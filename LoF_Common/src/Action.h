@@ -15,7 +15,11 @@ class Action
 {
 
 public:
+	//How many charge points gained per round
 	uint speed;
+
+	//The current charge level
+	uint currentCharge;
 
 	Action();
 };
