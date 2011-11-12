@@ -1,9 +1,9 @@
 //============================================================================
 // Name        : Action.h
 // Author      : AltF4
-// Copyright   : GNU GPLv3
+// Copyright   : 2011, GNU GPLv3
 // Description : Represents any scheduled action that a unit makes, such as
-//					attacks, healing, moving, etc...
+//					attacks, healing, moving, and the unit's turn itself
 //============================================================================
 
 #ifndef ACTION_H_

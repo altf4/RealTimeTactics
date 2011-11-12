@@ -1,7 +1,7 @@
 //============================================================================
 // Name        : Unit.h
 // Author      : AltF4
-// Copyright   : GNU GPLv3
+// Copyright   : 2011, GNU GPLv3
 // Description : Unit class, represents a single pawn in your army
 //============================================================================
 
