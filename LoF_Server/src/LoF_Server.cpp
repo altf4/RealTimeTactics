@@ -15,9 +15,11 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <algorithm>
+
 
 using namespace std;
-
+using namespace LoF;
 
 int main(int argc, char **argv)
 {
@@ -120,9 +122,44 @@ int main(int argc, char **argv)
 	return 0;
 }
 
-//Increments actions
+//Processes one round of combat. (Can consist of many actions triggered)
 void ProcessRound()
 {
+
+	//Step 1: Increment all the charges on the charging actions
+	for(uint i = 0; i < chargingActions.size(); i++)
+	{
+		chargingActions[i]->currentCharge += chargingActions[i]->speed;
+	}
+
+	//Step 2: Move any finished actions over to chargedActions
+	for(uint i = 0; i < chargingActions.size(); i++)
+	{
+		if( chargingActions[i]->currentCharge >= CHARGE_MAX )
+		{
+			//Move the Action over
+			chargedActions.push_back(chargingActions[i]);
+			//Delete it from this list
+			chargingActions[i] = NULL;
+			chargingActions.erase( chargingActions.begin()+i );
+			//Move the index back, since we just erased one elements
+			i--;
+		}
+	}
+
+	//Step 3: Sort the new charged list according to execution order
+	sort(chargedActions.front(), chargedActions.back(), Action::CompareActions);
+
+	//Step 4: Execute each of the charged actions, one by one
+	while(chargedActions.size() > 0)
+	{
+		chargedActions[0]->Execute();
+		chargingActions.erase( chargingActions.begin() );
+
+		//Re-sort the actions, since new ones might have been added
+		sort(chargedActions.front(), chargedActions.back(), Action::CompareActions);
+		//TODO: This is probably inefficient. Find a better way than re-sorting every time
+	}
 
 }
 

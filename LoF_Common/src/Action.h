@@ -6,6 +6,9 @@
 //					attacks, healing, moving, etc...
 //============================================================================
 
+#ifndef ACTION_H_
+#define ACTION_H_
+
 #include <stdlib.h>
 
 namespace LoF
@@ -21,7 +24,17 @@ public:
 	//The current charge level
 	uint currentCharge;
 
+
 	Action();
+
+	//Trigger the action
+	void Execute();
+
+	//Returns true if action1 < action2
+	static bool CompareActions(Action action1, Action action2);
+
 };
 
 }
+
+#endif /* ACTION_H */
