@@ -5,14 +5,23 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/Action.cpp \
+../src/Gameboard.cpp \
+../src/Player.cpp \
+../src/Tile.cpp \
 ../src/Unit.cpp 
 
 OBJS += \
 ./src/Action.o \
+./src/Gameboard.o \
+./src/Player.o \
+./src/Tile.o \
 ./src/Unit.o 
 
 CPP_DEPS += \
 ./src/Action.d \
+./src/Gameboard.d \
+./src/Player.d \
+./src/Tile.d \
 ./src/Unit.d 
 
 

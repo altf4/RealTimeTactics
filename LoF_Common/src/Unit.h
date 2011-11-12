@@ -12,6 +12,16 @@ using namespace std;
 namespace LoF
 {
 
+//The six possible directions to face or move on a hex gameboard
+enum direction
+{
+	NORTHEAST,
+	NORTHWEST,
+	WEST,
+	SOUTHWEST,
+	SOUTHEAST,
+	EAST
+};
 
 class Unit
 {
@@ -26,9 +36,18 @@ public:
 	uint verticalMovement;
 	uint horizontalMovement;
 
+	//How many charge points accumulated per round
+	//	IE: How quickly this unit gets to have a turn
+	//	(Not how far it can walk)
 	uint speed;
+	uint currentCharge;
 
-	uint directionFacing; //Maybe make an enum?
+	//How many movement points the unit has
+	//	Each tile takes up a certain number of movement points
+	double movement;
+	double currentMovement;
+
+	direction directionFacing;
 
 	//Empty constructor
 	Unit();
