@@ -5,6 +5,9 @@
 // Description : Unit class, represents a single pawn in your army
 //============================================================================
 
+#ifndef UNIT_H_
+#define UNIT_H_
+
 #include <stdlib.h>
 
 using namespace std;
@@ -27,6 +30,7 @@ class Unit
 {
 
 public:
+
 	uint maxHealth;
 	uint currentHealth;
 
@@ -49,11 +53,24 @@ public:
 
 	direction directionFacing;
 
+
 	//Empty constructor
 	Unit();
 
+	//Returns true if the given Unit is the same one as this
+	//	IE: The actual same unit. Not another unit with the same properties
+	//	Does this by comparing ID's
+	bool Equals(Unit *testUnit);
+
 	//TODO: Skills, class, etc...
+
+	//Unique identifier for this unit.
+	//	NOT an index into any list
+	uint ID;
+
 };
 
 
 } //end namespace LoF
+
+#endif /* UNIT_H_ */

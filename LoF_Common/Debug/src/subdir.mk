@@ -6,6 +6,8 @@
 CPP_SRCS += \
 ../src/Action.cpp \
 ../src/Gameboard.cpp \
+../src/Match.cpp \
+../src/Path.cpp \
 ../src/Player.cpp \
 ../src/Tile.cpp \
 ../src/Unit.cpp 
@@ -13,6 +15,8 @@ CPP_SRCS += \
 OBJS += \
 ./src/Action.o \
 ./src/Gameboard.o \
+./src/Match.o \
+./src/Path.o \
 ./src/Player.o \
 ./src/Tile.o \
 ./src/Unit.o 
@@ -20,6 +24,8 @@ OBJS += \
 CPP_DEPS += \
 ./src/Action.d \
 ./src/Gameboard.d \
+./src/Match.d \
+./src/Path.d \
 ./src/Player.d \
 ./src/Tile.d \
 ./src/Unit.d 

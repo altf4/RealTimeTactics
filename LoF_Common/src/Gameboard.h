@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <vector>
 #include "Tile.h"
+#include <string>
 
 using namespace std;
 
@@ -47,6 +48,10 @@ public:
 	//	y - Set the maximum latitude of gameboard
 	//Throws InvalidGameboardException on error
 	Gameboard(uint x, uint y);
+
+	//Constructor to set Gameboard from file
+	//TODO: Define this file structure
+	Gameboard(string filePath);
 
 };
 

@@ -14,6 +14,7 @@ using namespace LoF;
 
 Gameboard::Gameboard(uint x_arg, uint y_arg)
 {
+	//The gameboard must at least be 2x2
 	if( x_arg < 2 || y_arg < 2)
 	{
 		cerr << "ERROR: Invalid gameboard size specified. Too small.\n";
@@ -25,8 +26,14 @@ Gameboard::Gameboard(uint x_arg, uint y_arg)
 	xMax = x_arg;
 	yMax = y_arg;
 
-
-
+	//Create the gameboard tiles
+	for(uint i = 0; i < xMax; i++)
+	{
+		for(uint j = 0; j < yMax; j++)
+		{
+			tiles[i][j] = new Tile(i,j);
+		}
+	}
 
 
 }
