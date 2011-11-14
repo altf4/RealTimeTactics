@@ -11,6 +11,7 @@
 #include <stdlib.h>
 #include <vector>
 #include "Tile.h"
+#include "Unit.h"
 #include <string>
 
 using namespace std;
@@ -53,6 +54,24 @@ public:
 	//TODO: Define this file structure
 	Gameboard(string filePath);
 
+	//Return the tile specified by the given coordinates
+	//Return NULL if there is no such tile
+	Tile *GetTile(int x, int y);
+
+	//Considering this board to be a directional graph,
+	//	How many edges are there?
+	uint NumEdges(Unit *unit);
+
+	//Returns the weight (IE: Movement cost) of moving in the given direction
+	//	Returns -1 when impassible.
+	double GetMovementCost(Tile *tile, direction dir, Unit *unit);
+
+
+private:
+
+	//Find the difference between two elevations
+	//IE: The distance. Always a positive integer.
+	uint ElevationDiff(uint elevation1, uint elevation2);
 };
 
 }

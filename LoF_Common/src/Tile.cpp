@@ -9,6 +9,7 @@
 #include "Tile.h"
 #include "IllegalMoveException.h"
 
+
 using namespace std;
 using namespace LoF;
 
@@ -55,5 +56,4 @@ int Tile::IndexOfUnit(Unit *unit)
 	}
 	return -1;
 }
-
 

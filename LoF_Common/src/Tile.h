@@ -9,6 +9,7 @@
 #define TILE_H_
 
 #include <stdlib.h>
+#include <string>
 #include <vector>
 #include "Unit.h"
 
@@ -27,6 +28,9 @@ public:
 	uint x, y;
 	uint elevation; //aka: z coordinate
 
+	//A distinguishing ID from other tiles
+	//	Given consecutively. (0,0) = 0, (1,0) = 1, ... etc..
+	int ID;
 
 	//Properties of this tile:
 
@@ -53,7 +57,6 @@ public:
 	//Returns the index of the Unit in the Tile's list
 	//Returns -1 if it's not there
 	int IndexOfUnit(Unit *unit);
-
 
 };
 
