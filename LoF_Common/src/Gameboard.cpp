@@ -55,23 +55,45 @@ Tile *Gameboard::GetTile(int x, int y)
 
 }
 
-//Considering this board to be a directional graph,
-//	How many edges are there?
-uint Gameboard::NumEdges(Unit *unit)
+//Build a directional graph based on this unit's movement ablities on the map
+//	Returns the number of edges in the graph
+int Gameboard::BuildGraph(Unit *unit, Edge *edge_array, double *weight_array)
 {
 	uint count = 0;
+	vector <Edge> edges;
+	vector <double> weights;
+
+	double nextWeight;
+
 	//For every tile...
 	for(uint i = 0; i < xMax; i++)
 	{
 		for(uint j = 0; j < yMax; j++)
 		{
-			//Accumulate how many outgoing edges there are
-			if( GetMovementCost(tiles[i][j], NORTHEAST, unit ) != -1)
+			//For each direction
+			for( int k = 0; k < 6; k++ )
 			{
-				count++;
+				nextWeight = GetMovementCost(tiles[i][j], static_cast<direction>(k), unit);
+				//Accumulate how many outgoing edges there are
+				if( nextWeight != -1)
+				{
+					edges.push_back(Edge(i,j));
+					weights.push_back(nextWeight);
+					count++;
+				}
 			}
 		}
 	}
+
+	//Declare space and copy the edge array over
+	int edge_size = count * sizeof(Edge);
+	edge_array = (Edge*)malloc(edge_size);
+	memcpy(edge_array, edges.data(), edge_size);
+
+	//Delcate space and copy the weight array over
+	int weight_size = count * sizeof(double);
+	weight_array = (double*)malloc(weight_size);
+	memcpy(weight_array, weights.data(), weight_size);
 
 	return count;
 }

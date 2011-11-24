@@ -13,9 +13,10 @@
 #include "Tile.h"
 #include "Unit.h"
 #include <string>
+#include <string.h>
 
 using namespace std;
-
+typedef pair<int, int> Edge;
 namespace LoF
 {
 
@@ -58,9 +59,9 @@ public:
 	//Return NULL if there is no such tile
 	Tile *GetTile(int x, int y);
 
-	//Considering this board to be a directional graph,
-	//	How many edges are there?
-	uint NumEdges(Unit *unit);
+	//Build a directional graph based on this unit's movement ablities on the map
+	//	Returns the number of edges in the graph
+	int BuildGraph(Unit *unit, Edge *edge_array, double *weight_array);
 
 	//Returns the weight (IE: Movement cost) of moving in the given direction
 	//	Returns -1 when impassible.

@@ -8,14 +8,14 @@
 #ifndef PATH_H_
 #define PATH_H_
 
-#include <vector>
-#include "Tile.h"
-#include "Gameboard.h"
-
 #include <boost/config.hpp>
 #include <boost/graph/graph_traits.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
+
+#include <vector>
+#include "Tile.h"
+#include "Gameboard.h"
 
 using namespace boost;
 
@@ -33,6 +33,7 @@ namespace LoF
 
 class Path
 {
+public:
 	vector <Tile*> tilesMovedThrough;
 
 	//The total number of tiles moved through
@@ -42,11 +43,6 @@ class Path
 	double movementCost;
 
 	Path(Gameboard *board, Tile *fromTile, Tile *toTile, Unit *unit);
-
-	//Returns true on success, false on error
-	//Populates the given edge_array and weights arrays
-	bool BuildGraph(Edge *edge_array, double *weights);
-
 
 };
 

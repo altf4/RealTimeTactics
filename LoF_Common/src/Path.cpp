@@ -15,34 +15,40 @@ using namespace LoF;
 
 
 //Finds the shortest path from "fromTile" to "toTile" using Dijkstra's algorithm
-//	Uses the "jump" value to determine how high the unit can travel
-//		up or down elevations
+//	Uses the vertical movement value in *unit to determine how high the unit
+//		can travel up or down elevations
 Path::Path(Gameboard *board, Tile *fromTile, Tile *toTile, Unit *unit)
 {
-	const int num_nodes = board->tiles.size();
-	const int num_edges = board->NumEdges(unit);
-
 	//Declare the edge and weight arrays
-	Edge *edge_array = (Edge*) malloc( num_edges * sizeof(Edge) );
-	double *weights = (double*)malloc( num_edges * sizeof(double) );
+	Edge *edge_array = NULL;
+	double *weights = NULL;
 
 	//Populate the edge and weight arrays
+	int res = board->BuildGraph(unit, edge_array, weights);
+	if( res == -1 )
+	{
+		//Error condition
+		//TODO: Throw something?
+		return;
+	}
 
-
-	char name[] = "ABCDE";
+	const int num_nodes = board->tiles.size();
+	const int num_edges = res;
 
 	graph_t g(edge_array, edge_array + num_edges, weights, num_nodes);
-	property_map<graph_t, edge_weight_t>::type weightmap = get(edge_weight, g);
 
 	vector<vertex_descriptor> p(num_vertices(g));
 	vector<int> d(num_vertices(g));
 
 	vertex_descriptor s = vertex(unit->ID, g);
 
-
 	dijkstra_shortest_paths(g, s, predecessor_map(&p[0]).distance_map(&d[0]));
 
+	//Has to do with printing out the results:
 
+/*
+	property_map<graph_t, edge_weight_t>::type weightmap = get(edge_weight, g);
+	char name[] = "ABCDE";
 	cout << "distances and parents:" <<  endl;
 	graph_traits < graph_t >::vertex_iterator vi, vend;
 	for (tie(vi, vend) = vertices(g); vi != vend; ++vi)
@@ -76,12 +82,8 @@ Path::Path(Gameboard *board, Tile *fromTile, Tile *toTile, Unit *unit)
 		dot_file << "]";
 	}
 	dot_file << "}";
+*/
 
 }
 
-//Returns true on success, false on error
-//Populates the given edge_array and weights arrays
-bool Path::BuildGraph(Edge *edge_array, double *weights)
-{
 
-}
