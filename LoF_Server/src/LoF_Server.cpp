@@ -16,14 +16,15 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <algorithm>
-
+#include <pthread.h>
+#include "ProtocolHandler.h"
 
 using namespace std;
 using namespace LoF;
 
 int main(int argc, char **argv)
 {
-
+	pthread_t threadID;
 	int c;
 	uint serverPortNumber;
 
@@ -94,8 +95,7 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-
-	//Main loop
+	//Main loop, just listens for new TCP connections and sends them off to ClientThread
 	for(;;)
 	{
 		int ConnectFD = accept(SocketFD, NULL, NULL);
@@ -107,57 +107,69 @@ int main(int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 
-		char buff[1024];
-		uint size = 1024;
-		//perform read write operations ...
-		read(ConnectFD,buff,size);
-
-		cout << "Hey! Check this out: " << buff << "\n";
-
-		shutdown(ConnectFD, SHUT_RDWR);
-
-		close(ConnectFD);
+		//Send the new connection off to another thread for handling
+		pthread_create(&threadID, NULL, ClientThread, (void *) ConnectFD );
 	}
 
 	return 0;
 }
 
+void *ClientThread(void * parm)
+{
+	int ConnectFD = (int)parm;
+
+	//First, authenticate the client
+	if( AuthenticateNewClient(ConnectFD) == false )
+	{
+		cout << "ERROR: Authentication Failure\n";
+		shutdown(ConnectFD, SHUT_RDWR);
+		close(ConnectFD);
+		return NULL;
+	}
+
+	//
+
+	return NULL;
+}
+
 //Processes one round of combat. (Can consist of many actions triggered)
-void ProcessRound()
+void ProcessRound(Match *match)
 {
 
 	//Step 1: Increment all the charges on the charging actions
-	for(uint i = 0; i < chargingActions.size(); i++)
+	for(uint i = 0; i < match->chargingActions.size(); i++)
 	{
-		chargingActions[i]->currentCharge += chargingActions[i]->speed;
+		match->chargingActions[i]->currentCharge += match->chargingActions[i]->speed;
 	}
 
 	//Step 2: Move any finished actions over to chargedActions
-	for(uint i = 0; i < chargingActions.size(); i++)
+	for(uint i = 0; i < match->chargingActions.size(); i++)
 	{
-		if( chargingActions[i]->currentCharge >= CHARGE_MAX )
+		if( match->chargingActions[i]->currentCharge >= CHARGE_MAX )
 		{
 			//Move the Action over
-			chargedActions.push_back(chargingActions[i]);
+			match->chargedActions.push_back(match->chargingActions[i]);
 			//Delete it from this list
-			chargingActions[i] = NULL;
-			chargingActions.erase( chargingActions.begin()+i );
+			match->chargingActions[i] = NULL;
+			match->chargingActions.erase( match->chargingActions.begin()+i );
 			//Move the index back, since we just erased one elements
 			i--;
 		}
 	}
 
 	//Step 3: Sort the new charged list according to execution order
-	sort(chargedActions.front(), chargedActions.back(), Action::CompareActions);
+	sort(match->chargedActions.front(),
+			match->chargedActions.back(), Action::CompareActions);
 
 	//Step 4: Execute each of the charged actions, one by one
-	while(chargedActions.size() > 0)
+	while(match->chargedActions.size() > 0)
 	{
-		chargedActions[0]->Execute();
-		chargingActions.erase( chargingActions.begin() );
+		match->chargedActions[0]->Execute();
+		match->chargingActions.erase( match->chargingActions.begin() );
 
 		//Re-sort the actions, since new ones might have been added
-		sort(chargedActions.front(), chargedActions.back(), Action::CompareActions);
+		sort(match->chargedActions.front(),
+				match->chargedActions.back(), Action::CompareActions);
 		//TODO: This is probably inefficient. Find a better way than re-sorting every time
 	}
 

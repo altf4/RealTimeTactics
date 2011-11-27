@@ -2,26 +2,22 @@
 // Name        : LoF_Server.cpp
 // Author      : AltF4
 // Copyright   : 2011, GNU GPLv3
-// Description : LoF Game Server
+// Description : Code for handling socket IO on the server side
 //============================================================================
 
-#ifndef LOF_SERVER_H_
-#define LOF_SERVER_H_
+#ifndef PROTOCOLHANDLER_H_
+#define PROTOCOLHANDLER_H_
 
 #include <vector>
-#include "Action.h"
-#include "Match.h"
 #include "Message.h"
 
 using namespace std;
-using namespace LoF;
 
-#define CHARGE_MAX 100
+namespace LoF
+{
 
-string Usage();
+bool AuthenticateNewClient(int SocketFD);
 
-void ProcessRound(Match *match);
 
-void *ClientThread(void * parm);
-
-#endif /* LOF_SERVER_H_ */
+}
+#endif /* PROTOCOLHANDLER_H_ */
