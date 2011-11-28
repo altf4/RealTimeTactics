@@ -9,6 +9,7 @@
 #define MESSAGE_H_
 
 #define MESSAGE_MIN_SIZE	sizeof(enum MessageType)
+#define USERNAME_MAX_LENGTH	20
 
 #include <stdlib.h>
 
@@ -40,11 +41,30 @@ enum MessageType
 
 };
 
+enum AuthMechanism
+{
+	HASHED_SALTED_PASS = 0,
+	SSH_KEY,
+};
+
+struct VersionNumber
+{
+	uint major;
+	uint minor;
+	uint rev;
+};
+
 class Message
 {
 public:
 
 	enum MessageType type;
+
+	char username[USERNAME_MAX_LENGTH];
+
+	struct VersionNumber serverVersion;
+
+	enum AuthMechanism authMechanism;
 
 	//Plain old constructor
 	Message();
@@ -56,6 +76,8 @@ public:
 	//
 	//	Serialize will allocate memory on the heap for this object,
 	//	then change buffer to point to that
+	//
+	//	Returns: The length of the serialized buffer
 	uint Serialize(char **buffer);
 
 };
