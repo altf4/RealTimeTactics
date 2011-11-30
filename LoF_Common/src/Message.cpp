@@ -7,13 +7,52 @@
 
 #include "Message.h"
 #include "string.h"
+#include "iostream"
+#include <sys/socket.h>
 
 using namespace std;
 using namespace LoF;
 
-//Deserialize the buffer into this message
-Message::Message(char *buffer, uint length)
+Message::Message()
 {
+
+}
+
+//Read a message from the given socket
+// Must already have been Accepted()'ed
+Message::Message(int ConnectFD)
+{
+	//perform read operations ...
+	char buff[1024];
+	int bytesRead = 1024;
+	vector <char> input;
+	while( bytesRead < 1024)
+	{
+		bytesRead = read(ConnectFD, buff, 1024);
+		if( bytesRead >= 0 )
+		{
+			input.insert(input.end(), buff, buff + bytesRead);
+		}
+		else
+		{
+			//Error in reading from socket
+			return;
+		}
+	}
+
+	if(input.size() < MESSAGE_MIN_SIZE)
+	{
+		//Error, message too small
+		cerr << "ERROR: Message received is too small, ignoring...\n";
+		//shutdown(ConnectFD, SHUT_RDWR);
+		//close(ConnectFD);
+		return;
+	}
+
+	char *buffer = input.data();
+	//TODO: Check message sizes against this measured size
+	//uint length = input.size();
+
 	//Copy the message type
 	memcpy(&type, buffer, MESSAGE_MIN_SIZE);
 	buffer += MESSAGE_MIN_SIZE;
@@ -39,11 +78,14 @@ Message::Message(char *buffer, uint length)
 		}
 		case CLIENT_AUTH:
 		{
-
+			//TODO: Fill in authentication
 			break;
 		}
 		case SERVER_AUTH_REPLY:
 		{
+			//Uses: 1) authSuccess
+
+			memcpy(&authSuccess, buffer, sizeof(bool));
 
 			break;
 		}
@@ -129,12 +171,26 @@ uint Message::Serialize(char **buffer)
 		}
 		case CLIENT_AUTH:
 		{
+			//Allocate the memory and assign it to *buffer
+			*buffer = (char*)malloc(MESSAGE_MIN_SIZE);
 
+			//Put the type in
+			memcpy(*buffer, &type, MESSAGE_MIN_SIZE);
+			return MESSAGE_MIN_SIZE;
 			break;
 		}
 		case SERVER_AUTH_REPLY:
 		{
+			uint messageSize = MESSAGE_MIN_SIZE + sizeof(bool);
+			//Allocate the memory and assign it to *buffer
+			*buffer = (char*)malloc(messageSize);
 
+			//Put the type in
+			memcpy(*buffer, &type, MESSAGE_MIN_SIZE);
+			*buffer += MESSAGE_MIN_SIZE;
+
+			memcpy(*buffer, &authSuccess, sizeof(bool));
+			return messageSize;
 			break;
 		}
 		case MATCH_CREATE_REQUEST:

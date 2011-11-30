@@ -18,6 +18,10 @@ using namespace LoF;
 
 #define CHARGE_MAX 100
 
+#define SERVER_VERSION_MAJOR	0
+#define SERVER_VERSION_MINOR	0
+#define SERVER_VERSION_REV		1
+
 string Usage();
 
 void ProcessRound(Match *match);

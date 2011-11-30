@@ -12,6 +12,8 @@
 #define USERNAME_MAX_LENGTH	20
 
 #include <stdlib.h>
+#include <vector>
+#include <unistd.h>
 
 using namespace std;
 
@@ -66,10 +68,13 @@ public:
 
 	enum AuthMechanism authMechanism;
 
+	bool authSuccess;
+
 	//Plain old constructor
 	Message();
-	//Deserialize the buffer into this message
-	Message(char *buffer, uint length);
+
+	//Read a message from the given socket
+	Message(int ConnectFD);
 
 	//Serializes the Message into newly allocated memory
 	//	**buffer: The address of a pointer to a buffer.
