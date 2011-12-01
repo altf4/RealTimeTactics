@@ -132,8 +132,10 @@ bool LoF::WriteMessage(Message *message, int connectFD)
 	{
 		//Error
 		cerr << "ERROR: Write function didn't finish...\n";
+		free(buffer);
 		return false;
 	}
+	free(buffer);
 	return true;
 
 }
