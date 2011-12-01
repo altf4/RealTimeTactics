@@ -11,7 +11,7 @@
 #include <vector>
 #include "Action.h"
 #include "Match.h"
-#include "Message.h"
+#include "messages/AuthMessage.h"
 
 using namespace std;
 using namespace LoF;

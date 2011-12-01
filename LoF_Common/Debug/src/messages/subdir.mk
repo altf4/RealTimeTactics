@@ -4,35 +4,20 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/Action.cpp \
-../src/Gameboard.cpp \
-../src/Match.cpp \
-../src/Path.cpp \
-../src/Player.cpp \
-../src/Tile.cpp \
-../src/Unit.cpp 
+../src/messages/AuthMessage.cpp \
+../src/messages/Message.cpp 
 
 OBJS += \
-./src/Action.o \
-./src/Gameboard.o \
-./src/Match.o \
-./src/Path.o \
-./src/Player.o \
-./src/Tile.o \
-./src/Unit.o 
+./src/messages/AuthMessage.o \
+./src/messages/Message.o 
 
 CPP_DEPS += \
-./src/Action.d \
-./src/Gameboard.d \
-./src/Match.d \
-./src/Path.d \
-./src/Player.d \
-./src/Tile.d \
-./src/Unit.d 
+./src/messages/AuthMessage.d \
+./src/messages/Message.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-src/%.o: ../src/%.cpp
+src/messages/%.o: ../src/messages/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
 	g++ -O0 -g3 -Wall -c -fmessage-length=0  -std=c++0x -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
