@@ -7,8 +7,8 @@
 
 #include "Gameboard.h"
 #include <iostream>
-#include "InvalidGameboardException.h"
-#include "IllegalMoveException.h"
+#include "exceptions/InvalidGameboardException.h"
+#include "exceptions/IllegalMoveException.h"
 
 using namespace std;
 using namespace LoF;

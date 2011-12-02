@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include "Tile.h"
-#include "IllegalMoveException.h"
+#include "exceptions/IllegalMoveException.h"
 
 
 using namespace std;
