@@ -8,6 +8,7 @@
 #include <iostream>
 #include "Unit.h"
 #include "LoF_Client.h"
+#include "ProtocolHandler.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -18,6 +19,7 @@
 #include <unistd.h>
 
 using namespace std;
+using namespace LoF;
 
 int main(int argc, char **argv)
 {
@@ -110,11 +112,14 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-	/* perform read write operations ... */
-	write(SocketFD, "xXx Test Message xXx", 21);
+
+	if( AuthToServer(SocketFD) == false)
+	{
+		//Error
+	}
+
 
 	shutdown(SocketFD, SHUT_RDWR);
-
 	close(SocketFD);
 	return 0;
 }

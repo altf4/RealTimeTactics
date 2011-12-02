@@ -8,6 +8,12 @@
 #ifndef LOF_CLIENT_H_
 #define LOF_CLIENT_H_
 
+#define CLIENT_VERSION_MAJOR	0
+#define CLIENT_VERSION_MINOR	0
+#define CLIENT_VERSION_REV		1
+
+#include <string>
+
 using namespace std;
 
 string Usage();

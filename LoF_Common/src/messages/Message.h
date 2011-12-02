@@ -62,6 +62,9 @@ public:
 	virtual char *Serialize(uint *length);
 	static Message *Deserialize(char *buffer, uint length);
 
+	static Message *ReadMessage(int connectFD);
+	static bool WriteMessage(Message *message, int connectFD);
+
 };
 
 }

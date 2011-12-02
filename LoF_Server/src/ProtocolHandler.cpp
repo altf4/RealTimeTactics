@@ -2,7 +2,7 @@
 // Name        : LoF_Server.cpp
 // Author      : AltF4
 // Copyright   : 2011, GNU GPLv3
-// Description : Message class pertaining to client authentication
+// Description : Code for handling socket IO on the server side
 //============================================================================
 
 #include "LoF_Server.h"
@@ -20,7 +20,7 @@ using namespace LoF;
 bool LoF::AuthenticateNewClient(int ConnectFD)
 {
 
-	Message *message = ReadMessage(ConnectFD);
+	Message *message = Message::ReadMessage(ConnectFD);
 
 	if( message->type == CLIENT_HELLO )
 	{
@@ -32,7 +32,7 @@ bool LoF::AuthenticateNewClient(int ConnectFD)
 		server_hello->serverVersion.minor = SERVER_VERSION_MINOR;
 		server_hello->serverVersion.rev = SERVER_VERSION_REV;
 
-		if( WriteMessage(server_hello, ConnectFD) == false)
+		if(  Message::WriteMessage(server_hello, ConnectFD) == false)
 		{
 			//Error in write
 			delete server_hello;
@@ -41,7 +41,7 @@ bool LoF::AuthenticateNewClient(int ConnectFD)
 		delete server_hello;
 
 		//Wait for a CLIENT_AUTH
-		AuthMessage *client_auth = (AuthMessage*)ReadMessage(ConnectFD);
+		AuthMessage *client_auth = (AuthMessage*)Message::ReadMessage(ConnectFD);
 
 		if( client_auth->type !=  CLIENT_AUTH)
 		{
@@ -60,7 +60,7 @@ bool LoF::AuthenticateNewClient(int ConnectFD)
 		server_auth_reply->authSuccess = true;
 
 
-		if( WriteMessage(server_auth_reply, ConnectFD) == false)
+		if(  Message::WriteMessage(server_auth_reply, ConnectFD) == false)
 		{
 			//Error in write
 			delete server_auth_reply;
@@ -90,52 +90,3 @@ bool LoF::AuthenticateNewClient(int ConnectFD)
 	return true;
 }
 
-Message *LoF::ReadMessage(int connectFD)
-{
-	//perform read operations ...
-	char buff[4096];
-	int bytesRead = 4096;
-	vector <char> input;
-	while( bytesRead < 4096)
-	{
-		bytesRead = read(connectFD, buff, 4096);
-		if( bytesRead >= 0 )
-		{
-			input.insert(input.end(), buff, buff + bytesRead);
-		}
-		else
-		{
-			//Error in reading from socket
-			cerr << "ERROR: Socket returned error...\n";
-			return NULL;
-		}
-	}
-
-	if(input.size() < MESSAGE_MIN_SIZE)
-	{
-		//Error, message too small
-		cerr << "ERROR: Message received is too small, ignoring...\n";
-		return NULL;
-	}
-
-	return Message::Deserialize(input.data(), input.size());
-
-}
-
-bool LoF::WriteMessage(Message *message, int connectFD)
-{
-	uint length;
-	char *buffer = message->Serialize(&length);
-
-	//TODO: Loop the write until it finishes?
-	if( write(connectFD, buffer, length) == -1)
-	{
-		//Error
-		cerr << "ERROR: Write function didn't finish...\n";
-		free(buffer);
-		return false;
-	}
-	free(buffer);
-	return true;
-
-}
