@@ -73,6 +73,7 @@ char *AuthMessage::Serialize(uint *length)
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			*length = MESSAGE_MIN_SIZE;
 			return buffer;
 		}
 		case SERVER_HELLO:
@@ -87,6 +88,7 @@ char *AuthMessage::Serialize(uint *length)
 
 			memcpy(buffer, &serverVersion, sizeof(serverVersion));
 			memcpy(buffer + sizeof(serverVersion), &authMechanism, sizeof(authMechanism));
+			*length = messageSize;
 
 			return buffer;
 		}
@@ -97,8 +99,8 @@ char *AuthMessage::Serialize(uint *length)
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			*length = MESSAGE_MIN_SIZE;
 			return buffer;
-			break;
 		}
 		case SERVER_AUTH_REPLY:
 		{
@@ -111,8 +113,8 @@ char *AuthMessage::Serialize(uint *length)
 			buffer += MESSAGE_MIN_SIZE;
 
 			memcpy(buffer, &authSuccess, sizeof(bool));
+			*length = messageSize;
 			return buffer;
-			break;
 		}
 		default:
 		{

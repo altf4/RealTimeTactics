@@ -22,6 +22,11 @@ bool LoF::AuthenticateNewClient(int ConnectFD)
 
 	Message *message = Message::ReadMessage(ConnectFD);
 
+	if( message == NULL )
+	{
+		return false;
+	}
+
 	if( message->type == CLIENT_HELLO )
 	{
 
@@ -43,6 +48,11 @@ bool LoF::AuthenticateNewClient(int ConnectFD)
 		//Wait for a CLIENT_AUTH
 		AuthMessage *client_auth = (AuthMessage*)Message::ReadMessage(ConnectFD);
 
+		if( client_auth == NULL )
+		{
+			//ERROR
+			return false;
+		}
 		if( client_auth->type !=  CLIENT_AUTH)
 		{
 			//Error
