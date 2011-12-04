@@ -133,5 +133,12 @@ int main(int argc, char **argv)
 //Prints usage tips
 string Usage()
 {
-	return "";
+	string out;
+
+	out += "Line of Fire Client Usage:\n";
+	out += "\t LoF_Client -s SERVER_IP -p PORT\n\n";
+	out += "\t -s SERVER_IP == IP address of the game server\n";
+	out += "\t\t IE: \"127.0.0.1\" or \"192.168.1.110\", etc...\n";
+	out += "\t -p PORT      == TCP Port number to contact on the server.\n";
+	return out;
 }

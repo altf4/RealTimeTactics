@@ -178,6 +178,11 @@ void ProcessRound(Match *match)
 //Prints usage tips
 string Usage()
 {
-	return "";
+	string out;
+
+	out += "Line of Fire Server Usage:\n";
+	out += "\t LoF_Server -p PORT\n\n";
+	out += "\t -p PORT == TCP Port number to listen for connections on.\n";
+	return out;
 }
 
