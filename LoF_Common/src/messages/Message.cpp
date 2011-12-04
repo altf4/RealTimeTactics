@@ -69,9 +69,9 @@ Message *Message::ReadMessage(int connectFD)
 {
 	//perform read operations ...
 	char buff[4096];
-	int bytesRead = 1;
+	int bytesRead = 4096;
 	vector <char> input;
-	while( bytesRead > 0)
+	while( bytesRead == 4096)
 	{
 		bytesRead = read(connectFD, buff, 4096);
 		if( bytesRead >= 0 )

@@ -116,8 +116,13 @@ int main(int argc, char **argv)
 	if( AuthToServer(SocketFD) == false)
 	{
 		//Error
+		cerr << "Authentication to server failed.\n";
+		shutdown(SocketFD, SHUT_RDWR);
+		close(SocketFD);
+		return 0;
 	}
 
+	cout << "Authentication to server succeeded!\n";
 
 	shutdown(SocketFD, SHUT_RDWR);
 	close(SocketFD);

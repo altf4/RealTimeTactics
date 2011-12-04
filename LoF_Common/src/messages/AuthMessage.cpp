@@ -63,18 +63,19 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 
 char *AuthMessage::Serialize(uint *length)
 {
-	char *buffer;
+	char *buffer, *originalBuffer;
 	switch(type)
 	{
 		case CLIENT_HELLO:
 		{
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(MESSAGE_MIN_SIZE);
+			originalBuffer = buffer;
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			*length = MESSAGE_MIN_SIZE;
-			return buffer;
+			return originalBuffer;
 		}
 		case SERVER_HELLO:
 		{
@@ -85,28 +86,35 @@ char *AuthMessage::Serialize(uint *length)
 							+ sizeof(serverVersion);
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
 
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
 			memcpy(buffer, &serverVersion, sizeof(serverVersion));
-			memcpy(buffer + sizeof(serverVersion), &authMechanism, sizeof(authMechanism));
+			buffer += sizeof(serverVersion);
+			memcpy(buffer, &authMechanism, sizeof(authMechanism));
 			*length = messageSize;
 
-			return buffer;
+			return originalBuffer;
 		}
 		case CLIENT_AUTH:
 		{
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(MESSAGE_MIN_SIZE);
+			originalBuffer = buffer;
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			*length = MESSAGE_MIN_SIZE;
-			return buffer;
+			return originalBuffer;
 		}
 		case SERVER_AUTH_REPLY:
 		{
 			uint messageSize = MESSAGE_MIN_SIZE + sizeof(bool);
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
@@ -114,7 +122,7 @@ char *AuthMessage::Serialize(uint *length)
 
 			memcpy(buffer, &authSuccess, sizeof(bool));
 			*length = messageSize;
-			return buffer;
+			return originalBuffer;
 		}
 		default:
 		{

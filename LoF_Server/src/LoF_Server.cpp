@@ -127,7 +127,7 @@ void *ClientThread(void * parm)
 		return NULL;
 	}
 
-	//
+	cout << "Client Authenticated!\n";
 
 	return NULL;
 }
