@@ -4,16 +4,16 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/LoF_Client.cpp \
-../src/ProtocolHandler.cpp 
+../src/ClientProtocolHandler.cpp \
+../src/LoF_Client.cpp 
 
 OBJS += \
-./src/LoF_Client.o \
-./src/ProtocolHandler.o 
+./src/ClientProtocolHandler.o \
+./src/LoF_Client.o 
 
 CPP_DEPS += \
-./src/LoF_Client.d \
-./src/ProtocolHandler.d 
+./src/ClientProtocolHandler.d \
+./src/LoF_Client.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

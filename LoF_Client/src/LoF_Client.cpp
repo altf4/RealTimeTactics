@@ -8,7 +8,7 @@
 #include <iostream>
 #include "Unit.h"
 #include "LoF_Client.h"
-#include "ProtocolHandler.h"
+#include "ClientProtocolHandler.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>

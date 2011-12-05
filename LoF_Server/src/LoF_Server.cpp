@@ -17,7 +17,7 @@
 #include <netinet/in.h>
 #include <algorithm>
 #include <pthread.h>
-#include "ProtocolHandler.h"
+#include "ServerProtocolHandler.h"
 
 using namespace std;
 using namespace LoF;
