@@ -74,6 +74,8 @@ int main(int argc, char **argv)
 		perror("can not create socket");
 		exit(EXIT_FAILURE);
 	}
+	int optval = 1;
+	setsockopt(SocketFD, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
 
 	memset(&stSockAddr, 0, sizeof(stSockAddr));
 
