@@ -23,21 +23,47 @@ bool LoF::AuthenticateNewClient(int ConnectFD)
 	// Read client Hello
 	//***************************
 
-	AuthMessage *message =(AuthMessage*) Message::ReadMessage(ConnectFD);
+	AuthMessage *client_hello =(AuthMessage*) Message::ReadMessage(ConnectFD);
 
-	if( message == NULL )
+	if( client_hello == NULL )
 	{
 		return false;
 	}
 
-	if( message->type != CLIENT_HELLO )
+	if( client_hello->type != CLIENT_HELLO )
 	{
 		cerr << "ERROR: Expected CLIENT_HELLO message, received: "
-				<< message->type << "\n";
-		delete message;
+				<< client_hello->type << "\n";
+		delete client_hello;
 		return false;
 	}
-	delete message;
+
+	//Check version compatibility
+	if ((client_hello->softwareVersion.major != SERVER_VERSION_MAJOR) ||
+		(client_hello->softwareVersion.minor != SERVER_VERSION_MINOR) ||
+		(client_hello->softwareVersion.rev != SERVER_VERSION_REV) )
+	{
+		//If versions are not the same, send an error message to the client
+		delete client_hello;
+		cout << "Client Connected with bad software version.\n";
+
+		//*********************************
+		// Send Server Auth Reply (Error)
+		//*********************************
+		AuthMessage *server_auth_reply = new AuthMessage();
+		server_auth_reply->type = SERVER_AUTH_REPLY;
+		server_auth_reply->authSuccess = false;
+
+		if(  Message::WriteMessage(server_auth_reply, ConnectFD) == false)
+		{
+			//Error in write
+			cerr << "Wasn't able to send AUTH_REPLY to client to tell it about "
+					"the bad incompatible software versions.\n";
+		}
+		delete server_auth_reply;
+		return false;
+	}
+	delete client_hello;
 
 
 	//***************************
@@ -46,9 +72,9 @@ bool LoF::AuthenticateNewClient(int ConnectFD)
 
 	AuthMessage *server_hello = new AuthMessage();
 	server_hello->type = SERVER_HELLO;
-	server_hello->serverVersion.major = SERVER_VERSION_MAJOR;
-	server_hello->serverVersion.minor = SERVER_VERSION_MINOR;
-	server_hello->serverVersion.rev = SERVER_VERSION_REV;
+	server_hello->softwareVersion.major = SERVER_VERSION_MAJOR;
+	server_hello->softwareVersion.minor = SERVER_VERSION_MINOR;
+	server_hello->softwareVersion.rev = SERVER_VERSION_REV;
 
 	if(  Message::WriteMessage(server_hello, ConnectFD) == false)
 	{

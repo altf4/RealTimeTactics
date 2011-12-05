@@ -26,7 +26,11 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 	{
 		case CLIENT_HELLO:
 		{
-			//Nothing to do here. This message is only the type
+			//Uses: 1) Message Type
+			//		2) Version Number
+
+			memcpy(&softwareVersion, buffer, sizeof(softwareVersion));
+			buffer += sizeof(softwareVersion);
 			break;
 		}
 		case SERVER_HELLO:
@@ -34,8 +38,8 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 			//Uses: 1) Version Number
 			//		2) AuthMechanism
 
-			memcpy(&serverVersion, buffer, sizeof(serverVersion));
-			buffer += sizeof(serverVersion);
+			memcpy(&softwareVersion, buffer, sizeof(softwareVersion));
+			buffer += sizeof(softwareVersion);
 
 			memcpy(&authMechanism, buffer, sizeof(authMechanism));
 
@@ -68,22 +72,32 @@ char *AuthMessage::Serialize(uint *length)
 	{
 		case CLIENT_HELLO:
 		{
+
+			//Uses: 1) Message Type
+			//		2) Version Number
+
 			//Allocate the memory and assign it to *buffer
-			buffer = (char*)malloc(MESSAGE_MIN_SIZE);
+			uint messageSize = MESSAGE_MIN_SIZE	+ sizeof(softwareVersion);
+			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
-			*length = MESSAGE_MIN_SIZE;
+			buffer += MESSAGE_MIN_SIZE;
+			//Version Number
+			memcpy(buffer, &softwareVersion,  sizeof(softwareVersion));
+
+			*length = messageSize;
 			return originalBuffer;
 		}
 		case SERVER_HELLO:
 		{
-			//Uses: 1) Version Number
-			//		2) AuthMechanism
+			//Uses: 1) Message Type
+			//		2) Version Number
+			//		3) AuthMechanism
 
 			uint messageSize = MESSAGE_MIN_SIZE + sizeof(authMechanism)
-							+ sizeof(serverVersion);
+							+ sizeof(softwareVersion);
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
@@ -91,8 +105,8 @@ char *AuthMessage::Serialize(uint *length)
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
-			memcpy(buffer, &serverVersion, sizeof(serverVersion));
-			buffer += sizeof(serverVersion);
+			memcpy(buffer, &softwareVersion, sizeof(softwareVersion));
+			buffer += sizeof(softwareVersion);
 			memcpy(buffer, &authMechanism, sizeof(authMechanism));
 			*length = messageSize;
 

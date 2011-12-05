@@ -26,6 +26,9 @@ bool LoF::AuthToServer(int connectFD)
 
 	AuthMessage *client_hello = new AuthMessage();
 	client_hello->type = CLIENT_HELLO;
+	client_hello->softwareVersion.major = CLIENT_VERSION_MAJOR;
+	client_hello->softwareVersion.minor = CLIENT_VERSION_MINOR;
+	client_hello->softwareVersion.rev = CLIENT_VERSION_REV;
 
 	if( Message::WriteMessage(client_hello, connectFD) == false)
 	{
@@ -44,13 +47,40 @@ bool LoF::AuthToServer(int connectFD)
 	{
 		return false;
 	}
+	if( server_hello->type == SERVER_AUTH_REPLY)
+	{
+		if(server_hello->authSuccess == false)
+		{
+			//Rejected by server
+			cout << "Rejected by server. Probably incompatible software versions.\n";
+		}
+		else
+		{
+			//ERROR: Shouldn't get here. So assume some kind of error happened
+			cerr << "ERROR: Protocol error. Server replied with wrong message...\n";
+		}
+		delete server_hello;
+		return false;
+	}
 	if( server_hello->type != SERVER_HELLO)
 	{
 		delete server_hello;
 		return false;
 	}
 
-	//TODO: Check versions and stuff
+	//Check version compatibility
+	if ((server_hello->softwareVersion.major != CLIENT_VERSION_MAJOR) ||
+		(server_hello->softwareVersion.minor != CLIENT_VERSION_MINOR) ||
+		(server_hello->softwareVersion.rev != CLIENT_VERSION_REV) )
+	{
+		//Incompatible software versions.
+		//The server should have caught this, though.
+
+		delete server_hello;
+		return false;
+	}
+	delete server_hello;
+
 
 	//***************************
 	// Send Client Auth

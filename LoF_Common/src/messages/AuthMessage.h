@@ -26,7 +26,7 @@ class AuthMessage: public Message
 
 public:
 	enum AuthMechanism authMechanism;
-	struct VersionNumber serverVersion;
+	struct VersionNumber softwareVersion;
 	char username[USERNAME_MAX_LENGTH];
 	bool authSuccess;
 
