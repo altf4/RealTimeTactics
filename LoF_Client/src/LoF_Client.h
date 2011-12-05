@@ -10,7 +10,7 @@
 
 #define CLIENT_VERSION_MAJOR	0
 #define CLIENT_VERSION_MINOR	0
-#define CLIENT_VERSION_REV		2
+#define CLIENT_VERSION_REV		1
 
 #include <string>
 
