@@ -11,7 +11,7 @@
 namespace LoF
 {
 
-bool AuthToServer(int connectFD);
+bool AuthToServer(int connectFD, string username, unsigned char *hashedPassword);
 
 }
 

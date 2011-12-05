@@ -9,6 +9,7 @@
 #include "Unit.h"
 #include "LoF_Client.h"
 #include "ClientProtocolHandler.h"
+#include "messages/Message.h"
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -17,6 +18,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <termios.h>
 
 using namespace std;
 using namespace LoF;
@@ -26,14 +28,16 @@ int main(int argc, char **argv)
 
 	int c;
 	uint serverPortNumber;
+	string username;
 
 	bool portEntered = false;
 	bool serverAddrEntered = false;
+	bool usernameEntered = false;
 
 	struct sockaddr_in stSockAddr;
 	int SocketFD = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	while ((c = getopt(argc, argv, ":p:s:")) != -1)
+	while ((c = getopt(argc, argv, ":p:s:u:")) != -1)
 	{
 		switch (c)
 		{
@@ -69,6 +73,21 @@ int main(int argc, char **argv)
 				serverAddrEntered = true;
 				break;
 			}
+			case 'u':
+			{
+				username = string(optarg);
+				if( (username.size() < 1) || (username.size() > USERNAME_MAX_LENGTH))
+				{
+					//Error occurred
+					cerr << "You entered an invalid username. "
+							"Length must be between 1 and " << USERNAME_MAX_LENGTH
+							<< ".\n";
+					cerr << Usage();
+					exit(EXIT_FAILURE);
+				}
+				usernameEntered = true;
+				break;
+			}
 			case '?':
 			{
 				cerr << Usage();
@@ -88,6 +107,12 @@ int main(int argc, char **argv)
 	if( ! serverAddrEntered )
 	{
 		cerr << "You did not enter a server address\n";
+		cerr << Usage();
+		exit(EXIT_FAILURE);
+	}
+	if( ! usernameEntered )
+	{
+		cerr << "You did not enter a username\n";
 		cerr << Usage();
 		exit(EXIT_FAILURE);
 	}
@@ -112,14 +137,22 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
+	//Get password
+	unsigned char hash[SHA256_DIGEST_LENGTH];
+	if( GetPasswordTerminal(hash) == false)
+	{
+		cerr << "ERROR: Something went wrong with entering your password.\n";
+		close(SocketFD);
+		exit(EXIT_FAILURE);
+	}
 
-	if( AuthToServer(SocketFD) == false)
+	if( AuthToServer(SocketFD, username, hash) == false)
 	{
 		//Error
-		cerr << "Authentication to server failed.\n";
+		cerr << "ERROR: Authentication to server failed.\n";
 		shutdown(SocketFD, SHUT_RDWR);
 		close(SocketFD);
-		return 0;
+		exit(EXIT_FAILURE);
 	}
 
 	cout << "Authentication to server succeeded!\n";
@@ -129,6 +162,36 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+
+//Asks the user for their password over terminal
+//Sets *hash to the SHA256 hash of the input password
+bool GetPasswordTerminal(unsigned char *hash)
+{
+	//Get Password:
+
+	//Disables terminal echo on input
+    termios oldt;
+    tcgetattr(STDIN_FILENO, &oldt);
+    termios newt = oldt;
+    newt.c_lflag &= ~ECHO;
+    tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+	string password;
+	cout << "Please enter your password: \n";
+	getline( cin, password );
+
+	//Put the terminal settings back
+	newt.c_lflag &= ECHO;
+	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
+
+	//Do the hash
+	SHA256_CTX sha256;
+	SHA256_Init(&sha256);
+	SHA256_Update(&sha256, password.c_str(), password.length());
+	SHA256_Final(hash, &sha256);
+
+	return true;
+}
 
 //Prints usage tips
 string Usage()

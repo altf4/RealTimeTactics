@@ -47,7 +47,14 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 		}
 		case CLIENT_AUTH:
 		{
-			//TODO: Fill in authentication
+			//Uses: 1) Message Type
+			//		2) Username
+			//		3) Hashed password
+
+			memcpy(username, buffer, sizeof(username));
+			buffer += sizeof(username);
+			memcpy(hashedPassword, buffer, sizeof(hashedPassword));
+
 			break;
 		}
 		case SERVER_AUTH_REPLY:
@@ -114,13 +121,26 @@ char *AuthMessage::Serialize(uint *length)
 		}
 		case CLIENT_AUTH:
 		{
+			//Uses: 1) Message Type
+			//		2) Username
+			//		3) Hashed password
+
+			uint messageSize = MESSAGE_MIN_SIZE + sizeof(username)
+					+ sizeof(hashedPassword);
 			//Allocate the memory and assign it to *buffer
-			buffer = (char*)malloc(MESSAGE_MIN_SIZE);
+			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
-			*length = MESSAGE_MIN_SIZE;
+			buffer += MESSAGE_MIN_SIZE;
+			//Username
+			memcpy(buffer, username, sizeof(username));
+			buffer += sizeof(username);
+			//Hashed password
+			memcpy(buffer, hashedPassword, sizeof(hashedPassword));
+
+			*length = messageSize;
 			return originalBuffer;
 		}
 		case SERVER_AUTH_REPLY:

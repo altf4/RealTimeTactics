@@ -13,9 +13,11 @@
 #define CLIENT_VERSION_REV		1
 
 #include <string>
+#include <openssl/sha.h>
 
 using namespace std;
 
+bool GetPasswordTerminal(unsigned char *hash);
 string Usage();
 
 #endif /* LOF_CLIENT_H_ */

@@ -14,11 +14,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
+#include <string.h>
 
 using namespace std;
 using namespace LoF;
 
-bool LoF::AuthToServer(int connectFD)
+bool LoF::AuthToServer(int connectFD, string username, unsigned char *hashedPassword)
 {
 	//***************************
 	// Send client Hello
@@ -88,6 +89,8 @@ bool LoF::AuthToServer(int connectFD)
 
 	AuthMessage *client_auth = new AuthMessage();
 	client_auth->type = CLIENT_AUTH;
+	strncpy( client_auth->username, username.data(), USERNAME_MAX_LENGTH);
+	memcpy(client_auth->hashedPassword, hashedPassword, SHA256_DIGEST_LENGTH);
 
 	if( Message::WriteMessage(client_auth, connectFD) == false)
 	{

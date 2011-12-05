@@ -28,6 +28,8 @@ public:
 	enum AuthMechanism authMechanism;
 	struct VersionNumber softwareVersion;
 	char username[USERNAME_MAX_LENGTH];
+	//TODO: I didn't want to import libssl just to use SHA256_DIGEST_LENGTH
+	unsigned char hashedPassword[32];
 	bool authSuccess;
 
 	AuthMessage();

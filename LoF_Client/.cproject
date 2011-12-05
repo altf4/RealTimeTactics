@@ -42,6 +42,7 @@
 								</option>
 								<option id="gnu.cpp.link.option.libs.53441142" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="LoF_Common"/>
+									<listOptionValue builtIn="false" value="crypto"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1781177187" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
