@@ -43,6 +43,20 @@ enum MessageType: char
 
 };
 
+enum AuthResult: char
+{
+	//Success!
+	AUTH_SUCCESS = 0,
+
+	//Failure... :(
+	USERNAME_ALREADY_EXISTS,	//For creating a new account
+	INCORRECT_PASSWORD,
+	USERNAME_NOT_FOUND,			//For logging into an existing account
+	INVALID_USERNAME,
+	INCOMPATIBLE_SOFTWARE_VERSIONS,
+
+};
+
 struct VersionNumber
 {
 	uint major;

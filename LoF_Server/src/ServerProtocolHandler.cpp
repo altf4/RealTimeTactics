@@ -17,7 +17,7 @@
 using namespace std;
 using namespace LoF;
 
-bool LoF::AuthenticateNewClient(int ConnectFD)
+bool LoF::GetNewClient(int ConnectFD)
 {
 	//***************************
 	// Read client Hello
@@ -52,7 +52,7 @@ bool LoF::AuthenticateNewClient(int ConnectFD)
 		//*********************************
 		AuthMessage *server_auth_reply = new AuthMessage();
 		server_auth_reply->type = SERVER_AUTH_REPLY;
-		server_auth_reply->authSuccess = false;
+		server_auth_reply->authSuccess = INCOMPATIBLE_SOFTWARE_VERSIONS;
 
 		if(  Message::WriteMessage(server_auth_reply, ConnectFD) == false)
 		{
@@ -101,7 +101,8 @@ bool LoF::AuthenticateNewClient(int ConnectFD)
 		return false;
 	}
 
-	//TODO: Do the "real" authentication here
+	enum AuthResult authresult =
+			AuthenticateClient(client_auth->username, client_auth->hashedPassword);
 
 	delete client_auth;
 
@@ -111,7 +112,7 @@ bool LoF::AuthenticateNewClient(int ConnectFD)
 	//***************************
 	AuthMessage *server_auth_reply = new AuthMessage();
 	server_auth_reply->type = SERVER_AUTH_REPLY;
-	server_auth_reply->authSuccess = true;
+	server_auth_reply->authSuccess = authresult;
 
 	if(  Message::WriteMessage(server_auth_reply, ConnectFD) == false)
 	{
@@ -124,3 +125,9 @@ bool LoF::AuthenticateNewClient(int ConnectFD)
 	return true;
 }
 
+
+enum AuthResult LoF::AuthenticateClient(char *username, unsigned char *hashedPassword)
+{
+	//TODO: Authenticate!
+	return AUTH_SUCCESS;
+}

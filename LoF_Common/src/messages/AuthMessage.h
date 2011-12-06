@@ -30,7 +30,7 @@ public:
 	char username[USERNAME_MAX_LENGTH];
 	//TODO: I didn't want to import libssl just to use SHA256_DIGEST_LENGTH
 	unsigned char hashedPassword[32];
-	bool authSuccess;
+	enum AuthResult authSuccess;
 
 	AuthMessage();
 	AuthMessage(char *buffer, uint length);

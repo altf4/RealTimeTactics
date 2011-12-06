@@ -121,7 +121,7 @@ void *ClientThread(void * parm)
 	int ConnectFD = (int)parm;
 
 	//First, authenticate the client
-	if( AuthenticateNewClient(ConnectFD) == false )
+	if( GetNewClient(ConnectFD) == false )
 	{
 		cout << "ERROR: Authentication Failure\n";
 		shutdown(ConnectFD, SHUT_RDWR);

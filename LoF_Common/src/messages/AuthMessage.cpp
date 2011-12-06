@@ -179,7 +179,7 @@ char *AuthMessage::Serialize(uint *length)
 		}
 		case SERVER_AUTH_REPLY:
 		{
-			uint messageSize = MESSAGE_MIN_SIZE + sizeof(bool);
+			uint messageSize = MESSAGE_MIN_SIZE + sizeof(authSuccess);
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
@@ -188,7 +188,7 @@ char *AuthMessage::Serialize(uint *length)
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
-			memcpy(buffer, &authSuccess, sizeof(bool));
+			memcpy(buffer, &authSuccess, sizeof(authSuccess));
 			*length = messageSize;
 			return originalBuffer;
 		}

@@ -16,7 +16,8 @@ using namespace std;
 namespace LoF
 {
 
-bool AuthenticateNewClient(int connectFD);
+bool GetNewClient(int connectFD);
+enum AuthResult AuthenticateClient(char *username, unsigned char *hashedPassword);
 
 }
 #endif /* PROTOCOLHANDLER_H_ */

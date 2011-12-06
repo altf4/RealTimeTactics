@@ -50,10 +50,17 @@ bool LoF::AuthToServer(int connectFD, string username, unsigned char *hashedPass
 	}
 	if( server_hello->type == SERVER_AUTH_REPLY)
 	{
-		if(server_hello->authSuccess == false)
+		if(server_hello->authSuccess != AUTH_SUCCESS)
 		{
-			//Rejected by server
-			cout << "Rejected by server. Probably incompatible software versions.\n";
+			if( server_hello->authSuccess == INCOMPATIBLE_SOFTWARE_VERSIONS )
+			{
+				//Rejected by server
+				cout << "Rejected by server, incompatible software versions.\n";
+			}
+			else
+			{
+				cout << "Rejected by server.\n";
+			}
 		}
 		else
 		{
