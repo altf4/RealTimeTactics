@@ -18,6 +18,10 @@ AuthMessage::AuthMessage()
 
 AuthMessage::AuthMessage(char *buffer, uint length)
 {
+	if( length < MESSAGE_MIN_SIZE )
+	{
+		return;
+	}
 	//Copy the message type
 	memcpy(&type, buffer, MESSAGE_MIN_SIZE);
 	buffer += MESSAGE_MIN_SIZE;
@@ -29,6 +33,13 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 			//Uses: 1) Message Type
 			//		2) Version Number
 
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(softwareVersion);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
 			memcpy(&softwareVersion, buffer, sizeof(softwareVersion));
 			buffer += sizeof(softwareVersion);
 			break;
@@ -37,6 +48,14 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 		{
 			//Uses: 1) Version Number
 			//		2) AuthMechanism
+
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(softwareVersion)
+					+ sizeof(authMechanism);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
 
 			memcpy(&softwareVersion, buffer, sizeof(softwareVersion));
 			buffer += sizeof(softwareVersion);
@@ -51,6 +70,14 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 			//		2) Username
 			//		3) Hashed password
 
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(username)
+					+ sizeof(hashedPassword);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
 			memcpy(username, buffer, sizeof(username));
 			buffer += sizeof(username);
 			memcpy(hashedPassword, buffer, sizeof(hashedPassword));
@@ -61,8 +88,14 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 		{
 			//Uses: 1) authSuccess
 
-			memcpy(&authSuccess, buffer, sizeof(bool));
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(authSuccess);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
 
+			memcpy(&authSuccess, buffer, sizeof(authSuccess));
 			break;
 		}
 		default:
@@ -70,6 +103,7 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 			//error
 		}
 	}
+	serializeError = false;
 }
 
 char *AuthMessage::Serialize(uint *length)

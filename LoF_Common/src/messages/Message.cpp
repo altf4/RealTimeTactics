@@ -41,6 +41,10 @@ char *Message::Serialize(uint *length)
 
 Message *Message::Deserialize(char *buffer, uint length)
 {
+	if( length <  MESSAGE_MIN_SIZE )
+	{
+		return NULL;
+	}
 	//Copy the message type
 	enum MessageType thisType;
 	memcpy(&thisType, buffer, MESSAGE_MIN_SIZE);
@@ -53,8 +57,12 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case SERVER_AUTH_REPLY:
 		{
 			AuthMessage *message = new AuthMessage(buffer, length);
+			if( message->serializeError == true )
+			{
+				delete message;
+				return NULL;
+			}
 			return message;
-			break;
 		}
 		default:
 		{

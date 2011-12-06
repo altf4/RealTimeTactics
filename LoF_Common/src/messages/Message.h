@@ -54,6 +54,9 @@ class Message
 {
 public:
 
+	//Not ever sent. Just used to return errors
+	bool serializeError;
+
 	enum MessageType type;
 
 	//Plain old constructor
