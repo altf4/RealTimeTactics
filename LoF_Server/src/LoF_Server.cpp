@@ -109,6 +109,9 @@ int main(int argc, char **argv)
 			exit(EXIT_FAILURE);
 		}
 
+		//Initialize the playerList hashmap
+		playerList.set_empty_key(NULL);
+
 		//Send the new connection off to another thread for handling
 		pthread_create(&threadID, NULL, ClientThread, (void *) ConnectFD );
 	}
