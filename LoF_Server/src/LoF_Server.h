@@ -34,6 +34,7 @@ struct eqstr
 };
 
 static dense_hash_map<const char*, Player*, hash<const char*>, eqstr> playerList;
+static dense_hash_map<int, Match*, hash<int>, eqstr> matchList;
 
 string Usage();
 

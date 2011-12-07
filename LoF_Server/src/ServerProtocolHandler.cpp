@@ -104,6 +104,12 @@ bool LoF::GetNewClient(int ConnectFD)
 	enum AuthResult authresult =
 			AuthenticateClient(client_auth->username, client_auth->hashedPassword);
 
+	if( authresult == AUTH_SUCCESS)
+	{
+		Player *player = new Player(client_auth->username);
+		playerList[client_auth->username] = player;
+	}
+
 	delete client_auth;
 
 
@@ -120,14 +126,35 @@ bool LoF::GetNewClient(int ConnectFD)
 		delete server_auth_reply;
 		return false;
 	}
+
 	delete server_auth_reply;
-	//TODO: Right now, always return true (authentication success)
-	return true;
+
+	if( authresult == AUTH_SUCCESS)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
-
+//Authenticates the given username/password with the server
+//Checks that:
+//	a) The username exists in the system
+//	b) The given password hash is correct for the specified username
+//	c) The username is unique on the server
 enum AuthResult LoF::AuthenticateClient(char *username, unsigned char *hashedPassword)
 {
 	//TODO: Authenticate!
+
+	//Check if the username exists in the active list
+	if( playerList[username] != NULL)
+	{
+		return USERNAME_ALREADY_EXISTS;
+	}
+
+	//TODO: Check if the username exists in the non-active list (from file on disk)
+
 	return AUTH_SUCCESS;
 }

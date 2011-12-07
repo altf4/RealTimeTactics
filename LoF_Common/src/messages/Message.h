@@ -28,6 +28,10 @@ enum MessageType: char
 	CLIENT_AUTH,
 	SERVER_AUTH_REPLY,
 
+	//Messages for Querying matches
+	MATCH_LIST_REQUEST,
+	MATCH_LIST_REPLY,
+
 	//Messages for creating a new match
 	MATCH_CREATE_REQUEST,
 	MATCH_CREATE_OPTIONS_AVAILABLE,

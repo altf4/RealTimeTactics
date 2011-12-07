@@ -26,6 +26,10 @@ public:
 
 	Player();
 
+	//For when c strings are easier, or std::strings are
+	Player(char *username);
+	Player(string username);
+
 };
 
 }

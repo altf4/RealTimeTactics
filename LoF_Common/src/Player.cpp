@@ -14,3 +14,13 @@ Player::Player()
 
 }
 
+Player::Player(char *username)
+{
+	name = string(username);
+}
+
+Player::Player(string username)
+{
+	name = username;
+}
+
