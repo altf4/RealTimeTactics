@@ -5,14 +5,17 @@
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
 ../src/messages/AuthMessage.cpp \
+../src/messages/LobbyMessage.cpp \
 ../src/messages/Message.cpp 
 
 OBJS += \
 ./src/messages/AuthMessage.o \
+./src/messages/LobbyMessage.o \
 ./src/messages/Message.o 
 
 CPP_DEPS += \
 ./src/messages/AuthMessage.d \
+./src/messages/LobbyMessage.d \
 ./src/messages/Message.d 
 
 

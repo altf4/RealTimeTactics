@@ -22,26 +22,31 @@ namespace LoF
 
 enum MessageType: char
 {
+	//****************
+	//	AuthMessage
+	//****************
 	//Messages for first contacting the server and authenticating
 	CLIENT_HELLO = 0,
 	SERVER_HELLO,
 	CLIENT_AUTH,
 	SERVER_AUTH_REPLY,
 
+	//****************
+	//	LobbyMessage
+	//****************
 	//Messages for Querying matches
 	MATCH_LIST_REQUEST,
 	MATCH_LIST_REPLY,
-
 	//Messages for creating a new match
 	MATCH_CREATE_REQUEST,
 	MATCH_CREATE_OPTIONS_AVAILABLE,
 	MATCH_CREATE_OPTIONS_CHOSEN,
 	MATCH_CREATE_ERROR,
 	MATCH_CREATE_REPLY,
-
 	//Joining a match already created
 	MATCH_JOIN_REQUEST,
 	MATCH_JOIN_REPLY,
+
 
 	//TODO: Fill this out as they become needed / invented
 
