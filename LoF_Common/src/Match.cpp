@@ -16,4 +16,24 @@ Match::Match()
 
 }
 
+void Match::SetID(uint newID)
+{
+	ID = newID;
+	description.ID = newID;
+}
 
+void Match::SetStatus(enum Status newStatus)
+{
+	status = newStatus;
+	description.status = newStatus;
+}
+
+enum Status Match::GetStatus()
+{
+	return status;
+}
+
+uint Match::GetID()
+{
+	return ID;
+}

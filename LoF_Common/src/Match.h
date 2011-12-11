@@ -50,6 +50,11 @@ public:
 
 	Match();
 
+	void SetID(uint newID);
+	void SetStatus(enum Status newStatus);
+	enum Status GetStatus();
+	uint GetID();
+
 private:
 
 	enum Status status;
