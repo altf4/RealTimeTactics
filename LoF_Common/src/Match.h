@@ -24,6 +24,14 @@ enum Status
 	IN_PROGRESS,
 };
 
+//A fixed size description of the match
+//	Suitable for sending to others to give match info
+struct MatchDescription
+{
+	enum Status status;
+	uint ID;
+};
+
 class Match
 {
 
@@ -34,13 +42,19 @@ public:
 	//Players involved
 	vector <Player*> players;
 
-	enum Status status;
+	struct MatchDescription description;
 
 	// chargingActions is the global list of actions which have not yet been triggered
 	// chargedActions is the list of actions which are on queue to be triggered
 	vector <Action*> chargingActions, chargedActions;
 
 	Match();
+
+private:
+
+	enum Status status;
+	uint ID;
+
 };
 
 }

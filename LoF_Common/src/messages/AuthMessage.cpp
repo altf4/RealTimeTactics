@@ -101,6 +101,7 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 		default:
 		{
 			//error
+			serializeError = true;
 		}
 	}
 	serializeError = false;
