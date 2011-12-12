@@ -18,9 +18,9 @@ LobbyMessage::LobbyMessage()
 
 LobbyMessage::~LobbyMessage()
 {
-	if(matchDescription != NULL)
+	if(matchDescriptions != NULL)
 	{
-		free(matchDescription);
+		free(matchDescriptions);
 	}
 }
 
@@ -71,9 +71,9 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 			buffer += sizeof(returnedMatchesCount);
 
 			//All the returned matches
-			matchDescription = (struct MatchDescription *)malloc(returnedMatchesCount
+			matchDescriptions = (struct MatchDescription *)malloc(returnedMatchesCount
 					* sizeof(struct MatchDescription));
-			memcpy(matchDescription, buffer, returnedMatchesCount
+			memcpy(matchDescriptions, buffer, returnedMatchesCount
 					* sizeof(struct MatchDescription));
 
 			break;
@@ -81,21 +81,86 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		//Messages for creating a new match
 		case MATCH_CREATE_REQUEST:
 		{
+			//Uses: 1) Message Type
+			uint expectedSize = MESSAGE_MIN_SIZE;
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			break;
 		}
 		case MATCH_CREATE_OPTIONS_AVAILABLE:
 		{
+			//Uses: 1) Message Type
+			//		2) Max players allowed by server
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(maxPlayers);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			//Max players
+			memcpy(&maxPlayers, buffer, sizeof(maxPlayers));
+			buffer += sizeof(maxPlayers);
+
+			break;
 
 		}
 		case MATCH_CREATE_OPTIONS_CHOSEN:
 		{
+			//Uses: 1) Message Type
+			//		2) Max players set by client
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(maxPlayers);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			//Max players
+			memcpy(&maxPlayers, buffer, sizeof(maxPlayers));
+			buffer += sizeof(maxPlayers);
+
+			break;
 
 		}
 		case MATCH_CREATE_ERROR:
 		{
+			//Uses: 1) Message Type
+			//		2) Error type
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(error);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			//Error type
+			memcpy(&error, buffer, sizeof(error));
+			buffer += sizeof(error);
+
+			break;
 
 		}
 		case MATCH_CREATE_REPLY:
 		{
+			//Uses: 1) Message Type
+			//		2) Description of newly created match
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(matchDescription);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			//Match description
+			memcpy(&matchDescription, buffer, sizeof(matchDescription));
+			buffer += sizeof(matchDescription);
+
+			break;
 
 		}
 		//Joining a match already created
@@ -104,6 +169,15 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 
 		}
 		case MATCH_JOIN_REPLY:
+		{
+
+		}
+		//Deleting a match you're in
+		case MATCH_DELETE_NOTIFICATION:
+		{
+
+		}
+		case MATCH_DELETE_ACKNOWLEDGE:
 		{
 
 		}
@@ -119,6 +193,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 char *LobbyMessage::Serialize(uint *length)
 {
 	char *buffer, *originalBuffer;
+	uint messageSize;
 	switch(type)
 	{
 		case MATCH_LIST_REQUEST:
@@ -126,7 +201,7 @@ char *LobbyMessage::Serialize(uint *length)
 			//Uses: 1) Message Type
 			//		2) Page number
 
-			uint messageSize = MESSAGE_MIN_SIZE + sizeof(requestedPage);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(requestedPage);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
@@ -137,15 +212,14 @@ char *LobbyMessage::Serialize(uint *length)
 			memcpy(buffer, &requestedPage, sizeof(requestedPage));
 			buffer += sizeof(requestedPage);
 
-			*length = messageSize;
-			return originalBuffer;
+			break;
 		}
 		case MATCH_LIST_REPLY:
 		{
 			//Uses: 1) Message Type
 			//		2) Returned Matches Count
 			//		3) Match Descriptions
-			uint messageSize = MESSAGE_MIN_SIZE + sizeof(returnedMatchesCount)
+			messageSize = MESSAGE_MIN_SIZE + sizeof(returnedMatchesCount)
 					+ (returnedMatchesCount * sizeof(struct MatchDescription));
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
@@ -161,67 +235,141 @@ char *LobbyMessage::Serialize(uint *length)
 			//Put the match descriptions in
 			for(uint i = 0; i < returnedMatchesCount; i++)
 			{
-				memcpy(buffer, &matchDescription[i], sizeof(struct MatchDescription));
+				memcpy(buffer, &matchDescriptions[i], sizeof(struct MatchDescription));
 				buffer += sizeof(struct MatchDescription);
 			}
-
-			*length = messageSize;
-			return originalBuffer;
+			break;
 		}
 		//Messages for creating a new match
 		case MATCH_CREATE_REQUEST:
 		{
-			return originalBuffer;
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE;
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			break;
 		}
 		case MATCH_CREATE_OPTIONS_AVAILABLE:
 		{
-			uint messageSize = MESSAGE_MIN_SIZE;
+			//Uses: 1) Message Type
+			//		2) Max players allowed by server
+			messageSize = MESSAGE_MIN_SIZE + sizeof(maxPlayers);
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
 
-			*length = messageSize;
-			return originalBuffer;
+			//TODO: Fill in with match options allowed by server
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			//Max players
+			memcpy(buffer, &maxPlayers, sizeof(maxPlayers));
+			buffer += sizeof(maxPlayers);
+
+			break;
 		}
 		case MATCH_CREATE_OPTIONS_CHOSEN:
 		{
-			uint messageSize = MESSAGE_MIN_SIZE;
+			//Uses: 1) Message Type
+			//		2) Max players set by client
+			messageSize = MESSAGE_MIN_SIZE + sizeof(maxPlayers);
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
 
-			*length = messageSize;
-			return originalBuffer;
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			//Max players
+			memcpy(buffer, &maxPlayers, sizeof(maxPlayers));
+			buffer += sizeof(maxPlayers);
+
+			break;
 		}
 		case MATCH_CREATE_ERROR:
 		{
-			uint messageSize = MESSAGE_MIN_SIZE;
+			//Uses: 1) Message Type
+			//		2) Error type
+			messageSize = MESSAGE_MIN_SIZE + sizeof(error);
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
 
-			*length = messageSize;
-			return originalBuffer;
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			//Error type
+			memcpy(buffer, &error, sizeof(error));
+			buffer += sizeof(error);
+
+			break;
 		}
 		case MATCH_CREATE_REPLY:
 		{
-			uint messageSize = MESSAGE_MIN_SIZE;
+			//Uses: 1) Message Type
+			//		2) Description of newly created match
+			messageSize = MESSAGE_MIN_SIZE + sizeof(matchDescription);
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
 
-			*length = messageSize;
-			return originalBuffer;
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			//New match description
+			memcpy(buffer, &matchDescription, sizeof(matchDescription));
+			buffer += sizeof(matchDescription);
+
+			break;
 		}
 		//Joining a match already created
 		case MATCH_JOIN_REQUEST:
 		{
-			uint messageSize = MESSAGE_MIN_SIZE;
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE;
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
 
-			*length = messageSize;
-			return originalBuffer;
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			break;
 		}
 		case MATCH_JOIN_REPLY:
 		{
-			uint messageSize = MESSAGE_MIN_SIZE;
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE;
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
 
-			*length = messageSize;
-			return originalBuffer;
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			break;
 		}
 		default:
 		{
-			//Error
-			return NULL;
-		}
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE;
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
 
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			break;
+		}
 	}
 
+	*length = messageSize;
+	return originalBuffer;
 }

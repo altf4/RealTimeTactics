@@ -34,10 +34,10 @@ enum MessageType: char
 	//****************
 	//	LobbyMessage
 	//****************
-	//Messages for Querying matches
+	//Querying matches
 	MATCH_LIST_REQUEST,
 	MATCH_LIST_REPLY,
-	//Messages for creating a new match
+	//Creating a new match
 	MATCH_CREATE_REQUEST,
 	MATCH_CREATE_OPTIONS_AVAILABLE,
 	MATCH_CREATE_OPTIONS_CHOSEN,
@@ -46,23 +46,12 @@ enum MessageType: char
 	//Joining a match already created
 	MATCH_JOIN_REQUEST,
 	MATCH_JOIN_REPLY,
+	//Deleting a match you're in
+	MATCH_DELETE_NOTIFICATION,
+	MATCH_DELETE_ACKNOWLEDGE,
 
 
 	//TODO: Fill this out as they become needed / invented
-
-};
-
-enum AuthResult: char
-{
-	//Success!
-	AUTH_SUCCESS = 0,
-
-	//Failure... :(
-	USERNAME_ALREADY_EXISTS,	//For creating a new account
-	INCORRECT_PASSWORD,
-	USERNAME_NOT_FOUND,			//For logging into an existing account
-	INVALID_USERNAME,
-	INCOMPATIBLE_SOFTWARE_VERSIONS,
 
 };
 

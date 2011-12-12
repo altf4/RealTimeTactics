@@ -14,11 +14,35 @@ using namespace std;
 namespace LoF
 {
 
+enum LobbyResult: char
+{
+	//Success
+	LOBBY_SUCCESS = 0,
+
+	//Failure, Invalid options
+	INVALID_MAX_PLAYERS,
+
+	//Failure joining
+	MATCH_IS_FULL,
+	MATCH_DOESNT_EXIST,
+	NOT_ALLOWED_IN,
+
+	//Failure, General server stuff
+	TOO_BUSY,
+	SHUTTING_DOWN_SOON,
+};
+
 class LobbyMessage: public Message
 {
 	uint requestedPage;
 	uint returnedMatchesCount;
-	struct MatchDescription *matchDescription;
+	//A list of queried matches
+	struct MatchDescription *matchDescriptions;
+	//Newly created match
+	struct MatchDescription matchDescription;
+	uint maxPlayers;
+	enum LobbyResult error;
+
 
 	LobbyMessage();
 	~LobbyMessage();

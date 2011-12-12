@@ -16,6 +16,7 @@ Match::Match()
 
 }
 
+//SET methods
 void Match::SetID(uint newID)
 {
 	ID = newID;
@@ -28,6 +29,13 @@ void Match::SetStatus(enum Status newStatus)
 	description.status = newStatus;
 }
 
+void Match::SetMaxPlayers(uint newMaxPlayers)
+{
+	maxPlayers = newMaxPlayers;
+	description.maxPlayers = newMaxPlayers;
+}
+
+//GET methods
 enum Status Match::GetStatus()
 {
 	return status;
@@ -36,4 +44,9 @@ enum Status Match::GetStatus()
 uint Match::GetID()
 {
 	return ID;
+}
+
+uint Match::GetMaxPlayers()
+{
+	return maxPlayers;
 }

@@ -30,6 +30,7 @@ struct MatchDescription
 {
 	enum Status status;
 	uint ID;
+	uint maxPlayers;
 };
 
 class Match
@@ -52,13 +53,20 @@ public:
 
 	void SetID(uint newID);
 	void SetStatus(enum Status newStatus);
+	void SetMaxPlayers(uint maxPlayers);
+
 	enum Status GetStatus();
 	uint GetID();
+	uint GetMaxPlayers();
 
 private:
 
+	//The current status of the match
 	enum Status status;
+	//Globally unique identifier for the match on this server
 	uint ID;
+	//Maximum number of players allowed for this match
+	uint maxPlayers;
 
 };
 
