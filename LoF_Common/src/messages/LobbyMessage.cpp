@@ -127,24 +127,6 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 			break;
 
 		}
-		case MATCH_CREATE_ERROR:
-		{
-			//Uses: 1) Message Type
-			//		2) Error type
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(error);
-			if( length != expectedSize)
-			{
-				serializeError = true;
-				return;
-			}
-
-			//Error type
-			memcpy(&error, buffer, sizeof(error));
-			buffer += sizeof(error);
-
-			break;
-
-		}
 		case MATCH_CREATE_REPLY:
 		{
 			//Uses: 1) Message Type
@@ -166,19 +148,84 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		//Joining a match already created
 		case MATCH_JOIN_REQUEST:
 		{
+			//Uses: 1) Message Type
+			//		2) ID of the match to join
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(ID);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
 
+			//Match description
+			memcpy(&ID, buffer, sizeof(ID));
+			buffer += sizeof(ID);
+
+			break;
 		}
 		case MATCH_JOIN_REPLY:
 		{
+			//Uses: 1) Message Type
+			//		2) Description of newly created match
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(matchDescription);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
 
+			//Match description
+			memcpy(&matchDescription, buffer, sizeof(matchDescription));
+			buffer += sizeof(matchDescription);
+
+			break;
 		}
 		//Deleting a match you're in
-		case MATCH_DELETE_NOTIFICATION:
+		case MATCH_LEAVE_NOTIFICATION:
 		{
+			//Uses: 1) Message Type
+			//		2) ID of the match to leave
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(ID);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
 
+			//Match description
+			memcpy(&ID, buffer, sizeof(ID));
+			buffer += sizeof(ID);
+
+			break;
 		}
-		case MATCH_DELETE_ACKNOWLEDGE:
+		case MATCH_LEAVE_ACKNOWLEDGE:
 		{
+			//Uses: 1) Message Type
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(ID);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			break;
+		}
+		case MATCH_ERROR:
+		{
+			//Uses: 1) Message Type
+			//		2) Error type
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(error);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			//Error type
+			memcpy(&error, buffer, sizeof(error));
+			buffer += sizeof(error);
+
+			break;
 
 		}
 		default:
@@ -292,24 +339,6 @@ char *LobbyMessage::Serialize(uint *length)
 
 			break;
 		}
-		case MATCH_CREATE_ERROR:
-		{
-			//Uses: 1) Message Type
-			//		2) Error type
-			messageSize = MESSAGE_MIN_SIZE + sizeof(error);
-			buffer = (char*)malloc(messageSize);
-			originalBuffer = buffer;
-
-			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
-			buffer += MESSAGE_MIN_SIZE;
-
-			//Error type
-			memcpy(buffer, &error, sizeof(error));
-			buffer += sizeof(error);
-
-			break;
-		}
 		case MATCH_CREATE_REPLY:
 		{
 			//Uses: 1) Message Type
@@ -332,13 +361,18 @@ char *LobbyMessage::Serialize(uint *length)
 		case MATCH_JOIN_REQUEST:
 		{
 			//Uses: 1) Message Type
-			messageSize = MESSAGE_MIN_SIZE;
+			//		2) ID of the match to join
+			messageSize = MESSAGE_MIN_SIZE + sizeof(ID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
+
+			//ID of the match to join
+			memcpy(buffer, &ID, sizeof(ID));
+			buffer += sizeof(ID);
 
 			break;
 		}
@@ -355,10 +389,11 @@ char *LobbyMessage::Serialize(uint *length)
 
 			break;
 		}
-		default:
+		case MATCH_ERROR:
 		{
 			//Uses: 1) Message Type
-			messageSize = MESSAGE_MIN_SIZE;
+			//		2) Error type
+			messageSize = MESSAGE_MIN_SIZE + sizeof(error);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
@@ -366,7 +401,16 @@ char *LobbyMessage::Serialize(uint *length)
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
+			//Error type
+			memcpy(buffer, &error, sizeof(error));
+			buffer += sizeof(error);
+
 			break;
+		}
+		default:
+		{
+			//Error
+			return NULL;
 		}
 	}
 

@@ -42,6 +42,8 @@ class LobbyMessage: public Message
 	struct MatchDescription matchDescription;
 	uint maxPlayers;
 	enum LobbyResult error;
+	//ID of a match to join
+	uint ID;
 
 
 	LobbyMessage();
