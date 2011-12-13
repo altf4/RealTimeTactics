@@ -26,14 +26,22 @@ enum LobbyResult: char
 	MATCH_IS_FULL,
 	MATCH_DOESNT_EXIST,
 	NOT_ALLOWED_IN,
+	ALREADY_IN_MATCH,
+
+	//Failure leaving
+	NOT_IN_THAT_MATCH,
 
 	//Failure, General server stuff
 	TOO_BUSY,
 	SHUTTING_DOWN_SOON,
+
+	//Protocol error
+	SPOKE_OUT_OF_TURN,
 };
 
 class LobbyMessage: public Message
 {
+public:
 	uint requestedPage;
 	uint returnedMatchesCount;
 	//A list of queried matches

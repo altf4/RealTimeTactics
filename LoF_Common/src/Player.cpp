@@ -11,16 +11,18 @@ using namespace LoF;
 
 Player::Player()
 {
-
+	currentMatch = NULL;
 }
 
 Player::Player(char *username)
 {
 	name = string(username);
+	currentMatch = NULL;
 }
 
 Player::Player(string username)
 {
 	name = username;
+	currentMatch = NULL;
 }
 

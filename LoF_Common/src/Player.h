@@ -10,6 +10,7 @@
 
 #include <vector>
 #include "Unit.h"
+#include "Match.h"
 #include <string>
 
 using namespace std;
@@ -17,12 +18,18 @@ using namespace std;
 namespace LoF
 {
 
+//Forward declaration to avoid self-reference
+class Match;
+
 class Player
 {
 public:
 	string name;
 
 	vector <Unit*> units;
+
+	//The match that this player is currently in
+	Match *currentMatch;
 
 	Player();
 

@@ -180,7 +180,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 
 			break;
 		}
-		//Deleting a match you're in
+		//Leaving a match you're in
 		case MATCH_LEAVE_NOTIFICATION:
 		{
 			//Uses: 1) Message Type
@@ -377,6 +377,36 @@ char *LobbyMessage::Serialize(uint *length)
 			break;
 		}
 		case MATCH_JOIN_REPLY:
+		{
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE;
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			break;
+		}
+		//Leaving a match you're in
+		case MATCH_LEAVE_NOTIFICATION:
+		{
+			//Uses: 1) Message Type
+			//		2) ID of the match to leave
+			messageSize = MESSAGE_MIN_SIZE + sizeof(ID);
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			memcpy(buffer, &ID, sizeof(ID));
+			buffer += sizeof(ID);
+
+			break;
+		}
+		case MATCH_LEAVE_ACKNOWLEDGE:
 		{
 			//Uses: 1) Message Type
 			messageSize = MESSAGE_MIN_SIZE;

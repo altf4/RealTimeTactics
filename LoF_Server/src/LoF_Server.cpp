@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <pthread.h>
 #include "ServerProtocolHandler.h"
+#include <iterator>
 
 using namespace std;
 using namespace LoF;
@@ -124,7 +125,8 @@ void *ClientThread(void * parm)
 	int ConnectFD = (int)parm;
 
 	//First, authenticate the client
-	if( GetNewClient(ConnectFD) == false )
+	Player *player = GetNewClient(ConnectFD);
+	if( player == NULL )
 	{
 		cout << "ERROR: Authentication Failure\n";
 		shutdown(ConnectFD, SHUT_RDWR);
@@ -133,6 +135,21 @@ void *ClientThread(void * parm)
 	}
 
 	cout << "Client Authenticated!\n";
+
+	//*************************************
+	// In the main lobby
+	// Main Server Loop
+	//*************************************
+	while(true)
+	{
+		enum LobbyReturn lobbyReturn;
+		lobbyReturn = ProcessLobbyCommand(ConnectFD, player);
+
+		if(lobbyReturn == STARTING_MATCH)
+		{
+			//TODO: START A MATCH!!
+		}
+	}
 
 	return NULL;
 }
@@ -178,6 +195,126 @@ void ProcessRound(Match *match)
 		//TODO: This is probably inefficient. Find a better way than re-sorting every time
 	}
 
+}
+
+//Gets match descriptions from the matchlist
+//	page: specifies which block of matches to get
+//	descArray: output array where matches are written to
+//	Returns: The number of matches written
+uint GetMatchDescriptions(uint page, MatchDescription *descArray)
+{
+	MatchList::iterator it = matchList.begin();
+	uint count = 0;
+
+	//Skip forward to the beginning of this page
+	while(count < (page * MATCHES_PER_PAGE))
+	{
+		it++;
+		count++;
+
+		if(it == matchList.end())
+		{
+			return 0;
+		}
+	}
+
+	//Copy the matches in, one by one
+	for(uint i = 0; i < MATCHES_PER_PAGE; i++)
+	{
+		if(it == matchList.end())
+		{
+			return i;
+		}
+		descArray[i] = it.pos->second->description;
+		it++;
+	}
+
+	return MATCHES_PER_PAGE;
+}
+
+//Creates a new match and places it into matchList
+//	Returns: The unique ID of the new match
+//		returns 0 on error
+uint RegisterNewMatch(Player *player)
+{
+	//The player's current match must be empty to join a new one
+	if( player->currentMatch != NULL )
+	{
+		return 0;
+	}
+	lastMatchID++;
+
+	Match *match = new Match();
+	match->SetID(lastMatchID);
+	match->SetStatus(WAITING_FOR_PLAYERS);
+
+	matchList[lastMatchID] = match;
+	player->currentMatch = match;
+
+	return match->GetID();
+}
+
+//Make player join specified match
+//	Sets the variables within player and match properly
+//	Returns an enum of the success or failure condition
+enum LobbyResult JoinMatch(Player *player, uint matchID)
+{
+	//The player's current match must be empty to join a new one
+	if( player->currentMatch != NULL )
+	{
+		return ALREADY_IN_MATCH;
+	}
+	if( matchList[matchID] == NULL)
+	{
+		return MATCH_DOESNT_EXIST;
+	}
+	if( matchList[matchID]->players.size() == matchList[matchID]->GetMaxPlayers())
+	{
+		return MATCH_IS_FULL;
+	}
+	//TODO: Check for permission to enter
+//	if(permission is not granted)
+//	{
+//		return NOT_ALLOWED_IN;
+//	}
+
+	matchList[matchID]->players.push_back(player);
+	player->currentMatch = matchList[matchID];
+
+	return LOBBY_SUCCESS;
+}
+
+//Make player leave specified match
+//	Sets the variables within player and match properly
+//	If no players remain in the match afterward, then the match is deleted
+//	Returns success or failure
+bool LeaveMatch(Player *player, uint matchID)
+{
+	bool foundOne = false;
+	for(uint i = 0; i < matchList[matchID]->players.size(); i++)
+	{
+		//Find our player in the match' player list
+		if( matchList[matchID]->players[i]->name == player->name)
+		{
+			matchList[matchID]->players.erase(matchList[matchID]->players.begin()+i);
+			foundOne = true;
+			break;
+		}
+	}
+	if( !foundOne )
+	{
+		return false;
+	}
+	player->currentMatch = NULL;
+
+	//If this was the last player in the match
+	if( matchList[matchID]->players.empty() )
+	{
+		delete matchList[matchID];
+		matchList.erase(matchID);
+	}
+
+	return true;
 }
 
 //Prints usage tips

@@ -18,6 +18,9 @@ using namespace std;
 namespace LoF
 {
 
+//Forward declaration to avoid self-reference
+class Player;
+
 enum Status
 {
 	WAITING_FOR_PLAYERS,

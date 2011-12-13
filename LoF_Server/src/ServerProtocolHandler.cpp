@@ -17,7 +17,9 @@
 using namespace std;
 using namespace LoF;
 
-bool LoF::GetNewClient(int ConnectFD)
+//Negotiates the hello messages and authentication to a new client
+//	Returns a new Player object, NULL on error
+Player *LoF::GetNewClient(int ConnectFD)
 {
 	//***************************
 	// Read client Hello
@@ -27,7 +29,7 @@ bool LoF::GetNewClient(int ConnectFD)
 
 	if( client_hello == NULL )
 	{
-		return false;
+		return NULL;
 	}
 
 	if( client_hello->type != CLIENT_HELLO )
@@ -35,7 +37,7 @@ bool LoF::GetNewClient(int ConnectFD)
 		cerr << "ERROR: Expected CLIENT_HELLO message, received: "
 				<< client_hello->type << "\n";
 		delete client_hello;
-		return false;
+		return NULL;
 	}
 
 	//Check version compatibility
@@ -61,7 +63,7 @@ bool LoF::GetNewClient(int ConnectFD)
 					"the bad incompatible software versions.\n";
 		}
 		delete server_auth_reply;
-		return false;
+		return NULL;
 	}
 	delete client_hello;
 
@@ -80,7 +82,7 @@ bool LoF::GetNewClient(int ConnectFD)
 	{
 		//Error in write
 		delete server_hello;
-		return false;
+		return NULL;
 	}
 	delete server_hello;
 
@@ -92,21 +94,22 @@ bool LoF::GetNewClient(int ConnectFD)
 	if( client_auth == NULL )
 	{
 		//ERROR
-		return false;
+		return NULL;
 	}
 	if( client_auth->type !=  CLIENT_AUTH)
 	{
 		//Error
 		delete client_auth;
-		return false;
+		return NULL;
 	}
 
 	enum AuthResult authresult =
 			AuthenticateClient(client_auth->username, client_auth->hashedPassword);
 
+	Player *player = NULL;
 	if( authresult == AUTH_SUCCESS)
 	{
-		Player *player = new Player(client_auth->username);
+		player = new Player(client_auth->username);
 		playerList[client_auth->username] = player;
 	}
 
@@ -124,19 +127,234 @@ bool LoF::GetNewClient(int ConnectFD)
 	{
 		//Error in write
 		delete server_auth_reply;
-		return false;
+		return NULL;
 	}
 
 	delete server_auth_reply;
+	return player;
+}
 
-	if( authresult == AUTH_SUCCESS)
+//Processes one Lobby command
+//	Starts out by listening on the given socket for a LobbyMessage
+//	Executes the Lobby protocol
+//	Returns a enum LobbyReturn to describe the end state
+enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
+{
+	//********************************
+	// Receive Initial Lobby Message
+	//********************************
+	LobbyMessage *lobby_message = (LobbyMessage*)Message::ReadMessage(ConnectFD);
+	if( lobby_message == NULL )
 	{
-		return true;
+		//ERROR
+		cerr << "ERROR: Lobby message came back NULL\n";
 	}
-	else
+
+	switch (lobby_message->type)
 	{
-		return false;
+		case MATCH_LIST_REQUEST:
+		{
+			struct MatchDescription matches[MATCHES_PER_PAGE];
+			uint matchCount = GetMatchDescriptions(lobby_message->requestedPage, matches);
+
+			//***************************
+			// Send Query Reply
+			//***************************
+			LobbyMessage *query_reply = new LobbyMessage();
+			query_reply->type = MATCH_LIST_REPLY;
+			query_reply->returnedMatchesCount = matchCount;
+			query_reply->matchDescriptions = matches;
+
+			if(  Message::WriteMessage(query_reply, ConnectFD) == false)
+			{
+				//Error in write, do something?
+				cerr << "ERROR: Message send returned failure.\n";
+			}
+			delete query_reply;
+
+			return STILL_IN_LOBBY;
+		}
+		case MATCH_CREATE_REQUEST:
+		{
+			//***************************
+			// Send Options Available
+			//***************************
+			LobbyMessage *options_available = new LobbyMessage();
+			options_available->type = MATCH_CREATE_OPTIONS_AVAILABLE;
+			options_available->maxPlayers = MAX_PLAYERS_IN_MATCH;
+			if(  Message::WriteMessage(options_available, ConnectFD) == false)
+			{
+				//Error in write, do something?
+				cerr << "ERROR: Message send returned failure.\n";
+				delete options_available;
+				return STILL_IN_LOBBY;
+			}
+			delete options_available;
+
+			//********************************
+			// Receive Options Chosen
+			//********************************
+			LobbyMessage *options_chosen = (LobbyMessage*)Message::ReadMessage(ConnectFD);
+			if( options_chosen == NULL )
+			{
+				//Error
+				cerr << "ERROR: Reading from client failed.\n";
+				return STILL_IN_LOBBY;
+			}
+			if( options_chosen->type !=  CLIENT_AUTH)
+			{
+				//Error
+				cerr << "ERROR: Client gave us the wrong message type.\n";
+				delete options_chosen;
+				return STILL_IN_LOBBY;
+			}
+
+			if(options_chosen->maxPlayers > MAX_PLAYERS_IN_MATCH)
+			{
+				cerr << "ERROR: Client asked for more players in a match than allowed.\n";
+
+				//***************************
+				// Send Lobby Error
+				//***************************
+				LobbyMessage *error_reply = new LobbyMessage();
+				error_reply->type = MATCH_ERROR;
+				error_reply->error = INVALID_MAX_PLAYERS;
+				if(  Message::WriteMessage(error_reply, ConnectFD) == false)
+				{
+					//Error in write, do something?
+					cerr << "ERROR: Message send returned failure.\n";
+				}
+				delete error_reply;
+				return STILL_IN_LOBBY;
+			}
+
+			uint matchID = RegisterNewMatch(player);
+
+			if( matchID == 0 )
+			{
+				//***************************
+				// Send Lobby Error
+				//***************************
+				LobbyMessage *error_reply = new LobbyMessage();
+				error_reply->type = MATCH_ERROR;
+				error_reply->error = TOO_BUSY;
+				if(  Message::WriteMessage(error_reply, ConnectFD) == false)
+				{
+					//Error in write, do something?
+					cerr << "ERROR: Message send returned failure.\n";
+				}
+				delete error_reply;
+				return STILL_IN_LOBBY;
+			}
+
+			delete options_chosen;
+
+			//***************************
+			// Send Match Create Reply
+			//***************************
+			LobbyMessage *create_reply = new LobbyMessage();
+			create_reply->type = MATCH_CREATE_REPLY;
+			create_reply->ID = matchID;
+			if(  Message::WriteMessage(create_reply, ConnectFD) == false)
+			{
+				//Error in write, do something?
+				//TODO: This case is awkward. Should probably
+				//	remove player from the match?
+				cerr << "ERROR: Message send returned failure.\n";
+				return STILL_IN_LOBBY;
+			}
+			delete create_reply;
+
+			return STARTING_MATCH;
+		}
+		case MATCH_JOIN_REQUEST:
+		{
+			enum LobbyResult joinResult = JoinMatch(player, lobby_message->ID);
+			if( joinResult !=  LOBBY_SUCCESS)
+			{
+				//***************************
+				// Send Lobby Error
+				//***************************
+				LobbyMessage *error_reply = new LobbyMessage();
+				error_reply->type = MATCH_ERROR;
+				error_reply->error = joinResult;
+				if(  Message::WriteMessage(error_reply, ConnectFD) == false)
+				{
+					//Error in write, do something?
+					cerr << "ERROR: Message send returned failure.\n";
+				}
+				delete error_reply;
+				return STILL_IN_LOBBY;
+			}
+			else
+			{
+				//***************************
+				// Send Match Join Reply
+				//***************************
+				LobbyMessage *match_join = new LobbyMessage();
+				match_join->type = MATCH_JOIN_REPLY;
+				match_join->matchDescription = matchList[match_join->ID]->description;
+				if(  Message::WriteMessage(match_join, ConnectFD) == false)
+				{
+					//Error in write, do something?
+					cerr << "ERROR: Message send returned failure.\n";
+				}
+				delete match_join;
+				return STARTING_MATCH;
+			}
+		}
+		case MATCH_LEAVE_NOTIFICATION:
+		{
+			if( LeaveMatch(player, lobby_message->ID) )
+			{
+				//*******************************
+				// Send Match Leave Acknowledge
+				//*******************************
+				LobbyMessage *leave_ack = new LobbyMessage();
+				leave_ack->type = MATCH_LEAVE_ACKNOWLEDGE;
+				if(  Message::WriteMessage(leave_ack, ConnectFD) == false)
+				{
+					//Error in write, do something?
+					cerr << "ERROR: Message send returned failure.\n";
+				}
+				delete leave_ack;
+				return STILL_IN_LOBBY;
+			}
+			else
+			{
+				//***************************
+				// Send Lobby Error
+				//***************************
+				LobbyMessage *error_reply = new LobbyMessage();
+				error_reply->type = MATCH_ERROR;
+				error_reply->error = NOT_IN_THAT_MATCH;
+				if(  Message::WriteMessage(error_reply, ConnectFD) == false)
+				{
+					//Error in write, do something?
+					cerr << "ERROR: Message send returned failure.\n";
+				}
+				delete error_reply;
+				return STILL_IN_LOBBY;
+			}
+		}
+		default:
+		{
+			//***************************
+			// Send Match Error
+			//***************************
+			cerr << "ERROR: Client gave us an unexpected message type.\n";
+			LobbyMessage *error_msg = new LobbyMessage();
+			error_msg->type = MATCH_ERROR;
+			error_msg->error = SPOKE_OUT_OF_TURN;
+			if(  Message::WriteMessage(error_msg, ConnectFD) == false)
+			{
+				//Error in write, do something?
+				cerr << "ERROR: Message send returned failure.\n";
+			}
+			delete error_msg;
+		}
 	}
+	delete lobby_message;
 }
 
 //Authenticates the given username/password with the server
