@@ -151,6 +151,7 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 	{
 		//ERROR
 		cerr << "ERROR: Lobby message came back NULL\n";
+		return STILL_IN_LOBBY;
 	}
 
 	switch (lobby_message->type)

@@ -30,6 +30,9 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 	{
 		return;
 	}
+
+	serializeError = false;
+
 	//Copy the message type
 	memcpy(&type, buffer, MESSAGE_MIN_SIZE);
 	buffer += MESSAGE_MIN_SIZE;

@@ -10,6 +10,7 @@
 #include "iostream"
 #include <sys/socket.h>
 #include "AuthMessage.h"
+#include "LobbyMessage.h"
 
 using namespace std;
 using namespace LoF;
@@ -64,9 +65,32 @@ Message *Message::Deserialize(char *buffer, uint length)
 			}
 			return message;
 		}
+		case MATCH_LIST_REQUEST:
+		case MATCH_LIST_REPLY:
+		case MATCH_CREATE_REQUEST:
+		case MATCH_CREATE_OPTIONS_AVAILABLE:
+		case MATCH_CREATE_OPTIONS_CHOSEN:
+		case MATCH_CREATE_REPLY:
+		case MATCH_JOIN_REQUEST:
+		case MATCH_JOIN_REPLY:
+		case MATCH_LEAVE_NOTIFICATION:
+		case MATCH_LEAVE_ACKNOWLEDGE:
+		case MATCH_EXIT_SERVER_NOTIFICATION:
+		case MATCH_EXIT_SERVER_ACKNOWLEDGE:
+		case MATCH_ERROR:
+		{
+			LobbyMessage *message = new LobbyMessage(buffer, length);
+			if( message->serializeError == true )
+			{
+				delete message;
+				return NULL;
+			}
+			return message;
+		}
 		default:
 		{
 			//error
+			cerr << "ERROR: Unrecognized message type\n.";
 			return NULL;
 		}
 	}
