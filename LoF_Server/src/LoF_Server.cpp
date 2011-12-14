@@ -23,8 +23,16 @@
 using namespace std;
 using namespace LoF;
 
+PlayerList playerList;
+MatchList matchList;
+
 int main(int argc, char **argv)
 {
+	matchList.set_empty_key(-1);
+	matchList.set_deleted_key(-2);
+	playerList.set_empty_key("=");
+	playerList.set_deleted_key("-");
+
 	pthread_t threadID;
 	int c;
 	uint serverPortNumber;
@@ -109,9 +117,6 @@ int main(int argc, char **argv)
 			close(SocketFD);
 			exit(EXIT_FAILURE);
 		}
-
-		//Initialize the playerList hashmap
-		playerList.set_empty_key(NULL);
 
 		//Send the new connection off to another thread for handling
 		pthread_create(&threadID, NULL, ClientThread, (void *) ConnectFD );

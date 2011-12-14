@@ -94,17 +94,17 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		case MATCH_CREATE_OPTIONS_AVAILABLE:
 		{
 			//Uses: 1) Message Type
-			//		2) Max players allowed by server
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(maxPlayers);
+			//		2) Match Options offered by server
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(options);
 			if( length != expectedSize)
 			{
 				serializeError = true;
 				return;
 			}
 
-			//Max players
-			memcpy(&maxPlayers, buffer, sizeof(maxPlayers));
-			buffer += sizeof(maxPlayers);
+			//MatchOptions
+			memcpy(&options, buffer, sizeof(options));
+			buffer += sizeof(options);
 
 			break;
 
@@ -112,17 +112,17 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		case MATCH_CREATE_OPTIONS_CHOSEN:
 		{
 			//Uses: 1) Message Type
-			//		2) Max players set by client
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(maxPlayers);
+			//		2) Match Options Set by client
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(options);
 			if( length != expectedSize)
 			{
 				serializeError = true;
 				return;
 			}
 
-			//Max players
-			memcpy(&maxPlayers, buffer, sizeof(maxPlayers));
-			buffer += sizeof(maxPlayers);
+			//MatchOptions
+			memcpy(&options, buffer, sizeof(options));
+			buffer += sizeof(options);
 
 			break;
 
@@ -328,8 +328,8 @@ char *LobbyMessage::Serialize(uint *length)
 		case MATCH_CREATE_OPTIONS_AVAILABLE:
 		{
 			//Uses: 1) Message Type
-			//		2) Max players allowed by server
-			messageSize = MESSAGE_MIN_SIZE + sizeof(maxPlayers);
+			//		2) Match Options offered by server
+			messageSize = MESSAGE_MIN_SIZE + sizeof(options);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
@@ -340,16 +340,16 @@ char *LobbyMessage::Serialize(uint *length)
 			buffer += MESSAGE_MIN_SIZE;
 
 			//Max players
-			memcpy(buffer, &maxPlayers, sizeof(maxPlayers));
-			buffer += sizeof(maxPlayers);
+			memcpy(buffer, &options, sizeof(options));
+			buffer += sizeof(options);
 
 			break;
 		}
 		case MATCH_CREATE_OPTIONS_CHOSEN:
 		{
 			//Uses: 1) Message Type
-			//		2) Max players set by client
-			messageSize = MESSAGE_MIN_SIZE + sizeof(maxPlayers);
+			//		2) Match Options chosen by client
+			messageSize = MESSAGE_MIN_SIZE + sizeof(options);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
@@ -358,8 +358,8 @@ char *LobbyMessage::Serialize(uint *length)
 			buffer += MESSAGE_MIN_SIZE;
 
 			//Max players
-			memcpy(buffer, &maxPlayers, sizeof(maxPlayers));
-			buffer += sizeof(maxPlayers);
+			memcpy(buffer, &options, sizeof(options));
+			buffer += sizeof(options);
 
 			break;
 		}

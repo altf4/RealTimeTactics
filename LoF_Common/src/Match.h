@@ -36,6 +36,13 @@ struct MatchDescription
 	uint maxPlayers;
 };
 
+//A fixed size collection of options for match creation
+//	List of options necessary upon creation of the Match
+struct MatchOptions
+{
+	uint maxPlayers;
+};
+
 class Match
 {
 

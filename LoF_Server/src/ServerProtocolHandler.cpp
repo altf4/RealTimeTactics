@@ -17,6 +17,9 @@
 using namespace std;
 using namespace LoF;
 
+extern PlayerList playerList;
+extern MatchList matchList;
+
 //Negotiates the hello messages and authentication to a new client
 //	Returns a new Player object, NULL on error
 Player *LoF::GetNewClient(int ConnectFD)
@@ -181,7 +184,7 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 			//***************************
 			LobbyMessage *options_available = new LobbyMessage();
 			options_available->type = MATCH_CREATE_OPTIONS_AVAILABLE;
-			options_available->maxPlayers = MAX_PLAYERS_IN_MATCH;
+			options_available->options.maxPlayers = MAX_PLAYERS_IN_MATCH;
 			if(  Message::WriteMessage(options_available, ConnectFD) == false)
 			{
 				//Error in write, do something?
@@ -209,7 +212,7 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 				return STILL_IN_LOBBY;
 			}
 
-			if(options_chosen->maxPlayers > MAX_PLAYERS_IN_MATCH)
+			if(options_chosen->options.maxPlayers > MAX_PLAYERS_IN_MATCH)
 			{
 				cerr << "ERROR: Client asked for more players in a match than allowed.\n";
 

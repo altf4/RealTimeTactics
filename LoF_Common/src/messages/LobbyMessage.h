@@ -48,7 +48,7 @@ public:
 	struct MatchDescription *matchDescriptions;
 	//Newly created match
 	struct MatchDescription matchDescription;
-	uint maxPlayers;
+	struct MatchOptions options;
 	enum LobbyResult error;
 	//ID of a match to join
 	uint ID;

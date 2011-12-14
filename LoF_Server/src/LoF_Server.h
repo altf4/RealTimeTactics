@@ -52,9 +52,6 @@ typedef dense_hash_map<const char*, Player*, hash<const char*>, eqstr> PlayerLis
 //Key : Match unique ID
 typedef dense_hash_map<int, Match*, hash<int>, eqint> MatchList;
 
-static PlayerList playerList;
-static MatchList matchList;
-
 //The mast match ID given out
 static uint lastMatchID;
 

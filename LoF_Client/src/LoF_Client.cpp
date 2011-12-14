@@ -157,6 +157,53 @@ int main(int argc, char **argv)
 
 	cout << "Authentication to server succeeded!\n";
 
+	char input;
+
+	//Main loop
+	while(true)
+	{
+		cout << "What would you like to do?\n";
+		cout << "\t(1) List matches on the server\n";
+		cout << "\t(2) Create a new match\n";
+		cout << "\t(3) Join an existing match\n";
+		cout << "\t(4) Exit the server\n";
+
+		cin >> input;
+
+		switch (input)
+		{
+			case '1':
+			{
+				break;
+			}
+			case '2':
+			{
+				break;
+			}
+			case '3':
+			{
+				break;
+			}
+			case '4':
+			{
+				if( ExitServer(SocketFD) )
+				{
+					cout << "Successfully exited server. See you later!\n";
+					//Ugly, I know. But you can't double-break
+					goto quit;
+				}
+				cout << "Failed to exit server cleanly. Try again?\n";
+				break;
+			}
+			default:
+			{
+				cout << "Not an accepted option.\n";
+				break;
+			}
+		}
+	}
+
+	quit:
 	shutdown(SocketFD, SHUT_RDWR);
 	close(SocketFD);
 	return 0;

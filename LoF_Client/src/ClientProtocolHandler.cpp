@@ -125,5 +125,241 @@ bool LoF::AuthToServer(int connectFD, string username, unsigned char *hashedPass
 	return true;
 }
 
+//Informs the server that we want to exit
+//	connectFD: Socket File descriptor of the server
+//	Returns true if we get a successful acknowledgment back
+bool LoF::ExitServer(int connectFD)
+{
+	//********************************
+	// Send Exit Server Notification
+	//********************************
+	LobbyMessage *exit_server_notice = new LobbyMessage();
+	exit_server_notice->type = MATCH_EXIT_SERVER_NOTIFICATION;
+	if( Message::WriteMessage(exit_server_notice, connectFD) == false)
+	{
+		//Error in write
+		delete exit_server_notice;
+		return false;
+	}
+	delete exit_server_notice;
 
+	//**********************************
+	// Receive Exit Server Acknowledge
+	//**********************************
+	LobbyMessage *exit_server_ack = (LobbyMessage*)Message::ReadMessage(connectFD);
+	if( exit_server_ack == NULL)
+	{
+		return false;
+	}
+	if( exit_server_ack->type != MATCH_EXIT_SERVER_ACKNOWLEDGE)
+	{
+		delete exit_server_ack;
+		return false;
+	}
+
+	return true;
+}
+
+//Get a page of match descriptions from the server
+//	Writes the data into the matchArray array.
+//	connectFD: Socket File descriptor of the server
+//	page: What page of results to ask for? (>0)
+//	matchArray: An array of MatchDescription's, of length MATCHES_PER_PAGE
+//	Returns: The number of descriptions actually found
+uint LoF::ListMatches(int connectFD, uint page, MatchDescription *matchArray)
+{
+	if(page < 1)
+	{
+		return 0;
+	}
+
+	//********************************
+	// Send Match List Request
+	//********************************
+	LobbyMessage *list_request = new LobbyMessage();
+	list_request->type = MATCH_LIST_REQUEST;
+	list_request->requestedPage = page;
+	if( Message::WriteMessage(list_request, connectFD) == false)
+	{
+		//Error in write
+		delete list_request;
+		return 0;
+	}
+	delete list_request;
+
+	//**********************************
+	// Receive Match List Reply
+	//**********************************
+	LobbyMessage *list_reply = (LobbyMessage*)Message::ReadMessage(connectFD);
+	if( list_reply == NULL)
+	{
+		return 0;
+	}
+	if( list_reply->type != MATCH_LIST_REPLY)
+	{
+		delete list_reply;
+		return 0;
+	}
+	if( list_reply->returnedMatchesCount > MATCHES_PER_PAGE)
+	{
+		delete list_reply;
+		return 0;
+	}
+
+	//Copy each Match Description in
+	for( uint i = 0; i < list_reply->returnedMatchesCount; i++ )
+	{
+		matchArray[i] = list_reply->matchDescriptions[i];
+	}
+
+	return list_reply->returnedMatchesCount;
+
+}
+
+//Create a new Match on the server, and join that Match
+//	connectFD: Socket File descriptor of the server
+//	Returns: true if the match is created successfully
+bool LoF::CreateMatch(int connectFD, struct MatchOptions options)
+{
+	//********************************
+	// Send Match Create Request
+	//********************************
+	LobbyMessage *create_request = new LobbyMessage();
+	create_request->type = MATCH_CREATE_REQUEST;
+	if( Message::WriteMessage(create_request, connectFD) == false)
+	{
+		//Error in write
+		delete create_request;
+		return false;
+	}
+	delete create_request;
+
+	//**********************************
+	// Receive Match Options Available
+	//**********************************
+	LobbyMessage *ops_available = (LobbyMessage*)Message::ReadMessage(connectFD);
+	if( ops_available == NULL)
+	{
+		return false;
+	}
+	if( ops_available->type != MATCH_CREATE_OPTIONS_AVAILABLE)
+	{
+		delete ops_available;
+		return false;
+	}
+
+	if( ops_available->options.maxPlayers != options.maxPlayers )
+	{
+		return false;
+	}
+
+	//********************************
+	// Send Match Create Request
+	//********************************
+	LobbyMessage *ops_chosen = new LobbyMessage();
+	ops_chosen->type = MATCH_CREATE_OPTIONS_CHOSEN;
+	ops_chosen->options = options;
+	if( Message::WriteMessage(ops_chosen, connectFD) == false)
+	{
+		//Error in write
+		delete ops_chosen;
+		return false;
+	}
+	delete ops_chosen;
+
+	//**********************************
+	// Receive Match Create Reply
+	//**********************************
+	LobbyMessage *create_reply = (LobbyMessage*)Message::ReadMessage(connectFD);
+	if( create_reply == NULL)
+	{
+		return false;
+	}
+	if( create_reply->type != MATCH_CREATE_REPLY)
+	{
+		delete create_reply;
+		return false;
+	}
+	delete create_reply;
+
+	return true;
+
+}
+
+//Joins the match at the given ID
+//	connectFD: Socket File descriptor of the server
+//	matchID: The server's unique ID for the chosen match
+//	Returns: true if the match is joined successfully
+bool LoF::JoinMatch(int connectFD, uint matchID)
+{
+
+	//********************************
+	// Send Match Join Request
+	//********************************
+	LobbyMessage *join_request = new LobbyMessage();
+	join_request->type = MATCH_JOIN_REQUEST;
+	join_request->ID = matchID;
+	if( Message::WriteMessage(join_request, connectFD) == false)
+	{
+		//Error in write
+		delete join_request;
+		return false;
+	}
+	delete join_request;
+
+	//**********************************
+	// Receive Match Join Reply
+	//**********************************
+	LobbyMessage *join_reply = (LobbyMessage*)Message::ReadMessage(connectFD);
+	if( join_reply == NULL)
+	{
+		return false;
+	}
+	if( join_reply->type != MATCH_JOIN_REPLY)
+	{
+		delete join_reply;
+		return false;
+	}
+	delete join_reply;
+
+	return true;
+}
+
+//Leaves the match at the given ID
+//	connectFD: Socket File descriptor of the server
+//	matchID: The server's unique ID for the chosen match
+//	Returns: true if the match is left cleanly
+bool LoF::LeaveMatch(int connectFD, uint matchID)
+{
+	//********************************
+	// Send Match Leave Notification
+	//********************************
+	LobbyMessage *leave_note = new LobbyMessage();
+	leave_note->type = MATCH_LEAVE_NOTIFICATION;
+	leave_note->ID = matchID;
+	if( Message::WriteMessage(leave_note, connectFD) == false)
+	{
+		//Error in write
+		delete leave_note;
+		return false;
+	}
+	delete leave_note;
+
+	//**********************************
+	// Receive Match Leave Acknowledge
+	//**********************************
+	LobbyMessage *leave_ack = (LobbyMessage*)Message::ReadMessage(connectFD);
+	if( leave_ack == NULL)
+	{
+		return false;
+	}
+	if( leave_ack->type != MATCH_LEAVE_ACKNOWLEDGE)
+	{
+		delete leave_ack;
+		return false;
+	}
+	delete leave_ack;
+
+	return true;
+}
 
