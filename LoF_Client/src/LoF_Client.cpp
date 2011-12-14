@@ -228,7 +228,7 @@ bool GetPasswordTerminal(unsigned char *hash)
 	getline( cin, password );
 
 	//Put the terminal settings back
-	newt.c_lflag &= ECHO;
+	newt.c_lflag |= ECHO;
 	tcsetattr(STDIN_FILENO, TCSANOW, &newt);
 
 	//Do the hash
