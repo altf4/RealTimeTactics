@@ -20,6 +20,7 @@ enum LobbyReturn
 {
 	STARTING_MATCH,
 	STILL_IN_LOBBY,
+	EXITING_SERVER,
 };
 
 //Negotiates the hello messages and authentication to a new client

@@ -337,6 +337,21 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 				return STILL_IN_LOBBY;
 			}
 		}
+		case MATCH_EXIT_SERVER_NOTIFICATION:
+		{
+			//*******************************
+			// Send Exit Server Acknowledge
+			//*******************************
+			LobbyMessage *exit_server = new LobbyMessage();
+			exit_server->type = MATCH_EXIT_SERVER_ACKNOWLEDGE;
+			if(  Message::WriteMessage(exit_server, ConnectFD) == false)
+			{
+				//Error in write, do something?
+				cerr << "ERROR: Message send returned failure.\n";
+			}
+			delete exit_server;
+			return EXITING_SERVER;
+		}
 		default:
 		{
 			//***************************

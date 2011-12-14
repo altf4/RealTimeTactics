@@ -201,7 +201,31 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		case MATCH_LEAVE_ACKNOWLEDGE:
 		{
 			//Uses: 1) Message Type
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(ID);
+			uint expectedSize = MESSAGE_MIN_SIZE;
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			break;
+		}
+		case MATCH_EXIT_SERVER_NOTIFICATION:
+		{
+			//Uses: 1) Message Type
+			uint expectedSize = MESSAGE_MIN_SIZE;
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			break;
+		}
+		case MATCH_EXIT_SERVER_ACKNOWLEDGE:
+		{
+			//Uses: 1) Message Type
+			uint expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -407,6 +431,32 @@ char *LobbyMessage::Serialize(uint *length)
 			break;
 		}
 		case MATCH_LEAVE_ACKNOWLEDGE:
+		{
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE;
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			break;
+		}
+		//Leaving a match you're in
+		case MATCH_EXIT_SERVER_NOTIFICATION:
+		{
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE;
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			break;
+		}
+		case MATCH_EXIT_SERVER_ACKNOWLEDGE:
 		{
 			//Uses: 1) Message Type
 			messageSize = MESSAGE_MIN_SIZE;

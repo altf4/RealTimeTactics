@@ -145,6 +145,12 @@ void *ClientThread(void * parm)
 		enum LobbyReturn lobbyReturn;
 		lobbyReturn = ProcessLobbyCommand(ConnectFD, player);
 
+		if(lobbyReturn == EXITING_SERVER)
+		{
+			//TODO: Clean up any objects for the player
+			return NULL;
+		}
+
 		if(lobbyReturn == STARTING_MATCH)
 		{
 			//TODO: START A MATCH!!
