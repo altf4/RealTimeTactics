@@ -226,14 +226,14 @@ uint GetMatchDescriptions(uint page, MatchDescription *descArray)
 	}
 
 	//Skip forward to the beginning of this page
-	while(count < (page * MATCHES_PER_PAGE))
+	while(count < ( (page-1) * MATCHES_PER_PAGE))
 	{
 		it++;
 		count++;
 
 		if(it == matchList.end())
 		{
-			return 0;
+			break;
 		}
 	}
 

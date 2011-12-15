@@ -61,6 +61,11 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 			//Uses: 1) Message Type
 			//		2) Returned Matches Count
 			//		3) Match Descriptions
+
+			//Returned Matches Count
+			memcpy(&returnedMatchesCount, buffer, sizeof(returnedMatchesCount));
+			buffer += sizeof(returnedMatchesCount);
+
 			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(returnedMatchesCount)
 					+ (returnedMatchesCount * sizeof(struct MatchDescription));
 			if( length != expectedSize)
@@ -68,10 +73,6 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 				serializeError = true;
 				return;
 			}
-
-			//Returned Matches Count
-			memcpy(&returnedMatchesCount, buffer, sizeof(returnedMatchesCount));
-			buffer += sizeof(returnedMatchesCount);
 
 			//All the returned matches
 			matchDescriptions = (struct MatchDescription *)malloc(returnedMatchesCount

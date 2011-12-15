@@ -184,7 +184,7 @@ int main(int argc, char **argv)
 				}
 				struct MatchDescription results[MATCHES_PER_PAGE];
 				uint numResults = ListMatches(SocketFD, page, results);
-				if( numResults > 0 )
+				if( numResults == 0 )
 				{
 					cout << "There are no matches on the server.\n";
 					break;
