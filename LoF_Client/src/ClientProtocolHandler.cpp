@@ -248,7 +248,7 @@ bool LoF::CreateMatch(int connectFD, struct MatchOptions options)
 		return false;
 	}
 
-	if( ops_available->options.maxPlayers != options.maxPlayers )
+	if( ops_available->options.maxPlayers < options.maxPlayers )
 	{
 		return false;
 	}
