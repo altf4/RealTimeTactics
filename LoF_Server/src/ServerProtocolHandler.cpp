@@ -20,6 +20,8 @@ using namespace LoF;
 extern PlayerList playerList;
 extern MatchList matchList;
 
+extern uint lastMatchID;
+
 //Negotiates the hello messages and authentication to a new client
 //	Returns a new Player object, NULL on error
 Player *LoF::GetNewClient(int ConnectFD)
@@ -167,8 +169,12 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 			LobbyMessage *query_reply = new LobbyMessage();
 			query_reply->type = MATCH_LIST_REPLY;
 			query_reply->returnedMatchesCount = matchCount;
-			query_reply->matchDescriptions = matches;
-
+			query_reply->matchDescriptions = (MatchDescription*)
+					malloc(sizeof(struct MatchDescription) * matchCount);
+			for(uint i = 0; i < matchCount; i++ )
+			{
+				query_reply->matchDescriptions[i] = matches[i];
+			}
 			if(  Message::WriteMessage(query_reply, ConnectFD) == false)
 			{
 				//Error in write, do something?

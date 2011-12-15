@@ -26,6 +26,9 @@ using namespace LoF;
 PlayerList playerList;
 MatchList matchList;
 
+//The mast match ID given out
+uint lastMatchID;
+
 int main(int argc, char **argv)
 {
 	matchList.set_empty_key(-1);
@@ -216,6 +219,11 @@ uint GetMatchDescriptions(uint page, MatchDescription *descArray)
 {
 	MatchList::iterator it = matchList.begin();
 	uint count = 0;
+
+	if(matchList.empty())
+	{
+		return 0;
+	}
 
 	//Skip forward to the beginning of this page
 	while(count < (page * MATCHES_PER_PAGE))
