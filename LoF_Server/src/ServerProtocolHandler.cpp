@@ -205,7 +205,7 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 				cerr << "ERROR: Reading from client failed.\n";
 				return STILL_IN_LOBBY;
 			}
-			if( options_chosen->type !=  CLIENT_AUTH)
+			if( options_chosen->type !=  MATCH_CREATE_OPTIONS_CHOSEN)
 			{
 				//Error
 				cerr << "ERROR: Client gave us the wrong message type.\n";
