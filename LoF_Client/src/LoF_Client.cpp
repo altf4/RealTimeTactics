@@ -174,14 +174,74 @@ int main(int argc, char **argv)
 		{
 			case '1':
 			{
+				uint page = 0;
+				cout << "What page of matches would you like to see?\n";
+
+				if ( !(cin >> page) )
+				{
+					cout << "ERROR: Bad input\n";
+					break;
+				}
+				struct MatchDescription results[MATCHES_PER_PAGE];
+				uint numResults = ListMatches(SocketFD, page, results);
+				if( numResults > 0 )
+				{
+					cout << "There are no matches on the server.\n";
+					break;
+				}
+
+				cout << "The following matches are available on the server:\n";
+				for(uint i = 0; i < numResults; i++)
+				{
+					cout << "ID: " << results[i].ID << "\n";
+					cout << "MaxPlayers " << results[i].maxPlayers << "\n";
+					cout << "Status " << results[i].status << "\n";
+					cout << "\n";
+				}
+
 				break;
 			}
 			case '2':
 			{
+				struct MatchOptions options;
+				cout << "How many players (max) should be allowed in the match? (2-8)\n";
+
+				if ( !(cin >> options.maxPlayers) )
+				{
+					cout << "ERROR: Bad input\n";
+					break;
+				}
+				if( !CreateMatch(SocketFD , options) )
+				{
+					cout << "ERROR: Failed to create match\n";
+					break;
+				}
+
+				//TODO: Enter game lobby?
+				cout << "Yay! You're in a match now! Just pretend until there's"
+						"something fun here...\n";
 				break;
 			}
 			case '3':
 			{
+				uint matchID = 0;
+				cout << "What match would you like to join? (It's ID)\n";
+
+				if ( !(cin >> matchID) )
+				{
+					cout << "ERROR: Bad input\n";
+					break;
+				}
+				if( !JoinMatch(SocketFD , matchID) )
+				{
+					cout << "ERROR: Failed to join match\n";
+					break;
+				}
+
+				//TODO: Enter game lobby?
+				cout << "Yay! You're in a match now! Just pretend until there's"
+						"something fun here...\n";
+
 				break;
 			}
 			case '4':
