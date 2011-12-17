@@ -155,7 +155,7 @@ void *ClientThread(void * parm)
 
 		if(lobbyReturn == EXITING_SERVER)
 		{
-			//TODO: Clean up any objects for the player
+			QuitServer(player);
 			return NULL;
 		}
 
@@ -268,8 +268,12 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 	match->SetStatus(WAITING_FOR_PLAYERS);
 	match->SetMaxPlayers(options.maxPlayers);
 
+	//Put the match in the global match list
 	matchList[lastMatchID] = match;
+	//Put the match in this player's current match
 	player->currentMatch = match;
+	//Put the player in this match's player list
+	match->players.push_back(player);
 
 	return match->GetID();
 }
@@ -311,6 +315,11 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 bool LeaveMatch(Player *player, uint matchID)
 {
 	bool foundOne = false;
+	if( matchList[matchID] == NULL )
+	{
+		return false;
+	}
+	Match *m  = matchList[matchID];
 	for(uint i = 0; i < matchList[matchID]->players.size(); i++)
 	{
 		//Find our player in the match' player list
@@ -335,6 +344,19 @@ bool LeaveMatch(Player *player, uint matchID)
 	}
 
 	return true;
+}
+
+//Player has quit the server, clean up any references to it
+//	Deletes the player object
+void QuitServer(Player *player)
+{
+	//Leave any matches currently in
+	LeaveMatch(player, player->currentMatch->GetID());
+
+	//Remove from the list of current players
+	playerList.erase(player->name.c_str());
+
+	delete player;
 }
 
 //Prints usage tips

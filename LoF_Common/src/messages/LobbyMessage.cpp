@@ -13,7 +13,7 @@ using namespace LoF;
 
 LobbyMessage::LobbyMessage()
 {
-
+	matchDescriptions = NULL;
 }
 
 LobbyMessage::~LobbyMessage()
@@ -26,6 +26,7 @@ LobbyMessage::~LobbyMessage()
 
 LobbyMessage::LobbyMessage(char *buffer, uint length)
 {
+	matchDescriptions = NULL;
 	if( length < MESSAGE_MIN_SIZE )
 	{
 		return;
