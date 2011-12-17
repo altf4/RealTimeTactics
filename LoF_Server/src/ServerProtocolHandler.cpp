@@ -20,7 +20,8 @@ using namespace LoF;
 extern PlayerList playerList;
 extern MatchList matchList;
 
-extern uint lastMatchID;
+extern pthread_rwlock_t matchListLock;
+extern pthread_rwlock_t playerListLock;
 
 //Negotiates the hello messages and authentication to a new client
 //	Returns a new Player object, NULL on error
@@ -115,7 +116,9 @@ Player *LoF::GetNewClient(int ConnectFD)
 	if( authresult == AUTH_SUCCESS)
 	{
 		player = new Player(client_auth->username);
+		pthread_rwlock_wrlock(&playerListLock);
 		playerList[client_auth->username] = player;
+		pthread_rwlock_unlock(&playerListLock);
 	}
 
 	delete client_auth;
@@ -270,7 +273,9 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 					//***************************
 					LobbyMessage *match_join = new LobbyMessage();
 					match_join->type = MATCH_JOIN_REPLY;
+					pthread_rwlock_rdlock(&matchListLock);
 					match_join->matchDescription = matchList[lobby_message->ID]->description;
+					pthread_rwlock_unlock(&matchListLock);
 					if(  Message::WriteMessage(match_join, ConnectFD) == false)
 					{
 						//Error in write, do something?
@@ -360,13 +365,15 @@ enum AuthResult LoF::AuthenticateClient(char *username, unsigned char *hashedPas
 	//TODO: Authenticate!
 
 	//Check if the username exists in the active list
+	pthread_rwlock_rdlock(&playerListLock);
 	if( playerList[username] != NULL)
 	{
+		pthread_rwlock_unlock(&playerListLock);
 		return USERNAME_ALREADY_EXISTS;
 	}
 
 	//TODO: Check if the username exists in the non-active list (from file on disk)
-
+	pthread_rwlock_unlock(&playerListLock);
 	return AUTH_SUCCESS;
 }
 

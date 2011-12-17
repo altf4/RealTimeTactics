@@ -29,12 +29,20 @@ MatchList matchList;
 //The mast match ID given out
 uint lastMatchID;
 
+pthread_rwlock_t playerListLock;
+pthread_rwlock_t matchListLock;
+pthread_rwlock_t matchIDLock;
+
 int main(int argc, char **argv)
 {
 	matchList.set_empty_key(-1);
 	matchList.set_deleted_key(-2);
-	playerList.set_empty_key("=");
+	playerList.set_empty_key("\0");
 	playerList.set_deleted_key("-");
+
+	pthread_rwlock_init(&playerListLock, NULL);
+	pthread_rwlock_init(&matchListLock, NULL);
+	pthread_rwlock_init(&matchIDLock, NULL);
 
 	pthread_t threadID;
 	int c;
@@ -217,11 +225,13 @@ void ProcessRound(Match *match)
 //	Returns: The number of matches written
 uint GetMatchDescriptions(uint page, MatchDescription *descArray)
 {
+	pthread_rwlock_rdlock(&matchListLock);
 	MatchList::iterator it = matchList.begin();
 	uint count = 0;
 
 	if(matchList.empty())
 	{
+		pthread_rwlock_unlock(&matchListLock);
 		return 0;
 	}
 
@@ -242,12 +252,14 @@ uint GetMatchDescriptions(uint page, MatchDescription *descArray)
 	{
 		if(it == matchList.end())
 		{
+			pthread_rwlock_unlock(&matchListLock);
 			return i;
 		}
 		descArray[i] = it.pos->second->description;
 		it++;
 	}
 
+	pthread_rwlock_unlock(&matchListLock);
 	return MATCHES_PER_PAGE;
 }
 
@@ -261,15 +273,20 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 	{
 		return 0;
 	}
-	lastMatchID++;
+	pthread_rwlock_wrlock(&matchIDLock);
+	uint matchID = lastMatchID++;
+	pthread_rwlock_unlock(&matchIDLock);
 
 	Match *match = new Match();
-	match->SetID(lastMatchID);
+	match->SetID(matchID);
 	match->SetStatus(WAITING_FOR_PLAYERS);
 	match->SetMaxPlayers(options.maxPlayers);
 
 	//Put the match in the global match list
-	matchList[lastMatchID] = match;
+	pthread_rwlock_wrlock(&matchListLock);
+	matchList[matchID] = match;
+	pthread_rwlock_unlock(&matchListLock);
+
 	//Put the match in this player's current match
 	player->currentMatch = match;
 	//Put the player in this match's player list
@@ -283,27 +300,35 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 //	Returns an enum of the success or failure condition
 enum LobbyResult JoinMatch(Player *player, uint matchID)
 {
+	pthread_rwlock_rdlock(&matchListLock);
 	//The player's current match must be empty to join a new one
 	if( player->currentMatch != NULL )
 	{
+		pthread_rwlock_unlock(&matchListLock);
 		return LOBBY_ALREADY_IN_MATCH;
 	}
 	if( matchList[matchID] == NULL)
 	{
+		pthread_rwlock_unlock(&matchListLock);
 		return LOBBY_MATCH_DOESNT_EXIST;
 	}
 	if( matchList[matchID]->players.size() == matchList[matchID]->GetMaxPlayers())
 	{
+		pthread_rwlock_unlock(&matchListLock);
 		return LOBBY_MATCH_IS_FULL;
 	}
+	pthread_rwlock_unlock(&matchListLock);
+
 	//TODO: Check for permission to enter
 //	if(permission is not granted)
 //	{
 //		return NOT_ALLOWED_IN;
 //	}
 
+	pthread_rwlock_wrlock(&matchListLock);
 	matchList[matchID]->players.push_back(player);
 	player->currentMatch = matchList[matchID];
+	pthread_rwlock_unlock(&matchListLock);
 
 	return LOBBY_SUCCESS;
 }
@@ -315,11 +340,12 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 bool LeaveMatch(Player *player, uint matchID)
 {
 	bool foundOne = false;
+	pthread_rwlock_wrlock(&matchListLock);
 	if( matchList[matchID] == NULL )
 	{
+		pthread_rwlock_unlock(&matchListLock);
 		return false;
 	}
-	Match *m  = matchList[matchID];
 	for(uint i = 0; i < matchList[matchID]->players.size(); i++)
 	{
 		//Find our player in the match' player list
@@ -332,6 +358,7 @@ bool LeaveMatch(Player *player, uint matchID)
 	}
 	if( !foundOne )
 	{
+		pthread_rwlock_unlock(&matchListLock);
 		return false;
 	}
 	player->currentMatch = NULL;
@@ -343,6 +370,7 @@ bool LeaveMatch(Player *player, uint matchID)
 		matchList.erase(matchID);
 	}
 
+	pthread_rwlock_unlock(&matchListLock);
 	return true;
 }
 
@@ -350,11 +378,22 @@ bool LeaveMatch(Player *player, uint matchID)
 //	Deletes the player object
 void QuitServer(Player *player)
 {
-	//Leave any matches currently in
-	LeaveMatch(player, player->currentMatch->GetID());
+	if( player == NULL )
+	{
+		return;
+	}
+	if( player->currentMatch != NULL)
+	{
+		//Leave any matches currently in
+		LeaveMatch(player, player->currentMatch->GetID());
+	}
 
+	const char *u = player->name.c_str();
 	//Remove from the list of current players
-	playerList.erase(player->name.c_str());
+	pthread_rwlock_wrlock(&playerListLock);
+	playerList[u] = NULL;
+	playerList.erase(u);
+	pthread_rwlock_unlock(&playerListLock);
 
 	delete player;
 }
