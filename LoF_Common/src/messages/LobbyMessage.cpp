@@ -389,13 +389,18 @@ char *LobbyMessage::Serialize(uint *length)
 		case MATCH_JOIN_REPLY:
 		{
 			//Uses: 1) Message Type
-			messageSize = MESSAGE_MIN_SIZE;
+			//		2) Match Description
+			messageSize = MESSAGE_MIN_SIZE + sizeof(matchDescription);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
+
+			//Match Description
+			memcpy(buffer, &matchDescription, sizeof(matchDescription));
+			buffer += sizeof(matchDescription);
 
 			break;
 		}

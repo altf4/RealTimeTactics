@@ -64,7 +64,7 @@ uint GetMatchDescriptions(uint page, MatchDescription *descArray);
 
 //Creates a new match and places it into matchList
 //	Returns: The unique ID of the new match
-uint RegisterNewMatch(Player *player);
+uint RegisterNewMatch(Player *player, struct MatchOptions options);
 
 //Make player join specified match
 //	Sets the variables within player and match properly

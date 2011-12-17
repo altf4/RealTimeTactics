@@ -254,7 +254,7 @@ uint GetMatchDescriptions(uint page, MatchDescription *descArray)
 //Creates a new match and places it into matchList
 //	Returns: The unique ID of the new match
 //		returns 0 on error
-uint RegisterNewMatch(Player *player)
+uint RegisterNewMatch(Player *player, struct MatchOptions options)
 {
 	//The player's current match must be empty to join a new one
 	if( player->currentMatch != NULL )
@@ -266,6 +266,7 @@ uint RegisterNewMatch(Player *player)
 	Match *match = new Match();
 	match->SetID(lastMatchID);
 	match->SetStatus(WAITING_FOR_PLAYERS);
+	match->SetMaxPlayers(options.maxPlayers);
 
 	matchList[lastMatchID] = match;
 	player->currentMatch = match;

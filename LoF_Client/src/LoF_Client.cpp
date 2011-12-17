@@ -239,7 +239,7 @@ int main(int argc, char **argv)
 				}
 
 				//TODO: Enter game lobby?
-				cout << "Yay! You're in a match now! Just pretend until there's"
+				cout << "Yay! You're in a match now! Just pretend until there's "
 						"something fun here...\n";
 
 				break;

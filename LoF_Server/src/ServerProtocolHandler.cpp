@@ -226,7 +226,7 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 				return STILL_IN_LOBBY;
 			}
 
-			uint matchID = RegisterNewMatch(player);
+			uint matchID = RegisterNewMatch(player, options_chosen->options);
 
 			if( matchID == 0 )
 			{
@@ -269,7 +269,7 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 					//***************************
 					LobbyMessage *match_join = new LobbyMessage();
 					match_join->type = MATCH_JOIN_REPLY;
-					match_join->matchDescription = matchList[match_join->ID]->description;
+					match_join->matchDescription = matchList[lobby_message->ID]->description;
 					if(  Message::WriteMessage(match_join, ConnectFD) == false)
 					{
 						//Error in write, do something?
@@ -343,6 +343,7 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 		default:
 		{
 			SendError(ConnectFD, PROTOCOL_ERROR);
+			return STILL_IN_LOBBY;
 		}
 	}
 	delete lobby_message;
