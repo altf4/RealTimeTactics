@@ -222,19 +222,7 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 			if(options_chosen->options.maxPlayers > MAX_PLAYERS_IN_MATCH)
 			{
 				cerr << "ERROR: Client asked for more players in a match than allowed.\n";
-
-				//***************************
-				// Send Lobby Error
-				//***************************
-				LobbyMessage *error_reply = new LobbyMessage();
-				error_reply->type = MATCH_ERROR;
-				error_reply->error = INVALID_MAX_PLAYERS;
-				if(  Message::WriteMessage(error_reply, ConnectFD) == false)
-				{
-					//Error in write, do something?
-					cerr << "ERROR: Message send returned failure.\n";
-				}
-				delete error_reply;
+				SendError(ConnectFD, INVALID_MAX_PLAYERS);
 				return STILL_IN_LOBBY;
 			}
 
@@ -242,18 +230,8 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 
 			if( matchID == 0 )
 			{
-				//***************************
-				// Send Lobby Error
-				//***************************
-				LobbyMessage *error_reply = new LobbyMessage();
-				error_reply->type = MATCH_ERROR;
-				error_reply->error = TOO_BUSY;
-				if(  Message::WriteMessage(error_reply, ConnectFD) == false)
-				{
-					//Error in write, do something?
-					cerr << "ERROR: Message send returned failure.\n";
-				}
-				delete error_reply;
+				//TODO: Find a better error message hereb
+				SendError(ConnectFD, TOO_BUSY);
 				return STILL_IN_LOBBY;
 			}
 
@@ -279,38 +257,49 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 		}
 		case MATCH_JOIN_REQUEST:
 		{
+			//Try to join the match, process result
 			enum LobbyResult joinResult = JoinMatch(player, lobby_message->ID);
-			if( joinResult !=  LOBBY_SUCCESS)
+			switch(joinResult)
 			{
-				//***************************
-				// Send Lobby Error
-				//***************************
-				LobbyMessage *error_reply = new LobbyMessage();
-				error_reply->type = MATCH_ERROR;
-				error_reply->error = joinResult;
-				if(  Message::WriteMessage(error_reply, ConnectFD) == false)
+				enum ErrorType errorType;
+				case LOBBY_SUCCESS:
 				{
-					//Error in write, do something?
-					cerr << "ERROR: Message send returned failure.\n";
+					//***************************
+					// Send Match Join Reply
+					//***************************
+					LobbyMessage *match_join = new LobbyMessage();
+					match_join->type = MATCH_JOIN_REPLY;
+					match_join->matchDescription = matchList[match_join->ID]->description;
+					if(  Message::WriteMessage(match_join, ConnectFD) == false)
+					{
+						//Error in write, do something?
+						cerr << "ERROR: Message send returned failure.\n";
+					}
+					delete match_join;
+					return STARTING_MATCH;
 				}
-				delete error_reply;
+				case LOBBY_MATCH_IS_FULL:
+				{
+					errorType = MATCH_IS_FULL;
+				}
+				case LOBBY_MATCH_DOESNT_EXIST:
+				{
+					errorType = MATCH_DOESNT_EXIST;
+				}
+				case LOBBY_NOT_ALLOWED_IN:
+				{
+					errorType = NOT_ALLOWED_IN;
+				}
+				case LOBBY_ALREADY_IN_MATCH:
+				{
+					errorType = ALREADY_IN_MATCH;
+				}
+				default:
+				{
+					errorType = PROTOCOL_ERROR;
+				}
+				SendError(ConnectFD, errorType);
 				return STILL_IN_LOBBY;
-			}
-			else
-			{
-				//***************************
-				// Send Match Join Reply
-				//***************************
-				LobbyMessage *match_join = new LobbyMessage();
-				match_join->type = MATCH_JOIN_REPLY;
-				match_join->matchDescription = matchList[match_join->ID]->description;
-				if(  Message::WriteMessage(match_join, ConnectFD) == false)
-				{
-					//Error in write, do something?
-					cerr << "ERROR: Message send returned failure.\n";
-				}
-				delete match_join;
-				return STARTING_MATCH;
 			}
 		}
 		case MATCH_LEAVE_NOTIFICATION:
@@ -332,18 +321,7 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 			}
 			else
 			{
-				//***************************
-				// Send Lobby Error
-				//***************************
-				LobbyMessage *error_reply = new LobbyMessage();
-				error_reply->type = MATCH_ERROR;
-				error_reply->error = NOT_IN_THAT_MATCH;
-				if(  Message::WriteMessage(error_reply, ConnectFD) == false)
-				{
-					//Error in write, do something?
-					cerr << "ERROR: Message send returned failure.\n";
-				}
-				delete error_reply;
+				SendError(ConnectFD, NOT_IN_THAT_MATCH);
 				return STILL_IN_LOBBY;
 			}
 		}
@@ -364,19 +342,7 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 		}
 		default:
 		{
-			//***************************
-			// Send Match Error
-			//***************************
-			cerr << "ERROR: Client gave us an unexpected message type.\n";
-			LobbyMessage *error_msg = new LobbyMessage();
-			error_msg->type = MATCH_ERROR;
-			error_msg->error = SPOKE_OUT_OF_TURN;
-			if(  Message::WriteMessage(error_msg, ConnectFD) == false)
-			{
-				//Error in write, do something?
-				cerr << "ERROR: Message send returned failure.\n";
-			}
-			delete error_msg;
+			SendError(ConnectFD, PROTOCOL_ERROR);
 		}
 	}
 	delete lobby_message;
@@ -400,4 +366,17 @@ enum AuthResult LoF::AuthenticateClient(char *username, unsigned char *hashedPas
 	//TODO: Check if the username exists in the non-active list (from file on disk)
 
 	return AUTH_SUCCESS;
+}
+
+//Send a message of type Error to the client
+void  LoF::SendError(int connectFD, enum ErrorType errorType)
+{
+	ErrorMessage *error_msg = new ErrorMessage();
+	error_msg->type = MESSAGE_ERROR;
+	error_msg->errorType = errorType;
+	if(  Message::WriteMessage(error_msg, connectFD) == false)
+	{
+		cerr << "ERROR: Error message send returned failure.\n";
+	}
+	delete error_msg;
 }

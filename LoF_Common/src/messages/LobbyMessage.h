@@ -19,24 +19,11 @@ enum LobbyResult: char
 	//Success
 	LOBBY_SUCCESS = 0,
 
-	//Failure, Invalid options
-	INVALID_MAX_PLAYERS,
-
 	//Failure joining
-	MATCH_IS_FULL,
-	MATCH_DOESNT_EXIST,
-	NOT_ALLOWED_IN,
-	ALREADY_IN_MATCH,
-
-	//Failure leaving
-	NOT_IN_THAT_MATCH,
-
-	//Failure, General server stuff
-	TOO_BUSY,
-	SHUTTING_DOWN_SOON,
-
-	//Protocol error
-	SPOKE_OUT_OF_TURN,
+	LOBBY_MATCH_IS_FULL,
+	LOBBY_MATCH_DOESNT_EXIST,
+	LOBBY_NOT_ALLOWED_IN,
+	LOBBY_ALREADY_IN_MATCH,
 };
 
 class LobbyMessage: public Message
@@ -49,7 +36,6 @@ public:
 	//Newly created match
 	struct MatchDescription matchDescription;
 	struct MatchOptions options;
-	enum LobbyResult error;
 	//ID of a match to join
 	uint ID;
 

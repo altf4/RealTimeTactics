@@ -281,15 +281,15 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 	//The player's current match must be empty to join a new one
 	if( player->currentMatch != NULL )
 	{
-		return ALREADY_IN_MATCH;
+		return LOBBY_ALREADY_IN_MATCH;
 	}
 	if( matchList[matchID] == NULL)
 	{
-		return MATCH_DOESNT_EXIST;
+		return LOBBY_MATCH_DOESNT_EXIST;
 	}
 	if( matchList[matchID]->players.size() == matchList[matchID]->GetMaxPlayers())
 	{
-		return MATCH_IS_FULL;
+		return LOBBY_MATCH_IS_FULL;
 	}
 	//TODO: Check for permission to enter
 //	if(permission is not granted)

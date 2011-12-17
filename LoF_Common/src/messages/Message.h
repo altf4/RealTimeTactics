@@ -51,9 +51,11 @@ enum MessageType: char
 	//Exit the server
 	MATCH_EXIT_SERVER_NOTIFICATION,
 	MATCH_EXIT_SERVER_ACKNOWLEDGE,
-	//Error message
-	MATCH_ERROR,
 
+	//*******************
+	//   Error Message
+	//*******************
+	MESSAGE_ERROR,
 
 	//TODO: Fill this out as they become needed / invented
 

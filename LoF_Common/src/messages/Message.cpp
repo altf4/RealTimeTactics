@@ -11,6 +11,7 @@
 #include <sys/socket.h>
 #include "AuthMessage.h"
 #include "LobbyMessage.h"
+#include "ErrorMessage.h"
 
 using namespace std;
 using namespace LoF;
@@ -77,9 +78,18 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case MATCH_LEAVE_ACKNOWLEDGE:
 		case MATCH_EXIT_SERVER_NOTIFICATION:
 		case MATCH_EXIT_SERVER_ACKNOWLEDGE:
-		case MATCH_ERROR:
 		{
 			LobbyMessage *message = new LobbyMessage(buffer, length);
+			if( message->serializeError == true )
+			{
+				delete message;
+				return NULL;
+			}
+			return message;
+		}
+		case MESSAGE_ERROR:
+		{
+			ErrorMessage *message = new ErrorMessage(buffer, length);
 			if( message->serializeError == true )
 			{
 				delete message;

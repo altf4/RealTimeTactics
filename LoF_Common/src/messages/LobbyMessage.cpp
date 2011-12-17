@@ -238,24 +238,6 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 
 			break;
 		}
-		case MATCH_ERROR:
-		{
-			//Uses: 1) Message Type
-			//		2) Error type
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(error);
-			if( length != expectedSize)
-			{
-				serializeError = true;
-				return;
-			}
-
-			//Error type
-			memcpy(&error, buffer, sizeof(error));
-			buffer += sizeof(error);
-
-			break;
-
-		}
 		default:
 		{
 			//Error
@@ -470,24 +452,6 @@ char *LobbyMessage::Serialize(uint *length)
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
-
-			break;
-		}
-		case MATCH_ERROR:
-		{
-			//Uses: 1) Message Type
-			//		2) Error type
-			messageSize = MESSAGE_MIN_SIZE + sizeof(error);
-			buffer = (char*)malloc(messageSize);
-			originalBuffer = buffer;
-
-			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
-			buffer += MESSAGE_MIN_SIZE;
-
-			//Error type
-			memcpy(buffer, &error, sizeof(error));
-			buffer += sizeof(error);
 
 			break;
 		}

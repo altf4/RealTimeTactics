@@ -10,6 +10,7 @@
 
 #include <vector>
 #include "messages/AuthMessage.h"
+#include "messages/ErrorMessage.h"
 
 using namespace std;
 
@@ -39,6 +40,9 @@ enum AuthResult AuthenticateClient(char *username, unsigned char *hashedPassword
 //	Executes the Lobby protocol
 //	Returns a enum LobbyReturn to describe the end state
 enum LobbyReturn ProcessLobbyCommand(int connectFD, Player *player);
+
+//Send a message of type Error to the client
+void SendError(int connectFD, enum ErrorType errorType);
 
 }
 #endif /* PROTOCOLHANDLER_H_ */
