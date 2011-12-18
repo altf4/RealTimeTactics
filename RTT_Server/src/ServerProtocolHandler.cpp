@@ -214,9 +214,10 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 			}
 
 			LobbyMessage *options_chosen = (LobbyMessage*)options_chosen_init;
-			if(options_chosen->options.maxPlayers > MAX_PLAYERS_IN_MATCH)
+			if((options_chosen->options.maxPlayers > MAX_PLAYERS_IN_MATCH) ||
+					(options_chosen->options.maxPlayers < 2))
 			{
-				cerr << "ERROR: Client asked for more players in a match than allowed.\n";
+				cerr << "ERROR: Client asked an invalid number of max playersb.\n";
 				SendError(ConnectFD, INVALID_MAX_PLAYERS);
 				return STILL_IN_LOBBY;
 			}

@@ -234,7 +234,8 @@ bool RTT::CreateMatch(int connectFD, struct MatchOptions options)
 	}
 
 	LobbyMessage *ops_available = (LobbyMessage*)ops_available_init;
-	if( ops_available->options.maxPlayers < options.maxPlayers )
+	if( (ops_available->options.maxPlayers < options.maxPlayers) ||
+			(options.maxPlayers < 2))
 	{
 		return false;
 	}
