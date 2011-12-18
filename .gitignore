@@ -1,5 +1,5 @@
 .metadata
-LoF_Client_Core/.settings/
-LoF_Client_Core/Debug/LoF_Client_Core
-LoF_Client_Terminal/Debug/LoF_Client_Terminal
-LoF_Server/Debug/LoF_Server
+RTT_Client_Core/.settings/
+RTT_Client_Core/Debug/RTT_Client_Core
+RTT_Client_Terminal/Debug/RTT_Client_Terminal
+RTT_Server/Debug/RTT_Server
