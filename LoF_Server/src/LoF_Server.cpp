@@ -150,7 +150,7 @@ void *ClientThread(void * parm)
 		return NULL;
 	}
 
-	cout << "Client Authenticated!\n";
+	cout << "Client: " << player->name << " Authenticated!\n";
 
 	//*************************************
 	// In the main lobby
