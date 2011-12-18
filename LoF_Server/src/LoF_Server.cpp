@@ -274,7 +274,7 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 		return 0;
 	}
 	pthread_rwlock_wrlock(&matchIDLock);
-	uint matchID = lastMatchID++;
+	uint matchID = ++lastMatchID;
 	pthread_rwlock_unlock(&matchIDLock);
 
 	Match *match = new Match();
