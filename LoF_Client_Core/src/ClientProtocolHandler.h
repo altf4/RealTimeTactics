@@ -8,6 +8,13 @@
 #ifndef PROTOCOLHANDLER_H_
 #define PROTOCOLHANDLER_H_
 
+#define CLIENT_VERSION_MAJOR	0
+#define CLIENT_VERSION_MINOR	0
+#define CLIENT_VERSION_REV		1
+
+//TODO: Read this from config file
+#define MATCHES_PER_PAGE 10
+
 #include "Match.h"
 #include "messages/LobbyMessage.h"
 #include "messages/ErrorMessage.h"

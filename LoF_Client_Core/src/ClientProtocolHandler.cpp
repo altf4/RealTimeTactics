@@ -5,7 +5,6 @@
 // Description : Code for handling socket IO on the server side
 //============================================================================
 
-#include "LoF_Client.h"
 #include "ClientProtocolHandler.h"
 #include "messages/AuthMessage.h"
 #include <unistd.h>
@@ -15,6 +14,8 @@
 #include <netinet/in.h>
 #include <iostream>
 #include <string.h>
+
+#define SHA256_DIGEST_LENGTH 32
 
 using namespace std;
 using namespace LoF;

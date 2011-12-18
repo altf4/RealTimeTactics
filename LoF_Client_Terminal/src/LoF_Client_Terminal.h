@@ -8,15 +8,7 @@
 #ifndef LOF_CLIENT_H_
 #define LOF_CLIENT_H_
 
-#define CLIENT_VERSION_MAJOR	0
-#define CLIENT_VERSION_MINOR	0
-#define CLIENT_VERSION_REV		1
-
-//TODO: Read this from config file
-#define MATCHES_PER_PAGE 10
-
 #include <string>
-#include <openssl/sha.h>
 
 using namespace std;
 

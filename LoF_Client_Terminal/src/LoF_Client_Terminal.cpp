@@ -7,7 +7,7 @@
 
 #include <iostream>
 #include "Unit.h"
-#include "LoF_Client.h"
+#include "LoF_Client_Terminal.h"
 #include "ClientProtocolHandler.h"
 #include "messages/Message.h"
 #include <sys/types.h>
@@ -19,6 +19,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <termios.h>
+#include <openssl/sha.h>
 
 using namespace std;
 using namespace LoF;

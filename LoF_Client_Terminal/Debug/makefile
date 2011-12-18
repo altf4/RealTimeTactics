@@ -38,19 +38,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: LoF_Client
+all: LoF_Client_Terminal
 
 # Tool invocations
-LoF_Client: $(OBJS) $(USER_OBJS)
+LoF_Client_Terminal: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L../../LoF_Common/Debug -o "LoF_Client" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L../../LoF_Common/Debug -L../../LoF_Client_Core/Debug -o "LoF_Client_Terminal" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) LoF_Client
+	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) LoF_Client_Terminal
 	-@echo ' '
 
 .PHONY: all clean dependents

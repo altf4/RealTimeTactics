@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lLoF_Common -lcrypto
+LIBS := -lLoF_Common -lcrypto -lLoF_Client_Core
 

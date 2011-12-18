@@ -18,7 +18,7 @@
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 				<configuration artifactName="${ProjName}" buildArtefactType="org.eclipse.cdt.build.core.buildArtefactType.exe" buildProperties="org.eclipse.cdt.build.core.buildType=org.eclipse.cdt.build.core.buildType.debug,org.eclipse.cdt.build.core.buildArtefactType=org.eclipse.cdt.build.core.buildArtefactType.exe" cleanCommand="rm -rf" description="" id="cdt.managedbuild.config.gnu.exe.debug.134644458" name="Debug" parent="cdt.managedbuild.config.gnu.exe.debug">
 					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.134644458." name="/" resourcePath="">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.810594368" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
+						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.810594368" name="Linux GCC" resourceTypeBasedDiscovery="true" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug.669531883" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
 							<builder buildPath="${workspace_loc:/LoF_Client/Debug}" id="cdt.managedbuild.target.gnu.builder.exe.debug.1452613183" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1009801976" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
@@ -27,6 +27,7 @@
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.1542981365" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1504475528" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="../../LoF_Common/src"/>
+									<listOptionValue builtIn="false" value="../../LoF_Client_Core/src"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.52892692" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -39,10 +40,12 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.1746925811" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.paths.2102917812" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="../../LoF_Common/Debug"/>
+									<listOptionValue builtIn="false" value="../../LoF_Client_Core/Debug"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.53441142" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="LoF_Common"/>
 									<listOptionValue builtIn="false" value="crypto"/>
+									<listOptionValue builtIn="false" value="LoF_Client_Core"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1781177187" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -113,9 +116,13 @@
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">
 		<project id="LoF_Client.cdt.managedbuild.target.gnu.exe.184534959" name="Executable" projectType="cdt.managedbuild.target.gnu.exe"/>
 	</storageModule>
+	<storageModule moduleId="refreshScope" versionNumber="1">
+		<resource resourceType="PROJECT" workspacePath="/LoF_Client"/>
+	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.754012548;cdt.managedbuild.config.gnu.exe.release.754012548.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.9648119;cdt.managedbuild.tool.gnu.c.compiler.input.382149735">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.134644458;cdt.managedbuild.config.gnu.exe.debug.134644458.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.472992161;cdt.managedbuild.tool.gnu.c.compiler.input.544317131">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.754012548;cdt.managedbuild.config.gnu.exe.release.754012548.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1883782397;cdt.managedbuild.tool.gnu.cpp.compiler.input.708613013">
@@ -124,12 +131,8 @@
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.134644458;cdt.managedbuild.config.gnu.exe.debug.134644458.;cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.661018513;cdt.managedbuild.tool.gnu.cpp.compiler.input.52892692">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileCPP"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.debug.134644458;cdt.managedbuild.config.gnu.exe.debug.134644458.;cdt.managedbuild.tool.gnu.c.compiler.exe.debug.472992161;cdt.managedbuild.tool.gnu.c.compiler.input.544317131">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.exe.release.754012548;cdt.managedbuild.config.gnu.exe.release.754012548.;cdt.managedbuild.tool.gnu.c.compiler.exe.release.9648119;cdt.managedbuild.tool.gnu.c.compiler.input.382149735">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 	</storageModule>
-	<storageModule moduleId="refreshScope" versionNumber="1">
-		<resource resourceType="PROJECT" workspacePath="/LoF_Client"/>
-	</storageModule>
-	<storageModule moduleId="org.eclipse.cdt.internal.ui.text.commentOwnerProjectMappings"/>
 </cproject>
