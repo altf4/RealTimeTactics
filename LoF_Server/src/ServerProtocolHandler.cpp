@@ -30,22 +30,22 @@ Player *LoF::GetNewClient(int ConnectFD)
 	//***************************
 	// Read client Hello
 	//***************************
-
-	AuthMessage *client_hello =(AuthMessage*) Message::ReadMessage(ConnectFD);
-
-	if( client_hello == NULL )
+	Message *client_hello_init = Message::ReadMessage(ConnectFD);
+	if( client_hello_init == NULL )
 	{
+		SendError(ConnectFD, PROTOCOL_ERROR);
 		return NULL;
 	}
-
-	if( client_hello->type != CLIENT_HELLO )
+	if( client_hello_init->type != CLIENT_HELLO )
 	{
 		cerr << "ERROR: Expected CLIENT_HELLO message, received: "
-				<< client_hello->type << "\n";
-		delete client_hello;
+				<< client_hello_init->type << "\n";
+		SendError(ConnectFD, PROTOCOL_ERROR);
+		delete client_hello_init;
 		return NULL;
 	}
 
+	AuthMessage *client_hello = (AuthMessage*)client_hello_init;
 	//Check version compatibility
 	if ((client_hello->softwareVersion.major != SERVER_VERSION_MAJOR) ||
 		(client_hello->softwareVersion.minor != SERVER_VERSION_MINOR) ||
@@ -54,21 +54,7 @@ Player *LoF::GetNewClient(int ConnectFD)
 		//If versions are not the same, send an error message to the client
 		delete client_hello;
 		cout << "Client Connected with bad software version.\n";
-
-		//*********************************
-		// Send Server Auth Reply (Error)
-		//*********************************
-		AuthMessage *server_auth_reply = new AuthMessage();
-		server_auth_reply->type = SERVER_AUTH_REPLY;
-		server_auth_reply->authSuccess = INCOMPATIBLE_SOFTWARE_VERSIONS;
-
-		if(  Message::WriteMessage(server_auth_reply, ConnectFD) == false)
-		{
-			//Error in write
-			cerr << "Wasn't able to send AUTH_REPLY to client to tell it about "
-					"the bad incompatible software versions.\n";
-		}
-		delete server_auth_reply;
+		SendError(ConnectFD, INCOMPATIBLE_SOFTWARE_VERSION);
 		return NULL;
 	}
 	delete client_hello;
@@ -77,7 +63,6 @@ Player *LoF::GetNewClient(int ConnectFD)
 	//***************************
 	// Send Server Hello
 	//***************************
-
 	AuthMessage *server_hello = new AuthMessage();
 	server_hello->type = SERVER_HELLO;
 	server_hello->softwareVersion.major = SERVER_VERSION_MAJOR;
@@ -95,20 +80,22 @@ Player *LoF::GetNewClient(int ConnectFD)
 	//***************************
 	// Receive Client Auth
 	//***************************
-
-	AuthMessage *client_auth = (AuthMessage*)Message::ReadMessage(ConnectFD);
-	if( client_auth == NULL )
+	Message *client_auth_init = Message::ReadMessage(ConnectFD);
+	if( client_auth_init == NULL )
 	{
 		//ERROR
+		SendError(ConnectFD, PROTOCOL_ERROR);
 		return NULL;
 	}
-	if( client_auth->type !=  CLIENT_AUTH)
+	if( client_auth_init->type != CLIENT_AUTH)
 	{
 		//Error
-		delete client_auth;
+		SendError(ConnectFD, PROTOCOL_ERROR);
+		delete client_auth_init;
 		return NULL;
 	}
 
+	AuthMessage *client_auth = (AuthMessage*)client_auth_init;
 	enum AuthResult authresult =
 			AuthenticateClient(client_auth->username, client_auth->hashedPassword);
 
@@ -151,8 +138,8 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 	//********************************
 	// Receive Initial Lobby Message
 	//********************************
-	LobbyMessage *lobby_message = (LobbyMessage*)Message::ReadMessage(ConnectFD);
-	if( lobby_message == NULL )
+	Message *lobby_message_init = Message::ReadMessage(ConnectFD);
+	if( lobby_message_init == NULL )
 	{
 		//ERROR
 		cerr << "ERROR: Lobby message came back NULL\n";
@@ -160,6 +147,7 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 		return EXITING_SERVER;
 	}
 
+	LobbyMessage *lobby_message = (LobbyMessage*)lobby_message_init;
 	switch (lobby_message->type)
 	{
 		case MATCH_LIST_REQUEST:
@@ -208,21 +196,24 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 			//********************************
 			// Receive Options Chosen
 			//********************************
-			LobbyMessage *options_chosen = (LobbyMessage*)Message::ReadMessage(ConnectFD);
-			if( options_chosen == NULL )
+			Message *options_chosen_init = Message::ReadMessage(ConnectFD);
+			if( options_chosen_init == NULL )
 			{
 				//Error
 				cerr << "ERROR: Reading from client failed.\n";
+				SendError(ConnectFD, PROTOCOL_ERROR);
 				return STILL_IN_LOBBY;
 			}
-			if( options_chosen->type !=  MATCH_CREATE_OPTIONS_CHOSEN)
+			if( options_chosen_init->type !=  MATCH_CREATE_OPTIONS_CHOSEN)
 			{
 				//Error
 				cerr << "ERROR: Client gave us the wrong message type.\n";
-				delete options_chosen;
+				SendError(ConnectFD, PROTOCOL_ERROR);
+				delete options_chosen_init;
 				return STILL_IN_LOBBY;
 			}
 
+			LobbyMessage *options_chosen = (LobbyMessage*)options_chosen_init;
 			if(options_chosen->options.maxPlayers > MAX_PLAYERS_IN_MATCH)
 			{
 				cerr << "ERROR: Client asked for more players in a match than allowed.\n";
@@ -238,7 +229,6 @@ enum LobbyReturn LoF::ProcessLobbyCommand(int ConnectFD, Player *player)
 				SendError(ConnectFD, TOO_BUSY);
 				return STILL_IN_LOBBY;
 			}
-
 			delete options_chosen;
 
 			//***************************

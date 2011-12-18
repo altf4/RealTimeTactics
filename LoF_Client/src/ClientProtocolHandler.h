@@ -10,6 +10,7 @@
 
 #include "Match.h"
 #include "messages/LobbyMessage.h"
+#include "messages/ErrorMessage.h"
 
 namespace LoF
 {
@@ -52,6 +53,9 @@ bool JoinMatch(int connectFD, uint matchID);
 //	matchID: The server's unique ID for the chosen match
 //	Returns: true if the match is left successfully
 bool LeaveMatch(int connectFD, uint matchID);
+
+//Send a message of type Error to the client
+void SendError(int connectFD, enum ErrorType errorType);
 
 }
 

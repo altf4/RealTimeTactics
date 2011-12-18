@@ -20,7 +20,10 @@ enum ErrorType: char
 {
 	PROTOCOL_ERROR = 0,
 	SERVER_FAULT,
+
+	//Authentication Errors
 	AUTHENTICATION_ERROR,
+	INCOMPATIBLE_SOFTWARE_VERSION,
 
 	//Failure, Invalid options
 	INVALID_MAX_PLAYERS,

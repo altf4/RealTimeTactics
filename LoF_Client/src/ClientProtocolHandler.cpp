@@ -24,7 +24,6 @@ bool LoF::AuthToServer(int connectFD, string username, unsigned char *hashedPass
 	//***************************
 	// Send client Hello
 	//***************************
-
 	AuthMessage *client_hello = new AuthMessage();
 	client_hello->type = CLIENT_HELLO;
 	client_hello->softwareVersion.major = CLIENT_VERSION_MAJOR;
@@ -42,39 +41,19 @@ bool LoF::AuthToServer(int connectFD, string username, unsigned char *hashedPass
 	//***************************
 	// Receive Server Hello
 	//***************************
-
-	AuthMessage *server_hello = (AuthMessage*)Message::ReadMessage(connectFD);
-	if( server_hello == NULL)
+	Message *server_hello_init = Message::ReadMessage(connectFD);
+	if( server_hello_init == NULL)
 	{
+		SendError(connectFD, PROTOCOL_ERROR);
 		return false;
 	}
-	if( server_hello->type == SERVER_AUTH_REPLY)
+	if( server_hello_init->type != SERVER_HELLO)
 	{
-		if(server_hello->authSuccess != AUTH_SUCCESS)
-		{
-			if( server_hello->authSuccess == INCOMPATIBLE_SOFTWARE_VERSIONS )
-			{
-				//Rejected by server
-				cout << "Rejected by server, incompatible software versions.\n";
-			}
-			else
-			{
-				cout << "Rejected by server.\n";
-			}
-		}
-		else
-		{
-			//ERROR: Shouldn't get here. So assume some kind of error happened
-			cerr << "ERROR: Protocol error. Server replied with wrong message...\n";
-		}
-		delete server_hello;
+		SendError(connectFD, PROTOCOL_ERROR);
+		delete server_hello_init;
 		return false;
 	}
-	if( server_hello->type != SERVER_HELLO)
-	{
-		delete server_hello;
-		return false;
-	}
+	AuthMessage *server_hello = (AuthMessage*)server_hello_init;
 
 	//Check version compatibility
 	if ((server_hello->softwareVersion.major != CLIENT_VERSION_MAJOR) ||
@@ -84,16 +63,15 @@ bool LoF::AuthToServer(int connectFD, string username, unsigned char *hashedPass
 		//Incompatible software versions.
 		//The server should have caught this, though.
 
-		delete server_hello;
+		SendError(connectFD, AUTHENTICATION_ERROR);
+		delete server_hello_init;
 		return false;
 	}
-	delete server_hello;
-
+	delete server_hello_init;
 
 	//***************************
 	// Send Client Auth
 	//***************************
-
 	AuthMessage *client_auth = new AuthMessage();
 	client_auth->type = CLIENT_AUTH;
 	strncpy( client_auth->username, username.data(), USERNAME_MAX_LENGTH);
@@ -110,15 +88,20 @@ bool LoF::AuthToServer(int connectFD, string username, unsigned char *hashedPass
 	//***************************
 	// Receive Server Auth Reply
 	//***************************
-
-	AuthMessage *server_auth_reply = (AuthMessage*)Message::ReadMessage(connectFD);
-	if( server_auth_reply == NULL)
+	Message *server_auth_reply_init = Message::ReadMessage(connectFD);
+	if( server_auth_reply_init == NULL)
 	{
 		return false;
 	}
-	if( server_auth_reply->type != SERVER_AUTH_REPLY)
+	if( server_auth_reply_init->type != SERVER_AUTH_REPLY)
 	{
-		delete server_auth_reply;
+		delete server_auth_reply_init;
+		return false;
+	}
+	AuthMessage *server_auth_reply = (AuthMessage*)server_auth_reply_init;
+
+	if( server_auth_reply->authSuccess != AUTH_SUCCESS)
+	{
 		return false;
 	}
 
@@ -146,7 +129,7 @@ bool LoF::ExitServer(int connectFD)
 	//**********************************
 	// Receive Exit Server Acknowledge
 	//**********************************
-	LobbyMessage *exit_server_ack = (LobbyMessage*)Message::ReadMessage(connectFD);
+	Message *exit_server_ack = Message::ReadMessage(connectFD);
 	if( exit_server_ack == NULL)
 	{
 		return false;
@@ -190,16 +173,17 @@ uint LoF::ListMatches(int connectFD, uint page, MatchDescription *matchArray)
 	//**********************************
 	// Receive Match List Reply
 	//**********************************
-	LobbyMessage *list_reply = (LobbyMessage*)Message::ReadMessage(connectFD);
-	if( list_reply == NULL)
+	Message *list_reply_init = Message::ReadMessage(connectFD);
+	if( list_reply_init == NULL)
 	{
 		return 0;
 	}
-	if( list_reply->type != MATCH_LIST_REPLY)
+	if( list_reply_init->type != MATCH_LIST_REPLY)
 	{
-		delete list_reply;
+		delete list_reply_init;
 		return 0;
 	}
+	LobbyMessage *list_reply = (LobbyMessage*)list_reply_init;
 	if( list_reply->returnedMatchesCount > MATCHES_PER_PAGE)
 	{
 		delete list_reply;
@@ -237,17 +221,18 @@ bool LoF::CreateMatch(int connectFD, struct MatchOptions options)
 	//**********************************
 	// Receive Match Options Available
 	//**********************************
-	LobbyMessage *ops_available = (LobbyMessage*)Message::ReadMessage(connectFD);
-	if( ops_available == NULL)
+	Message *ops_available_init = Message::ReadMessage(connectFD);
+	if( ops_available_init == NULL)
 	{
 		return false;
 	}
-	if( ops_available->type != MATCH_CREATE_OPTIONS_AVAILABLE)
+	if( ops_available_init->type != MATCH_CREATE_OPTIONS_AVAILABLE)
 	{
-		delete ops_available;
+		delete ops_available_init;
 		return false;
 	}
 
+	LobbyMessage *ops_available = (LobbyMessage*)ops_available_init;
 	if( ops_available->options.maxPlayers < options.maxPlayers )
 	{
 		return false;
@@ -270,7 +255,7 @@ bool LoF::CreateMatch(int connectFD, struct MatchOptions options)
 	//**********************************
 	// Receive Match Create Reply
 	//**********************************
-	LobbyMessage *create_reply = (LobbyMessage*)Message::ReadMessage(connectFD);
+	Message *create_reply = Message::ReadMessage(connectFD);
 	if( create_reply == NULL)
 	{
 		return false;
@@ -363,3 +348,15 @@ bool LoF::LeaveMatch(int connectFD, uint matchID)
 	return true;
 }
 
+//Send a message of type Error to the client
+void  LoF::SendError(int connectFD, enum ErrorType errorType)
+{
+	ErrorMessage *error_msg = new ErrorMessage();
+	error_msg->type = MESSAGE_ERROR;
+	error_msg->errorType = errorType;
+	if(  Message::WriteMessage(error_msg, connectFD) == false)
+	{
+		cerr << "ERROR: Error message send returned failure.\n";
+	}
+	delete error_msg;
+}
