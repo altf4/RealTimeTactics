@@ -30,13 +30,11 @@ int main(int argc, char **argv)
 	int c;
 	uint serverPortNumber;
 	string username;
+	string server_IP;
 
 	bool portEntered = false;
 	bool serverAddrEntered = false;
 	bool usernameEntered = false;
-
-	struct sockaddr_in stSockAddr;
-	int SocketFD = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 
 	while ((c = getopt(argc, argv, ":p:s:u:")) != -1)
 	{
@@ -45,7 +43,7 @@ int main(int argc, char **argv)
 			case 'p':
 			{
 				char *errString;
-				serverPortNumber = strtol(optarg, &errString, 10);
+				serverPortNumber = strtoul(optarg, &errString, 10);
 				if( *errString != '\0' || optarg == '\0')
 				{
 					//Error occurred
@@ -58,17 +56,17 @@ int main(int argc, char **argv)
 			}
 			case 's':
 			{
+				struct sockaddr_in stSockAddr;
+				server_IP = string(optarg);
 				int Res = inet_pton(AF_INET, optarg, &stSockAddr.sin_addr);
 				if (0 > Res)
 				{
 					perror("error: first parameter is not a valid address family");
-					close(SocketFD);
 					exit(EXIT_FAILURE);
 				}
 				else if (0 == Res)
 				{
 					perror("char string (second parameter does not contain valid ipaddress)");
-					close(SocketFD);
 					exit(EXIT_FAILURE);
 				}
 				serverAddrEntered = true;
@@ -118,36 +116,16 @@ int main(int argc, char **argv)
 		exit(EXIT_FAILURE);
 	}
 
-
-	if (-1 == SocketFD)
-	{
-		perror("cannot create socket");
-		exit(EXIT_FAILURE);
-	}
-
-	memset(&stSockAddr, 0, sizeof(stSockAddr));
-
-	stSockAddr.sin_family = AF_INET;
-	stSockAddr.sin_port = htons(serverPortNumber);
-
-
-	if (-1 == connect(SocketFD, (struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
-	{
-		perror("connect failed");
-		close(SocketFD);
-		exit(EXIT_FAILURE);
-	}
-
 	//Get password
 	unsigned char hash[SHA256_DIGEST_LENGTH];
 	if( GetPasswordTerminal(hash) == false)
 	{
 		cerr << "ERROR: Something went wrong with entering your password.\n";
-		close(SocketFD);
 		exit(EXIT_FAILURE);
 	}
 
-	if( AuthToServer(SocketFD, username, hash) == false)
+	int SocketFD = AuthToServer(server_IP, serverPortNumber, username, hash);
+	if( SocketFD < 0)
 	{
 		//Error
 		cerr << "ERROR: Authentication to server failed.\n";
