@@ -9,7 +9,7 @@
     <property name="title" translatable="yes">Real Time Tactics - GTK</property>
     <property name="resizable">False</property>
     <property name="default_width">600</property>
-    <property name="default_height">400</property>
+    <property name="default_height">40</property>
     <property name="has_resize_grip">False</property>
     <child>
       <object class="GtkBox" id="box2">
@@ -290,6 +290,7 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
+                        <signal name="clicked" handler="connect_click" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
