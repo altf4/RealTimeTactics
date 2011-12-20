@@ -12,6 +12,7 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <iostream>
 #include <string.h>
 
@@ -20,8 +21,48 @@
 using namespace std;
 using namespace RTT;
 
-bool RTT::AuthToServer(int connectFD, string username, unsigned char *hashedPassword)
+int RTT::AuthToServer(string IPAddress, uint port,
+		string username, unsigned char *hashedPassword)
 {
+
+	struct sockaddr_in stSockAddr;
+
+	//Make a socket
+	int connectFD = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (-1 == connectFD)
+	{
+		perror("cannot create socket");
+		return -1;
+	}
+
+	//Zero out the socket struct
+	memset(&stSockAddr, 0, sizeof(stSockAddr));
+
+	//Set sock type and port
+	stSockAddr.sin_family = AF_INET;
+	stSockAddr.sin_port = htons(port);
+
+	//Set the IP address of the socket struct
+	int Res = inet_pton(AF_INET, IPAddress.c_str(), &stSockAddr.sin_addr);
+	if (0 > Res)
+	{
+		perror("error: first parameter is not a valid address family");
+		return -1;
+	}
+	else if (0 == Res)
+	{
+		perror("char string (second parameter does not contain valid ipaddress)");
+		return -1;
+	}
+
+	if (-1 == connect(connectFD, (struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
+	{
+		perror("connect failed");
+		close(connectFD);
+		return -1;
+	}
+
+
 	//***************************
 	// Send client Hello
 	//***************************
@@ -35,7 +76,7 @@ bool RTT::AuthToServer(int connectFD, string username, unsigned char *hashedPass
 	{
 		//Error in write
 		delete client_hello;
-		return false;
+		return -1;
 	}
 	delete client_hello;
 
@@ -46,13 +87,13 @@ bool RTT::AuthToServer(int connectFD, string username, unsigned char *hashedPass
 	if( server_hello_init == NULL)
 	{
 		SendError(connectFD, PROTOCOL_ERROR);
-		return false;
+		return -1;
 	}
 	if( server_hello_init->type != SERVER_HELLO)
 	{
 		SendError(connectFD, PROTOCOL_ERROR);
 		delete server_hello_init;
-		return false;
+		return -1;
 	}
 	AuthMessage *server_hello = (AuthMessage*)server_hello_init;
 
@@ -66,7 +107,7 @@ bool RTT::AuthToServer(int connectFD, string username, unsigned char *hashedPass
 
 		SendError(connectFD, AUTHENTICATION_ERROR);
 		delete server_hello_init;
-		return false;
+		return -1;
 	}
 	delete server_hello_init;
 
@@ -82,7 +123,7 @@ bool RTT::AuthToServer(int connectFD, string username, unsigned char *hashedPass
 	{
 		//Error in write
 		delete client_auth;
-		return false;
+		return -1;
 	}
 	delete client_auth;
 
@@ -92,21 +133,21 @@ bool RTT::AuthToServer(int connectFD, string username, unsigned char *hashedPass
 	Message *server_auth_reply_init = Message::ReadMessage(connectFD);
 	if( server_auth_reply_init == NULL)
 	{
-		return false;
+		return -1;
 	}
 	if( server_auth_reply_init->type != SERVER_AUTH_REPLY)
 	{
 		delete server_auth_reply_init;
-		return false;
+		return -1;
 	}
 	AuthMessage *server_auth_reply = (AuthMessage*)server_auth_reply_init;
 
 	if( server_auth_reply->authSuccess != AUTH_SUCCESS)
 	{
-		return false;
+		return -1;
 	}
 
-	return true;
+	return connectFD;
 }
 
 //Informs the server that we want to exit

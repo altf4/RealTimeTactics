@@ -23,8 +23,9 @@ namespace RTT
 {
 
 //Authenticates to the game server and sets us up into the lobby
-//	Returns true if authentication is successful, false otherwise
-bool AuthToServer(int connectFD, string username, unsigned char *hashedPassword);
+//	Returns socket descriptor for the TCP connection. -1
+int AuthToServer(string IPAddress, uint port,
+		string username, unsigned char *hashedPassword);
 
 
 //********************************************
