@@ -301,7 +301,12 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 		}
 		case MATCH_LEAVE_NOTIFICATION:
 		{
-			if( LeaveMatch(player, lobby_message->ID) )
+			if( player->currentMatch == NULL )
+			{
+				SendError(ConnectFD, NOT_IN_THAT_MATCH);
+				return STILL_IN_LOBBY;
+			}
+			if( LeaveMatch(player, player->currentMatch->GetID()) )
 			{
 				//*******************************
 				// Send Match Leave Acknowledge

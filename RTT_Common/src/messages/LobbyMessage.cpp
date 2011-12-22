@@ -190,16 +190,12 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		{
 			//Uses: 1) Message Type
 			//		2) ID of the match to leave
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(ID);
+			uint expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
 				return;
 			}
-
-			//Match description
-			memcpy(&ID, buffer, sizeof(ID));
-			buffer += sizeof(ID);
 
 			break;
 		}
@@ -410,15 +406,12 @@ char *LobbyMessage::Serialize(uint *length)
 		{
 			//Uses: 1) Message Type
 			//		2) ID of the match to leave
-			messageSize = MESSAGE_MIN_SIZE + sizeof(ID);
+			messageSize = MESSAGE_MIN_SIZE;
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
-
-			memcpy(buffer, &ID, sizeof(ID));
-			buffer += sizeof(ID);
 
 			break;
 		}
