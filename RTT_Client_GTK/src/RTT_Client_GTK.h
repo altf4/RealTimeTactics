@@ -9,6 +9,8 @@
 #define RTT_CLIENT_GTK_H_
 
 
+void connect_click();
+void LaunchLobbyWindow();
 
 
 #endif /* RTT_CLIENT_GTK_H_ */
