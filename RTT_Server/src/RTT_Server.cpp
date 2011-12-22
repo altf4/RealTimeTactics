@@ -163,6 +163,7 @@ void *ClientThread(void * parm)
 
 		if(lobbyReturn == EXITING_SERVER)
 		{
+			cout << "Player: " << player->name << " has left.\n";
 			QuitServer(player);
 			return NULL;
 		}
