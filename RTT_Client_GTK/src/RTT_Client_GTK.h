@@ -10,7 +10,16 @@
 
 
 void connect_click();
-void LaunchLobbyWindow();
+void quit_server_click();
+void create_match_click();
+void create_match_submit_click();
 
+void leave_match_click();
+
+void LaunchMainLobbyPane();
+void LaunchServerConnectPane();
+void LaunchMatchLobbyPane();
+
+void InitGlobalWidgets();
 
 #endif /* RTT_CLIENT_GTK_H_ */

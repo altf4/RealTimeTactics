@@ -69,6 +69,7 @@
                       <object class="GtkButton" id="button_main_server">
                         <property name="label" translatable="yes">Connect to Main Server
       (unimplemented)</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
@@ -84,6 +85,7 @@
                     <child>
                       <object class="GtkButton" id="button_custom">
                         <property name="label" translatable="yes">Connect to Custom Server...</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -100,6 +102,7 @@
                       <object class="GtkButton" id="button_run_server">
                         <property name="label" translatable="yes">   Host a Match
 (unimplemented)</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
@@ -308,6 +311,7 @@
                         <child>
                           <object class="GtkButton" id="button_connect">
                             <property name="label" translatable="yes">Connect to Server</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
@@ -394,10 +398,12 @@
                     <child>
                       <object class="GtkButton" id="create_match_button">
                         <property name="label" translatable="yes">Create a Match</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
+                        <signal name="clicked" handler="create_match_click" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -409,10 +415,12 @@
                       <object class="GtkButton" id="list_matches_button">
                         <property name="label" translatable="yes">List Matches
    (Refresh)</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="use_action_appearance">False</property>
+                        <signal name="clicked" handler="list_matches_click" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -423,6 +431,7 @@
                     <child>
                       <object class="GtkButton" id="join_match_button">
                         <property name="label" translatable="yes">Join Match</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -437,6 +446,7 @@
                     <child>
                       <object class="GtkButton" id="quit_server_button">
                         <property name="label" translatable="yes">Quit Server</property>
+                        <property name="use_action_appearance">False</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
@@ -527,7 +537,6 @@
                     </child>
                     <child>
                       <object class="GtkBox" id="create_match_box">
-                        <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
@@ -565,7 +574,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkEntry" id="entry2">
+                                  <object class="GtkEntry" id="match_name_entry">
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="max_length">20</property>
@@ -601,7 +610,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkComboBoxText" id="comboboxtext1">
+                                  <object class="GtkComboBoxText" id="create_match_map_combo">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <items>
@@ -640,7 +649,7 @@
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkComboBoxText" id="comboboxtext2">
+                                  <object class="GtkComboBoxText" id="max_players_combo">
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <items>
@@ -674,8 +683,9 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkCheckButton" id="checkbutton1">
+                          <object class="GtkCheckButton" id="set_private_check">
                             <property name="label" translatable="yes">Set as Private</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
@@ -690,12 +700,14 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkButton" id="button2">
+                          <object class="GtkButton" id="create_match_submit">
                             <property name="label" translatable="yes">Submit</property>
+                            <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">True</property>
                             <property name="use_action_appearance">False</property>
+                            <signal name="clicked" handler="create_match_submit_click" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -1022,10 +1034,12 @@ Condition: </property>
                 <child>
                   <object class="GtkButton" id="leave_match_button">
                     <property name="label" translatable="yes">Leave Match</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
+                    <signal name="clicked" handler="leave_match_click" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -1049,6 +1063,7 @@ Condition: </property>
                 <child>
                   <object class="GtkButton" id="launch_match_button">
                     <property name="label" translatable="yes">Launch Match</property>
+                    <property name="use_action_appearance">False</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
