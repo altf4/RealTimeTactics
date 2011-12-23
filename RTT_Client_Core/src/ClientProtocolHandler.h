@@ -60,7 +60,7 @@ bool JoinMatch(int connectFD, uint matchID);
 //	connectFD: Socket File descriptor of the server
 //	matchID: The server's unique ID for the chosen match
 //	Returns: true if the match is left successfully
-bool LeaveMatch(int connectFD, uint matchID);
+bool LeaveMatch(int connectFD);
 
 //Send a message of type Error to the client
 void SendError(int connectFD, enum ErrorType errorType);

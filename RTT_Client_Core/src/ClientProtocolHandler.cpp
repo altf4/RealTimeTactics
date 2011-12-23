@@ -357,14 +357,13 @@ bool RTT::JoinMatch(int connectFD, uint matchID)
 //	connectFD: Socket File descriptor of the server
 //	matchID: The server's unique ID for the chosen match
 //	Returns: true if the match is left cleanly
-bool RTT::LeaveMatch(int connectFD, uint matchID)
+bool RTT::LeaveMatch(int connectFD)
 {
 	//********************************
 	// Send Match Leave Notification
 	//********************************
 	LobbyMessage *leave_note = new LobbyMessage();
 	leave_note->type = MATCH_LEAVE_NOTIFICATION;
-	leave_note->ID = matchID;
 	if( Message::WriteMessage(leave_note, connectFD) == false)
 	{
 		//Error in write
