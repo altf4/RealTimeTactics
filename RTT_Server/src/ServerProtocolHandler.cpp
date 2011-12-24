@@ -23,6 +23,9 @@ extern MatchList matchList;
 extern pthread_rwlock_t matchListLock;
 extern pthread_rwlock_t playerListLock;
 
+extern pthread_rwlock_t playerIDLock;
+extern uint lastPlayerID;
+
 //Negotiates the hello messages and authentication to a new client
 //	Returns a new Player object, NULL on error
 Player *RTT::GetNewClient(int ConnectFD)
@@ -102,9 +105,13 @@ Player *RTT::GetNewClient(int ConnectFD)
 	Player *player = NULL;
 	if( authresult == AUTH_SUCCESS)
 	{
-		player = new Player(client_auth->username);
+		pthread_rwlock_wrlock(&playerIDLock);
+		uint ID = lastPlayerID++;
+		pthread_rwlock_unlock(&playerIDLock);
+
+		player = new Player(client_auth->username, ID);
 		pthread_rwlock_wrlock(&playerListLock);
-		playerList[client_auth->username] = player;
+		playerList[ID] = player;
 		pthread_rwlock_unlock(&playerListLock);
 	}
 
@@ -386,10 +393,14 @@ enum AuthResult RTT::AuthenticateClient(char *username, unsigned char *hashedPas
 
 	//Check if the username exists in the active list
 	pthread_rwlock_rdlock(&playerListLock);
-	if( playerList[username] != NULL)
+	PlayerList::iterator it = playerList.begin();
+	for(; it != playerList.end(); ++it)
 	{
-		pthread_rwlock_unlock(&playerListLock);
-		return USERNAME_ALREADY_EXISTS;
+		if( it->second->name.compare(username) == 0)
+		{
+			pthread_rwlock_unlock(&playerListLock);
+			return USERNAME_ALREADY_EXISTS;
+		}
 	}
 
 	//TODO: Check if the username exists in the non-active list (from file on disk)

@@ -28,21 +28,24 @@ MatchList matchList;
 
 //The mast match ID given out
 uint lastMatchID;
+uint lastPlayerID;
 
 pthread_rwlock_t playerListLock;
 pthread_rwlock_t matchListLock;
 pthread_rwlock_t matchIDLock;
+pthread_rwlock_t playerIDLock;
 
 int main(int argc, char **argv)
 {
 	matchList.set_empty_key(-1);
 	matchList.set_deleted_key(-2);
-	playerList.set_empty_key("\0");
-	playerList.set_deleted_key("-");
+	playerList.set_empty_key(-1);
+	playerList.set_deleted_key(-2);
 
 	pthread_rwlock_init(&playerListLock, NULL);
 	pthread_rwlock_init(&matchListLock, NULL);
 	pthread_rwlock_init(&matchIDLock, NULL);
+	pthread_rwlock_init(&playerIDLock, NULL);
 
 	pthread_t threadID;
 	int c;
@@ -389,11 +392,11 @@ void QuitServer(Player *player)
 		LeaveMatch(player, player->currentMatch->GetID());
 	}
 
-	const char *u = player->name.c_str();
+	int ID = player->ID;
 	//Remove from the list of current players
 	pthread_rwlock_wrlock(&playerListLock);
-	playerList[u] = NULL;
-	playerList.erase(u);
+	playerList[ID] = NULL;
+	playerList.erase(ID);
 	pthread_rwlock_unlock(&playerListLock);
 
 	delete player;

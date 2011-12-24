@@ -48,7 +48,7 @@ struct eqint
 
 //Define types, so it's easier to refer to later
 //Key : Player name as a c string
-typedef dense_hash_map<const char*, Player*, hash<const char*>, eqstr> PlayerList;
+typedef dense_hash_map<int, Player*, hash<int>, eqint> PlayerList;
 //Key : Match unique ID
 typedef dense_hash_map<int, Match*, hash<int>, eqint> MatchList;
 

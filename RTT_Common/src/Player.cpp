@@ -14,15 +14,17 @@ Player::Player()
 	currentMatch = NULL;
 }
 
-Player::Player(char *username)
+Player::Player(char *username, uint newID)
 {
 	name = string(username);
 	currentMatch = NULL;
+	ID = newID;
 }
 
-Player::Player(string username)
+Player::Player(string username, uint newID)
 {
 	name = username;
 	currentMatch = NULL;
+	ID = newID;
 }
 

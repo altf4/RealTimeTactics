@@ -28,14 +28,16 @@ public:
 
 	vector <Unit*> units;
 
+	uint ID;
+
 	//The match that this player is currently in
 	Match *currentMatch;
 
 	Player();
 
 	//For when c strings are easier, or std::strings are
-	Player(char *username);
-	Player(string username);
+	Player(char *username, uint newID);
+	Player(string username, uint newID);
 
 };
 
