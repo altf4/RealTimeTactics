@@ -390,6 +390,48 @@ bool RTT::LeaveMatch(int connectFD)
 	return true;
 }
 
+//Asks the server for stats about its current state
+//	connectFD: Socket File descriptor of the server
+//	Returns: A ServerStats struct containing
+struct ServerStats RTT::GetServerStats(int connectFD)
+{
+	struct ServerStats stats;
+	stats.numPlayers = 0;
+	stats.numMatches = 0;
+
+	//********************************
+	// Send Server Stats Request
+	//********************************
+	LobbyMessage *server_stats_req = new LobbyMessage();
+	server_stats_req->type = SERVER_STATS_REQUEST;
+	if( Message::WriteMessage(server_stats_req, connectFD) == false)
+	{
+		//Error in write
+		delete server_stats_req;
+		return stats;
+	}
+	delete server_stats_req;
+
+	//**********************************
+	// Receive Server Stats Reply
+	//**********************************
+	LobbyMessage *server_stats_reply = (LobbyMessage*)Message::ReadMessage(connectFD);
+	if( server_stats_reply == NULL)
+	{
+		return stats;
+	}
+	if( server_stats_reply->type != SERVER_STATS_REPLY)
+	{
+		delete server_stats_reply;
+		return stats;
+	}
+
+	stats = server_stats_reply->serverStats;
+
+	delete server_stats_reply;
+	return stats;
+}
+
 //Send a message of type Error to the client
 void  RTT::SendError(int connectFD, enum ErrorType errorType)
 {

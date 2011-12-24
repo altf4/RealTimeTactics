@@ -62,6 +62,11 @@ bool JoinMatch(int connectFD, uint matchID);
 //	Returns: true if the match is left successfully
 bool LeaveMatch(int connectFD);
 
+//Asks the server for stats about its current state
+//	connectFD: Socket File descriptor of the server
+//	Returns: A ServerStats struct containing
+struct ServerStats GetServerStats(int connectFD);
+
 //Send a message of type Error to the client
 void SendError(int connectFD, enum ErrorType errorType);
 

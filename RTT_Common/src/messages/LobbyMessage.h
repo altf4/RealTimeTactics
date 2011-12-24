@@ -26,6 +26,14 @@ enum LobbyResult: char
 	LOBBY_ALREADY_IN_MATCH,
 };
 
+struct ServerStats
+{
+	//Total number of matches on server right now
+	uint numMatches;
+	//Total number of players on server right now
+	uint numPlayers;
+};
+
 class LobbyMessage: public Message
 {
 public:
@@ -38,6 +46,7 @@ public:
 	struct MatchOptions options;
 	//ID of a match to join
 	uint ID;
+	struct ServerStats serverStats;
 
 
 	LobbyMessage();

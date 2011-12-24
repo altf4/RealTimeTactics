@@ -327,6 +327,30 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				return STILL_IN_LOBBY;
 			}
 		}
+		case SERVER_STATS_REQUEST:
+		{
+			//*******************************
+			// Send Server Stats Reply
+			//*******************************
+			LobbyMessage *stats_reply = new LobbyMessage();
+			stats_reply->type = SERVER_STATS_REPLY;
+
+			pthread_rwlock_rdlock(&matchListLock);
+			stats_reply->serverStats.numMatches = matchList.size();
+			pthread_rwlock_unlock(&matchListLock);
+
+			pthread_rwlock_rdlock(&playerListLock);
+			stats_reply->serverStats.numPlayers = playerList.size();
+			pthread_rwlock_unlock(&playerListLock);
+
+			if( Message::WriteMessage(stats_reply, ConnectFD) == false )
+			{
+				//Error in write, do something?
+				cerr << "ERROR: Message send returned failure.\n";
+			}
+			delete stats_reply;
+			return STILL_IN_LOBBY;
+		}
 		case MATCH_EXIT_SERVER_NOTIFICATION:
 		{
 			//*******************************

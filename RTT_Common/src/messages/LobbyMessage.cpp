@@ -211,6 +211,34 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 
 			break;
 		}
+		case SERVER_STATS_REQUEST:
+		{
+			//Uses: 1) Message Type
+			uint expectedSize = MESSAGE_MIN_SIZE;
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			break;
+		}
+		case SERVER_STATS_REPLY:
+		{
+			//Uses: 1) Message Type
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(struct ServerStats);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			//Match description
+			memcpy(&serverStats, buffer, sizeof(serverStats));
+			buffer += sizeof(serverStats);
+
+			break;
+		}
 		case MATCH_EXIT_SERVER_NOTIFICATION:
 		{
 			//Uses: 1) Message Type
@@ -425,6 +453,36 @@ char *LobbyMessage::Serialize(uint *length)
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
+
+			break;
+		}
+		case SERVER_STATS_REQUEST:
+		{
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE;
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			break;
+		}
+		case SERVER_STATS_REPLY:
+		{
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE + sizeof(serverStats);
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			//Put the stats struct in
+			memcpy(buffer, &serverStats, sizeof(serverStats));
+			buffer += sizeof(serverStats);
 
 			break;
 		}

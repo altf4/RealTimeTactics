@@ -48,6 +48,9 @@ enum MessageType: char
 	//Deleting a match you're in
 	MATCH_LEAVE_NOTIFICATION,
 	MATCH_LEAVE_ACKNOWLEDGE,
+	//Ask server for stats
+	SERVER_STATS_REQUEST,
+	SERVER_STATS_REPLY,
 	//Exit the server
 	MATCH_EXIT_SERVER_NOTIFICATION,
 	MATCH_EXIT_SERVER_ACKNOWLEDGE,

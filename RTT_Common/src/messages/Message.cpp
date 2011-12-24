@@ -76,6 +76,8 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case MATCH_JOIN_REPLY:
 		case MATCH_LEAVE_NOTIFICATION:
 		case MATCH_LEAVE_ACKNOWLEDGE:
+		case SERVER_STATS_REQUEST:
+		case SERVER_STATS_REPLY:
 		case MATCH_EXIT_SERVER_NOTIFICATION:
 		case MATCH_EXIT_SERVER_ACKNOWLEDGE:
 		{
