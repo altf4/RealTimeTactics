@@ -1,24 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <!-- interface-requires gtk+ 3.0 -->
-  <object class="GtkListStore" id="match_store">
-    <columns>
-      <!-- column-name matchID -->
-      <column type="guint"/>
-      <!-- column-name matchName -->
-      <column type="gchararray"/>
-    </columns>
-  </object>
-  <object class="GtkListStore" id="players_store">
-    <columns>
-      <!-- column-name position -->
-      <column type="guint"/>
-      <!-- column-name player_name -->
-      <column type="guchar"/>
-      <!-- column-name team -->
-      <column type="guint"/>
-    </columns>
-  </object>
   <object class="GtkWindow" id="window_welcome">
     <property name="width_request">600</property>
     <property name="height_request">400</property>
@@ -478,16 +460,10 @@
                         <property name="can_focus">True</property>
                         <property name="hexpand">True</property>
                         <child>
-                          <object class="GtkTreeView" id="matches_view">
+                          <object class="GtkLabel" id="label16">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="model">match_store</property>
-                            <property name="fixed_height_mode">True</property>
-                            <property name="show_expanders">False</property>
-                            <property name="enable_grid_lines">both</property>
-                            <child internal-child="selection">
-                              <object class="GtkTreeSelection" id="treeview-selection1"/>
-                            </child>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">label</property>
                           </object>
                         </child>
                         <child type="tab">
@@ -537,7 +513,6 @@
                     </child>
                     <child>
                       <object class="GtkBox" id="create_match_box">
-                        <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
@@ -808,7 +783,6 @@
                 <property name="height_request">100</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="model">players_store</property>
                 <property name="enable_grid_lines">both</property>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection" id="treeview-selection2"/>
@@ -1048,7 +1022,7 @@ Condition: </property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkStatusbar" id="statusbar1">
+                  <object class="GtkStatusbar" id="match_lobby_status">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="orientation">vertical</property>

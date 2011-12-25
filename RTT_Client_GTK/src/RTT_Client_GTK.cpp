@@ -7,9 +7,11 @@
 
 #include "ClientProtocolHandler.h"
 #include "RTT_Client_GTK.h"
+#include "MatchListColumns.h"
 #include <iostream>
 #include <gtkmm.h>
 #include <arpa/inet.h>
+#include <vector>
 
 using namespace std;
 using namespace Gtk;
@@ -49,8 +51,11 @@ Notebook *match_lists = NULL;
 
 //Third Pane Widgets
 Button *leave_match_button = NULL;
+Statusbar *match_lobby_status = NULL;
 
 int SocketFD = 0;
+
+vector <MatchListColumns*> MatchColumns;
 
 void custom_server_click()
 {
@@ -145,10 +150,72 @@ void create_match_click()
 	match_lists->set_visible(false);
 }
 
+//Refresh the match list
 void list_matches_click()
 {
 	create_match_box->set_visible(false);
 	match_lists->set_visible(true);
+
+	int page = match_lists->get_current_page();
+
+	//If no page is selected, then put us to page 1
+	if( page == -1)
+	{
+		page = 1;
+	}
+
+	struct ServerStats stats = GetServerStats(SocketFD);
+
+	//Determine how many pages we need to display these
+	//	x / y (rounding up) = (x + y - 1) / y
+	uint pagesNeeded = (stats.numMatches + MATCHES_PER_PAGE - 1) / MATCHES_PER_PAGE;
+	if( pagesNeeded == 0 )
+	{
+		//We always want at least one page
+		pagesNeeded = 1;
+	}
+
+	//If trying to select more than we have, select the last page
+	if( page > (int)pagesNeeded-1 )
+	{
+		page = pagesNeeded-1;
+	}
+
+	//Remove all the existing pages
+	for(int i = 0; i < match_lists->get_n_pages(); i++)
+	{
+		match_lists->remove_page();
+	}
+	//Put the new ones in
+	TreeView *view;
+	for(uint i = 0; i < pagesNeeded; i++)
+	{
+		view = manage(new TreeView());
+		match_lists->append_page(*view, "worked");
+	}
+
+	//Populate the view we're currently selecting
+	struct MatchDescription descriptions[MATCHES_PER_PAGE];
+	uint numMatchesThisPage = ListMatches(SocketFD, page+1, descriptions);
+
+	match_lists->set_current_page(page);
+
+	MatchListColumns *columns = new MatchListColumns();
+
+	Glib::RefPtr<ListStore> refListStore = ListStore::create(*columns);
+	view->set_model(refListStore);
+
+	for(uint i = 0; i < numMatchesThisPage; i++)
+	{
+		TreeModel::Row row = *(refListStore->append());
+		row[columns->matchID] = (int)descriptions[page].ID;
+		row[columns->maxPlayers] = (int)descriptions[page].maxPlayers;
+	}
+
+	view->append_column("ID", columns->matchID);
+	view->append_column("Max Players", columns->maxPlayers);
+
+	match_lists->show_all();
 }
 
 //Hides other windows (WelcomeWindow) and shows LobbyWindow
@@ -173,15 +240,23 @@ void LaunchMatchLobbyPane()
 	match_lobby_box->set_visible(true);
 }
 
+void leave_match_click()
+{
+	if( LeaveMatch(SocketFD) )
+	{
+		LaunchMainLobbyPane();
+	}
+	else
+	{
+		match_lobby_status->push("Error on server, couldn't leave match");
+	}
+
+}
+
 void quit_server_click()
 {
 	ExitServer(SocketFD);
 	LaunchServerConnectPane();
-}
-
-void leave_match_click()
-{
-
 }
 
 void InitGlobalWidgets()
@@ -213,6 +288,7 @@ void InitGlobalWidgets()
 	welcome_builder->get_widget("match_lists", match_lists);
 
 	welcome_builder->get_widget("leave_match_button", leave_match_button);
+	welcome_builder->get_widget("match_lobby_status", match_lobby_status);
 
 }
 
