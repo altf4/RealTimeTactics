@@ -20,10 +20,13 @@ class MatchListColumns : public Gtk::TreeModelColumnRecord
 public:
 
 	MatchListColumns()
-    { add(matchID); add(maxPlayers); }
+	{ add(matchID); add(maxPlayers); add(currentPlayers); add(name); add(timeCreated);}
 
-  TreeModelColumn<int> matchID;
-  TreeModelColumn<int> maxPlayers;
+	TreeModelColumn<int> matchID;
+	TreeModelColumn<int> maxPlayers;
+	TreeModelColumn<int> currentPlayers;
+	TreeModelColumn<string> name;
+	TreeModelColumn<string> timeCreated;
 };
 
 }

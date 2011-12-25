@@ -12,6 +12,9 @@
 #include "Gameboard.h"
 #include "Player.h"
 #include "Action.h"
+#include <sys/time.h>
+
+#define MAX_MATCHNAME_LEN 20
 
 using namespace std;
 
@@ -34,6 +37,9 @@ struct MatchDescription
 	enum Status status;
 	uint ID;
 	uint maxPlayers;
+	uint currentPlayerCount;
+	char name[MAX_MATCHNAME_LEN];
+	time_t timeCreated;
 };
 
 //A fixed size collection of options for match creation
@@ -64,10 +70,15 @@ public:
 	void SetID(uint newID);
 	void SetStatus(enum Status newStatus);
 	void SetMaxPlayers(uint maxPlayers);
+	void SetCurrentPlayerCount(uint newPlayerCount);
+	void SetName(string newName);
 
 	enum Status GetStatus();
 	uint GetID();
 	uint GetMaxPlayers();
+	uint GetCurrentPlayerCount();
+	string GetName();
+	time_t GetTimeCreated();
 
 private:
 
@@ -77,6 +88,10 @@ private:
 	uint ID;
 	//Maximum number of players allowed for this match
 	uint maxPlayers;
+	uint currentPlayerCount;
+	//Truncated at MAX_MATCHNAME_LEN chars
+	string name;
+	time_t timeCreated;
 
 };
 

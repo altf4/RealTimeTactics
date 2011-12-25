@@ -13,7 +13,10 @@ using namespace RTT;
 
 Match::Match()
 {
-
+	struct timeval tv;
+	gettimeofday(&tv,NULL);
+	timeCreated = tv.tv_sec;
+	description.timeCreated = tv.tv_sec;
 }
 
 //SET methods
@@ -35,6 +38,19 @@ void Match::SetMaxPlayers(uint newMaxPlayers)
 	description.maxPlayers = newMaxPlayers;
 }
 
+void Match::SetCurrentPlayerCount(uint newPlayerCount)
+{
+	currentPlayerCount = newPlayerCount;
+	description.currentPlayerCount = newPlayerCount;
+}
+
+void Match::SetName(string newName)
+{
+	name = newName;
+	name.resize(MAX_MATCHNAME_LEN);
+	strncpy(description.name, newName.c_str(), MAX_MATCHNAME_LEN);
+}
+
 //GET methods
 enum Status Match::GetStatus()
 {
@@ -49,4 +65,14 @@ uint Match::GetID()
 uint Match::GetMaxPlayers()
 {
 	return maxPlayers;
+}
+
+uint Match::GetCurrentPlayerCount()
+{
+	return currentPlayerCount;
+}
+
+string Match::GetName()
+{
+	return name;
 }

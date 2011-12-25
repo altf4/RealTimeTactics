@@ -285,6 +285,7 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 	match->SetID(matchID);
 	match->SetStatus(WAITING_FOR_PLAYERS);
 	match->SetMaxPlayers(options.maxPlayers);
+	match->SetCurrentPlayerCount(1);
 
 	//Put the match in the global match list
 	pthread_rwlock_wrlock(&matchListLock);
@@ -331,6 +332,9 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 
 	pthread_rwlock_wrlock(&matchListLock);
 	matchList[matchID]->players.push_back(player);
+	//Increment match's player count
+	matchList[matchID]->SetCurrentPlayerCount(
+			matchList[matchID]->GetCurrentPlayerCount() +1 );
 	player->currentMatch = matchList[matchID];
 	pthread_rwlock_unlock(&matchListLock);
 
@@ -356,6 +360,9 @@ bool LeaveMatch(Player *player, uint matchID)
 		if( matchList[matchID]->players[i]->name == player->name)
 		{
 			matchList[matchID]->players.erase(matchList[matchID]->players.begin()+i);
+			//Increment match's player count
+			matchList[matchID]->SetCurrentPlayerCount(
+					matchList[matchID]->GetCurrentPlayerCount() +1 );
 			foundOne = true;
 			break;
 		}

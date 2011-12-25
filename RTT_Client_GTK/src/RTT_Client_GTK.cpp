@@ -191,7 +191,7 @@ void list_matches_click()
 	for(uint i = 0; i < pagesNeeded; i++)
 	{
 		view = manage(new TreeView());
-		match_lists->append_page(*view, "worked");
+		match_lists->append_page(*view);
 	}
 
 	//Populate the view we're currently selecting
@@ -210,10 +210,16 @@ void list_matches_click()
 		TreeModel::Row row = *(refListStore->append());
 		row[columns->matchID] = (int)descriptions[page].ID;
 		row[columns->maxPlayers] = (int)descriptions[page].maxPlayers;
+		row[columns->currentPlayers] = (int)descriptions[page].currentPlayerCount;
+		row[columns->name] = descriptions[page].name;
+		row[columns->timeCreated] = ctime(&descriptions[page].timeCreated) ;
 	}
 
 	view->append_column("ID", columns->matchID);
+	view->append_column("Name", columns->name);
+	view->append_column("Current Players", columns->currentPlayers);
 	view->append_column("Max Players", columns->maxPlayers);
+	view->append_column("Time Created", columns->timeCreated);
 
 	match_lists->show_all();
 }
