@@ -230,6 +230,9 @@ void LaunchMainLobbyPane()
 	welcome_box->set_visible(false);
 	lobby_box->set_visible(true);
 	match_lobby_box->set_visible(false);
+
+	//By default, show the match list first
+	list_matches_click();
 }
 
 void LaunchServerConnectPane()
