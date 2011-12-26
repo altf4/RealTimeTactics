@@ -13,6 +13,7 @@ void connect_click();
 void quit_server_click();
 void create_match_click();
 void create_match_submit_click();
+void join_match_click();
 
 void leave_match_click();
 

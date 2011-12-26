@@ -41,6 +41,7 @@ Button *quit_server_button = NULL;
 Button *create_match_button = NULL;
 Button *create_match_submit = NULL;
 Button *list_matches_button = NULL;
+Button *join_match_button = NULL;
 Entry *match_name_entry = NULL;
 ComboBoxText *create_match_map_combo = NULL;
 ComboBoxText *max_players_combo = NULL;
@@ -262,6 +263,44 @@ void leave_match_click()
 
 }
 
+void join_match_click()
+{
+	int page = match_lists->get_current_page();
+	if( page == -1 )
+	{
+		status_lobby->push("Please select a match, and try again");
+		return;
+	}
+
+	TreeView *view = (TreeView*)match_lists->get_nth_page( page );
+	if( view == NULL )
+	{
+		status_lobby->push("Please select a match, and try again");
+		return;
+	}
+
+	MatchListColumns columns;
+	Glib::RefPtr<Gtk::TreeSelection> select = view->get_selection();
+	if( select->count_selected_rows() != 1)
+	{
+		status_lobby->push("Please select a match, and try again");
+		return;
+	}
+	TreeModel::iterator iter = select->get_selected();
+	TreeModel::Row row = *( iter );
+	int matchID = row[columns.matchID];
+
+	if( JoinMatch(SocketFD, matchID) )
+	{
+		LaunchMatchLobbyPane();
+	}
+	else
+	{
+		status_lobby->push("Failed to join match. Is it full?");
+		return;
+	}
+}
+
 void quit_server_click()
 {
 	ExitServer(SocketFD);
@@ -295,6 +334,7 @@ void InitGlobalWidgets()
 	welcome_builder->get_widget("status_lobby", status_lobby);
 	welcome_builder->get_widget("create_match_box", create_match_box);
 	welcome_builder->get_widget("match_lists", match_lists);
+	welcome_builder->get_widget("join_match_button", join_match_button);
 
 	welcome_builder->get_widget("leave_match_button", leave_match_button);
 	welcome_builder->get_widget("match_lobby_status", match_lobby_status);
@@ -316,6 +356,7 @@ int main( int argc, char **argv)
 	create_match_button->signal_clicked().connect(sigc::ptr_fun(create_match_click));
 	create_match_submit->signal_clicked().connect(sigc::ptr_fun(create_match_submit_click));
 	list_matches_button->signal_clicked().connect(sigc::ptr_fun(list_matches_click));
+	join_match_button->signal_clicked().connect(sigc::ptr_fun(join_match_click));
 
 	leave_match_button->signal_clicked().connect(sigc::ptr_fun(leave_match_click));
 
