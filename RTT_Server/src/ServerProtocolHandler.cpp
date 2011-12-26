@@ -285,22 +285,27 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				case LOBBY_MATCH_IS_FULL:
 				{
 					errorType = MATCH_IS_FULL;
+					break;
 				}
 				case LOBBY_MATCH_DOESNT_EXIST:
 				{
 					errorType = MATCH_DOESNT_EXIST;
+					break;
 				}
 				case LOBBY_NOT_ALLOWED_IN:
 				{
 					errorType = NOT_ALLOWED_IN;
+					break;
 				}
 				case LOBBY_ALREADY_IN_MATCH:
 				{
 					errorType = ALREADY_IN_MATCH;
+					break;
 				}
 				default:
 				{
 					errorType = PROTOCOL_ERROR;
+					break;
 				}
 				SendError(ConnectFD, errorType);
 				return STILL_IN_LOBBY;
