@@ -312,7 +312,7 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 		pthread_rwlock_unlock(&matchListLock);
 		return LOBBY_ALREADY_IN_MATCH;
 	}
-	if( matchList[matchID] == NULL)
+	if( matchList.count(matchID) == 0)
 	{
 		pthread_rwlock_unlock(&matchListLock);
 		return LOBBY_MATCH_DOESNT_EXIST;
@@ -349,7 +349,7 @@ bool LeaveMatch(Player *player, uint matchID)
 {
 	bool foundOne = false;
 	pthread_rwlock_wrlock(&matchListLock);
-	if( matchList[matchID] == NULL )
+	if( matchList.count(matchID) == 0 )
 	{
 		pthread_rwlock_unlock(&matchListLock);
 		return false;
