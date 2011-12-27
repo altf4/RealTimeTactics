@@ -318,7 +318,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				SendError(ConnectFD, NOT_IN_THAT_MATCH);
 				return STILL_IN_LOBBY;
 			}
-			if( LeaveMatch(player, player->currentMatch->GetID()) )
+			if( LeaveMatch(player) )
 			{
 				//*******************************
 				// Send Match Leave Acknowledge

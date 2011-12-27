@@ -11,7 +11,7 @@
 using namespace std;
 using namespace RTT;
 
-Match::Match()
+Match::Match(Player *player)
 {
 	struct timeval tv;
 	gettimeofday(&tv,NULL);
@@ -21,6 +21,7 @@ Match::Match()
 	{
 		teams[i] = new Team((enum TeamNumber)i);
 	}
+	leader = player;
 }
 
 Match::~Match()
@@ -115,6 +116,7 @@ bool Match::RemovePlayer( uint playerID )
 				teams[i]->players.erase(it);
 				currentPlayerCount--;
 				description.currentPlayerCount--;
+				leader = GetFirstPlayer();
 				return true;
 			}
 		}
@@ -136,4 +138,20 @@ Player* Match::GetPlayer( uint playerID )
 		}
 	}
 	return false;
+}
+
+//Get the first Player in the teams lists
+//	For use in getting the next leader when one leaves
+//	Returns NULL if there are no more players
+Player* Match::GetFirstPlayer()
+{
+	for(uint i = 0; i < MAX_TEAMS; i++)
+	{
+		vector<Player*>::iterator it = teams[i]->players.begin();
+		for( ; it != teams[i]->players.end(); it++ )
+		{
+			return *it;
+		}
+	}
+	return NULL;
 }

@@ -281,7 +281,7 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 	uint matchID = ++lastMatchID;
 	pthread_rwlock_unlock(&matchIDLock);
 
-	Match *match = new Match();
+	Match *match = new Match(player);
 	match->SetID(matchID);
 	match->SetStatus(WAITING_FOR_PLAYERS);
 	match->SetMaxPlayers(options.maxPlayers);
@@ -341,9 +341,15 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 //	Sets the variables within player and match properly
 //	If no players remain in the match afterward, then the match is deleted
 //	Returns success or failure
-bool LeaveMatch(Player *player, uint matchID)
+bool LeaveMatch(Player *player)
 {
 	bool foundOne = false;
+	if( player->currentMatch == NULL)
+	{
+		return false;
+	}
+	uint matchID = player->currentMatch->GetID();
+
 	pthread_rwlock_wrlock(&matchListLock);
 	if( matchList.count(matchID) == 0 )
 	{
@@ -380,7 +386,7 @@ void QuitServer(Player *player)
 	if( player->currentMatch != NULL)
 	{
 		//Leave any matches currently in
-		LeaveMatch(player, player->currentMatch->GetID());
+		LeaveMatch(player);
 	}
 
 	int ID = player->ID;

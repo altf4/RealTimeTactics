@@ -61,13 +61,16 @@ public:
 	//Teams involved
 	Team* teams[MAX_TEAMS];
 
+	//The "Leader" player who can make changes to match settings
+	Player *leader;
+
 	struct MatchDescription description;
 
 	// chargingActions is the global list of actions which have not yet been triggered
 	// chargedActions is the list of actions which are on queue to be triggered
 	vector <Action*> chargingActions, chargedActions;
 
-	Match();
+	Match(Player *player);
 	~Match();
 
 	void SetID(uint newID);
@@ -98,6 +101,8 @@ private:
 	//Truncated at MAX_MATCHNAME_LEN chars
 	string name;
 	time_t timeCreated;
+
+	Player *GetFirstPlayer();
 
 };
 

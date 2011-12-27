@@ -66,7 +66,7 @@ enum LobbyResult JoinMatch(Player *player, uint matchID);
 //Make player leave specified match
 //	Sets the variables within player and match properly
 //	Returns success or failure
-bool LeaveMatch(Player *player, uint matchID);
+bool LeaveMatch(Player *player);
 
 //Player has quit the server, clean up any references to it
 //	Deletes the player object
