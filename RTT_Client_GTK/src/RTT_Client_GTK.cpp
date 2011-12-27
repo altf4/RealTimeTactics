@@ -8,6 +8,7 @@
 #include "ClientProtocolHandler.h"
 #include "RTT_Client_GTK.h"
 #include "MatchListColumns.h"
+#include "PlayerListColumns.h"
 #include <iostream>
 #include <gtkmm.h>
 #include <arpa/inet.h>
@@ -53,10 +54,11 @@ Notebook *match_lists = NULL;
 //Third Pane Widgets
 Button *leave_match_button = NULL;
 Statusbar *match_lobby_status = NULL;
+TreeView *player_list_view = NULL;
+
 
 int SocketFD = 0;
-
-vector <MatchListColumns*> MatchColumns;
+string username;
 
 void custom_server_click()
 {
@@ -88,7 +90,7 @@ void connect_click()
 		return;
 	}
 
-	string username = entry_username->get_text();
+	username = entry_username->get_text();
 	string hashedPassword = entry_password->get_text();
 
 	SocketFD = AuthToServer(serverIP, serverPort,
@@ -248,6 +250,24 @@ void LaunchMatchLobbyPane()
 	welcome_box->set_visible(false);
 	lobby_box->set_visible(false);
 	match_lobby_box->set_visible(true);
+
+	//Clear out anything in the Player ListView
+	player_list_view->remove_all_columns();
+	player_list_view->unset_model();
+
+	PlayerListColumns *columns = new PlayerListColumns();
+	Glib::RefPtr<ListStore> refListStore = ListStore::create(*columns);
+	player_list_view->set_model(refListStore);
+
+	//Add a new row (for ourselves)
+	TreeModel::Row row = *(refListStore->append());
+	row[columns->name] = username;
+	row[columns->team] = TEAM_1;
+
+	player_list_view->append_column("Name", columns->name);
+	player_list_view->append_column("Team", columns->team);
+
+	player_list_view->show_all();
 }
 
 void leave_match_click()
@@ -338,6 +358,8 @@ void InitGlobalWidgets()
 
 	welcome_builder->get_widget("leave_match_button", leave_match_button);
 	welcome_builder->get_widget("match_lobby_status", match_lobby_status);
+	welcome_builder->get_widget("player_list_view", player_list_view);
+
 
 }
 
