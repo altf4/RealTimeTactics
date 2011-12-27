@@ -285,7 +285,6 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 	match->SetID(matchID);
 	match->SetStatus(WAITING_FOR_PLAYERS);
 	match->SetMaxPlayers(options.maxPlayers);
-	match->SetCurrentPlayerCount(1);
 
 	//Put the match in the global match list
 	pthread_rwlock_wrlock(&matchListLock);
@@ -295,7 +294,7 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 	//Put the match in this player's current match
 	player->currentMatch = match;
 	//Put the player in this match's player list
-	match->players.push_back(player);
+	match->AddPlayer(player, TEAM_1);
 
 	return match->GetID();
 }
@@ -317,7 +316,7 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 		pthread_rwlock_unlock(&matchListLock);
 		return LOBBY_MATCH_DOESNT_EXIST;
 	}
-	if( matchList[matchID]->players.size() == matchList[matchID]->GetMaxPlayers())
+	if( matchList[matchID]->GetCurrentPlayerCount() == matchList[matchID]->GetMaxPlayers())
 	{
 		pthread_rwlock_unlock(&matchListLock);
 		return LOBBY_MATCH_IS_FULL;
@@ -331,10 +330,7 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 //	}
 
 	pthread_rwlock_wrlock(&matchListLock);
-	matchList[matchID]->players.push_back(player);
-	//Increment match's player count
-	matchList[matchID]->SetCurrentPlayerCount(
-			matchList[matchID]->GetCurrentPlayerCount() +1 );
+	matchList[matchID]->AddPlayer(player, TEAM_1);
 	player->currentMatch = matchList[matchID];
 	pthread_rwlock_unlock(&matchListLock);
 
@@ -354,19 +350,7 @@ bool LeaveMatch(Player *player, uint matchID)
 		pthread_rwlock_unlock(&matchListLock);
 		return false;
 	}
-	for(uint i = 0; i < matchList[matchID]->players.size(); i++)
-	{
-		//Find our player in the match' player list
-		if( matchList[matchID]->players[i]->name == player->name)
-		{
-			matchList[matchID]->players.erase(matchList[matchID]->players.begin()+i);
-			//Increment match's player count
-			matchList[matchID]->SetCurrentPlayerCount(
-					matchList[matchID]->GetCurrentPlayerCount() +1 );
-			foundOne = true;
-			break;
-		}
-	}
+	foundOne = matchList[matchID]->RemovePlayer( player->ID );
 	if( !foundOne )
 	{
 		pthread_rwlock_unlock(&matchListLock);
@@ -375,7 +359,7 @@ bool LeaveMatch(Player *player, uint matchID)
 	player->currentMatch = NULL;
 
 	//If this was the last player in the match
-	if( matchList[matchID]->players.empty() )
+	if( matchList[matchID]->GetCurrentPlayerCount() == 0 )
 	{
 		delete matchList[matchID];
 		matchList.erase(matchID);

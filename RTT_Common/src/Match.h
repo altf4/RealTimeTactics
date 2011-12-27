@@ -10,8 +10,10 @@
 #define MATCH_H_
 
 #include "Gameboard.h"
-#include "Player.h"
+#include "Team.h"
 #include "Action.h"
+#include "Player.h"
+#include "Enums.h"
 #include <sys/time.h>
 
 #define MAX_MATCHNAME_LEN 20
@@ -20,8 +22,8 @@ using namespace std;
 
 namespace RTT
 {
-
 //Forward declaration to avoid self-reference
+class Team;
 class Player;
 
 enum Status
@@ -56,8 +58,8 @@ public:
 	//The gameboard for this match
 	Gameboard *gameboard;
 
-	//Players involved
-	vector <Player*> players;
+	//Teams involved
+	Team* teams[MAX_TEAMS];
 
 	struct MatchDescription description;
 
@@ -66,11 +68,11 @@ public:
 	vector <Action*> chargingActions, chargedActions;
 
 	Match();
+	~Match();
 
 	void SetID(uint newID);
 	void SetStatus(enum Status newStatus);
 	void SetMaxPlayers(uint maxPlayers);
-	void SetCurrentPlayerCount(uint newPlayerCount);
 	void SetName(string newName);
 
 	enum Status GetStatus();
@@ -79,6 +81,10 @@ public:
 	uint GetCurrentPlayerCount();
 	string GetName();
 	time_t GetTimeCreated();
+
+	bool AddPlayer(Player *player, enum TeamNumber teamNum);
+	bool RemovePlayer( uint playerID );
+	Player *GetPlayer( uint playerID );
 
 private:
 

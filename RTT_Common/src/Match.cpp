@@ -17,6 +17,21 @@ Match::Match()
 	gettimeofday(&tv,NULL);
 	timeCreated = tv.tv_sec;
 	description.timeCreated = tv.tv_sec;
+	for(uint i = 0; i < MAX_TEAMS; i++)
+	{
+		teams[i] = new Team((enum TeamNumber)i);
+	}
+}
+
+Match::~Match()
+{
+	for(uint i = 0; i < MAX_TEAMS; i++)
+	{
+		if( teams[i] != NULL )
+		{
+			delete teams[i];
+		}
+	}
 }
 
 //SET methods
@@ -36,12 +51,6 @@ void Match::SetMaxPlayers(uint newMaxPlayers)
 {
 	maxPlayers = newMaxPlayers;
 	description.maxPlayers = newMaxPlayers;
-}
-
-void Match::SetCurrentPlayerCount(uint newPlayerCount)
-{
-	currentPlayerCount = newPlayerCount;
-	description.currentPlayerCount = newPlayerCount;
 }
 
 void Match::SetName(string newName)
@@ -75,4 +84,56 @@ uint Match::GetCurrentPlayerCount()
 string Match::GetName()
 {
 	return name;
+}
+
+bool Match::AddPlayer(Player *player, enum TeamNumber teamNum)
+{
+	if( currentPlayerCount >= maxPlayers )
+	{
+		return false;
+	}
+	if( teamNum > REFEREE)
+	{
+		return false;
+	}
+	teams[teamNum]->players.push_back(player);
+	currentPlayerCount++;
+	description.currentPlayerCount++;
+
+	return true;
+}
+
+bool Match::RemovePlayer( uint playerID )
+{
+	for(uint i = 0; i < MAX_TEAMS; i++)
+	{
+		vector<Player*>::iterator it = teams[i]->players.begin();
+		for( ; it != teams[i]->players.end(); it++ )
+		{
+			if( (*it)->ID == playerID )
+			{
+				teams[i]->players.erase(it);
+				currentPlayerCount--;
+				description.currentPlayerCount--;
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+Player* Match::GetPlayer( uint playerID )
+{
+	for(uint i = 0; i < MAX_TEAMS; i++)
+	{
+		vector<Player*>::iterator it = teams[i]->players.begin();
+		for( ; it != teams[i]->players.end(); it++ )
+		{
+			if( (*it)->ID == playerID )
+			{
+				return (*it);
+			}
+		}
+	}
+	return false;
 }

@@ -9,6 +9,7 @@ CPP_SRCS += \
 ../src/Match.cpp \
 ../src/Path.cpp \
 ../src/Player.cpp \
+../src/Team.cpp \
 ../src/Tile.cpp \
 ../src/Unit.cpp 
 
@@ -18,6 +19,7 @@ OBJS += \
 ./src/Match.o \
 ./src/Path.o \
 ./src/Player.o \
+./src/Team.o \
 ./src/Tile.o \
 ./src/Unit.o 
 
@@ -27,6 +29,7 @@ CPP_DEPS += \
 ./src/Match.d \
 ./src/Path.d \
 ./src/Player.d \
+./src/Team.d \
 ./src/Tile.d \
 ./src/Unit.d 
 
