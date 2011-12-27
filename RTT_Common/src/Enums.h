@@ -25,6 +25,31 @@ enum TeamNumber: uint
 	REFEREE = 9,
 };
 
+enum TeamColor: char
+{
+	COLOR_BLUE = 0,
+	COLOR_RED,
+	COLOR_GREEN,
+	COLOR_PURPLE,
+	COLOR_BLACK,
+	COLOR_WHITE,
+	COLOR_YELLOW,
+	COLOR_ORANGE,
+};
+
+enum VictoryCondition: char
+{
+	DEATHMATCH,
+};
+
+enum GameSpeed: char
+{
+	SPEED_SLOW,
+	SPEED_NORMAL,
+	SPEED_FAST,
+	SPEED_FASTEST,
+};
+
 }
 
 

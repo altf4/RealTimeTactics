@@ -55,6 +55,61 @@ enum MessageType: char
 	MATCH_EXIT_SERVER_NOTIFICATION,
 	MATCH_EXIT_SERVER_ACKNOWLEDGE,
 
+	//*********************
+	//	MatchLobbyMessage
+	// (Initiated by client)
+	//*********************
+	//Change what team a player is on
+	CHANGE_TEAM_REQUEST,
+	CHANGE_TEAM_REPLY,
+	//Start the match
+	START_MATCH_REQUEST,
+	START_MATCH_REPLY,
+	//Change color of a player
+	CHANGE_COLOR_REQUEST,
+	CHANGE_COLOR_REPLY,
+	//Change the map
+	CHANGE_MAP_REQUEST,
+	CHANGE_MAP_REPLY,
+	//Change victory condition
+	CHANGE_VICTORY_COND_REQUEST,
+	CHANGE_VICTORY_COND_REPLY,
+	//Change game speed
+	CHANGE_GAME_SPEED_REQUEST,
+	CHANGE_GAME_SPEED_REPLY,
+	//Kick player
+	KICK_PLAYER_REQUEST,
+	KICK_PLAYER_REPLY,
+
+	//************************
+	//	MatchLobbyMessage
+	// (Initiated by server)
+	//************************
+	//Someone's team changed
+	TEAM_CHANGED_NOTIFICATION,
+	TEAM_CHANGED_ACK,
+	//Leader kicked you out of match
+	KICKED_FROM_MATCH_NOTIFICATION,
+	KICKED_FROM_MATCH_ACK,
+	//Someone else left the match
+	PLAYER_LEFT_MATCH_NOTIFICATION,
+	PLAYER_LEFT_MATCH_ACK,
+	//Someone joined the match
+	PLAYER_JOINED_MATCH_NOTIFICATION,
+	PLAYER_JOINED_MATCH_ACK,
+	//Someone's color changed
+	COLOR_CHANGED_NOTIFICATION,
+	COLOR_CHANGED_ACK,
+	//Leader changed the map
+	MAP_CHANGED_NOTIFICATION,
+	MAP_CHANGED_ACK,
+	//Leader changed the game speed
+	GAME_SPEED_CHANGED_NOTIFICATION,
+	GAME_SPEED_CHANGED_ACK,
+	//The match has started!
+	MATCH_START_NOTIFICATION,
+	MATCH_START_ACK,
+
 	//*******************
 	//   Error Message
 	//*******************

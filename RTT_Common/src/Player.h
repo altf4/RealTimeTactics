@@ -12,6 +12,7 @@
 #include "Unit.h"
 #include "Match.h"
 #include <string>
+#include "Enums.h"
 
 using namespace std;
 
@@ -20,6 +21,16 @@ namespace RTT
 
 //Forward declaration to avoid self-reference
 class Match;
+
+//A fixed size representation of the Player suitable for providing
+//	to other Players for display
+struct PlayerDescription
+{
+	uint ID;
+	char name[20];
+	enum TeamNumber team;
+	enum TeamColor color;
+};
 
 class Player
 {
