@@ -37,6 +37,10 @@ enum ErrorType: char
 	//Failure leaving
 	NOT_IN_THAT_MATCH,
 
+	//Failure changing attributes
+	NOT_ALLOWED_TO_CHANGE_THAT,
+	NO_SUCH_PLAYER,
+
 	//Failure, General server stuff
 	TOO_BUSY,
 	SHUTTING_DOWN_SOON,

@@ -80,6 +80,9 @@ enum MessageType: char
 	//Kick player
 	KICK_PLAYER_REQUEST,
 	KICK_PLAYER_REPLY,
+	//ConnectBack
+	CONNECT_BACK_SERVER_READY,
+	CONNECT_BACK_CLIENT_REQUEST,
 
 	//************************
 	//	MatchLobbyMessage
@@ -106,6 +109,9 @@ enum MessageType: char
 	//Leader changed the game speed
 	GAME_SPEED_CHANGED_NOTIFICATION,
 	GAME_SPEED_CHANGED_ACK,
+	//Victory condition changed
+	VICTORY_COND_CHANGED_NOTIFICATION,
+	VICTORY_COND_CHANGED_ACK,
 	//The match has started!
 	MATCH_START_NOTIFICATION,
 	MATCH_START_ACK,

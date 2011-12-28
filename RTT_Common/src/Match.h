@@ -13,6 +13,7 @@
 #include "Team.h"
 #include "Action.h"
 #include "Player.h"
+#include "Map.h"
 #include "Enums.h"
 #include <sys/time.h>
 
@@ -66,6 +67,14 @@ public:
 
 	struct MatchDescription description;
 
+	//Map to be used in the match
+	//TODO: Make this a full map object
+	struct MapDescription map;
+
+	enum VictoryCondition victoryCondition;
+
+	enum GameSpeed gameSpeed;
+
 	// chargingActions is the global list of actions which have not yet been triggered
 	// chargedActions is the list of actions which are on queue to be triggered
 	vector <Action*> chargingActions, chargedActions;
@@ -88,6 +97,8 @@ public:
 	bool AddPlayer(Player *player, enum TeamNumber teamNum);
 	bool RemovePlayer( uint playerID );
 	Player *GetPlayer( uint playerID );
+	bool ChangeTeam(uint playerID, enum TeamNumber newTeam);
+	bool StartMatch();
 
 private:
 

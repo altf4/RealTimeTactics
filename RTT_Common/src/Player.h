@@ -35,14 +35,15 @@ struct PlayerDescription
 class Player
 {
 public:
-	string name;
+
 
 	vector <Unit*> units;
 
-	uint ID;
-
 	//The match that this player is currently in
 	Match *currentMatch;
+	//Socket to receive MatchLobby messages from server on
+	int receiveSocket;
+	struct PlayerDescription description;
 
 	Player();
 
@@ -50,6 +51,21 @@ public:
 	Player(char *username, uint newID);
 	Player(string username, uint newID);
 
+	string GetName();
+	uint GetID();
+	enum TeamNumber GetTeam();
+	enum TeamColor GetColor();
+
+	void SetName(string newName);
+	void SetID(uint newID);
+	void SetTeam(enum TeamNumber newTeam);
+	void SetColor(enum TeamColor newColor);
+
+private:
+	string name;
+	uint ID;
+	enum TeamNumber team;
+	enum TeamColor color;
 };
 
 }

@@ -31,6 +31,7 @@ public:
 	struct MapDescription mapDescription;
 	uint playerID;
 	struct PlayerDescription playerDescription;
+	uint portNum;
 
 	MatchLobbyMessage();
 	~MatchLobbyMessage();

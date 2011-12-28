@@ -25,6 +25,7 @@ using namespace RTT;
 
 PlayerList playerList;
 MatchList matchList;
+ConnectBackWaitPool connectBackWaitPool;
 
 //The mast match ID given out
 uint lastMatchID;
@@ -34,6 +35,9 @@ pthread_rwlock_t playerListLock;
 pthread_rwlock_t matchListLock;
 pthread_rwlock_t matchIDLock;
 pthread_rwlock_t playerIDLock;
+pthread_rwlock_t waitPoolLock;
+
+uint serverPortNumber;
 
 int main(int argc, char **argv)
 {
@@ -41,15 +45,17 @@ int main(int argc, char **argv)
 	matchList.set_deleted_key(-2);
 	playerList.set_empty_key(-1);
 	playerList.set_deleted_key(-2);
+	connectBackWaitPool.set_empty_key(-1);
+	connectBackWaitPool.set_deleted_key(-2);
 
 	pthread_rwlock_init(&playerListLock, NULL);
 	pthread_rwlock_init(&matchListLock, NULL);
 	pthread_rwlock_init(&matchIDLock, NULL);
 	pthread_rwlock_init(&playerIDLock, NULL);
+	pthread_rwlock_init(&waitPoolLock, NULL);
 
 	pthread_t threadID;
 	int c;
-	uint serverPortNumber;
 
 	bool portEntered = false;
 
@@ -153,7 +159,7 @@ void *ClientThread(void * parm)
 		return NULL;
 	}
 
-	cout << "Client: " << player->name << " Authenticated!\n";
+	cout << "Client: " << player->GetName() << " Authenticated!\n";
 
 	//*************************************
 	// In the main lobby
@@ -166,14 +172,34 @@ void *ClientThread(void * parm)
 
 		if(lobbyReturn == EXITING_SERVER)
 		{
-			cout << "Player: " << player->name << " has left.\n";
+			cout << "Player: " << player->GetName() << " has left.\n";
 			QuitServer(player);
 			return NULL;
 		}
 
-		if(lobbyReturn == STARTING_MATCH)
+		//In the a Match Lobby
+		if(lobbyReturn == IN_MATCH_LOBBY)
 		{
-			//TODO: START A MATCH!!
+			//TODO: Uncomment to enable MatchLobby messages
+			if( MatchLobbyConnectBack(
+					ConnectFD, serverPortNumber+1, player) == -1)
+			{
+				lobbyReturn = IN_MAIN_LOBBY;
+			}
+			while( lobbyReturn == IN_MATCH_LOBBY)
+			{
+				lobbyReturn = ProcessMatchLobbyCommand(ConnectFD, player);
+			}
+			if( lobbyReturn == EXITING_SERVER )
+			{
+				cout << "Player: " << player->GetName() << " has left.\n";
+				QuitServer(player);
+				return NULL;
+			}
+			if( lobbyReturn == IN_GAME )
+			{
+				//TODO: Start the match!!!
+			}
 		}
 	}
 
@@ -356,7 +382,7 @@ bool LeaveMatch(Player *player)
 		pthread_rwlock_unlock(&matchListLock);
 		return false;
 	}
-	foundOne = matchList[matchID]->RemovePlayer( player->ID );
+	foundOne = matchList[matchID]->RemovePlayer( player->GetID() );
 	if( !foundOne )
 	{
 		pthread_rwlock_unlock(&matchListLock);
@@ -389,7 +415,7 @@ void QuitServer(Player *player)
 		LeaveMatch(player);
 	}
 
-	int ID = player->ID;
+	int ID = player->GetID();
 	//Remove from the list of current players
 	pthread_rwlock_wrlock(&playerListLock);
 	playerList[ID] = NULL;

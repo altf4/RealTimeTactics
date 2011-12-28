@@ -16,6 +16,11 @@ MatchLobbyMessage::~MatchLobbyMessage()
 
 }
 
+MatchLobbyMessage::MatchLobbyMessage()
+{
+
+}
+
 MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 {
 	if( length < MESSAGE_MIN_SIZE )
@@ -39,7 +44,8 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 		{
 			//Uses: 1) Message Type
 			//		2) New team
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(newTeam);
+			//		3) Player ID to change
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(newTeam) + sizeof(playerID);
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -49,6 +55,9 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 			//new team
 			memcpy(&newTeam, buffer, sizeof(newTeam));
 			buffer += sizeof(newTeam);
+			//new team
+			memcpy(&playerID, buffer, sizeof(playerID));
+			buffer += sizeof(playerID);
 
 			break;
 		}
@@ -101,8 +110,9 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 		case CHANGE_COLOR_REQUEST:
 		{
 			//Uses: 1) Message Type
-			//		2) new Color
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(newColor);
+			//		2) New Color
+			//		3) Player ID
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(newColor) + sizeof(playerID);
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -112,6 +122,9 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 			//new team
 			memcpy(&newColor, buffer, sizeof(newColor));
 			buffer += sizeof(newColor);
+			//Player to change
+			memcpy(&playerID, buffer, sizeof(playerID));
+			buffer += sizeof(playerID);
 
 			break;
 		}
@@ -231,6 +244,40 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 			//new team
 			memcpy(&changeAccepted, buffer, sizeof(changeAccepted));
 			buffer += sizeof(changeAccepted);
+
+			break;
+		}
+		case CONNECT_BACK_SERVER_READY:
+		{
+			//Uses: 1) Message Type
+			//		2) ConnectBack port number
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(portNum);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			//ConnectBack port number
+			memcpy(&portNum, buffer, sizeof(portNum));
+			buffer += sizeof(portNum);
+
+			break;
+		}
+		case CONNECT_BACK_CLIENT_REQUEST:
+		{
+			//Uses: 1) Message Type
+			//		2) PlayerID
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(playerID);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			//new team
+			memcpy(&playerID, buffer, sizeof(playerID));
+			buffer += sizeof(playerID);
 
 			break;
 		}
@@ -479,6 +526,35 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 
 			break;
 		}
+		case VICTORY_COND_CHANGED_NOTIFICATION:
+		{
+			//Uses: 1) Message Type
+			//		2) Victory Condition
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(newVictCond);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			//Victory condition
+			memcpy(&newVictCond, buffer, sizeof(newVictCond));
+			buffer += sizeof(newVictCond);
+
+			break;
+		}
+		case VICTORY_COND_CHANGED_ACK:
+		{
+			//Uses: 1) Message Type
+			uint expectedSize = MESSAGE_MIN_SIZE;
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			break;
+		}
 		case MATCH_START_NOTIFICATION:
 		{
 			//Uses: 1) Message Type
@@ -533,7 +609,8 @@ char *MatchLobbyMessage::Serialize(uint *length)
 		{
 			//Uses: 1) Message Type
 			//		2) New team
-			messageSize = MESSAGE_MIN_SIZE + sizeof(newTeam);
+			//		3) Player ID to change
+			messageSize = MESSAGE_MIN_SIZE + sizeof(newTeam) + sizeof(playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
@@ -543,6 +620,9 @@ char *MatchLobbyMessage::Serialize(uint *length)
 			//Page Count
 			memcpy(buffer, &newTeam, sizeof(newTeam));
 			buffer += sizeof(newTeam);
+			//PlayerID
+			memcpy(buffer, &playerID, sizeof(playerID));
+			buffer += sizeof(playerID);
 
 			break;
 		}
@@ -597,7 +677,8 @@ char *MatchLobbyMessage::Serialize(uint *length)
 		{
 			//Uses: 1) Message Type
 			//		2) new Color
-			messageSize = MESSAGE_MIN_SIZE + sizeof(newColor);
+			//		3) Player ID
+			messageSize = MESSAGE_MIN_SIZE + sizeof(newColor) + sizeof(playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
@@ -607,6 +688,9 @@ char *MatchLobbyMessage::Serialize(uint *length)
 			//New color
 			memcpy(buffer, &newColor, sizeof(newColor));
 			buffer += sizeof(newColor);
+			//Player ID
+			memcpy(buffer, &playerID, sizeof(playerID));
+			buffer += sizeof(playerID);
 
 			break;
 		}
@@ -726,6 +810,40 @@ char *MatchLobbyMessage::Serialize(uint *length)
 			//Change accepted
 			memcpy(buffer, &changeAccepted, sizeof(changeAccepted));
 			buffer += sizeof(changeAccepted);
+
+			break;
+		}
+		case CONNECT_BACK_SERVER_READY:
+		{
+			//Uses: 1) Message Type
+			//		2) ConnectBack port number
+			messageSize = MESSAGE_MIN_SIZE + sizeof(portNum);
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+			//New color
+			memcpy(buffer, &portNum, sizeof(portNum));
+			buffer += sizeof(portNum);
+
+			break;
+		}
+		case CONNECT_BACK_CLIENT_REQUEST:
+		{
+			//Uses: 1) Message Type
+			//		2) PlayerID
+			messageSize = MESSAGE_MIN_SIZE + sizeof(playerID);
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+			//Change accepted
+			memcpy(buffer, &playerID, sizeof(playerID));
+			buffer += sizeof(playerID);
 
 			break;
 		}
@@ -970,6 +1088,36 @@ char *MatchLobbyMessage::Serialize(uint *length)
 			break;
 		}
 		case GAME_SPEED_CHANGED_ACK:
+		{
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE;
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			break;
+		}
+		case VICTORY_COND_CHANGED_NOTIFICATION:
+		{
+			//Uses: 1) Message Type
+			//		2) Victory Condition
+			messageSize = MESSAGE_MIN_SIZE + sizeof(newVictCond);
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+			//PVictory Condition
+			memcpy(buffer, &newVictCond, sizeof(newVictCond));
+			buffer += sizeof(newVictCond);
+
+			break;
+		}
+		case VICTORY_COND_CHANGED_ACK:
 		{
 			//Uses: 1) Message Type
 			messageSize = MESSAGE_MIN_SIZE;
