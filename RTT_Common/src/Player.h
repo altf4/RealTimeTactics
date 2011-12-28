@@ -8,6 +8,9 @@
 #ifndef PLAYER_H_
 #define PLAYER_H_
 
+#define PLAYER_NAME_SIZE 20
+#define PLAYER_DESCR_SIZE sizeof(uint) + PLAYER_NAME_SIZE + sizeof(enum TeamNumber) + sizeof(enum TeamColor)
+
 #include <vector>
 #include "Unit.h"
 #include "Match.h"
@@ -27,7 +30,7 @@ class Match;
 struct PlayerDescription
 {
 	uint ID;
-	char name[20];
+	char name[PLAYER_NAME_SIZE];
 	enum TeamNumber team;
 	enum TeamColor color;
 };

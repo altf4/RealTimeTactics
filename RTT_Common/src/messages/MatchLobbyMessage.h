@@ -8,7 +8,6 @@
 #ifndef MATCHLOBBYMESSAGE_H_
 #define MATCHLOBBYMESSAGE_H_
 
-
 #include "Message.h"
 #include "../Map.h"
 #include "../Player.h"

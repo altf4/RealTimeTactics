@@ -149,17 +149,20 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 		{
 			//Uses: 1) Message Type
 			//		2) New map data
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(mapDescription);
+			uint expectedSize = MESSAGE_MIN_SIZE + MAP_DESCR_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
 				return;
 			}
 
-			//new team
-			memcpy(&mapDescription, buffer, sizeof(mapDescription));
+			//new map
+			memcpy(&mapDescription.name, buffer, MAP_NAME_LEN);
 			buffer += sizeof(mapDescription);
-
+			memcpy(&mapDescription.length, buffer, sizeof(uint));
+			buffer += sizeof(uint);
+			memcpy(&mapDescription.width, buffer, sizeof(uint));
+			buffer += sizeof(uint);
 			break;
 		}
 		case CHANGE_MAP_REPLY:
@@ -410,7 +413,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 		{
 			//Uses: 1) Message Type
 			//		2) Player Description
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(playerDescription);
+			uint expectedSize = MESSAGE_MIN_SIZE + PLAYER_DESCR_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -418,8 +421,15 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 			}
 
 			//Player ID that joined
-			memcpy(&playerDescription, buffer, sizeof(playerDescription));
-			buffer += sizeof(playerDescription);
+			memcpy(&playerDescription.name, buffer, PLAYER_NAME_SIZE);
+			buffer += PLAYER_NAME_SIZE;
+			memcpy(&playerDescription.ID, buffer, sizeof(uint));
+			buffer += sizeof(uint);
+			memcpy(&playerDescription.color, buffer, sizeof(enum TeamColor));
+			buffer += sizeof(enum TeamColor);
+			memcpy(&playerDescription.team, buffer, sizeof(enum TeamNumber));
+			buffer += sizeof(enum TeamNumber);
+
 
 			break;
 		}
@@ -472,7 +482,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 		{
 			//Uses: 1) Message Type
 			//		2) Map Description
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(mapDescription);
+			uint expectedSize = MESSAGE_MIN_SIZE + MAP_DESCR_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -480,8 +490,12 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 			}
 
 			//Map description
-			memcpy(&mapDescription, buffer, sizeof(mapDescription));
+			memcpy(&mapDescription.name, buffer, MAP_NAME_LEN);
 			buffer += sizeof(mapDescription);
+			memcpy(&mapDescription.length, buffer, sizeof(uint));
+			buffer += sizeof(uint);
+			memcpy(&mapDescription.width, buffer, sizeof(uint));
+			buffer += sizeof(uint);
 
 			break;
 		}
@@ -715,16 +729,21 @@ char *MatchLobbyMessage::Serialize(uint *length)
 		{
 			//Uses: 1) Message Type
 			//		2) New Map
-			messageSize = MESSAGE_MIN_SIZE + sizeof(mapDescription);
+			messageSize = MESSAGE_MIN_SIZE + MAP_DESCR_SIZE;
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
+
 			//New color
-			memcpy(buffer, &mapDescription, sizeof(mapDescription));
+			memcpy(buffer, &mapDescription.name, MAP_NAME_LEN);
 			buffer += sizeof(mapDescription);
+			memcpy(buffer, &mapDescription.length, sizeof(uint));
+			buffer += sizeof(uint);
+			memcpy(buffer, &mapDescription.width, sizeof(uint));
+			buffer += sizeof(uint);
 
 			break;
 		}
@@ -980,16 +999,23 @@ char *MatchLobbyMessage::Serialize(uint *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Player Description
-			messageSize = MESSAGE_MIN_SIZE + sizeof(playerDescription);
+			messageSize = MESSAGE_MIN_SIZE + PLAYER_DESCR_SIZE;
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
-			//Put the type in
-			memcpy(buffer, &playerDescription, sizeof(playerDescription));
-			buffer += sizeof(playerDescription);
+
+			//Put the player description in
+			memcpy(buffer, &playerDescription.name, PLAYER_NAME_SIZE);
+			buffer += PLAYER_NAME_SIZE;
+			memcpy(buffer, &playerDescription.ID, sizeof(uint));
+			buffer += sizeof(uint);
+			memcpy(buffer, &playerDescription.color, sizeof(enum TeamColor));
+			buffer += sizeof(enum TeamColor);
+			memcpy(buffer, &playerDescription.team, sizeof(enum TeamNumber));
+			buffer += sizeof(enum TeamNumber);
 
 			break;
 		}
@@ -1044,17 +1070,21 @@ char *MatchLobbyMessage::Serialize(uint *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Map Description
-			messageSize = MESSAGE_MIN_SIZE + sizeof(mapDescription);
+			messageSize = MESSAGE_MIN_SIZE + MAP_DESCR_SIZE;
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
-			//Put the type in
-			memcpy(buffer, &mapDescription, sizeof(mapDescription));
-			buffer += sizeof(mapDescription);
 
+			//Put the map description in
+			memcpy(buffer, &mapDescription.name, MAP_NAME_LEN);
+			buffer += sizeof(mapDescription);
+			memcpy(buffer, &mapDescription.length, sizeof(uint));
+			buffer += sizeof(uint);
+			memcpy(buffer, &mapDescription.width, sizeof(uint));
+			buffer += sizeof(uint);
 			break;
 		}
 		case MAP_CHANGED_ACK:

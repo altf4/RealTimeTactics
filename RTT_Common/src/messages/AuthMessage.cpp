@@ -36,23 +36,28 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 			//Uses: 1) Message Type
 			//		2) Version Number
 
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(softwareVersion);
+			uint expectedSize = MESSAGE_MIN_SIZE + (sizeof(uint)*3);
 			if( length != expectedSize)
 			{
 				serializeError = true;
 				return;
 			}
 
-			memcpy(&softwareVersion, buffer, sizeof(softwareVersion));
-			buffer += sizeof(softwareVersion);
+			memcpy(&softwareVersion.major, buffer, sizeof(softwareVersion.major));
+			buffer += sizeof(softwareVersion.major);
+			memcpy(&softwareVersion.minor, buffer, sizeof(softwareVersion.minor));
+			buffer += sizeof(softwareVersion.minor);
+			memcpy(&softwareVersion.rev, buffer, sizeof(softwareVersion.rev));
+			buffer += sizeof(softwareVersion.rev);
 			break;
 		}
 		case SERVER_HELLO:
 		{
-			//Uses: 1) Version Number
-			//		2) AuthMechanism
+			//Uses: 1) Message type
+			//		2) Version Number
+			//		3) AuthMechanism
 
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(softwareVersion)
+			uint expectedSize = MESSAGE_MIN_SIZE + (sizeof(uint)*3)
 					+ sizeof(authMechanism);
 			if( length != expectedSize)
 			{
@@ -60,8 +65,12 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 				return;
 			}
 
-			memcpy(&softwareVersion, buffer, sizeof(softwareVersion));
-			buffer += sizeof(softwareVersion);
+			memcpy(&softwareVersion.major, buffer, sizeof(softwareVersion.major));
+			buffer += sizeof(softwareVersion.major);
+			memcpy(&softwareVersion.minor, buffer, sizeof(softwareVersion.minor));
+			buffer += sizeof(softwareVersion.minor);
+			memcpy(&softwareVersion.rev, buffer, sizeof(softwareVersion.rev));
+			buffer += sizeof(softwareVersion.rev);
 
 			memcpy(&authMechanism, buffer, sizeof(authMechanism));
 
@@ -122,7 +131,7 @@ char *AuthMessage::Serialize(uint *length)
 			//		2) Version Number
 
 			//Allocate the memory and assign it to *buffer
-			uint messageSize = MESSAGE_MIN_SIZE	+ sizeof(softwareVersion);
+			uint messageSize = MESSAGE_MIN_SIZE	+ (sizeof(uint)*3);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
@@ -130,7 +139,12 @@ char *AuthMessage::Serialize(uint *length)
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Version Number
-			memcpy(buffer, &softwareVersion,  sizeof(softwareVersion));
+			memcpy(buffer, &softwareVersion.major, sizeof(softwareVersion.major));
+			buffer += sizeof(softwareVersion.major);
+			memcpy(buffer, &softwareVersion.minor, sizeof(softwareVersion.minor));
+			buffer += sizeof(softwareVersion.minor);
+			memcpy(buffer, &softwareVersion.rev, sizeof(softwareVersion.rev));
+			buffer += sizeof(softwareVersion.rev);
 
 			*length = messageSize;
 			return originalBuffer;
@@ -142,7 +156,7 @@ char *AuthMessage::Serialize(uint *length)
 			//		3) AuthMechanism
 
 			uint messageSize = MESSAGE_MIN_SIZE + sizeof(authMechanism)
-							+ sizeof(softwareVersion);
+							+ (sizeof(uint)*3);
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
@@ -150,8 +164,12 @@ char *AuthMessage::Serialize(uint *length)
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
-			memcpy(buffer, &softwareVersion, sizeof(softwareVersion));
-			buffer += sizeof(softwareVersion);
+			memcpy(buffer, &softwareVersion.major, sizeof(softwareVersion.major));
+			buffer += sizeof(softwareVersion.major);
+			memcpy(buffer, &softwareVersion.minor, sizeof(softwareVersion.minor));
+			buffer += sizeof(softwareVersion.minor);
+			memcpy(buffer, &softwareVersion.rev, sizeof(softwareVersion.rev));
+			buffer += sizeof(softwareVersion.rev);
 			memcpy(buffer, &authMechanism, sizeof(authMechanism));
 			*length = messageSize;
 

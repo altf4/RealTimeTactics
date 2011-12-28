@@ -18,7 +18,8 @@
 #include <sys/time.h>
 
 #define MAX_MATCHNAME_LEN 20
-
+#define MATCH_DESCR_SIZE sizeof(enum Status) + (sizeof(uint)*3) + MAX_MATCHNAME_LEN + sizeof(time_t)
+#define MATCH_OPTIONS_SIZE sizeof(uint)
 using namespace std;
 
 namespace RTT

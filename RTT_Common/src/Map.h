@@ -8,6 +8,9 @@
 #ifndef MAP_H_
 #define MAP_H_
 
+#define MAP_NAME_LEN 20
+#define MAP_DESCR_SIZE MAP_NAME_LEN + sizeof(uint) + sizeof(uint)
+
 #include "stdlib.h"
 
 using namespace std;
@@ -17,7 +20,7 @@ namespace RTT
 
 struct MapDescription
 {
-	char name[20];
+	char name[MAP_NAME_LEN];
 	//X direction
 	uint width;
 	//Y direction
