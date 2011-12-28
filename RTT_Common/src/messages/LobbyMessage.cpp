@@ -123,8 +123,10 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 			}
 
 			//MatchOptions
-			memcpy(&options.maxPlayers, buffer, MATCH_OPTIONS_SIZE);
-			buffer += MATCH_OPTIONS_SIZE;
+			memcpy(&options.maxPlayers, buffer, sizeof(uint));
+			buffer += sizeof(uint);
+			memcpy(&options.name, buffer, MAX_MATCHNAME_LEN);
+			buffer += MAX_MATCHNAME_LEN;
 
 			break;
 
@@ -141,8 +143,10 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 			}
 
 			//MatchOptions
-			memcpy(&options.maxPlayers, buffer, MATCH_OPTIONS_SIZE);
-			buffer += MATCH_OPTIONS_SIZE;
+			memcpy(&options.maxPlayers, buffer, sizeof(uint));
+			buffer += sizeof(uint);
+			memcpy(&options.name, buffer, MAX_MATCHNAME_LEN);
+			buffer += MAX_MATCHNAME_LEN;
 
 			break;
 
@@ -396,9 +400,11 @@ char *LobbyMessage::Serialize(uint *length)
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
-			//Max players
-			memcpy(buffer, &options.maxPlayers, MATCH_OPTIONS_SIZE);
-			buffer += MATCH_OPTIONS_SIZE;
+			//Options
+			memcpy(buffer, &options.maxPlayers, sizeof(uint));
+			buffer += sizeof(uint);
+			memcpy(buffer, &options.name, MAX_MATCHNAME_LEN);
+			buffer += MAX_MATCHNAME_LEN;
 
 			break;
 		}
@@ -414,9 +420,11 @@ char *LobbyMessage::Serialize(uint *length)
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
-			//Max players
-			memcpy(buffer, &options.maxPlayers, MATCH_OPTIONS_SIZE);
-			buffer += MATCH_OPTIONS_SIZE;
+			//options
+			memcpy(buffer, &options.maxPlayers, sizeof(uint));
+			buffer += sizeof(uint);
+			memcpy(buffer, &options.name, MAX_MATCHNAME_LEN);
+			buffer += MAX_MATCHNAME_LEN;
 
 			break;
 		}

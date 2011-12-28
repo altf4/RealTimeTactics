@@ -135,6 +135,7 @@ void create_match_submit_click()
 
 	struct MatchOptions options;
 	options.maxPlayers = maxPlayers + 2; //+2 since the combo starts at 2
+	strncpy(options.name, match_name_entry->get_text().c_str(), sizeof(options.name));
 
 	if (CreateMatch(SocketFD, options) )
 	{

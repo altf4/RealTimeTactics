@@ -311,6 +311,7 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 	match->SetID(matchID);
 	match->SetStatus(WAITING_FOR_PLAYERS);
 	match->SetMaxPlayers(options.maxPlayers);
+	match->SetName(options.name);
 
 	//Put the match in the global match list
 	pthread_rwlock_wrlock(&matchListLock);

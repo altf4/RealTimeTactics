@@ -19,7 +19,7 @@
 
 #define MAX_MATCHNAME_LEN 20
 #define MATCH_DESCR_SIZE sizeof(enum Status) + (sizeof(uint)*3) + MAX_MATCHNAME_LEN + sizeof(time_t)
-#define MATCH_OPTIONS_SIZE sizeof(uint)
+#define MATCH_OPTIONS_SIZE sizeof(uint) + MAX_MATCHNAME_LEN
 using namespace std;
 
 namespace RTT
@@ -51,6 +51,7 @@ struct MatchDescription
 struct MatchOptions
 {
 	uint maxPlayers;
+	char name[MAX_MATCHNAME_LEN];
 };
 
 class Match
