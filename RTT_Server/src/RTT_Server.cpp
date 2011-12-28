@@ -181,25 +181,25 @@ void *ClientThread(void * parm)
 		if(lobbyReturn == IN_MATCH_LOBBY)
 		{
 			//TODO: Uncomment to enable MatchLobby messages
-			if( MatchLobbyConnectBack(
-					ConnectFD, serverPortNumber+1, player) == -1)
-			{
-				lobbyReturn = IN_MAIN_LOBBY;
-			}
-			while( lobbyReturn == IN_MATCH_LOBBY)
-			{
-				lobbyReturn = ProcessMatchLobbyCommand(ConnectFD, player);
-			}
-			if( lobbyReturn == EXITING_SERVER )
-			{
-				cout << "Player: " << player->GetName() << " has left.\n";
-				QuitServer(player);
-				return NULL;
-			}
-			if( lobbyReturn == IN_GAME )
-			{
-				//TODO: Start the match!!!
-			}
+//			if( MatchLobbyConnectBack(
+//					ConnectFD, serverPortNumber+1, player) == -1)
+//			{
+//				lobbyReturn = IN_MAIN_LOBBY;
+//			}
+//			while( lobbyReturn == IN_MATCH_LOBBY)
+//			{
+//				lobbyReturn = ProcessMatchLobbyCommand(ConnectFD, player);
+//			}
+//			if( lobbyReturn == EXITING_SERVER )
+//			{
+//				cout << "Player: " << player->GetName() << " has left.\n";
+//				QuitServer(player);
+//				return NULL;
+//			}
+//			if( lobbyReturn == IN_GAME )
+//			{
+//				//TODO: Start the match!!!
+//			}
 		}
 	}
 
