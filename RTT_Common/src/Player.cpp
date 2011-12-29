@@ -28,3 +28,47 @@ Player::Player(string username, uint newID)
 	ID = newID;
 }
 
+string Player::GetName()
+{
+	return name;
+}
+
+uint Player::GetID()
+{
+	return ID;
+}
+
+enum TeamNumber Player::GetTeam()
+{
+	return team;
+}
+
+enum TeamColor Player::GetColor()
+{
+	return color;
+}
+
+
+void Player::SetName(string newName)
+{
+	name = newName;
+	strncpy(description.name, newName.c_str(), sizeof(description.name));
+}
+
+void Player::SetID(uint newID)
+{
+	ID = newID;
+	description.ID = newID;
+}
+
+void Player::SetTeam(enum TeamNumber newTeam)
+{
+	team = newTeam;
+	description.team = newTeam;
+}
+
+void Player::SetColor(enum TeamColor newColor)
+{
+	color = newColor;
+	description.color = newColor;
+}

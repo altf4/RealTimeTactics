@@ -111,7 +111,7 @@ bool Match::RemovePlayer( uint playerID )
 		vector<Player*>::iterator it = teams[i]->players.begin();
 		for( ; it != teams[i]->players.end(); it++ )
 		{
-			if( (*it)->ID == playerID )
+			if( (*it)->GetID() == playerID )
 			{
 				teams[i]->players.erase(it);
 				currentPlayerCount--;
@@ -131,7 +131,7 @@ Player* Match::GetPlayer( uint playerID )
 		vector<Player*>::iterator it = teams[i]->players.begin();
 		for( ; it != teams[i]->players.end(); it++ )
 		{
-			if( (*it)->ID == playerID )
+			if( (*it)->GetID() == playerID )
 			{
 				return (*it);
 			}
@@ -154,4 +154,34 @@ Player* Match::GetFirstPlayer()
 		}
 	}
 	return NULL;
+}
+
+bool Match::ChangeTeam(uint playerID, enum TeamNumber newTeam)
+{
+	if( newTeam > REFEREE)
+	{
+		return false;
+	}
+	for(uint i = 0; i < MAX_TEAMS; i++)
+	{
+		vector<Player*>::iterator it = teams[i]->players.begin();
+		for( ; it != teams[i]->players.end(); it++ )
+		{
+			if( (*it)->GetID() == playerID )
+			{
+				//Remove player from existing team
+				teams[i]->players.erase(it);
+				//Add to new team
+				teams[newTeam]->players.push_back(*it);
+				(*it)->SetTeam(newTeam);
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+bool Match::StartMatch()
+{
+
 }
