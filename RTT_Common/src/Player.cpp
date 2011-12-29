@@ -12,20 +12,27 @@ using namespace RTT;
 Player::Player()
 {
 	currentMatch = NULL;
+	callbackSocket = -1;
 }
 
 Player::Player(char *username, uint newID)
 {
 	name = string(username);
+	strncpy(description.name, username, sizeof(description.name));
 	currentMatch = NULL;
 	ID = newID;
+	description.ID = newID;
+	callbackSocket = -1;
 }
 
 Player::Player(string username, uint newID)
 {
 	name = username;
+	strncpy(description.name, username.c_str(), sizeof(description.name));
 	currentMatch = NULL;
 	ID = newID;
+	description.ID = newID;
+	callbackSocket = -1;
 }
 
 string Player::GetName()

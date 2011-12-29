@@ -38,6 +38,7 @@ pthread_rwlock_t playerIDLock;
 pthread_rwlock_t waitPoolLock;
 
 uint serverPortNumber;
+int callBackParentSocket;
 
 int main(int argc, char **argv)
 {
@@ -94,47 +95,67 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	//Set up the TCP socket
-	struct sockaddr_in stSockAddr;
-	int SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	//Set up the TCP sockets
+	struct sockaddr_in stSockAddr, stCallbackSockAddr;
+	int mainSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	int callbackSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	if(-1 == SocketFD)
+	if(-1 == mainSocket || -1 == callbackSocket)
 	{
 		perror("can not create socket");
 		exit(EXIT_FAILURE);
 	}
 	int optval = 1;
-	setsockopt(SocketFD, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
+	setsockopt(mainSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
+	setsockopt(callbackSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
 
 	memset(&stSockAddr, 0, sizeof(stSockAddr));
-
 	stSockAddr.sin_family = AF_INET;
 	stSockAddr.sin_port = htons(serverPortNumber);
 	stSockAddr.sin_addr.s_addr = INADDR_ANY;
 
-	if(-1 == bind(SocketFD,(struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
+	memset(&stCallbackSockAddr, 0, sizeof(stSockAddr));
+	stCallbackSockAddr.sin_family = AF_INET;
+	stCallbackSockAddr.sin_port = htons(serverPortNumber+1);
+	stCallbackSockAddr.sin_addr.s_addr = INADDR_ANY;
+
+	if(-1 == bind(mainSocket,(struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
 	{
 		perror("error bind failed");
-		close(SocketFD);
+		close(mainSocket);
+		exit(EXIT_FAILURE);
+	}
+	if(-1 == bind(callbackSocket,(struct sockaddr *)&stCallbackSockAddr,
+			sizeof(stCallbackSockAddr)))
+	{
+		perror("error bind failed");
+		close(callbackSocket);
 		exit(EXIT_FAILURE);
 	}
 
-	if(-1 == listen(SocketFD, 10))
+	if(-1 == listen(mainSocket, 10))
 	{
 		perror("error listen failed");
-		close(SocketFD);
+		close(mainSocket);
 		exit(EXIT_FAILURE);
 	}
+	if(-1 == listen(callbackSocket, 10))
+	{
+		perror("error listen failed");
+		close(callbackSocket);
+		exit(EXIT_FAILURE);
+	}
+	callBackParentSocket = callbackSocket;
 
 	//Main loop, just listens for new TCP connections and sends them off to ClientThread
 	for(;;)
 	{
-		int ConnectFD = accept(SocketFD, NULL, NULL);
+		int ConnectFD = accept(mainSocket, NULL, NULL);
 
 		if(0 > ConnectFD)
 		{
 			perror("error accept failed");
-			close(SocketFD);
+			close(mainSocket);
 			exit(EXIT_FAILURE);
 		}
 
@@ -180,26 +201,25 @@ void *ClientThread(void * parm)
 		//In the a Match Lobby
 		if(lobbyReturn == IN_MATCH_LOBBY)
 		{
-			//TODO: Uncomment to enable MatchLobby messages
-//			if( MatchLobbyConnectBack(
-//					ConnectFD, serverPortNumber+1, player) == -1)
-//			{
-//				lobbyReturn = IN_MAIN_LOBBY;
-//			}
-//			while( lobbyReturn == IN_MATCH_LOBBY)
-//			{
-//				lobbyReturn = ProcessMatchLobbyCommand(ConnectFD, player);
-//			}
-//			if( lobbyReturn == EXITING_SERVER )
-//			{
-//				cout << "Player: " << player->GetName() << " has left.\n";
-//				QuitServer(player);
-//				return NULL;
-//			}
-//			if( lobbyReturn == IN_GAME )
-//			{
-//				//TODO: Start the match!!!
-//			}
+			if( MatchLobbyConnectBack(
+					ConnectFD, serverPortNumber+1, player) == -1)
+			{
+				lobbyReturn = IN_MAIN_LOBBY;
+			}
+			while( lobbyReturn == IN_MATCH_LOBBY)
+			{
+				lobbyReturn = ProcessMatchLobbyCommand(ConnectFD, player);
+			}
+			if( lobbyReturn == EXITING_SERVER )
+			{
+				cout << "Player: " << player->GetName() << " has left.\n";
+				QuitServer(player);
+				return NULL;
+			}
+			if( lobbyReturn == IN_GAME )
+			{
+				//TODO: Start the match!!!
+			}
 		}
 	}
 

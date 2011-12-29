@@ -191,9 +191,10 @@ bool Message::WriteMessage(Message *message, int connectFD)
 	char *buffer = message->Serialize(&length);
 
 	//TODO: Loop the write until it finishes?
-	if( write(connectFD, buffer, length) == -1)
+	if( write(connectFD, buffer, length) < 0 )
 	{
 		//Error
+		perror("ERROR: Write failed: ");
 		cerr << "ERROR: Write function didn't finish...\n";
 		free(buffer);
 		return false;

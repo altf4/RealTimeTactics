@@ -28,6 +28,8 @@ extern pthread_rwlock_t playerIDLock;
 extern pthread_rwlock_t waitPoolLock;
 extern uint lastPlayerID;
 
+extern int callBackParentSocket;
+
 //Negotiates the hello messages and authentication to a new client
 //	Returns a new Player object, NULL on error
 Player *RTT::GetNewClient(int ConnectFD)
@@ -126,6 +128,7 @@ Player *RTT::GetNewClient(int ConnectFD)
 	AuthMessage *server_auth_reply = new AuthMessage();
 	server_auth_reply->type = SERVER_AUTH_REPLY;
 	server_auth_reply->authSuccess = authresult;
+	server_auth_reply->playerID = player->GetID();
 
 	if(  Message::WriteMessage(server_auth_reply, ConnectFD) == false)
 	{
@@ -282,6 +285,19 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 						cerr << "ERROR: Message send returned failure.\n";
 					}
 					delete match_join;
+
+					//*******************************
+					// Send Client Notifications
+					//*******************************
+					MatchLobbyMessage *notification = new MatchLobbyMessage();
+					notification->type = PLAYER_JOINED_MATCH_NOTIFICATION;
+					notification->playerDescription = player->description;
+					pthread_rwlock_rdlock(&matchListLock);
+					NotifyClients(matchList[player->currentMatch->GetID()],
+							notification);
+					pthread_rwlock_unlock(&matchListLock);
+					delete notification;
+
 					return IN_MATCH_LOBBY;
 				}
 				case LOBBY_MATCH_IS_FULL:
@@ -879,30 +895,37 @@ bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
 	{
 		return false;
 	}
+	cout << "Sending notifications out...\n";
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
 		vector<Player*>::iterator it = match->teams[i]->players.begin();
 		for( ; it != match->teams[i]->players.end(); it++ )
 		{
-			int recvSocket = (*it)->receiveSocket;
+			int recvSocket = (*it)->callbackSocket;
 			if(  Message::WriteMessage(message, recvSocket == false) )
 			{
 				cerr << "ERROR: Message send returned failure.\n";
 			}
-			Message *message_ack = Message::ReadMessage(recvSocket);
-			if( message_ack == NULL )
-			{
-				cerr << "ERROR: Failed to receive an ack from: "
-						<< (*it)->GetName() << "\n";
-			}
-			//TODO: Not strictly correct. We only want to allow ACKs
-			if( message_ack->type < CHANGE_TEAM_REQUEST ||
-					message_ack->type > MATCH_START_ACK)
-			{
-				//Got a bad return message. Should have been an ack
-				fullSuccess = false;
-			}
-			delete message_ack;
+			cout << "Sent a callback! Waiting for ack...\n";
+//			Message *message_ack = Message::ReadMessage(recvSocket);
+//			if( message_ack == NULL )
+//			{
+//				cerr << "ERROR: Failed to receive an ack from: "
+//						<< (*it)->GetName() << "\n";
+//				return false;
+//			}
+//			//TODO: Not strictly correct. We only want to allow ACKs
+//			if( message_ack->type < CHANGE_TEAM_REQUEST ||
+//					message_ack->type > MATCH_START_ACK)
+//			{
+//				//Got a bad return message. Should have been an ack
+//				fullSuccess = false;
+//			}
+//			else
+//			{
+//				cout << "Got a callback ack!\n";
+//			}
+//			delete message_ack;
 		}
 	}
 	return fullSuccess;
@@ -910,38 +933,6 @@ bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
 
 int RTT::MatchLobbyConnectBack(int oldSocket, uint portNum, Player *player)
 {
-	//Set up a new server on the ConnectBack port
-	struct sockaddr_in stSockAddr;
-	int SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-	if(-1 == SocketFD)
-	{
-		perror("can not create socket");
-		return -1;
-	}
-	int optval = 1;
-	setsockopt(SocketFD, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
-
-	memset(&stSockAddr, 0, sizeof(stSockAddr));
-
-	stSockAddr.sin_family = AF_INET;
-	stSockAddr.sin_port = htons(portNum);
-	stSockAddr.sin_addr.s_addr = INADDR_ANY;
-
-	if(-1 == bind(SocketFD,(struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
-	{
-		perror("error bind failed");
-		close(SocketFD);
-		return -1;
-	}
-
-	if(-1 == listen(SocketFD, 10))
-	{
-		perror("error listen failed");
-		close(SocketFD);
-		return -1;
-	}
-
 	//Tell client we're ready
 	MatchLobbyMessage *connect_back_ready = new MatchLobbyMessage();
 	connect_back_ready->type = CONNECT_BACK_SERVER_READY;
@@ -954,7 +945,7 @@ int RTT::MatchLobbyConnectBack(int oldSocket, uint portNum, Player *player)
 	delete connect_back_ready;
 
 	//Listen for our client to connect back on the new port...
-	int connectBackSocket = accept(SocketFD, NULL, NULL);
+	int connectBackSocket = accept(callBackParentSocket, NULL, NULL);
 
 	//Read ready-to-go message
 	Message *connect_back_reply = Message::ReadMessage(connectBackSocket);
@@ -977,6 +968,8 @@ int RTT::MatchLobbyConnectBack(int oldSocket, uint portNum, Player *player)
 	if( match_connect_back_reply->playerID == player->GetID())
 	{
 		//The client should now be listening for a message on this socket
+		player->callbackSocket = connectBackSocket;
+		cout << "Callback successful for: " << player->GetName() << "\n";
 		return connectBackSocket;
 	}
 	//This was the wrong player!
@@ -1006,6 +999,8 @@ int RTT::MatchLobbyConnectBack(int oldSocket, uint portNum, Player *player)
 				returnSocket = connectBackWaitPool[player->GetID()];
 				connectBackWaitPool.erase(player->GetID());
 				pthread_rwlock_unlock(&waitPoolLock);
+				player->callbackSocket = returnSocket;
+				cout << "Callback successful for: " << player->GetName() << "\n";
 				return returnSocket;
 			}
 		}
