@@ -62,7 +62,7 @@ void TutorialApplication::createScene(void)
 	*/
 
 	DotSceneLoader loader;
-	   loader.parseDotScene("test.scene","General", mSceneMgr);
+	loader.parseDotScene("First.scene","General",mSceneMgr);
 
 }
 

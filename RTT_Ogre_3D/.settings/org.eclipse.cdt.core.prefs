@@ -1,4 +1,14 @@
-#Tue Dec 27 13:59:53 MST 2011
+#Wed Dec 28 01:15:00 MST 2011
 eclipse.preferences.version=1
-environment/project/cdt.managedbuild.config.gnu.exe.debug.1484600857=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\n<environment append\="true" appendContributed\="true">\n<variable delimiter\="\:" name\="OGRE_LOC" operation\="replace" value\="/usr/lib/OGRE"/>\n</environment>\n
-environment/project/cdt.managedbuild.config.gnu.exe.release.1101478741=<?xml version\="1.0" encoding\="UTF-8" standalone\="no"?>\n<environment append\="true" appendContributed\="true">\n<variable delimiter\="\:" name\="OGRE_LOC" operation\="replace" value\="/usr/lib/OGRE"/>\n</environment>\n
+environment/project/cdt.managedbuild.config.gnu.exe.debug.1484600857=
+environment/project/cdt.managedbuild.config.gnu.exe.debug.1484600857/OGRE_LOC/delimiter=\:
+environment/project/cdt.managedbuild.config.gnu.exe.debug.1484600857/OGRE_LOC/operation=replace
+environment/project/cdt.managedbuild.config.gnu.exe.debug.1484600857/OGRE_LOC/value=/usr/lib/OGRE
+environment/project/cdt.managedbuild.config.gnu.exe.debug.1484600857/append=true
+environment/project/cdt.managedbuild.config.gnu.exe.debug.1484600857/appendContributed=true
+environment/project/cdt.managedbuild.config.gnu.exe.release.1101478741=
+environment/project/cdt.managedbuild.config.gnu.exe.release.1101478741/OGRE_LOC/delimiter=\:
+environment/project/cdt.managedbuild.config.gnu.exe.release.1101478741/OGRE_LOC/operation=replace
+environment/project/cdt.managedbuild.config.gnu.exe.release.1101478741/OGRE_LOC/value=/usr/lib/OGRE
+environment/project/cdt.managedbuild.config.gnu.exe.release.1101478741/append=true
+environment/project/cdt.managedbuild.config.gnu.exe.release.1101478741/appendContributed=true
