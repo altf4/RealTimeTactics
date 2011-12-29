@@ -13,6 +13,7 @@
 #include "Match.h"
 #include "messages/LobbyMessage.h"
 #include "messages/AuthMessage.h"
+#include "messages/MatchLobbyMessage.h"
 #include <google/dense_hash_map>
 
 using namespace std;
@@ -39,10 +40,12 @@ struct eqint
 };
 
 //Define types, so it's easier to refer to later
-//Key : Player name as a c string
+//Key : Player ID
 typedef dense_hash_map<int, Player*, hash<int>, eqint> PlayerList;
 //Key : Match unique ID
 typedef dense_hash_map<int, Match*, hash<int>, eqint> MatchList;
+//Key: Player's unique ID
+typedef dense_hash_map<int, int, hash<int>, eqint> ConnectBackWaitPool;
 
 string Usage();
 void ProcessRound(Match *match);

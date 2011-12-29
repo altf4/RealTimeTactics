@@ -12,6 +12,7 @@
 #include "AuthMessage.h"
 #include "LobbyMessage.h"
 #include "ErrorMessage.h"
+#include "MatchLobbyMessage.h"
 
 using namespace std;
 using namespace RTT;
@@ -82,6 +83,49 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case MATCH_EXIT_SERVER_ACKNOWLEDGE:
 		{
 			LobbyMessage *message = new LobbyMessage(buffer, length);
+			if( message->serializeError == true )
+			{
+				delete message;
+				return NULL;
+			}
+			return message;
+		}
+		case CHANGE_TEAM_REQUEST:
+		case CHANGE_TEAM_REPLY:
+		case START_MATCH_REQUEST:
+		case START_MATCH_REPLY:
+		case CHANGE_COLOR_REQUEST:
+		case CHANGE_COLOR_REPLY:
+		case CHANGE_MAP_REQUEST:
+		case CHANGE_MAP_REPLY:
+		case CHANGE_VICTORY_COND_REQUEST:
+		case CHANGE_VICTORY_COND_REPLY:
+		case CHANGE_GAME_SPEED_REQUEST:
+		case CHANGE_GAME_SPEED_REPLY:
+		case KICK_PLAYER_REQUEST:
+		case KICK_PLAYER_REPLY:
+		case CONNECT_BACK_SERVER_READY:
+		case CONNECT_BACK_CLIENT_REQUEST:
+		case TEAM_CHANGED_NOTIFICATION:
+		case TEAM_CHANGED_ACK:
+		case KICKED_FROM_MATCH_NOTIFICATION:
+		case KICKED_FROM_MATCH_ACK:
+		case PLAYER_LEFT_MATCH_NOTIFICATION:
+		case PLAYER_LEFT_MATCH_ACK:
+		case PLAYER_JOINED_MATCH_NOTIFICATION:
+		case PLAYER_JOINED_MATCH_ACK:
+		case COLOR_CHANGED_NOTIFICATION:
+		case COLOR_CHANGED_ACK:
+		case MAP_CHANGED_NOTIFICATION:
+		case MAP_CHANGED_ACK:
+		case GAME_SPEED_CHANGED_NOTIFICATION:
+		case GAME_SPEED_CHANGED_ACK:
+		case VICTORY_COND_CHANGED_NOTIFICATION:
+		case VICTORY_COND_CHANGED_ACK:
+		case MATCH_START_NOTIFICATION:
+		case MATCH_START_ACK:
+		{
+			MatchLobbyMessage *message = new MatchLobbyMessage(buffer, length);
 			if( message->serializeError == true )
 			{
 				delete message;
