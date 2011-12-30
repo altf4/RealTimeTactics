@@ -521,6 +521,8 @@ bool LeaveMatch(Player *player)
 	{
 		delete matchList[matchID];
 		matchList.erase(matchID);
+		pthread_rwlock_unlock(&matchListLock);
+		return true;
 	}
 	pthread_rwlock_unlock(&matchListLock);
 
@@ -531,8 +533,7 @@ bool LeaveMatch(Player *player)
 	notification->type = PLAYER_LEFT_MATCH_NOTIFICATION;
 	notification->playerID = player->GetID();
 	pthread_rwlock_rdlock(&matchListLock);
-	NotifyClients(matchList[player->currentMatch->GetID()],
-			notification);
+	NotifyClients(matchList[matchID], notification);
 	pthread_rwlock_unlock(&matchListLock);
 	delete notification;
 	return true;
