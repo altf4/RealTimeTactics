@@ -81,8 +81,7 @@ enum MessageType: char
 	KICK_PLAYER_REQUEST,
 	KICK_PLAYER_REPLY,
 	//ConnectBack
-	CONNECT_BACK_SERVER_READY,
-	CONNECT_BACK_CLIENT_REQUEST,
+	CALLBACK_REGISTER,
 
 	//************************
 	//	MatchLobbyMessage

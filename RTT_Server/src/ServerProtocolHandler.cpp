@@ -28,8 +28,6 @@ extern pthread_rwlock_t playerIDLock;
 extern pthread_rwlock_t waitPoolLock;
 extern uint lastPlayerID;
 
-extern int callBackParentSocket;
-
 //Negotiates the hello messages and authentication to a new client
 //	Returns a new Player object, NULL on error
 Player *RTT::GetNewClient(int ConnectFD)
@@ -902,110 +900,36 @@ bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
 		for( ; it != match->teams[i]->players.end(); it++ )
 		{
 			int recvSocket = (*it)->callbackSocket;
-			if(  Message::WriteMessage(message, recvSocket == false) )
+			if( recvSocket >= 0 )
 			{
-				cerr << "ERROR: Message send returned failure.\n";
+				if(  Message::WriteMessage(message, recvSocket) == false )
+				{
+					cerr << "ERROR: Message send returned failure.\n";
+				}
+				cout << "Sent a callback! Waiting for ack...\n";
+				Message *message_ack = Message::ReadMessage(recvSocket);
+				if( message_ack == NULL )
+				{
+					cerr << "ERROR: Failed to receive an ack from: "
+							<< (*it)->GetName() << "\n";
+					fullSuccess = false;
+					continue;
+				}
+				//TODO: Not strictly correct. We only want to allow ACKs
+				if( message_ack->type < CHANGE_TEAM_REQUEST ||
+						message_ack->type > MATCH_START_ACK)
+				{
+					//Got a bad return message. Should have been an ack
+					fullSuccess = false;
+				}
+				else
+				{
+					cout << "Got a callback ack!\n";
+				}
+				delete message_ack;
 			}
-			cout << "Sent a callback! Waiting for ack...\n";
-//			Message *message_ack = Message::ReadMessage(recvSocket);
-//			if( message_ack == NULL )
-//			{
-//				cerr << "ERROR: Failed to receive an ack from: "
-//						<< (*it)->GetName() << "\n";
-//				return false;
-//			}
-//			//TODO: Not strictly correct. We only want to allow ACKs
-//			if( message_ack->type < CHANGE_TEAM_REQUEST ||
-//					message_ack->type > MATCH_START_ACK)
-//			{
-//				//Got a bad return message. Should have been an ack
-//				fullSuccess = false;
-//			}
-//			else
-//			{
-//				cout << "Got a callback ack!\n";
-//			}
-//			delete message_ack;
 		}
 	}
 	return fullSuccess;
 }
 
-int RTT::MatchLobbyConnectBack(int oldSocket, uint portNum, Player *player)
-{
-	//Tell client we're ready
-	MatchLobbyMessage *connect_back_ready = new MatchLobbyMessage();
-	connect_back_ready->type = CONNECT_BACK_SERVER_READY;
-	connect_back_ready->portNum = portNum;
-	if(  Message::WriteMessage(connect_back_ready, oldSocket) == false)
-	{
-		//Error in write, do something?
-		cerr << "ERROR: Message send returned failure.\n";
-	}
-	delete connect_back_ready;
-
-	//Listen for our client to connect back on the new port...
-	int connectBackSocket = accept(callBackParentSocket, NULL, NULL);
-
-	//Read ready-to-go message
-	Message *connect_back_reply = Message::ReadMessage(connectBackSocket);
-	if( connect_back_reply == NULL )
-	{
-		//ERROR
-		cerr << "ERROR: ConnectBack message came back NULL\n";
-		return -1;
-	}
-	if( connect_back_reply->type != CONNECT_BACK_CLIENT_REQUEST )
-	{
-		//ERROR
-		cerr << "ERROR: ConnectBack message was wrong type\n";
-		return -1;
-	}
-	MatchLobbyMessage *match_connect_back_reply =
-			(MatchLobbyMessage*)connect_back_reply;
-
-	//We got the correct player on the first try. Yay!
-	if( match_connect_back_reply->playerID == player->GetID())
-	{
-		//The client should now be listening for a message on this socket
-		player->callbackSocket = connectBackSocket;
-		cout << "Callback successful for: " << player->GetName() << "\n";
-		return connectBackSocket;
-	}
-	//This was the wrong player!
-	//	Store this into the ConnectBack player pool then
-	//	Wait for our player to appear in the pool
-	else
-	{
-		int returnSocket;
-		//Store player into waitPool:
-		connectBackWaitPool[match_connect_back_reply->playerID] = connectBackSocket;
-
-		//Try again for CALLBACK_WAIT_TIME seconds
-		pthread_rwlock_wrlock(&waitPoolLock);
-		for(uint i = 0; i < CALLBACK_WAIT_TIME; i++ )
-		{
-			if( connectBackWaitPool.count( player->GetID() ) == 0 )
-			{
-				//Player not in the pool. Wait and try again
-				pthread_rwlock_unlock(&waitPoolLock);
-				sleep(1); //Unlock for the sleep
-				pthread_rwlock_wrlock(&waitPoolLock);
-			}
-			else
-			{
-				//Found our player in the pool!
-				//Get the socket value and erase the record
-				returnSocket = connectBackWaitPool[player->GetID()];
-				connectBackWaitPool.erase(player->GetID());
-				pthread_rwlock_unlock(&waitPoolLock);
-				player->callbackSocket = returnSocket;
-				cout << "Callback successful for: " << player->GetName() << "\n";
-				return returnSocket;
-			}
-		}
-		pthread_rwlock_unlock(&waitPoolLock);
-		cerr << "ERROR: Player never called back\n";
-		return -1;
-	}
-}

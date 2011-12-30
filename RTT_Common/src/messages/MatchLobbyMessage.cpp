@@ -250,27 +250,10 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 
 			break;
 		}
-		case CONNECT_BACK_SERVER_READY:
+		case CALLBACK_REGISTER:
 		{
 			//Uses: 1) Message Type
-			//		2) ConnectBack port number
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(portNum);
-			if( length != expectedSize)
-			{
-				serializeError = true;
-				return;
-			}
-
-			//ConnectBack port number
-			memcpy(&portNum, buffer, sizeof(portNum));
-			buffer += sizeof(portNum);
-
-			break;
-		}
-		case CONNECT_BACK_CLIENT_REQUEST:
-		{
-			//Uses: 1) Message Type
-			//		2) PlayerID
+			//		2) playerID
 			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(playerID);
 			if( length != expectedSize)
 			{
@@ -278,7 +261,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 				return;
 			}
 
-			//new team
+			//PlayerID
 			memcpy(&playerID, buffer, sizeof(playerID));
 			buffer += sizeof(playerID);
 
@@ -832,24 +815,7 @@ char *MatchLobbyMessage::Serialize(uint *length)
 
 			break;
 		}
-		case CONNECT_BACK_SERVER_READY:
-		{
-			//Uses: 1) Message Type
-			//		2) ConnectBack port number
-			messageSize = MESSAGE_MIN_SIZE + sizeof(portNum);
-			buffer = (char*)malloc(messageSize);
-			originalBuffer = buffer;
-
-			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
-			buffer += MESSAGE_MIN_SIZE;
-			//New color
-			memcpy(buffer, &portNum, sizeof(portNum));
-			buffer += sizeof(portNum);
-
-			break;
-		}
-		case CONNECT_BACK_CLIENT_REQUEST:
+		case CALLBACK_REGISTER:
 		{
 			//Uses: 1) Message Type
 			//		2) PlayerID
@@ -860,7 +826,7 @@ char *MatchLobbyMessage::Serialize(uint *length)
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
-			//Change accepted
+			//New color
 			memcpy(buffer, &playerID, sizeof(playerID));
 			buffer += sizeof(playerID);
 

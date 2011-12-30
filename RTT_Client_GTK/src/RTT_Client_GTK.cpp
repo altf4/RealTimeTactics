@@ -419,14 +419,7 @@ void InitGlobalWidgets()
 
 void *CallbackThread(void * parm)
 {
-	cout << "Starting callback init...\n";
-	if( !InitializeCallback() )
-	{
-		cerr << "ERROR: Failed to initialize Callback\n";
-		return NULL;
-	}
 
-	cout << "Callback successfully initiated!\n";
 	while(true)
 	{
 		struct CallbackChange change = ProcessCallbackCommand();

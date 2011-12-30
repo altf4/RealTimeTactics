@@ -25,10 +25,12 @@ using namespace RTT;
 int connectFD, connectBackSocket;
 string serverIP;
 uint myPlayerID;
+uint callbackPort = 0;
 
 int RTT::AuthToServer(string IPAddress, uint port,
 		string username, unsigned char *hashedPassword)
 {
+	callbackPort = port + 1;
 	struct sockaddr_in stSockAddr;
 	serverIP = IPAddress;
 
@@ -156,6 +158,15 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	myPlayerID = server_auth_reply->playerID;
 
 	delete server_auth_reply;
+
+	cout << "Starting callback init...\n";
+	if( !InitializeCallback() )
+	{
+		cerr << "ERROR: Failed to initialize Callback\n";
+		return -1;
+	}
+	cout << "Callback successfully initiated!\n";
+
 	return connectFD;
 }
 
@@ -758,25 +769,6 @@ bool RTT::StartMatch()
 //	Immediately follow with ProcessCallbackCommand()
 bool RTT::InitializeCallback()
 {
-	//First, listen on the regular socket for when the server is ready
-	//**********************************
-	// Receive Connect Back Ready
-	//**********************************
-	Message *message = Message::ReadMessage(connectFD);
-	if( message == NULL)
-	{
-		return false;
-	}
-	if( message->type != CONNECT_BACK_SERVER_READY)
-	{
-		delete message;
-		return false;
-	}
-	MatchLobbyMessage *conn_back_rdy = (MatchLobbyMessage*)message;
-	uint connBackPort = conn_back_rdy->portNum;
-
-	delete conn_back_rdy;
-
 	//Make a new connection to the given port
 	struct sockaddr_in stSockAddr;
 	connectBackSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
@@ -791,7 +783,7 @@ bool RTT::InitializeCallback()
 
 	//Set sock type and port
 	stSockAddr.sin_family = AF_INET;
-	stSockAddr.sin_port = htons(connBackPort);
+	stSockAddr.sin_port = htons(callbackPort);
 
 	//Set the IP address of the socket struct
 	int Res = inet_pton(AF_INET, serverIP.c_str(), &stSockAddr.sin_addr);
@@ -814,18 +806,18 @@ bool RTT::InitializeCallback()
 	}
 
 	//***********************************
-	// Send Connect Back Client Request
+	// Send Callback Register
 	//***********************************
-	MatchLobbyMessage *conn_back_client_req = new MatchLobbyMessage();
-	conn_back_client_req->type = CONNECT_BACK_CLIENT_REQUEST;
-	conn_back_client_req->playerID = myPlayerID;
-	if( Message::WriteMessage(conn_back_client_req, connectBackSocket) == false)
+	MatchLobbyMessage *callback_register = new MatchLobbyMessage();
+	callback_register->type = CALLBACK_REGISTER;
+	callback_register->playerID = myPlayerID;
+	if( Message::WriteMessage(callback_register, connectBackSocket) == false)
 	{
 		//Error in write
-		delete conn_back_client_req;
+		delete callback_register;
 		return false;
 	}
-	delete conn_back_client_req;
+	delete callback_register;
 
 	return true;
 }

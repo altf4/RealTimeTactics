@@ -104,8 +104,7 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case CHANGE_GAME_SPEED_REPLY:
 		case KICK_PLAYER_REQUEST:
 		case KICK_PLAYER_REPLY:
-		case CONNECT_BACK_SERVER_READY:
-		case CONNECT_BACK_CLIENT_REQUEST:
+		case CALLBACK_REGISTER:
 		case TEAM_CHANGED_NOTIFICATION:
 		case TEAM_CHANGED_ACK:
 		case KICKED_FROM_MATCH_NOTIFICATION:
@@ -169,7 +168,8 @@ Message *Message::ReadMessage(int connectFD)
 		else
 		{
 			//Error in reading from socket
-			cerr << "ERROR: Socket returned error...\n";
+			perror("ERROR: Socket returned error...");
+
 			return NULL;
 		}
 	}

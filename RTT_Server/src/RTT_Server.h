@@ -49,7 +49,13 @@ typedef dense_hash_map<int, int, hash<int>, eqint> ConnectBackWaitPool;
 
 string Usage();
 void ProcessRound(Match *match);
-void *ClientThread(void * parm);
+
+void *MainListen(void * param);
+void *CallbackListen(void * param);
+
+void *MainClientThread(void * parm);
+void *CallbackClientThread(void * parm);
+
 
 //Gets match descriptions from the matchlist
 //	page: specifies which block of matches to get
