@@ -159,13 +159,11 @@ int RTT::AuthToServer(string IPAddress, uint port,
 
 	delete server_auth_reply;
 
-	cout << "Starting callback init...\n";
 	if( !InitializeCallback() )
 	{
 		cerr << "ERROR: Failed to initialize Callback\n";
 		return -1;
 	}
-	cout << "Callback successfully initiated!\n";
 
 	return connectFD;
 }
@@ -829,7 +827,6 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 	// Receive Connect Back Ready
 	//**********************************
 	Message *message = Message::ReadMessage(connectBackSocket);
-	cout << "Read a callback packet\n";
 	if( message == NULL)
 	{
 		return change;

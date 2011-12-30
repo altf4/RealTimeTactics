@@ -893,7 +893,6 @@ bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
 	{
 		return false;
 	}
-	cout << "Sending notifications out...\n";
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
 		vector<Player*>::iterator it = match->teams[i]->players.begin();
@@ -906,12 +905,9 @@ bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
 				{
 					cerr << "ERROR: Message send returned failure.\n";
 				}
-				cout << "Sent a callback! Waiting for ack...\n";
 				Message *message_ack = Message::ReadMessage(recvSocket);
 				if( message_ack == NULL )
 				{
-					cerr << "ERROR: Failed to receive an ack from: "
-							<< (*it)->GetName() << "\n";
 					fullSuccess = false;
 					continue;
 				}
@@ -921,10 +917,6 @@ bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
 				{
 					//Got a bad return message. Should have been an ack
 					fullSuccess = false;
-				}
-				else
-				{
-					cout << "Got a callback ack!\n";
 				}
 				delete message_ack;
 			}

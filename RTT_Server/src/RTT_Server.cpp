@@ -288,7 +288,6 @@ void *CallbackClientThread(void * parm)
 	{
 		//The client should now be listening for a message on this socket
 		player->callbackSocket = connectBackSocket;
-		cout << "Callback successful for: " << player->GetName() << "\n";
 		pthread_rwlock_unlock(&playerListLock);
 		return NULL;
 	}
@@ -323,7 +322,6 @@ void *CallbackClientThread(void * parm)
 				connectBackWaitPool.erase(player->GetID());
 				pthread_rwlock_unlock(&waitPoolLock);
 				player->callbackSocket = returnSocket;
-				cout << "Callback successful for: " << player->GetName() << "\n";
 				return NULL;
 			}
 		}

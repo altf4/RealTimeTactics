@@ -421,7 +421,6 @@ void *CallbackThread(void * parm)
 	while(true)
 	{
 		struct CallbackChange change = ProcessCallbackCommand();
-		cout << "Got a callback\n";
 		switch( change.type )
 		{
 			case TEAM_CHANGE:
