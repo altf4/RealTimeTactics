@@ -40,6 +40,31 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint length)
 		//	MatchLobbyMessage
 		// (Initiated by client)
 		//*********************
+		//Leaving a match you're in
+		case MATCH_LEAVE_NOTIFICATION:
+		{
+			//Uses: 1) Message Type
+			uint expectedSize = MESSAGE_MIN_SIZE;
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			break;
+		}
+		case MATCH_LEAVE_ACKNOWLEDGE:
+		{
+			//Uses: 1) Message Type
+			uint expectedSize = MESSAGE_MIN_SIZE;
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			break;
+		}
 		case CHANGE_TEAM_REQUEST:
 		{
 			//Uses: 1) Message Type
@@ -602,6 +627,32 @@ char *MatchLobbyMessage::Serialize(uint *length)
 		//	MatchLobbyMessage
 		// (Initiated by client)
 		//*********************
+		//Leaving a match you're in
+		case MATCH_LEAVE_NOTIFICATION:
+		{
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE;
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			break;
+		}
+		case MATCH_LEAVE_ACKNOWLEDGE:
+		{
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE;
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			break;
+		}
 		case CHANGE_TEAM_REQUEST:
 		{
 			//Uses: 1) Message Type

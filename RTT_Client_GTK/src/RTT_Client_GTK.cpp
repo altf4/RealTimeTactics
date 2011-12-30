@@ -109,6 +109,9 @@ void connect_click()
 	{
 		statusbar->push("Connection Successful!");
 		LaunchMainLobbyPane();
+
+		//Launch the Callback Thread
+		pthread_create(&threadID, NULL, CallbackThread, NULL);
 	}
 	else
 	{
@@ -163,9 +166,6 @@ void create_match_submit_click()
 		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
-
-	//Launch the Callback Thread
-	pthread_create(&threadID, NULL, CallbackThread, NULL);
 
 	pthread_rwlock_unlock(&globalLock);
 }
@@ -313,7 +313,6 @@ void leave_match_click()
 	if( LeaveMatch() )
 	{
 		LaunchMainLobbyPane();
-		pthread_cancel(threadID);
 	}
 	else
 	{
@@ -365,9 +364,6 @@ void join_match_click()
 		return;
 	}
 
-	//Launch the Callback Thread
-	pthread_create(&threadID, NULL, CallbackThread, NULL);
-
 	pthread_rwlock_unlock(&globalLock);
 }
 
@@ -377,6 +373,8 @@ void quit_server_click()
 
 	ExitServer();
 	LaunchServerConnectPane();
+
+	pthread_cancel(threadID);
 
 	pthread_rwlock_unlock(&globalLock);
 }

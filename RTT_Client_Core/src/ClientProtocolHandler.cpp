@@ -382,7 +382,7 @@ bool RTT::LeaveMatch()
 	//********************************
 	// Send Match Leave Notification
 	//********************************
-	LobbyMessage *leave_note = new LobbyMessage();
+	MatchLobbyMessage *leave_note = new MatchLobbyMessage();
 	leave_note->type = MATCH_LEAVE_NOTIFICATION;
 	if( Message::WriteMessage(leave_note, connectFD) == false)
 	{
@@ -406,11 +406,6 @@ bool RTT::LeaveMatch()
 		return false;
 	}
 	delete leave_ack;
-
-	//Close the Callback Socket
-	close(connectBackSocket);
-	connectBackSocket = -1;
-
 	return true;
 }
 
@@ -877,19 +872,11 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			kicked_ack->type = KICKED_FROM_MATCH_ACK;
 			if( Message::WriteMessage(kicked_ack, connectBackSocket) == false)
 			{
-				//Close the Callback Socket
-				close(connectBackSocket);
-				connectBackSocket = -1;
-
 				//Error in write
 				delete kicked_ack;
 				delete match_message;
 				return change;
 			}
-
-			//Close the Callback Socket
-			close(connectBackSocket);
-			connectBackSocket = -1;
 
 			delete kicked_ack;
 			break;

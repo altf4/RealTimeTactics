@@ -327,34 +327,6 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 		}
-		case MATCH_LEAVE_NOTIFICATION:
-		{
-			if( player->currentMatch == NULL )
-			{
-				SendError(ConnectFD, NOT_IN_THAT_MATCH);
-				return IN_MAIN_LOBBY;
-			}
-			if( LeaveMatch(player) )
-			{
-				//*******************************
-				// Send Match Leave Acknowledge
-				//*******************************
-				LobbyMessage *leave_ack = new LobbyMessage();
-				leave_ack->type = MATCH_LEAVE_ACKNOWLEDGE;
-				if(  Message::WriteMessage(leave_ack, ConnectFD) == false)
-				{
-					//Error in write, do something?
-					cerr << "ERROR: Message send returned failure.\n";
-				}
-				delete leave_ack;
-				return IN_MAIN_LOBBY;
-			}
-			else
-			{
-				SendError(ConnectFD, NOT_IN_THAT_MATCH);
-				return IN_MAIN_LOBBY;
-			}
-		}
 		case SERVER_STATS_REQUEST:
 		{
 			//*******************************
@@ -450,6 +422,34 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 	MatchLobbyMessage *match_lobby_message = (MatchLobbyMessage*)match_lobby_message_init;
 	switch (match_lobby_message->type)
 	{
+		case MATCH_LEAVE_NOTIFICATION:
+		{
+			if( player->currentMatch == NULL )
+			{
+				SendError(connectFD, NOT_IN_THAT_MATCH);
+				return IN_MAIN_LOBBY;
+			}
+			if( LeaveMatch(player) )
+			{
+				//*******************************
+				// Send Match Leave Acknowledge
+				//*******************************
+				MatchLobbyMessage *leave_ack = new MatchLobbyMessage();
+				leave_ack->type = MATCH_LEAVE_ACKNOWLEDGE;
+				if(  Message::WriteMessage(leave_ack, connectFD) == false)
+				{
+					//Error in write, do something?
+					cerr << "ERROR: Message send returned failure.\n";
+				}
+				delete leave_ack;
+				return IN_MAIN_LOBBY;
+			}
+			else
+			{
+				SendError(connectFD, NOT_IN_THAT_MATCH);
+				return IN_MAIN_LOBBY;
+			}
+		}
 		case CHANGE_TEAM_REQUEST:
 		{
 			if( player->currentMatch == NULL )
