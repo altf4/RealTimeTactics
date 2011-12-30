@@ -57,6 +57,9 @@ Button *leave_match_button = NULL;
 Statusbar *match_lobby_status = NULL;
 TreeView *player_list_view = NULL;
 
+PlayerListColumns *columns;
+Glib::RefPtr<ListStore> playerListStore;
+
 pthread_rwlock_t globalLock;
 string username;
 pthread_t threadID;
@@ -291,12 +294,12 @@ void LaunchMatchLobbyPane()
 	player_list_view->remove_all_columns();
 	player_list_view->unset_model();
 
-	PlayerListColumns *columns = new PlayerListColumns();
-	Glib::RefPtr<ListStore> refListStore = ListStore::create(*columns);
-	player_list_view->set_model(refListStore);
+	columns = new PlayerListColumns();
+	playerListStore = ListStore::create(*columns);
+	player_list_view->set_model(playerListStore);
 
 	//Add a new row (for ourselves)
-	TreeModel::Row row = *(refListStore->append());
+	TreeModel::Row row = *(playerListStore->append());
 	row[columns->name] = username;
 	row[columns->team] = TEAM_1;
 
@@ -461,6 +464,7 @@ void *CallbackThread(void * parm)
 			{
 				pthread_rwlock_wrlock(&globalLock);
 				//Do stuff here
+				cout << "Player Left\n";
 				pthread_rwlock_unlock(&globalLock);
 				break;
 			}
@@ -470,10 +474,17 @@ void *CallbackThread(void * parm)
 			}
 			case PLAYER_JOINED:
 			{
-				pthread_rwlock_wrlock(&globalLock);
-				//Do stuff here
-				cout << "Player joined!\n";
-				pthread_rwlock_unlock(&globalLock);
+				if( username.compare(change.playerDescription.name) != 0)
+				{
+					pthread_rwlock_wrlock(&globalLock);
+					//Add a new row (for ourselves)
+					TreeModel::Row row = *(playerListStore->append());
+					row[columns->name] = change.playerDescription.name;
+					row[columns->team] = change.playerDescription.team;
+					player_list_view->show_all();
+
+					pthread_rwlock_unlock(&globalLock);
+				}
 				break;
 			}
 			case MATCH_STARTED:
