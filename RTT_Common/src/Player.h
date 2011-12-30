@@ -45,7 +45,7 @@ public:
 	//The match that this player is currently in
 	Match *currentMatch;
 	//Socket to receive MatchLobby messages from server on
-	int receiveSocket;
+	int callbackSocket;
 	struct PlayerDescription description;
 
 	Player();

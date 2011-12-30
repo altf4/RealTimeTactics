@@ -54,7 +54,6 @@ int main(int argc, char **argv)
 	pthread_rwlock_init(&playerIDLock, NULL);
 	pthread_rwlock_init(&waitPoolLock, NULL);
 
-	pthread_t threadID;
 	int c;
 
 	bool portEntered = false;
@@ -94,58 +93,114 @@ int main(int argc, char **argv)
 		exit(-1);
 	}
 
-	//Set up the TCP socket
-	struct sockaddr_in stSockAddr;
-	int SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	//Set up the TCP sockets
+	struct sockaddr_in stSockAddr, stCallbackSockAddr;
+	int mainSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	int callbackSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	if(-1 == SocketFD)
+	if(-1 == mainSocket || -1 == callbackSocket)
 	{
 		perror("can not create socket");
 		exit(EXIT_FAILURE);
 	}
 	int optval = 1;
-	setsockopt(SocketFD, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
+	setsockopt(mainSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
+	setsockopt(callbackSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
 
 	memset(&stSockAddr, 0, sizeof(stSockAddr));
-
 	stSockAddr.sin_family = AF_INET;
 	stSockAddr.sin_port = htons(serverPortNumber);
 	stSockAddr.sin_addr.s_addr = INADDR_ANY;
 
-	if(-1 == bind(SocketFD,(struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
+	memset(&stCallbackSockAddr, 0, sizeof(stSockAddr));
+	stCallbackSockAddr.sin_family = AF_INET;
+	stCallbackSockAddr.sin_port = htons(serverPortNumber+1);
+	stCallbackSockAddr.sin_addr.s_addr = INADDR_ANY;
+
+	if(-1 == bind(mainSocket,(struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
 	{
 		perror("error bind failed");
-		close(SocketFD);
+		close(mainSocket);
+		exit(EXIT_FAILURE);
+	}
+	if(-1 == bind(callbackSocket,(struct sockaddr *)&stCallbackSockAddr,
+			sizeof(stCallbackSockAddr)))
+	{
+		perror("error bind failed");
+		close(callbackSocket);
 		exit(EXIT_FAILURE);
 	}
 
-	if(-1 == listen(SocketFD, 10))
+	if(-1 == listen(mainSocket, 10))
 	{
 		perror("error listen failed");
-		close(SocketFD);
+		close(mainSocket);
+		exit(EXIT_FAILURE);
+	}
+	if(-1 == listen(callbackSocket, 10))
+	{
+		perror("error listen failed");
+		close(callbackSocket);
 		exit(EXIT_FAILURE);
 	}
 
-	//Main loop, just listens for new TCP connections and sends them off to ClientThread
+	pthread_t mainThreadID, callbackThreadID;
+
+	//Send the new connection off to another thread for handling
+	pthread_create(&mainThreadID, NULL, MainListen, (void *) mainSocket );
+	pthread_create(&callbackThreadID, NULL, CallbackListen, (void *) callbackSocket );
+
+	//TODO: stupid hack to keep the threads alive. replace later
+	while(true)
+	{}
+}
+
+void *MainListen(void * param)
+{
+	int mainSocket = (int)param;
+	//Main loop, just listens for new TCP connections and sends them off to MainClientThread
 	for(;;)
 	{
-		int ConnectFD = accept(SocketFD, NULL, NULL);
+		int ConnectFD = accept(mainSocket, NULL, NULL);
 
 		if(0 > ConnectFD)
 		{
 			perror("error accept failed");
-			close(SocketFD);
+			close(mainSocket);
 			exit(EXIT_FAILURE);
 		}
-
+		pthread_t threadID;
 		//Send the new connection off to another thread for handling
-		pthread_create(&threadID, NULL, ClientThread, (void *) ConnectFD );
+		pthread_create(&threadID, NULL, MainClientThread, (void *) ConnectFD );
 	}
 
 	return 0;
 }
 
-void *ClientThread(void * parm)
+void *CallbackListen(void * param)
+{
+	int callbackSocket = (int)param;
+	//listen for new TCP connections and sends them off to CallbackClientThread
+	for(;;)
+	{
+		int ConnectFD = accept(callbackSocket, NULL, NULL);
+
+		if(0 > ConnectFD)
+		{
+			perror("error accept failed");
+			close(callbackSocket);
+			exit(EXIT_FAILURE);
+		}
+
+		pthread_t threadID;
+		//Send the new connection off to another thread for handling
+		pthread_create(&threadID, NULL, CallbackClientThread, (void *) ConnectFD );
+	}
+
+	return 0;
+}
+
+void *MainClientThread(void * parm)
 {
 	int ConnectFD = (int)parm;
 
@@ -180,30 +235,100 @@ void *ClientThread(void * parm)
 		//In the a Match Lobby
 		if(lobbyReturn == IN_MATCH_LOBBY)
 		{
-			//TODO: Uncomment to enable MatchLobby messages
-//			if( MatchLobbyConnectBack(
-//					ConnectFD, serverPortNumber+1, player) == -1)
-//			{
-//				lobbyReturn = IN_MAIN_LOBBY;
-//			}
-//			while( lobbyReturn == IN_MATCH_LOBBY)
-//			{
-//				lobbyReturn = ProcessMatchLobbyCommand(ConnectFD, player);
-//			}
-//			if( lobbyReturn == EXITING_SERVER )
-//			{
-//				cout << "Player: " << player->GetName() << " has left.\n";
-//				QuitServer(player);
-//				return NULL;
-//			}
-//			if( lobbyReturn == IN_GAME )
-//			{
-//				//TODO: Start the match!!!
-//			}
+			while( lobbyReturn == IN_MATCH_LOBBY)
+			{
+				lobbyReturn = ProcessMatchLobbyCommand(ConnectFD, player);
+			}
+			if( lobbyReturn == EXITING_SERVER )
+			{
+				cout << "Player: " << player->GetName() << " has left.\n";
+				QuitServer(player);
+				return NULL;
+			}
+			if( lobbyReturn == IN_GAME )
+			{
+				//TODO: Start the match!!!
+			}
 		}
 	}
 
 	return NULL;
+}
+
+//Listens for a CONNECT_BACK_CLIENT_REQUEST message
+//	When we get it, save the created socket into the relevant player object
+void *CallbackClientThread(void * parm)
+{
+	int connectBackSocket = (int)parm;
+
+	//*******************************
+	// Receive Callback Register
+	//*******************************
+	Message *connect_back_reply = Message::ReadMessage(connectBackSocket);
+	if( connect_back_reply == NULL )
+	{
+		//ERROR
+		cerr << "ERROR: Callback message came back NULL\n";
+		return NULL;
+	}
+	if( connect_back_reply->type != CALLBACK_REGISTER )
+	{
+		//ERROR
+		cerr << "ERROR: Callback message was wrong type\n";
+		return NULL;
+	}
+	MatchLobbyMessage *match_callback_reply =
+			(MatchLobbyMessage*)connect_back_reply;
+
+	pthread_rwlock_wrlock(&playerListLock);
+
+	Player *player = playerList[match_callback_reply->playerID];
+	//We got the correct player on the first try. Yay!
+	if( match_callback_reply->playerID == player->GetID())
+	{
+		//The client should now be listening for a message on this socket
+		player->callbackSocket = connectBackSocket;
+		pthread_rwlock_unlock(&playerListLock);
+		return NULL;
+	}
+	//This was the wrong player!
+	//	Store this into the ConnectBack player pool then
+	//	Wait for our player to appear in the pool
+	else
+	{
+		int returnSocket;
+
+		pthread_rwlock_unlock(&playerListLock);
+		pthread_rwlock_wrlock(&waitPoolLock);
+
+		//Store player into waitPool:
+		connectBackWaitPool[match_callback_reply->playerID] = connectBackSocket;
+
+		//Try again for CALLBACK_WAIT_TIME seconds
+		for(uint i = 0; i < CALLBACK_WAIT_TIME; i++ )
+		{
+			if( connectBackWaitPool.count( player->GetID() ) == 0 )
+			{
+				//Player not in the pool. Wait and try again
+				pthread_rwlock_unlock(&waitPoolLock);
+				sleep(1); //Unlock for the sleep
+				pthread_rwlock_wrlock(&waitPoolLock);
+			}
+			else
+			{
+				//Found our player in the pool!
+				//Get the socket value and erase the record
+				returnSocket = connectBackWaitPool[player->GetID()];
+				connectBackWaitPool.erase(player->GetID());
+				pthread_rwlock_unlock(&waitPoolLock);
+				player->callbackSocket = returnSocket;
+				return NULL;
+			}
+		}
+		pthread_rwlock_unlock(&waitPoolLock);
+		cerr << "ERROR: Player never called back\n";
+		return NULL;
+	}
 }
 
 //Processes one round of combat. (Can consist of many actions triggered)

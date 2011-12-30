@@ -13,6 +13,7 @@
 #include <gtkmm.h>
 #include <arpa/inet.h>
 #include <vector>
+#include <pthread.h>
 
 using namespace std;
 using namespace Gtk;
@@ -56,18 +57,24 @@ Button *leave_match_button = NULL;
 Statusbar *match_lobby_status = NULL;
 TreeView *player_list_view = NULL;
 
-
-int SocketFD = 0;
+pthread_rwlock_t globalLock;
 string username;
+pthread_t threadID;
 
 void custom_server_click()
 {
+	pthread_rwlock_wrlock(&globalLock);
+
 	statusbar->push("Set server settings, then hit Connect");
 	box_custom->set_visible(true);
+
+	pthread_rwlock_unlock(&globalLock);
 }
 
 void connect_click()
 {
+	pthread_rwlock_wrlock(&globalLock);
+
 	statusbar->push("Trying to connect...");
 
 	//A little bit of input validation here
@@ -78,6 +85,7 @@ void connect_click()
 	if (Res == 0)
 	{
 		statusbar->push("Invalid IP address");
+		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
@@ -87,38 +95,48 @@ void connect_click()
 	{
 		//Error occurred
 		statusbar->push("Invalid port number");
+		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
 	username = entry_username->get_text();
 	string hashedPassword = entry_password->get_text();
 
-	SocketFD = AuthToServer(serverIP, serverPort,
+	int SocketFD = AuthToServer(serverIP, serverPort,
 			username, (unsigned char*)hashedPassword.c_str());
 
 	if( SocketFD > 0 )
 	{
 		statusbar->push("Connection Successful!");
 		LaunchMainLobbyPane();
+
+		//Launch the Callback Thread
+		pthread_create(&threadID, NULL, CallbackThread, NULL);
 	}
 	else
 	{
 		statusbar->push("Failed to connect to server");
 	}
+
+	pthread_rwlock_unlock(&globalLock);
 }
 
 void create_match_submit_click()
 {
+	pthread_rwlock_wrlock(&globalLock);
+
 	string matchName = match_name_entry->get_text();
 	if(matchName.size() < 1 && matchName.size() > 20)
 	{
 		status_lobby->push("Invalid match name length");
+		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
 	if(create_match_map_combo->get_active_row_number() == -1)
 	{
 		status_lobby->push("Please select a map");
+		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 	string mapName = create_match_map_combo->get_active_text();
@@ -127,6 +145,7 @@ void create_match_submit_click()
 	if( maxPlayers == -1)
 	{
 		status_lobby->push("Please select a maximum number of players");
+		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
@@ -137,25 +156,41 @@ void create_match_submit_click()
 	options.maxPlayers = maxPlayers + 2; //+2 since the combo starts at 2
 	strncpy(options.name, match_name_entry->get_text().c_str(), sizeof(options.name));
 
-	if (CreateMatch(SocketFD, options) )
+	if (CreateMatch(options) )
 	{
 		LaunchMatchLobbyPane();
 	}
 	else
 	{
 		status_lobby->push("Server returned failure to create match");
+		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
+
+	pthread_rwlock_unlock(&globalLock);
 }
 
 void create_match_click()
 {
+	pthread_rwlock_wrlock(&globalLock);
+
 	create_match_box->set_visible(true);
 	match_lists->set_visible(false);
+
+	pthread_rwlock_unlock(&globalLock);
 }
 
 //Refresh the match list
 void list_matches_click()
+{
+	pthread_rwlock_wrlock(&globalLock);
+
+	list_matches();
+
+	pthread_rwlock_unlock(&globalLock);
+}
+
+void list_matches()
 {
 	create_match_box->set_visible(false);
 	match_lists->set_visible(true);
@@ -168,7 +203,7 @@ void list_matches_click()
 		page = 1;
 	}
 
-	struct ServerStats stats = GetServerStats(SocketFD);
+	struct ServerStats stats = GetServerStats();
 
 	//Determine how many pages we need to display these
 	//	x / y (rounding up) = (x + y - 1) / y
@@ -200,7 +235,7 @@ void list_matches_click()
 
 	//Populate the view we're currently selecting
 	struct MatchDescription descriptions[MATCHES_PER_PAGE];
-	uint numMatchesThisPage = ListMatches(SocketFD, page+1, descriptions);
+	uint numMatchesThisPage = ListMatches(page+1, descriptions);
 
 	match_lists->set_current_page(page);
 
@@ -236,7 +271,7 @@ void LaunchMainLobbyPane()
 	match_lobby_box->set_visible(false);
 
 	//By default, show the match list first
-	list_matches_click();
+	list_matches();
 }
 
 void LaunchServerConnectPane()
@@ -273,7 +308,9 @@ void LaunchMatchLobbyPane()
 
 void leave_match_click()
 {
-	if( LeaveMatch(SocketFD) )
+	pthread_rwlock_wrlock(&globalLock);
+
+	if( LeaveMatch() )
 	{
 		LaunchMainLobbyPane();
 	}
@@ -282,14 +319,17 @@ void leave_match_click()
 		match_lobby_status->push("Error on server, couldn't leave match");
 	}
 
+	pthread_rwlock_unlock(&globalLock);
 }
 
 void join_match_click()
 {
+	pthread_rwlock_wrlock(&globalLock);
 	int page = match_lists->get_current_page();
 	if( page == -1 )
 	{
 		status_lobby->push("Please select a match, and try again");
+		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
@@ -297,6 +337,7 @@ void join_match_click()
 	if( view == NULL )
 	{
 		status_lobby->push("Please select a match, and try again");
+		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
@@ -305,27 +346,37 @@ void join_match_click()
 	if( select->count_selected_rows() != 1)
 	{
 		status_lobby->push("Please select a match, and try again");
+		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 	TreeModel::iterator iter = select->get_selected();
 	TreeModel::Row row = *( iter );
 	int matchID = row[columns.matchID];
 
-	if( JoinMatch(SocketFD, matchID) )
+	if( JoinMatch(matchID) )
 	{
 		LaunchMatchLobbyPane();
 	}
 	else
 	{
 		status_lobby->push("Failed to join match. Is it full?");
+		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
+
+	pthread_rwlock_unlock(&globalLock);
 }
 
 void quit_server_click()
 {
-	ExitServer(SocketFD);
+	pthread_rwlock_wrlock(&globalLock);
+
+	ExitServer();
 	LaunchServerConnectPane();
+
+	pthread_cancel(threadID);
+
+	pthread_rwlock_unlock(&globalLock);
 }
 
 void InitGlobalWidgets()
@@ -364,8 +415,93 @@ void InitGlobalWidgets()
 
 }
 
+void *CallbackThread(void * parm)
+{
+
+	while(true)
+	{
+		struct CallbackChange change = ProcessCallbackCommand();
+		switch( change.type )
+		{
+			case TEAM_CHANGE:
+			{
+				pthread_rwlock_wrlock(&globalLock);
+				//Do stuff here
+				pthread_rwlock_unlock(&globalLock);
+			}
+			case COLOR_CHANGE:
+			{
+				pthread_rwlock_wrlock(&globalLock);
+				//Do stuff here
+				pthread_rwlock_unlock(&globalLock);
+				break;
+			}
+			case MAP_CHANGE:
+			{
+				pthread_rwlock_wrlock(&globalLock);
+				//Do stuff here
+				pthread_rwlock_unlock(&globalLock);
+				break;
+			}
+			case SPEED_CHANGE:
+			{
+				pthread_rwlock_wrlock(&globalLock);
+				//Do stuff here
+				pthread_rwlock_unlock(&globalLock);
+				break;
+			}
+			case VICTORY_CHANGE:
+			{
+				pthread_rwlock_wrlock(&globalLock);
+				//Do stuff here
+				pthread_rwlock_unlock(&globalLock);
+				break;
+			}
+			case PLAYER_LEFT:
+			{
+				pthread_rwlock_wrlock(&globalLock);
+				//Do stuff here
+				pthread_rwlock_unlock(&globalLock);
+				break;
+			}
+			case KICKED:
+			{
+				return NULL;
+			}
+			case PLAYER_JOINED:
+			{
+				pthread_rwlock_wrlock(&globalLock);
+				//Do stuff here
+				cout << "Player joined!\n";
+				pthread_rwlock_unlock(&globalLock);
+				break;
+			}
+			case MATCH_STARTED:
+			{
+				//TODO: Start the game!!!
+				cout << "Game is starting in 3... 2... 1...\n";
+				break;
+			}
+			case CALLBACK_ERROR:
+			{
+				cerr << "ERROR: Callback receive failed\n";
+				break;
+			}
+			default:
+			{
+				cerr << "ERROR: Got a bad type from callback. Shouldn't get here\n";
+				break;
+			}
+		}
+
+
+	}
+}
+
 int main( int argc, char **argv)
 {
+	pthread_rwlock_init(&globalLock, NULL);
+
 	Main kit(argc, argv);
 
 	//Initialize widgets used in Welcome Window

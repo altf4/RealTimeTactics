@@ -45,6 +45,7 @@ public:
 	//TODO: I didn't want to import libssl just to use SHA256_DIGEST_LENGTH
 	unsigned char hashedPassword[32];
 	enum AuthResult authSuccess;
+	uint playerID;
 
 	AuthMessage();
 	AuthMessage(char *buffer, uint length);

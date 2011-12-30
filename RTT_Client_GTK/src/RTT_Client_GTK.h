@@ -14,13 +14,18 @@ void quit_server_click();
 void create_match_click();
 void create_match_submit_click();
 void join_match_click();
-
+void list_matches_click();
 void leave_match_click();
+
+void list_matches();
 
 void LaunchMainLobbyPane();
 void LaunchServerConnectPane();
 void LaunchMatchLobbyPane();
 
 void InitGlobalWidgets();
+
+//Callback Thread managing events from the server
+void *CallbackThread(void * parm);
 
 #endif /* RTT_CLIENT_GTK_H_ */

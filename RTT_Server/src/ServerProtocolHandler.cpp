@@ -126,6 +126,7 @@ Player *RTT::GetNewClient(int ConnectFD)
 	AuthMessage *server_auth_reply = new AuthMessage();
 	server_auth_reply->type = SERVER_AUTH_REPLY;
 	server_auth_reply->authSuccess = authresult;
+	server_auth_reply->playerID = player->GetID();
 
 	if(  Message::WriteMessage(server_auth_reply, ConnectFD) == false)
 	{
@@ -282,6 +283,19 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 						cerr << "ERROR: Message send returned failure.\n";
 					}
 					delete match_join;
+
+					//*******************************
+					// Send Client Notifications
+					//*******************************
+					MatchLobbyMessage *notification = new MatchLobbyMessage();
+					notification->type = PLAYER_JOINED_MATCH_NOTIFICATION;
+					notification->playerDescription = player->description;
+					pthread_rwlock_rdlock(&matchListLock);
+					NotifyClients(matchList[player->currentMatch->GetID()],
+							notification);
+					pthread_rwlock_unlock(&matchListLock);
+					delete notification;
+
 					return IN_MATCH_LOBBY;
 				}
 				case LOBBY_MATCH_IS_FULL:
@@ -310,34 +324,6 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 					break;
 				}
 				SendError(ConnectFD, errorType);
-				return IN_MAIN_LOBBY;
-			}
-		}
-		case MATCH_LEAVE_NOTIFICATION:
-		{
-			if( player->currentMatch == NULL )
-			{
-				SendError(ConnectFD, NOT_IN_THAT_MATCH);
-				return IN_MAIN_LOBBY;
-			}
-			if( LeaveMatch(player) )
-			{
-				//*******************************
-				// Send Match Leave Acknowledge
-				//*******************************
-				LobbyMessage *leave_ack = new LobbyMessage();
-				leave_ack->type = MATCH_LEAVE_ACKNOWLEDGE;
-				if(  Message::WriteMessage(leave_ack, ConnectFD) == false)
-				{
-					//Error in write, do something?
-					cerr << "ERROR: Message send returned failure.\n";
-				}
-				delete leave_ack;
-				return IN_MAIN_LOBBY;
-			}
-			else
-			{
-				SendError(ConnectFD, NOT_IN_THAT_MATCH);
 				return IN_MAIN_LOBBY;
 			}
 		}
@@ -436,6 +422,34 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 	MatchLobbyMessage *match_lobby_message = (MatchLobbyMessage*)match_lobby_message_init;
 	switch (match_lobby_message->type)
 	{
+		case MATCH_LEAVE_NOTIFICATION:
+		{
+			if( player->currentMatch == NULL )
+			{
+				SendError(connectFD, NOT_IN_THAT_MATCH);
+				return IN_MAIN_LOBBY;
+			}
+			if( LeaveMatch(player) )
+			{
+				//*******************************
+				// Send Match Leave Acknowledge
+				//*******************************
+				MatchLobbyMessage *leave_ack = new MatchLobbyMessage();
+				leave_ack->type = MATCH_LEAVE_ACKNOWLEDGE;
+				if(  Message::WriteMessage(leave_ack, connectFD) == false)
+				{
+					//Error in write, do something?
+					cerr << "ERROR: Message send returned failure.\n";
+				}
+				delete leave_ack;
+				return IN_MAIN_LOBBY;
+			}
+			else
+			{
+				SendError(connectFD, NOT_IN_THAT_MATCH);
+				return IN_MAIN_LOBBY;
+			}
+		}
 		case CHANGE_TEAM_REQUEST:
 		{
 			if( player->currentMatch == NULL )
@@ -884,133 +898,30 @@ bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
 		vector<Player*>::iterator it = match->teams[i]->players.begin();
 		for( ; it != match->teams[i]->players.end(); it++ )
 		{
-			int recvSocket = (*it)->receiveSocket;
-			if(  Message::WriteMessage(message, recvSocket == false) )
+			int recvSocket = (*it)->callbackSocket;
+			if( recvSocket >= 0 )
 			{
-				cerr << "ERROR: Message send returned failure.\n";
+				if(  Message::WriteMessage(message, recvSocket) == false )
+				{
+					cerr << "ERROR: Message send returned failure.\n";
+				}
+				Message *message_ack = Message::ReadMessage(recvSocket);
+				if( message_ack == NULL )
+				{
+					fullSuccess = false;
+					continue;
+				}
+				//TODO: Not strictly correct. We only want to allow ACKs
+				if( message_ack->type < CHANGE_TEAM_REQUEST ||
+						message_ack->type > MATCH_START_ACK)
+				{
+					//Got a bad return message. Should have been an ack
+					fullSuccess = false;
+				}
+				delete message_ack;
 			}
-			Message *message_ack = Message::ReadMessage(recvSocket);
-			if( message_ack == NULL )
-			{
-				cerr << "ERROR: Failed to receive an ack from: "
-						<< (*it)->GetName() << "\n";
-			}
-			//TODO: Not strictly correct. We only want to allow ACKs
-			if( message_ack->type < CHANGE_TEAM_REQUEST ||
-					message_ack->type > MATCH_START_ACK)
-			{
-				//Got a bad return message. Should have been an ack
-				fullSuccess = false;
-			}
-			delete message_ack;
 		}
 	}
 	return fullSuccess;
 }
 
-int RTT::MatchLobbyConnectBack(int oldSocket, uint portNum, Player *player)
-{
-	//Set up a new server on the ConnectBack port
-	struct sockaddr_in stSockAddr;
-	int SocketFD = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-
-	if(-1 == SocketFD)
-	{
-		perror("can not create socket");
-		return -1;
-	}
-	int optval = 1;
-	setsockopt(SocketFD, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
-
-	memset(&stSockAddr, 0, sizeof(stSockAddr));
-
-	stSockAddr.sin_family = AF_INET;
-	stSockAddr.sin_port = htons(portNum);
-	stSockAddr.sin_addr.s_addr = INADDR_ANY;
-
-	if(-1 == bind(SocketFD,(struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
-	{
-		perror("error bind failed");
-		close(SocketFD);
-		return -1;
-	}
-
-	if(-1 == listen(SocketFD, 10))
-	{
-		perror("error listen failed");
-		close(SocketFD);
-		return -1;
-	}
-
-	//Tell client we're ready
-	MatchLobbyMessage *connect_back_ready = new MatchLobbyMessage();
-	connect_back_ready->type = CONNECT_BACK_SERVER_READY;
-	connect_back_ready->portNum = portNum;
-	if(  Message::WriteMessage(connect_back_ready, oldSocket) == false)
-	{
-		//Error in write, do something?
-		cerr << "ERROR: Message send returned failure.\n";
-	}
-	delete connect_back_ready;
-
-	//Listen for our client to connect back on the new port...
-	int connectBackSocket = accept(SocketFD, NULL, NULL);
-
-	//Read ready-to-go message
-	Message *connect_back_reply = Message::ReadMessage(connectBackSocket);
-	if( connect_back_reply == NULL )
-	{
-		//ERROR
-		cerr << "ERROR: ConnectBack message came back NULL\n";
-		return -1;
-	}
-	if( connect_back_reply->type != CONNECT_BACK_CLIENT_REQUEST )
-	{
-		//ERROR
-		cerr << "ERROR: ConnectBack message was wrong type\n";
-		return -1;
-	}
-	MatchLobbyMessage *match_connect_back_reply =
-			(MatchLobbyMessage*)connect_back_reply;
-
-	//We got the correct player on the first try. Yay!
-	if( match_connect_back_reply->playerID == player->GetID())
-	{
-		//The client should now be listening for a message on this socket
-		return connectBackSocket;
-	}
-	//This was the wrong player!
-	//	Store this into the ConnectBack player pool then
-	//	Wait for our player to appear in the pool
-	else
-	{
-		int returnSocket;
-		//Store player into waitPool:
-		connectBackWaitPool[match_connect_back_reply->playerID] = connectBackSocket;
-
-		//Try again for CALLBACK_WAIT_TIME seconds
-		pthread_rwlock_wrlock(&waitPoolLock);
-		for(uint i = 0; i < CALLBACK_WAIT_TIME; i++ )
-		{
-			if( connectBackWaitPool.count( player->GetID() ) == 0 )
-			{
-				//Player not in the pool. Wait and try again
-				pthread_rwlock_unlock(&waitPoolLock);
-				sleep(1); //Unlock for the sleep
-				pthread_rwlock_wrlock(&waitPoolLock);
-			}
-			else
-			{
-				//Found our player in the pool!
-				//Get the socket value and erase the record
-				returnSocket = connectBackWaitPool[player->GetID()];
-				connectBackWaitPool.erase(player->GetID());
-				pthread_rwlock_unlock(&waitPoolLock);
-				return returnSocket;
-			}
-		}
-		pthread_rwlock_unlock(&waitPoolLock);
-		cerr << "ERROR: Player never called back\n";
-		return -1;
-	}
-}
