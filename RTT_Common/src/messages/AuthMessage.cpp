@@ -99,8 +99,8 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 		case SERVER_AUTH_REPLY:
 		{
 			//Uses: 1) authSuccess
-
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(authSuccess);
+			//		2) Your new Player ID
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(authSuccess) + sizeof(playerID);
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -108,6 +108,10 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 			}
 
 			memcpy(&authSuccess, buffer, sizeof(authSuccess));
+			buffer += sizeof(authSuccess);
+			memcpy(&playerID, buffer, sizeof(playerID));
+			buffer += sizeof(playerID);
+
 			break;
 		}
 		default:
@@ -201,7 +205,7 @@ char *AuthMessage::Serialize(uint *length)
 		}
 		case SERVER_AUTH_REPLY:
 		{
-			uint messageSize = MESSAGE_MIN_SIZE + sizeof(authSuccess);
+			uint messageSize = MESSAGE_MIN_SIZE + sizeof(authSuccess) + sizeof(playerID);
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
@@ -211,6 +215,10 @@ char *AuthMessage::Serialize(uint *length)
 			buffer += MESSAGE_MIN_SIZE;
 
 			memcpy(buffer, &authSuccess, sizeof(authSuccess));
+			buffer += sizeof(authSuccess);
+			memcpy(buffer, &playerID, sizeof(playerID));
+			buffer += sizeof(playerID);
+
 			*length = messageSize;
 			return originalBuffer;
 		}

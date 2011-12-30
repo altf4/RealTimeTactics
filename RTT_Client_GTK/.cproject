@@ -123,6 +123,7 @@
 									<listOptionValue builtIn="false" value="gthread-2.0"/>
 									<listOptionValue builtIn="false" value="RTT_Common"/>
 									<listOptionValue builtIn="false" value="RTT_Client_Core"/>
+									<listOptionValue builtIn="false" value="pthread"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.1491907197" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="../../RTT_Common/Debug"/>

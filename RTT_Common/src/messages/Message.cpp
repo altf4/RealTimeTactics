@@ -75,8 +75,6 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case MATCH_CREATE_REPLY:
 		case MATCH_JOIN_REQUEST:
 		case MATCH_JOIN_REPLY:
-		case MATCH_LEAVE_NOTIFICATION:
-		case MATCH_LEAVE_ACKNOWLEDGE:
 		case SERVER_STATS_REQUEST:
 		case SERVER_STATS_REPLY:
 		case MATCH_EXIT_SERVER_NOTIFICATION:
@@ -90,6 +88,8 @@ Message *Message::Deserialize(char *buffer, uint length)
 			}
 			return message;
 		}
+		case MATCH_LEAVE_NOTIFICATION:
+		case MATCH_LEAVE_ACKNOWLEDGE:
 		case CHANGE_TEAM_REQUEST:
 		case CHANGE_TEAM_REPLY:
 		case START_MATCH_REQUEST:
@@ -104,8 +104,7 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case CHANGE_GAME_SPEED_REPLY:
 		case KICK_PLAYER_REQUEST:
 		case KICK_PLAYER_REPLY:
-		case CONNECT_BACK_SERVER_READY:
-		case CONNECT_BACK_CLIENT_REQUEST:
+		case CALLBACK_REGISTER:
 		case TEAM_CHANGED_NOTIFICATION:
 		case TEAM_CHANGED_ACK:
 		case KICKED_FROM_MATCH_NOTIFICATION:
@@ -169,7 +168,8 @@ Message *Message::ReadMessage(int connectFD)
 		else
 		{
 			//Error in reading from socket
-			cerr << "ERROR: Socket returned error...\n";
+			perror("ERROR: Socket returned error...");
+
 			return NULL;
 		}
 	}
@@ -191,9 +191,10 @@ bool Message::WriteMessage(Message *message, int connectFD)
 	char *buffer = message->Serialize(&length);
 
 	//TODO: Loop the write until it finishes?
-	if( write(connectFD, buffer, length) == -1)
+	if( write(connectFD, buffer, length) < 0 )
 	{
 		//Error
+		perror("ERROR: Write failed: ");
 		cerr << "ERROR: Write function didn't finish...\n";
 		free(buffer);
 		return false;

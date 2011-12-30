@@ -45,9 +45,6 @@ enum MessageType: char
 	//Joining a match already created
 	MATCH_JOIN_REQUEST,
 	MATCH_JOIN_REPLY,
-	//Deleting a match you're in
-	MATCH_LEAVE_NOTIFICATION,
-	MATCH_LEAVE_ACKNOWLEDGE,
 	//Ask server for stats
 	SERVER_STATS_REQUEST,
 	SERVER_STATS_REPLY,
@@ -59,6 +56,9 @@ enum MessageType: char
 	//	MatchLobbyMessage
 	// (Initiated by client)
 	//*********************
+	//leaving a match you're in
+	MATCH_LEAVE_NOTIFICATION,
+	MATCH_LEAVE_ACKNOWLEDGE,
 	//Change what team a player is on
 	CHANGE_TEAM_REQUEST,
 	CHANGE_TEAM_REPLY,
@@ -81,8 +81,7 @@ enum MessageType: char
 	KICK_PLAYER_REQUEST,
 	KICK_PLAYER_REPLY,
 	//ConnectBack
-	CONNECT_BACK_SERVER_READY,
-	CONNECT_BACK_CLIENT_REQUEST,
+	CALLBACK_REGISTER,
 
 	//************************
 	//	MatchLobbyMessage
