@@ -83,7 +83,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 
 			//Allocate new space for the match descriptions
 			matchDescriptions = (struct MatchDescription *)malloc(returnedMatchesCount
-					* (MATCH_DESCR_SIZE));
+					* sizeof(struct MatchDescription));
 
 			//Copy over the memory for the match descriptions
 			for(uint i = 0; i < returnedMatchesCount; i++)

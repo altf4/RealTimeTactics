@@ -251,11 +251,11 @@ void list_matches()
 	for(uint i = 0; i < numMatchesThisPage; i++)
 	{
 		TreeModel::Row row = *(refListStore->append());
-		row[columns->matchID] = (int)descriptions[page].ID;
-		row[columns->maxPlayers] = (int)descriptions[page].maxPlayers;
-		row[columns->currentPlayers] = (int)descriptions[page].currentPlayerCount;
-		row[columns->name] = descriptions[page].name;
-		row[columns->timeCreated] = ctime(&descriptions[page].timeCreated) ;
+		row[columns->matchID] = (int)descriptions[i].ID;
+		row[columns->maxPlayers] = (int)descriptions[i].maxPlayers;
+		row[columns->currentPlayers] = (int)descriptions[i].currentPlayerCount;
+		row[columns->name] = descriptions[i].name;
+		row[columns->timeCreated] = ctime(&descriptions[i].timeCreated) ;
 	}
 
 	view->append_column("ID", columns->matchID);
