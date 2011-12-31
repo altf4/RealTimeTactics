@@ -8,6 +8,7 @@
 #ifndef RTT_CLIENT_GTK_H_
 #define RTT_CLIENT_GTK_H_
 
+#include <gtkmm.h>
 
 void connect_click();
 void quit_server_click();
@@ -18,6 +19,7 @@ void list_matches_click();
 void leave_match_click();
 
 void list_matches();
+void teamNumberEdited(const Glib::ustring& path_string, const Glib::ustring& new_text);
 
 void LaunchMainLobbyPane();
 void LaunchServerConnectPane();

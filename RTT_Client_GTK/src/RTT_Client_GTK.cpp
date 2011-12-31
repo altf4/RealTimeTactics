@@ -9,6 +9,7 @@
 #include "RTT_Client_GTK.h"
 #include "MatchListColumns.h"
 #include "PlayerListColumns.h"
+#include "TeamComboColumns.h"
 #include <iostream>
 #include <gtkmm.h>
 #include <arpa/inet.h>
@@ -57,8 +58,11 @@ Button *leave_match_button = NULL;
 Statusbar *match_lobby_status = NULL;
 TreeView *player_list_view = NULL;
 
-PlayerListColumns *columns;
+PlayerListColumns *playerColumns;
 Glib::RefPtr<ListStore> playerListStore;
+
+TeamComboColumns *teamNumberColumns;
+Glib::RefPtr<Gtk::ListStore> teamNumberListStore;
 
 pthread_rwlock_t globalLock;
 pthread_t threadID;
@@ -285,6 +289,40 @@ void LaunchServerConnectPane()
 	match_lobby_box->set_visible(false);
 }
 
+void PopulateTeamNumberCombo()
+{
+	TreeModel::Row row = *(teamNumberListStore->append());
+	row[teamNumberColumns->teamNum] = "TEAM_1";
+	row[teamNumberColumns->teamString] = "Team 1";
+	row = *(teamNumberListStore->append());
+	row[teamNumberColumns->teamNum] = "TEAM_2";
+	row[teamNumberColumns->teamString] = "Team 2";
+	row = *(teamNumberListStore->append());
+	row[teamNumberColumns->teamNum] = "TEAM_3";
+	row[teamNumberColumns->teamString] = "Team 3";
+	row = *(teamNumberListStore->append());
+	row[teamNumberColumns->teamNum] = "TEAM_4";
+	row[teamNumberColumns->teamString] = "Team 4";
+	row = *(teamNumberListStore->append());
+	row[teamNumberColumns->teamNum] = "TEAM_5";
+	row[teamNumberColumns->teamString] = "Team 5";
+	row = *(teamNumberListStore->append());
+	row[teamNumberColumns->teamNum] = "TEAM_6";
+	row[teamNumberColumns->teamString] = "Team 6";
+	row = *(teamNumberListStore->append());
+	row[teamNumberColumns->teamNum] = "TEAM_7";
+	row[teamNumberColumns->teamString] = "Team 7";
+	row = *(teamNumberListStore->append());
+	row[teamNumberColumns->teamNum] = "TEAM_8";
+	row[teamNumberColumns->teamString] = "Team 8";
+	row = *(teamNumberListStore->append());
+	row[teamNumberColumns->teamNum] = "REFEREE";
+	row[teamNumberColumns->teamString] = "Referee";
+	row = *(teamNumberListStore->append());
+	row[teamNumberColumns->teamNum] = "SPECTATOR";
+	row[teamNumberColumns->teamString] = "Spectator";
+}
+
 void LaunchMatchLobbyPane(PlayerDescription *playerDescriptions, uint playerCount)
 {
 	welcome_box->set_visible(false);
@@ -295,23 +333,57 @@ void LaunchMatchLobbyPane(PlayerDescription *playerDescriptions, uint playerCoun
 	player_list_view->remove_all_columns();
 	player_list_view->unset_model();
 
-	columns = new PlayerListColumns();
-	playerListStore = ListStore::create(*columns);
+	playerColumns = new PlayerListColumns();
+	playerListStore = ListStore::create(*playerColumns);
 	player_list_view->set_model(playerListStore);
+
+	teamNumberColumns = new TeamComboColumns();
+	teamNumberListStore = Gtk::ListStore::create(*teamNumberColumns);
+	PopulateTeamNumberCombo();
 
 	//Add a new row (for ourselves)
 	for(uint i = 0; i < playerCount; i++)
 	{
 		TreeModel::Row row = *(playerListStore->append());
-		row[columns->name] = string(playerDescriptions[i].name);
-		row[columns->team] = playerDescriptions[i].team;
-		row[columns->ID] = playerDescriptions[i].ID;
+		row[playerColumns->name] = string(playerDescriptions[i].name);
+		row[playerColumns->ID] = playerDescriptions[i].ID;
+		row[playerColumns->teamChosen] = teamNumberListStore;
+		row[playerColumns->teamName] = string("Pick One!");
 	}
 
-	player_list_view->append_column("Name", columns->name);
-	player_list_view->append_column("Team", columns->team);
+	player_list_view->append_column("Name", playerColumns->name);
+
+	TreeView::Column* pColumn = manage( new Gtk::TreeView::Column("Team") );
+	CellRendererCombo* pRenderer = manage(	new CellRendererCombo());
+	pColumn->pack_start(*pRenderer);
+	player_list_view->append_column(*pColumn);
+
+	pRenderer->property_model() = teamNumberListStore;
+	pColumn->add_attribute(pRenderer->property_text(), playerColumns->teamName);
+	pColumn->add_attribute(pRenderer->property_model(), playerColumns->teamChosen);
+
+	pRenderer->property_text_column() = 0;
+	pRenderer->property_editable() = true;
+	pRenderer->property_has_entry() = false;
+
+//	m_button1.signal_clicked().connect( sigc::bind<Glib::ustring>( sigc::mem_fun(*this, &HelloWorld::on_button_clicked), "button 1") );
+//	pRenderer->signal_changed().connect( sigc::ptr_fun(teamNumberEdited) );
 
 	player_list_view->show_all();
+}
+
+void teamNumberEdited(const Glib::ustring& new_text)
+{
+	Gtk::TreePath path(path_string);
+
+	//Get the row from the path:
+	Gtk::TreeModel::iterator iter = teamNumberListStore->get_iter(path);
+	if(iter)
+	{
+		//Store the user's new text in the model:
+		Gtk::TreeRow row = *iter;
+//		row[m_Columns.m_col_itemchosen] = new_text;
+	}
 }
 
 void leave_match_click()
@@ -476,7 +548,7 @@ void *CallbackThread(void * parm)
 				for(r=rows.begin(); r!=rows.end(); r++)
 				{
 					TreeModel::Row row=*r;
-					uint ID = row[columns->ID];
+					uint ID = row[playerColumns->ID];
 					if( ID == change.playerID)
 					{
 						playerListStore->erase(r);
@@ -497,9 +569,9 @@ void *CallbackThread(void * parm)
 					pthread_rwlock_wrlock(&globalLock);
 					//Add a new row (for ourselves)
 					TreeModel::Row row = *(playerListStore->append());
-					row[columns->name] = change.playerDescription.name;
-					row[columns->team] = change.playerDescription.team;
-					row[columns->ID] = change.playerDescription.ID;
+					row[playerColumns->name] = change.playerDescription.name;
+//					row[playerColumns->team] = change.playerDescription.team;
+					row[playerColumns->ID] = change.playerDescription.ID;
 					player_list_view->show_all();
 
 					pthread_rwlock_unlock(&globalLock);

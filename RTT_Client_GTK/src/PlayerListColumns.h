@@ -21,10 +21,11 @@ class PlayerListColumns : public Gtk::TreeModelColumnRecord
 public:
 
 	PlayerListColumns()
-	{ add(name); add(team); add(ID);}
+	{ add(name); add(teamName); add(teamChosen); add(ID);}
 
 	TreeModelColumn<string> name;
-	TreeModelColumn<uint> team;
+	TreeModelColumn<Glib::ustring> teamName;
+	TreeModelColumn<Glib::RefPtr<Gtk::TreeModel> > teamChosen;
 	TreeModelColumn<uint> ID;
 
 };
