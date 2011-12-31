@@ -96,7 +96,7 @@ bool RTT_Ogre_3D::go(void)
     rttCamera->setAspectRatio(
     Real(vp->getActualWidth()) / Real(vp->getActualHeight()));
 
-    //START ADDING OBJECTS TO RENDER          Time for some objects for testing
+    //START ADDING OBJECTS TO RENDER          Time for some objects for testing ***************************************
     Entity* ogreHead = rttSceneManager->createEntity("Head", "ogrehead.mesh");
 
     SceneNode* headNode = rttSceneManager->getRootSceneNode()->createChildSceneNode();
@@ -109,7 +109,9 @@ bool RTT_Ogre_3D::go(void)
     Light* l = rttSceneManager->createLight("MainLight");
     l->setPosition(20,80,50);
 
-    //END OBJECTS
+    rttSceneManager->setSkyDome(true, "Examples/CloudySky2", 4, 6, 6000);
+
+    //END OBJECTS       ************************************************************************************************
 
     //where the magic happens:  Render loop!!!
     while(true)
