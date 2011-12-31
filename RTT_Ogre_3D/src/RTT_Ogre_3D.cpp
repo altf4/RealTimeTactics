@@ -84,8 +84,8 @@ bool RTT_Ogre_3D::go(void)
 
     rttCamera = rttSceneManager->createCamera("PrimaryCamera"); //Create our primary camera in our screen manager
     //The camera needs positioning
-    rttCamera->setPosition(Vector3(0,0,80)); // Position it at 80 in Z direction
-    rttCamera->lookAt(Vector3(0,0,-300)); // Look back along -Z
+    rttCamera->setPosition(Vector3(0,7.5,8.5)); // Position it at 80 in Z direction
+    rttCamera->lookAt(Vector3(0,0,-5)); // Look back along -Z
     rttCamera->setNearClipDistance(5); // This is how close an object can be to the camera before it is "clipped", or not rendered
 
     // Create one viewport, entire window, this is where the camera view is rendered
@@ -97,19 +97,45 @@ bool RTT_Ogre_3D::go(void)
     Real(vp->getActualWidth()) / Real(vp->getActualHeight()));
 
     //START ADDING OBJECTS TO RENDER          Time for some objects for testing ***************************************
-    Entity* ogreHead = rttSceneManager->createEntity("Head", "ogrehead.mesh");
 
-    SceneNode* headNode = rttSceneManager->getRootSceneNode()->createChildSceneNode();
-    headNode->attachObject(ogreHead);
+    // Set ambient light and shadows
+    rttSceneManager->setAmbientLight(ColourValue(0, 0, 0));
+    rttSceneManager->setShadowTechnique(SHADOWTYPE_TEXTURE_ADDITIVE);
+    //Shadowmaps	EXPERIMENTAL  **********BROKEN************
+    /*
+    rttSceneManager->setShadowTexturePixelFormat(Ogre::PF_FLOAT16_R);
+    rttSceneManager->setShadowTextureSelfShadow(true);
+    rttSceneManager->setShadowTextureCasterMaterial("ShadowCaster");
+    rttSceneManager->setShadowTextureReceiverMaterial("ShadowReceiver");
+     */
 
-    // Set ambient light
-    rttSceneManager->setAmbientLight(Ogre::ColourValue(0.5, 0.5, 0.5));
+    Entity* dirtTile = rttSceneManager->createEntity("DirtTile1", "DirtTile.mesh");
+    dirtTile->setCastShadows(true);
+    SceneNode* dirtTileNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("DirtTile1");
+    dirtTileNode->attachObject(dirtTile);
+
+    Entity* blueMarine = rttSceneManager->createEntity("BlueMarine", "BlueMarine.mesh");
+    blueMarine->setCastShadows(true);
+    SceneNode* blueMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("BlueMarine");
+    blueMarineNode->attachObject(blueMarine);
+
+    Entity* groundPlane = rttSceneManager->createEntity("Ground", "Plane.mesh");
+    groundPlane->setMaterialName("Claygreen");
+    groundPlane->setCastShadows(false);
+    SceneNode* groundPlaneNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Ground");
+    groundPlaneNode->attachObject(groundPlane);
+    groundPlaneNode->scale(25,25,25);
+
 
     // Create a light
-    Light* l = rttSceneManager->createLight("MainLight");
-    l->setPosition(20,80,50);
+    Light* mainLight = rttSceneManager->createLight("MainLight");
+    mainLight->setType(Light::LT_POINT);
+    //mainLight->mCastShadows=true;
+    mainLight->setPosition(20,30,15);
+    //mainLight->setCastShadows(true);
+    mainLight->setCastShadows(true);
 
-    rttSceneManager->setSkyDome(true, "Examples/CloudySky2", 4, 6, 6000);
+    rttSceneManager->setSkyDome(true, "Examples/CloudySky2", 4, 5, 3000);
 
     //END OBJECTS       ************************************************************************************************
 
