@@ -15,9 +15,16 @@
 #include <OgreRenderWindow.h>
 #include <OgreEntity.h>
 #include <OgreWindowEventUtilities.h>
+#include <OgreStringConverter.h>
+
+#include <string>
+
+#include <vector>
+
 
 using namespace RTT;
 using namespace Ogre;
+using namespace std;
 
 //-------------------------------------------------------------------------------------
 RTT_Ogre_3D::RTT_Ogre_3D(void)
@@ -84,8 +91,8 @@ bool RTT_Ogre_3D::go(void)
 
     rttCamera = rttSceneManager->createCamera("PrimaryCamera"); //Create our primary camera in our screen manager
     //The camera needs positioning
-    rttCamera->setPosition(Vector3(0,7.5,8.5)); // Position it at 80 in Z direction
-    rttCamera->lookAt(Vector3(0,0,-5)); // Look back along -Z
+    rttCamera->setPosition(Vector3(2.25,7.5,8.5)); // Position it at 80 in Z direction
+    rttCamera->lookAt(Vector3(2.25,0,-5)); // Look back along -Z
     rttCamera->setNearClipDistance(5); // This is how close an object can be to the camera before it is "clipped", or not rendered
 
     // Create one viewport, entire window, this is where the camera view is rendered
@@ -103,28 +110,78 @@ bool RTT_Ogre_3D::go(void)
     rttSceneManager->setShadowTechnique(SHADOWTYPE_TEXTURE_ADDITIVE);
     //Shadowmaps	EXPERIMENTAL  **********BROKEN************
     /*
-    rttSceneManager->setShadowTexturePixelFormat(Ogre::PF_FLOAT16_R);
+    rttSceneManager->setShadowTexturePixelFormat();
     rttSceneManager->setShadowTextureSelfShadow(true);
     rttSceneManager->setShadowTextureCasterMaterial("ShadowCaster");
-    rttSceneManager->setShadowTextureReceiverMaterial("ShadowReceiver");
-     */
 
+    rttSceneManager->setShadowTextureReceiverMaterial("ShadowReceiver");
+    */
+
+    //HACKED  Proof of concept/scratchboard
+
+    int tileSize = 1;
+    float posX = 0;
+    float posY = 0;
+    float posZ = 0;
+    Entity* tileVector[4][4];
+    std::string tileType = "DirtTile";
+    SceneNode* nodeVector[4][4];
+    Entity* blueMarine = rttSceneManager->createEntity("BlueMarine", "BlueMarine.mesh");
+    blueMarine->setCastShadows(true);
+    SceneNode* blueMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("BlueMarine");
+    blueMarineNode->attachObject(blueMarine);
+    blueMarineNode->yaw(Degree(90));
+    Entity* redMarine = rttSceneManager->createEntity("RedMarine", "RedMarine.mesh");
+    redMarine->setCastShadows(true);
+    SceneNode* redMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("RedMarine", Vector3(3*1.5,0,-3*1.732 -.866));
+    redMarineNode->attachObject(redMarine);
+    redMarineNode->yaw(Degree(-90));
+
+    for(int i=0;i < 4*tileSize; i+=tileSize)//build our columns
+    {
+    	for(int n=0; n<4*tileSize;n+=tileSize)//build our rows
+    	{
+    		posZ = -n *1.732;
+    		if(i%2 != 0)//test for odd
+    		{
+    			posZ -= .866; //steps up
+    		}
+    		tileVector[i][n] = rttSceneManager->createEntity(tileType + Ogre::StringConverter::toString(i) + Ogre::StringConverter::toString(n), "DirtTile.mesh", "RTT");
+    		tileVector[i][n]->setCastShadows(true);
+    		nodeVector[i][n] = rttSceneManager->getRootSceneNode()->createChildSceneNode(tileType + Ogre::StringConverter::toString(i) + Ogre::StringConverter::toString(n), Vector3(i*1.5, posY,posZ));
+    		nodeVector[i][n]->attachObject(tileVector[i][n]);
+    	}
+    }
+
+/*
     Entity* dirtTile = rttSceneManager->createEntity("DirtTile1", "DirtTile.mesh");
     dirtTile->setCastShadows(true);
     SceneNode* dirtTileNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("DirtTile1");
     dirtTileNode->attachObject(dirtTile);
 
+    Entity* dirtTile2 = rttSceneManager->createEntity("DirtTile2", "DirtTile.mesh");
+    dirtTile2->setCastShadows(true);
+    SceneNode* dirtTile2Node = rttSceneManager->getRootSceneNode()->createChildSceneNode("DirtTile2", Vector3(1.5,0,-.866));
+    dirtTile2Node->attachObject(dirtTile2);
+
+    Entity* dirtTile3 = rttSceneManager->createEntity("DirtTile3", "DirtTile.mesh");
+    dirtTile3->setCastShadows(true);
+    SceneNode* dirtTile3Node = rttSceneManager->getRootSceneNode()->createChildSceneNode("DirtTile3", Vector3(3,0,0));
+    dirtTile3Node->attachObject(dirtTile3);
+
     Entity* blueMarine = rttSceneManager->createEntity("BlueMarine", "BlueMarine.mesh");
     blueMarine->setCastShadows(true);
     SceneNode* blueMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("BlueMarine");
     blueMarineNode->attachObject(blueMarine);
+*/
 
+    //end HACK
     Entity* groundPlane = rttSceneManager->createEntity("Ground", "Plane.mesh");
     groundPlane->setMaterialName("Claygreen");
     groundPlane->setCastShadows(false);
-    SceneNode* groundPlaneNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Ground");
+    SceneNode* groundPlaneNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Ground", Vector3(2.25,0,0));
     groundPlaneNode->attachObject(groundPlane);
-    groundPlaneNode->scale(25,25,25);
+    //groundPlaneNode->scale(25,25,25);
 
 
     // Create a light
@@ -132,10 +189,9 @@ bool RTT_Ogre_3D::go(void)
     mainLight->setType(Light::LT_POINT);
     //mainLight->mCastShadows=true;
     mainLight->setPosition(20,30,15);
-    //mainLight->setCastShadows(true);
     mainLight->setCastShadows(true);
 
-    rttSceneManager->setSkyDome(true, "Examples/CloudySky2", 4, 5, 3000);
+    rttSceneManager->setSkyDome(true, "Examples/CloudySky2", 2, 3);
 
     //END OBJECTS       ************************************************************************************************
 

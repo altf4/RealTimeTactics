@@ -35,6 +35,7 @@ material BlueMarine
                 tex_coord_set 0
                 colour_op modulate
             }
+
         }
     }
 }
