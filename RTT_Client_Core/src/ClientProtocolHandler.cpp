@@ -24,11 +24,11 @@ using namespace RTT;
 
 int connectFD, connectBackSocket;
 string serverIP;
-uint myPlayerID;
+struct PlayerDescription myPlayerDescription;
 uint callbackPort = 0;
 
 int RTT::AuthToServer(string IPAddress, uint port,
-		string username, unsigned char *hashedPassword)
+		string username, unsigned char *hashedPassword, struct PlayerDescription *outDescr)
 {
 	callbackPort = port + 1;
 	struct sockaddr_in stSockAddr;
@@ -155,7 +155,8 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		return -1;
 	}
 
-	myPlayerID = server_auth_reply->playerID;
+	myPlayerDescription = server_auth_reply->playerDescription;
+	*outDescr = server_auth_reply->playerDescription;
 
 	delete server_auth_reply;
 
@@ -803,7 +804,7 @@ bool RTT::InitializeCallback()
 	//***********************************
 	MatchLobbyMessage *callback_register = new MatchLobbyMessage();
 	callback_register->type = CALLBACK_REGISTER;
-	callback_register->playerID = myPlayerID;
+	callback_register->playerID = myPlayerDescription.ID;
 	if( Message::WriteMessage(callback_register, connectBackSocket) == false)
 	{
 		//Error in write

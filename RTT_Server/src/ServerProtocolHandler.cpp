@@ -126,8 +126,10 @@ Player *RTT::GetNewClient(int ConnectFD)
 	AuthMessage *server_auth_reply = new AuthMessage();
 	server_auth_reply->type = SERVER_AUTH_REPLY;
 	server_auth_reply->authSuccess = authresult;
-	server_auth_reply->playerID = player->GetID();
-
+	if( player != NULL )
+	{
+		server_auth_reply->playerDescription = player->description;
+	}
 	if(  Message::WriteMessage(server_auth_reply, ConnectFD) == false)
 	{
 		//Error in write

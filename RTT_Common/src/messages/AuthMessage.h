@@ -9,6 +9,7 @@
 #define AUTHMESSAGE_H_
 
 #include "Message.h"
+#include "../Player.h"
 
 using namespace std;
 
@@ -45,7 +46,7 @@ public:
 	//TODO: I didn't want to import libssl just to use SHA256_DIGEST_LENGTH
 	unsigned char hashedPassword[32];
 	enum AuthResult authSuccess;
-	uint playerID;
+	struct PlayerDescription playerDescription;
 
 	AuthMessage();
 	AuthMessage(char *buffer, uint length);
