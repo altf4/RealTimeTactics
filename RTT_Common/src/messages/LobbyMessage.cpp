@@ -14,6 +14,7 @@ using namespace RTT;
 LobbyMessage::LobbyMessage()
 {
 	matchDescriptions = NULL;
+	playerDescriptions = NULL;
 }
 
 LobbyMessage::~LobbyMessage()
@@ -22,11 +23,16 @@ LobbyMessage::~LobbyMessage()
 	{
 		free(matchDescriptions);
 	}
+	if(playerDescriptions != NULL)
+	{
+		free(playerDescriptions);
+	}
 }
 
 LobbyMessage::LobbyMessage(char *buffer, uint length)
 {
 	matchDescriptions = NULL;
+	playerDescriptions = NULL;
 	if( length < MESSAGE_MIN_SIZE )
 	{
 		return;
@@ -199,13 +205,37 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		}
 		case MATCH_JOIN_REPLY:
 		{
+			//Get the count of returned matches
+			memcpy(&returnedPlayersCount, buffer, sizeof(returnedPlayersCount));
+			buffer += sizeof(returnedPlayersCount);
+
 			//Uses: 1) Message Type
-			//		2) Description of newly created match
-			uint expectedSize = MESSAGE_MIN_SIZE + MATCH_DESCR_SIZE;
+			//		2) Count of players in match
+			//		3) Players in match
+			//		4) Description of newly created match
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(returnedPlayersCount) +
+					(returnedPlayersCount * (PLAYER_DESCR_SIZE)) + MATCH_DESCR_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
 				return;
+			}
+
+			//Allocate new space for the player descriptions
+			playerDescriptions = (struct PlayerDescription *)malloc( returnedPlayersCount
+					* (sizeof(struct PlayerDescription)));
+
+			//Copy over the memory for the player descriptions
+			for(uint i = 0; i < returnedPlayersCount; i++)
+			{
+				memcpy(&(playerDescriptions[i].ID), buffer, sizeof(uint));
+				buffer += sizeof(uint);
+				memcpy(&(playerDescriptions[i].name), buffer, PLAYER_NAME_SIZE);
+				buffer += PLAYER_NAME_SIZE;
+				memcpy(&(playerDescriptions[i].team), buffer, sizeof(enum TeamNumber));
+				buffer += sizeof(enum TeamNumber);
+				memcpy(&(playerDescriptions[i].color), buffer, sizeof(enum TeamColor));
+				buffer += sizeof(enum TeamColor);
 			}
 
 			//Match description
@@ -451,14 +481,34 @@ char *LobbyMessage::Serialize(uint *length)
 		case MATCH_JOIN_REPLY:
 		{
 			//Uses: 1) Message Type
-			//		2) Match Description
-			messageSize = MESSAGE_MIN_SIZE + MATCH_DESCR_SIZE;
+			//		2) Count of players in match
+			//		3) Players in match
+			//		4) Description of newly created match
+			messageSize = MESSAGE_MIN_SIZE + sizeof(returnedPlayersCount) +
+					(returnedPlayersCount * (PLAYER_DESCR_SIZE)) + MATCH_DESCR_SIZE;
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
+
+			//Put the count of returned players
+			memcpy(buffer, &returnedPlayersCount, sizeof(returnedPlayersCount));
+			buffer += sizeof(returnedPlayersCount);
+
+			//Copy over the memory for the player descriptions
+			for(uint i = 0; i < returnedPlayersCount; i++)
+			{
+				memcpy(buffer, &playerDescriptions[i].ID, sizeof(uint));
+				buffer += sizeof(uint);
+				memcpy(buffer, &playerDescriptions[i].name, PLAYER_NAME_SIZE);
+				buffer += PLAYER_NAME_SIZE;
+				memcpy(buffer, &playerDescriptions[i].team, sizeof(enum TeamNumber));
+				buffer += sizeof(enum TeamNumber);
+				memcpy(buffer, &playerDescriptions[i].color, sizeof(enum TeamColor));
+				buffer += sizeof(enum TeamColor);
+			}
 
 			//Match Description
 			memcpy(buffer, &matchDescription.status, sizeof(enum Status));

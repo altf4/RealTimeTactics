@@ -276,9 +276,21 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 					//***************************
 					LobbyMessage *match_join = new LobbyMessage();
 					match_join->type = MATCH_JOIN_REPLY;
+
 					pthread_rwlock_rdlock(&matchListLock);
-					match_join->matchDescription = matchList[lobby_message->ID]->description;
+					Match *joinedMatch = matchList[lobby_message->ID];
+					match_join->matchDescription = joinedMatch->description;
+
+					//Put in the player descriptions of current members
+					match_join->playerDescriptions = (struct PlayerDescription*)
+						malloc(sizeof(struct PlayerDescription) * MAX_PLAYERS_IN_MATCH);
+
+					uint count = GetPlayerDescriptions(joinedMatch->GetID(),
+							match_join->playerDescriptions);
+					match_join->returnedPlayersCount = count;
+
 					pthread_rwlock_unlock(&matchListLock);
+
 					if(  Message::WriteMessage(match_join, ConnectFD) == false)
 					{
 						//Error in write, do something?

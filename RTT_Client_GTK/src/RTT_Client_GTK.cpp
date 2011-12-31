@@ -162,7 +162,7 @@ void create_match_submit_click()
 
 	if (CreateMatch(options) )
 	{
-		LaunchMatchLobbyPane();
+		LaunchMatchLobbyPane(&playerDescription, 1);
 	}
 	else
 	{
@@ -285,7 +285,7 @@ void LaunchServerConnectPane()
 	match_lobby_box->set_visible(false);
 }
 
-void LaunchMatchLobbyPane()
+void LaunchMatchLobbyPane(PlayerDescription *playerDescriptions, uint playerCount)
 {
 	welcome_box->set_visible(false);
 	lobby_box->set_visible(false);
@@ -300,10 +300,13 @@ void LaunchMatchLobbyPane()
 	player_list_view->set_model(playerListStore);
 
 	//Add a new row (for ourselves)
-	TreeModel::Row row = *(playerListStore->append());
-	row[columns->name] = string(playerDescription.name);
-	row[columns->team] = playerDescription.team;
-	row[columns->ID] = playerDescription.ID;
+	for(uint i = 0; i < playerCount; i++)
+	{
+		TreeModel::Row row = *(playerListStore->append());
+		row[columns->name] = string(playerDescriptions[i].name);
+		row[columns->team] = playerDescriptions[i].team;
+		row[columns->ID] = playerDescriptions[i].ID;
+	}
 
 	player_list_view->append_column("Name", columns->name);
 	player_list_view->append_column("Team", columns->team);
@@ -358,9 +361,12 @@ void join_match_click()
 	TreeModel::Row row = *( iter );
 	int matchID = row[columns.matchID];
 
-	if( JoinMatch(matchID) )
+	PlayerDescription playerDescriptions[MAX_PLAYERS_IN_MATCH];
+
+	uint playerCount = JoinMatch(matchID, playerDescriptions);
+	if( playerCount > 0 )
 	{
-		LaunchMatchLobbyPane();
+		LaunchMatchLobbyPane(playerDescriptions, playerCount);
 	}
 	else
 	{

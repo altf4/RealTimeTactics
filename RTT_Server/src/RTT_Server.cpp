@@ -418,6 +418,36 @@ uint GetMatchDescriptions(uint page, MatchDescription *descArray)
 	return MATCHES_PER_PAGE;
 }
 
+//Gets match descriptions from the playerlist
+//	matchID: What match to get the players from
+//	descArray: output array where matches are written to
+//		(Length = MAX_PLAYERS_IN_MATCH)
+//	Returns: The number of matches written
+uint GetPlayerDescriptions(uint matchID, PlayerDescription *descArray)
+{
+	pthread_rwlock_rdlock(&matchListLock);
+
+	if( matchList.count(matchID) == 0 )
+	{
+		pthread_rwlock_unlock(&matchListLock);
+		return 0;
+	}
+
+	Match *joinedMatch = matchList[matchID];
+	uint count = 0;
+	for(uint i = 0; i < MAX_TEAMS; i++)
+	{
+		vector<Player*>::iterator it =
+				joinedMatch->teams[i]->players.begin();
+		for(; it != joinedMatch->teams[i]->players.end(); it++ )
+		{
+			descArray[count] = (*it)->description;
+			count++;
+		}
+	}
+	pthread_rwlock_unlock(&matchListLock);
+	return count;
+}
 //Creates a new match and places it into matchList
 //	Returns: The unique ID of the new match
 //		returns 0 on error

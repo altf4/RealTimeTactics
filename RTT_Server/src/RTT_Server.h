@@ -63,6 +63,13 @@ void *CallbackClientThread(void * parm);
 //	Returns: The number of matches written
 uint GetMatchDescriptions(uint page, MatchDescription *descArray);
 
+//Gets match descriptions from the playerlist
+//	matchID: What match to get the players from
+//	descArray: output array where matches are written to
+//		(Length = MAX_PLAYERS_IN_MATCH)
+//	Returns: The number of matches written
+uint GetPlayerDescriptions(uint matchID, PlayerDescription *descArray);
+
 //Creates a new match and places it into matchList
 //	Returns: The unique ID of the new match
 uint RegisterNewMatch(Player *player, struct MatchOptions options);
