@@ -13,6 +13,7 @@ using namespace RTT;
 
 Match::Match(Player *player)
 {
+	memset(&description, '\0', sizeof(description));
 	struct timeval tv;
 	gettimeofday(&tv,NULL);
 	timeCreated = tv.tv_sec;
@@ -22,6 +23,7 @@ Match::Match(Player *player)
 		teams[i] = new Team((enum TeamNumber)i);
 	}
 	leader = player;
+	currentPlayerCount = 0;
 }
 
 Match::~Match()

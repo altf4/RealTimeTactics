@@ -21,7 +21,7 @@ void list_matches();
 
 void LaunchMainLobbyPane();
 void LaunchServerConnectPane();
-void LaunchMatchLobbyPane();
+void LaunchMatchLobbyPane(PlayerDescription *playerDescriptions, uint playerCount);
 
 void InitGlobalWidgets();
 

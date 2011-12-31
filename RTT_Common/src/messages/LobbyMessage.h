@@ -40,10 +40,12 @@ class LobbyMessage: public Message
 public:
 	uint requestedPage;
 	uint returnedMatchesCount;
+	uint returnedPlayersCount;
 	//A list of queried matches
 	struct MatchDescription *matchDescriptions;
 	//Newly created match
 	struct MatchDescription matchDescription;
+	struct PlayerDescription *playerDescriptions;
 	struct MatchOptions options;
 	//ID of a match to join
 	uint ID;
