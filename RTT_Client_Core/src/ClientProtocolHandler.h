@@ -14,6 +14,8 @@
 
 //TODO: Read this from config file
 #define MATCHES_PER_PAGE 10
+//TODO: Read this from config file
+#define MAX_PLAYERS_IN_MATCH 8
 
 #include "Match.h"
 #include "Map.h"
@@ -70,11 +72,15 @@ struct CallbackChange
 
 };
 
+//********************************************
+//				Authentication Commands
+//********************************************
 
 //Authenticates to the game server and sets us up into the lobby
+//	Writes out to the given PlayerDescription struct, which is your description
 //	Returns socket descriptor for the TCP connection. -1
 int AuthToServer(string IPAddress, uint port,
-		string username, unsigned char *hashedPassword);
+		string username, unsigned char *hashedPassword, struct PlayerDescription *outDescr);
 
 
 //********************************************
@@ -100,9 +106,13 @@ bool CreateMatch(struct MatchOptions options);
 
 //Joins the match at the given ID
 //	matchID: The server's unique ID for the chosen match
+//	descPtr: The address of a pointer to PlayerDescription.
+//    The current players in the match are given here
+
+//	playerCount: Output variable for the returned player count
 //	Returns: true if the match is joined successfully
 //	Should immediately follow with InitializeCallback()
-bool JoinMatch(uint matchID);
+uint JoinMatch(uint matchID, PlayerDescription *descPtr);
 
 //Leaves the match at the given ID
 //	matchID: The server's unique ID for the chosen match

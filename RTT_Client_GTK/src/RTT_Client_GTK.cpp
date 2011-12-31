@@ -61,8 +61,9 @@ PlayerListColumns *columns;
 Glib::RefPtr<ListStore> playerListStore;
 
 pthread_rwlock_t globalLock;
-string username;
 pthread_t threadID;
+
+PlayerDescription playerDescription;
 
 void custom_server_click()
 {
@@ -102,11 +103,11 @@ void connect_click()
 		return;
 	}
 
-	username = entry_username->get_text();
+	string givenName = entry_username->get_text();
 	string hashedPassword = entry_password->get_text();
 
 	int SocketFD = AuthToServer(serverIP, serverPort,
-			username, (unsigned char*)hashedPassword.c_str());
+			givenName, (unsigned char*)hashedPassword.c_str(), &playerDescription);
 
 	if( SocketFD > 0 )
 	{
@@ -161,7 +162,7 @@ void create_match_submit_click()
 
 	if (CreateMatch(options) )
 	{
-		LaunchMatchLobbyPane();
+		LaunchMatchLobbyPane(&playerDescription, 1);
 	}
 	else
 	{
@@ -250,11 +251,11 @@ void list_matches()
 	for(uint i = 0; i < numMatchesThisPage; i++)
 	{
 		TreeModel::Row row = *(refListStore->append());
-		row[columns->matchID] = (int)descriptions[page].ID;
-		row[columns->maxPlayers] = (int)descriptions[page].maxPlayers;
-		row[columns->currentPlayers] = (int)descriptions[page].currentPlayerCount;
-		row[columns->name] = descriptions[page].name;
-		row[columns->timeCreated] = ctime(&descriptions[page].timeCreated) ;
+		row[columns->matchID] = (int)descriptions[i].ID;
+		row[columns->maxPlayers] = (int)descriptions[i].maxPlayers;
+		row[columns->currentPlayers] = (int)descriptions[i].currentPlayerCount;
+		row[columns->name] = descriptions[i].name;
+		row[columns->timeCreated] = ctime(&descriptions[i].timeCreated) ;
 	}
 
 	view->append_column("ID", columns->matchID);
@@ -284,7 +285,7 @@ void LaunchServerConnectPane()
 	match_lobby_box->set_visible(false);
 }
 
-void LaunchMatchLobbyPane()
+void LaunchMatchLobbyPane(PlayerDescription *playerDescriptions, uint playerCount)
 {
 	welcome_box->set_visible(false);
 	lobby_box->set_visible(false);
@@ -299,9 +300,13 @@ void LaunchMatchLobbyPane()
 	player_list_view->set_model(playerListStore);
 
 	//Add a new row (for ourselves)
-	TreeModel::Row row = *(playerListStore->append());
-	row[columns->name] = username;
-	row[columns->team] = TEAM_1;
+	for(uint i = 0; i < playerCount; i++)
+	{
+		TreeModel::Row row = *(playerListStore->append());
+		row[columns->name] = string(playerDescriptions[i].name);
+		row[columns->team] = playerDescriptions[i].team;
+		row[columns->ID] = playerDescriptions[i].ID;
+	}
 
 	player_list_view->append_column("Name", columns->name);
 	player_list_view->append_column("Team", columns->team);
@@ -356,9 +361,12 @@ void join_match_click()
 	TreeModel::Row row = *( iter );
 	int matchID = row[columns.matchID];
 
-	if( JoinMatch(matchID) )
+	PlayerDescription playerDescriptions[MAX_PLAYERS_IN_MATCH];
+
+	uint playerCount = JoinMatch(matchID, playerDescriptions);
+	if( playerCount > 0 )
 	{
-		LaunchMatchLobbyPane();
+		LaunchMatchLobbyPane(playerDescriptions, playerCount);
 	}
 	else
 	{
@@ -463,8 +471,18 @@ void *CallbackThread(void * parm)
 			case PLAYER_LEFT:
 			{
 				pthread_rwlock_wrlock(&globalLock);
-				//Do stuff here
-				cout << "Player Left\n";
+				TreeModel::Children rows = playerListStore->children();
+				TreeModel::iterator r;
+				for(r=rows.begin(); r!=rows.end(); r++)
+				{
+					TreeModel::Row row=*r;
+					uint ID = row[columns->ID];
+					if( ID == change.playerID)
+					{
+						playerListStore->erase(r);
+					}
+				}
+
 				pthread_rwlock_unlock(&globalLock);
 				break;
 			}
@@ -474,13 +492,14 @@ void *CallbackThread(void * parm)
 			}
 			case PLAYER_JOINED:
 			{
-				if( username.compare(change.playerDescription.name) != 0)
+				if( playerDescription.ID !=	change.playerDescription.ID)
 				{
 					pthread_rwlock_wrlock(&globalLock);
 					//Add a new row (for ourselves)
 					TreeModel::Row row = *(playerListStore->append());
 					row[columns->name] = change.playerDescription.name;
 					row[columns->team] = change.playerDescription.team;
+					row[columns->ID] = change.playerDescription.ID;
 					player_list_view->show_all();
 
 					pthread_rwlock_unlock(&globalLock);

@@ -24,11 +24,11 @@ using namespace RTT;
 
 int connectFD, connectBackSocket;
 string serverIP;
-uint myPlayerID;
+struct PlayerDescription myPlayerDescription;
 uint callbackPort = 0;
 
 int RTT::AuthToServer(string IPAddress, uint port,
-		string username, unsigned char *hashedPassword)
+		string username, unsigned char *hashedPassword, struct PlayerDescription *outDescr)
 {
 	callbackPort = port + 1;
 	struct sockaddr_in stSockAddr;
@@ -155,7 +155,8 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		return -1;
 	}
 
-	myPlayerID = server_auth_reply->playerID;
+	myPlayerDescription = server_auth_reply->playerDescription;
+	*outDescr = server_auth_reply->playerDescription;
 
 	delete server_auth_reply;
 
@@ -334,11 +335,12 @@ bool RTT::CreateMatch(struct MatchOptions options)
 
 //Joins the match at the given ID
 //	connectFD: Socket File descriptor of the server
+//	descPtr: The address of a pointer to PlayerDescription.
+//		The current players in the match are given here
 //	matchID: The server's unique ID for the chosen match
 //	Returns: true if the match is joined successfully
-bool RTT::JoinMatch(uint matchID)
+uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr)
 {
-
 	//********************************
 	// Send Match Join Request
 	//********************************
@@ -349,26 +351,38 @@ bool RTT::JoinMatch(uint matchID)
 	{
 		//Error in write
 		delete join_request;
-		return false;
+		return 0;
 	}
 	delete join_request;
 
 	//**********************************
 	// Receive Match Join Reply
 	//**********************************
-	Message *join_reply = Message::ReadMessage(connectFD);
-	if( join_reply == NULL)
+	Message *join_reply_init = Message::ReadMessage(connectFD);
+	if( join_reply_init == NULL)
 	{
-		return false;
+		return 0;
 	}
-	if( join_reply->type != MATCH_JOIN_REPLY)
+	if( join_reply_init->type != MATCH_JOIN_REPLY)
 	{
-		delete join_reply;
-		return false;
+		delete join_reply_init;
+		return 0;
 	}
-	delete join_reply;
+	LobbyMessage *join_reply = (LobbyMessage *)join_reply_init;
+	uint count = join_reply->returnedPlayersCount;
+	if(count > MAX_PLAYERS_IN_MATCH )
+	{
+		delete join_reply_init;
+		return 0;
+	}
 
-	return true;
+	for(uint i = 0; i < count; i++ )
+	{
+		descPtr[i] = join_reply->playerDescriptions[i];
+	}
+
+	delete join_reply_init;
+	return count;
 }
 
 //Leaves the match at the given ID
@@ -803,7 +817,7 @@ bool RTT::InitializeCallback()
 	//***********************************
 	MatchLobbyMessage *callback_register = new MatchLobbyMessage();
 	callback_register->type = CALLBACK_REGISTER;
-	callback_register->playerID = myPlayerID;
+	callback_register->playerID = myPlayerDescription.ID;
 	if( Message::WriteMessage(callback_register, connectBackSocket) == false)
 	{
 		//Error in write

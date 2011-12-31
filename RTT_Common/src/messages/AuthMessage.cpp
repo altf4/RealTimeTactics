@@ -100,7 +100,7 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 		{
 			//Uses: 1) authSuccess
 			//		2) Your new Player ID
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(authSuccess) + sizeof(playerID);
+			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(authSuccess) + PLAYER_DESCR_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -109,8 +109,16 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 
 			memcpy(&authSuccess, buffer, sizeof(authSuccess));
 			buffer += sizeof(authSuccess);
-			memcpy(&playerID, buffer, sizeof(playerID));
-			buffer += sizeof(playerID);
+
+			//Player ID that joined
+			memcpy(&playerDescription.name, buffer, PLAYER_NAME_SIZE);
+			buffer += PLAYER_NAME_SIZE;
+			memcpy(&playerDescription.ID, buffer, sizeof(uint));
+			buffer += sizeof(uint);
+			memcpy(&playerDescription.color, buffer, sizeof(enum TeamColor));
+			buffer += sizeof(enum TeamColor);
+			memcpy(&playerDescription.team, buffer, sizeof(enum TeamNumber));
+			buffer += sizeof(enum TeamNumber);
 
 			break;
 		}
@@ -205,7 +213,7 @@ char *AuthMessage::Serialize(uint *length)
 		}
 		case SERVER_AUTH_REPLY:
 		{
-			uint messageSize = MESSAGE_MIN_SIZE + sizeof(authSuccess) + sizeof(playerID);
+			uint messageSize = MESSAGE_MIN_SIZE + sizeof(authSuccess) + PLAYER_DESCR_SIZE;
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
@@ -214,10 +222,19 @@ char *AuthMessage::Serialize(uint *length)
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
+			//Auth success
 			memcpy(buffer, &authSuccess, sizeof(authSuccess));
 			buffer += sizeof(authSuccess);
-			memcpy(buffer, &playerID, sizeof(playerID));
-			buffer += sizeof(playerID);
+
+			//Put the player description in
+			memcpy(buffer, &playerDescription.name, PLAYER_NAME_SIZE);
+			buffer += PLAYER_NAME_SIZE;
+			memcpy(buffer, &playerDescription.ID, sizeof(uint));
+			buffer += sizeof(uint);
+			memcpy(buffer, &playerDescription.color, sizeof(enum TeamColor));
+			buffer += sizeof(enum TeamColor);
+			memcpy(buffer, &playerDescription.team, sizeof(enum TeamNumber));
+			buffer += sizeof(enum TeamNumber);
 
 			*length = messageSize;
 			return originalBuffer;
