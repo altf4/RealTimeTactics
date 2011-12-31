@@ -5,7 +5,9 @@ src/messages/Message.d: ../src/messages/Message.cpp \
  ../src/messages/../Unit.h ../src/messages/../Team.h \
  ../src/messages/../Player.h ../src/messages/../Match.h \
  ../src/messages/../Enums.h ../src/messages/../Action.h \
- ../src/messages/ErrorMessage.h
+ ../src/messages/../Map.h ../src/messages/ErrorMessage.h \
+ ../src/messages/MatchLobbyMessage.h ../src/messages/../Map.h \
+ ../src/messages/../Player.h ../src/messages/../Enums.h
 
 ../src/messages/Message.h:
 
@@ -31,4 +33,14 @@ src/messages/Message.d: ../src/messages/Message.cpp \
 
 ../src/messages/../Action.h:
 
+../src/messages/../Map.h:
+
 ../src/messages/ErrorMessage.h:
+
+../src/messages/MatchLobbyMessage.h:
+
+../src/messages/../Map.h:
+
+../src/messages/../Player.h:
+
+../src/messages/../Enums.h:
