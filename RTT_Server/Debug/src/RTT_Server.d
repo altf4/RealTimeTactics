@@ -9,9 +9,9 @@ src/RTT_Server.d: ../src/RTT_Server.cpp ../../RTT_Common/src/Unit.h \
  ../../RTT_Common/src/messages/Message.h \
  ../../RTT_Common/src/messages/../Match.h \
  ../../RTT_Common/src/messages/AuthMessage.h \
+ ../../RTT_Common/src/messages/../Player.h \
  ../../RTT_Common/src/messages/MatchLobbyMessage.h \
  ../../RTT_Common/src/messages/../Map.h \
- ../../RTT_Common/src/messages/../Player.h \
  ../../RTT_Common/src/messages/../Enums.h ../src/ServerProtocolHandler.h \
  ../../RTT_Common/src/messages/ErrorMessage.h \
  ../../RTT_Common/src/Player.h
@@ -50,11 +50,11 @@ src/RTT_Server.d: ../src/RTT_Server.cpp ../../RTT_Common/src/Unit.h \
 
 ../../RTT_Common/src/messages/AuthMessage.h:
 
+../../RTT_Common/src/messages/../Player.h:
+
 ../../RTT_Common/src/messages/MatchLobbyMessage.h:
 
 ../../RTT_Common/src/messages/../Map.h:
-
-../../RTT_Common/src/messages/../Player.h:
 
 ../../RTT_Common/src/messages/../Enums.h:
 
