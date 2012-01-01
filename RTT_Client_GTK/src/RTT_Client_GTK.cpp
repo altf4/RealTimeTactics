@@ -14,12 +14,17 @@
 #include <arpa/inet.h>
 #include <vector>
 #include <pthread.h>
+#include "boost/date_time/posix_time/posix_time.hpp"
 
 using namespace std;
 using namespace Gtk;
+using boost::posix_time::ptime;
+using boost::posix_time::time_duration;
+using boost::gregorian::date;
 using namespace RTT;
 
 Glib::RefPtr<Builder> welcome_builder;
+ptime epoch(date(1970,boost::gregorian::Jan,1));
 
 Window *welcome_window = NULL;
 
@@ -255,7 +260,11 @@ void list_matches()
 		row[columns->maxPlayers] = (int)descriptions[i].maxPlayers;
 		row[columns->currentPlayers] = (int)descriptions[i].currentPlayerCount;
 		row[columns->name] = descriptions[i].name;
-		row[columns->timeCreated] = ctime(&descriptions[i].timeCreated) ;
+
+		ptime time = epoch + boost::posix_time::seconds(descriptions[i].timeCreated);
+		string timeString = to_simple_string(time);
+
+		row[columns->timeCreated] = timeString;
 	}
 
 	view->append_column("ID", columns->matchID);
