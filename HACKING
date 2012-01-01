@@ -39,6 +39,15 @@ RTT depends on a few packages that are easily available through the Ubuntu repos
 
 sudo apt-get install libsparsehash-dev libgtkmm-3.0-dev libois-dev libssl-dev
 
+########################
+OGRE 3D
+########################
 
+The version of OGRE in the default Ubuntu repositories is old / incomplete. So
+instead, we use the offical OGRE PPA, avaialble form here:
 
+https://launchpad.net/~ogre-team/+archive/ogre
 
+Also, we require (for now) the OGRE sample media packs:
+
+sudo apt-get install ogre-samples-media ogre-samples-source
