@@ -22,8 +22,6 @@
 
 #include "Player.h"
 
-#include <stdint.h>
-
 using namespace std;
 using namespace RTT;
 
@@ -92,9 +90,7 @@ int main(int argc, char **argv)
 	//Check that all parameters were entered
 	if( !portEntered )
 	{
-		cerr << "You did not enter a port number\n";
-		cerr << Usage();
-		exit(-1);
+		serverPortNumber = DEFAULT_SERVER_PORT;
 	}
 
 	//Set up the TCP sockets
@@ -603,7 +599,7 @@ string Usage()
 	string out;
 
 	out += "Line of Fire Server Usage:\n";
-	out += "\t RTT_Server -p PORT\n\n";
+	out += "\t RTT_Server [-p PORT]\n\n";
 	out += "\t -p PORT == TCP Port number to listen for connections on.\n";
 	return out;
 }

@@ -28,9 +28,9 @@ public:
 	enum GameSpeed newSpeed;
 	bool changeAccepted;
 	struct MapDescription mapDescription;
-	uint playerID;
+	uint32_t playerID;
 	struct PlayerDescription playerDescription;
-	uint portNum;
+	uint32_t portNum;
 
 	MatchLobbyMessage();
 	~MatchLobbyMessage();

@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <unistd.h>
+#include <stdint.h>
 
 using namespace std;
 
@@ -126,9 +127,9 @@ enum MessageType: char
 
 struct VersionNumber
 {
-	uint major;
-	uint minor;
-	uint rev;
+	uint32_t major;
+	uint32_t minor;
+	uint32_t rev;
 };
 
 class Message

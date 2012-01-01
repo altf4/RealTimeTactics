@@ -29,7 +29,7 @@ LobbyMessage::~LobbyMessage()
 	}
 }
 
-LobbyMessage::LobbyMessage(char *buffer, uint length)
+LobbyMessage::LobbyMessage(char *buffer, uint32_t length)
 {
 	matchDescriptions = NULL;
 	playerDescriptions = NULL;
@@ -50,7 +50,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		{
 			//Uses: 1) Message Type
 			//		2) Page number
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(requestedPage);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(requestedPage);
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -73,7 +73,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 			memcpy(&returnedMatchesCount, buffer, sizeof(returnedMatchesCount));
 			buffer += sizeof(returnedMatchesCount);
 
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(returnedMatchesCount)
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(returnedMatchesCount)
 					+ (returnedMatchesCount * (MATCH_DESCR_SIZE));
 			if( length != expectedSize)
 			{
@@ -86,20 +86,20 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 					* sizeof(struct MatchDescription));
 
 			//Copy over the memory for the match descriptions
-			for(uint i = 0; i < returnedMatchesCount; i++)
+			for(uint32_t i = 0; i < returnedMatchesCount; i++)
 			{
 				memcpy(&matchDescriptions[i].status, buffer, sizeof(enum Status));
 				buffer += sizeof(enum Status);
-				memcpy(&matchDescriptions[i].ID, buffer, sizeof(uint));
-				buffer += sizeof(uint);
-				memcpy(&matchDescriptions[i].currentPlayerCount, buffer, sizeof(uint));
-				buffer += sizeof(uint);
-				memcpy(&matchDescriptions[i].maxPlayers, buffer, sizeof(uint));
-				buffer += sizeof(uint);
+				memcpy(&matchDescriptions[i].ID, buffer, sizeof(uint32_t));
+				buffer += sizeof(uint32_t);
+				memcpy(&matchDescriptions[i].currentPlayerCount, buffer, sizeof(uint32_t));
+				buffer += sizeof(uint32_t);
+				memcpy(&matchDescriptions[i].maxPlayers, buffer, sizeof(uint32_t));
+				buffer += sizeof(uint32_t);
 				memcpy(&matchDescriptions[i].name, buffer, MAX_MATCHNAME_LEN);
 				buffer += MAX_MATCHNAME_LEN;
-				memcpy(&matchDescriptions[i].timeCreated, buffer, sizeof(time_t));
-				buffer += sizeof(time_t);
+				memcpy(&matchDescriptions[i].timeCreated, buffer, sizeof(int64_t));
+				buffer += sizeof(int64_t);
 			}
 
 			break;
@@ -108,7 +108,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		case MATCH_CREATE_REQUEST:
 		{
 			//Uses: 1) Message Type
-			uint expectedSize = MESSAGE_MIN_SIZE;
+			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -121,7 +121,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		{
 			//Uses: 1) Message Type
 			//		2) Match Options offered by server
-			uint expectedSize = MESSAGE_MIN_SIZE + MATCH_OPTIONS_SIZE;
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + MATCH_OPTIONS_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -129,8 +129,8 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 			}
 
 			//MatchOptions
-			memcpy(&options.maxPlayers, buffer, sizeof(uint));
-			buffer += sizeof(uint);
+			memcpy(&options.maxPlayers, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 			memcpy(&options.name, buffer, MAX_MATCHNAME_LEN);
 			buffer += MAX_MATCHNAME_LEN;
 
@@ -141,7 +141,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		{
 			//Uses: 1) Message Type
 			//		2) Match Options Set by client
-			uint expectedSize = MESSAGE_MIN_SIZE + MATCH_OPTIONS_SIZE;
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + MATCH_OPTIONS_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -149,8 +149,8 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 			}
 
 			//MatchOptions
-			memcpy(&options.maxPlayers, buffer, sizeof(uint));
-			buffer += sizeof(uint);
+			memcpy(&options.maxPlayers, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 			memcpy(&options.name, buffer, MAX_MATCHNAME_LEN);
 			buffer += MAX_MATCHNAME_LEN;
 
@@ -161,7 +161,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		{
 			//Uses: 1) Message Type
 			//		2) Description of newly created match
-			uint expectedSize = MESSAGE_MIN_SIZE + MATCH_DESCR_SIZE;
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + MATCH_DESCR_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -171,16 +171,16 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 			//Match description
 			memcpy(&matchDescription.status, buffer, sizeof(enum Status));
 			buffer += sizeof(enum Status);
-			memcpy(&matchDescription.ID, buffer, sizeof(uint));
-			buffer += sizeof(uint);
-			memcpy(&matchDescription.currentPlayerCount, buffer, sizeof(uint));
-			buffer += sizeof(uint);
-			memcpy(&matchDescription.maxPlayers, buffer, sizeof(uint));
-			buffer += sizeof(uint);
+			memcpy(&matchDescription.ID, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
+			memcpy(&matchDescription.currentPlayerCount, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
+			memcpy(&matchDescription.maxPlayers, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 			memcpy(&matchDescription.name, buffer, MAX_MATCHNAME_LEN);
 			buffer += MAX_MATCHNAME_LEN;
-			memcpy(&matchDescription.timeCreated, buffer, sizeof(time_t));
-			buffer += sizeof(time_t);
+			memcpy(&matchDescription.timeCreated, buffer, sizeof(int64_t));
+			buffer += sizeof(int64_t);
 
 			break;
 
@@ -190,7 +190,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		{
 			//Uses: 1) Message Type
 			//		2) ID of the match to join
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(ID);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(ID);
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -213,7 +213,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 			//		2) Count of players in match
 			//		3) Players in match
 			//		4) Description of newly created match
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(returnedPlayersCount) +
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(returnedPlayersCount) +
 					(returnedPlayersCount * (PLAYER_DESCR_SIZE)) + MATCH_DESCR_SIZE;
 			if( length != expectedSize)
 			{
@@ -226,10 +226,10 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 					* (sizeof(struct PlayerDescription)));
 
 			//Copy over the memory for the player descriptions
-			for(uint i = 0; i < returnedPlayersCount; i++)
+			for(uint32_t i = 0; i < returnedPlayersCount; i++)
 			{
-				memcpy(&(playerDescriptions[i].ID), buffer, sizeof(uint));
-				buffer += sizeof(uint);
+				memcpy(&(playerDescriptions[i].ID), buffer, sizeof(uint32_t));
+				buffer += sizeof(uint32_t);
 				memcpy(&(playerDescriptions[i].name), buffer, PLAYER_NAME_SIZE);
 				buffer += PLAYER_NAME_SIZE;
 				memcpy(&(playerDescriptions[i].team), buffer, sizeof(enum TeamNumber));
@@ -241,23 +241,23 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 			//Match description
 			memcpy(&matchDescription.status, buffer, sizeof(enum Status));
 			buffer += sizeof(enum Status);
-			memcpy(&matchDescription.ID, buffer, sizeof(uint));
-			buffer += sizeof(uint);
-			memcpy(&matchDescription.currentPlayerCount, buffer, sizeof(uint));
-			buffer += sizeof(uint);
-			memcpy(&matchDescription.maxPlayers, buffer, sizeof(uint));
-			buffer += sizeof(uint);
+			memcpy(&matchDescription.ID, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
+			memcpy(&matchDescription.currentPlayerCount, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
+			memcpy(&matchDescription.maxPlayers, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 			memcpy(&matchDescription.name, buffer, MAX_MATCHNAME_LEN);
 			buffer += MAX_MATCHNAME_LEN;
-			memcpy(&matchDescription.timeCreated, buffer, sizeof(time_t));
-			buffer += sizeof(time_t);
+			memcpy(&matchDescription.timeCreated, buffer, sizeof(int64_t));
+			buffer += sizeof(int64_t);
 
 			break;
 		}
 		case SERVER_STATS_REQUEST:
 		{
 			//Uses: 1) Message Type
-			uint expectedSize = MESSAGE_MIN_SIZE;
+			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -269,7 +269,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		case SERVER_STATS_REPLY:
 		{
 			//Uses: 1) Message Type
-			uint expectedSize = MESSAGE_MIN_SIZE + SERVER_STATS_SIZE;
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + SERVER_STATS_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -277,17 +277,17 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 			}
 
 			//Match description
-			memcpy(&serverStats.numMatches, buffer, sizeof(uint));
-			buffer += sizeof(uint);
-			memcpy(&serverStats.numPlayers, buffer, sizeof(uint));
-			buffer += sizeof(uint);
+			memcpy(&serverStats.numMatches, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
+			memcpy(&serverStats.numPlayers, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 
 			break;
 		}
 		case MATCH_EXIT_SERVER_NOTIFICATION:
 		{
 			//Uses: 1) Message Type
-			uint expectedSize = MESSAGE_MIN_SIZE;
+			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -299,7 +299,7 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 		case MATCH_EXIT_SERVER_ACKNOWLEDGE:
 		{
 			//Uses: 1) Message Type
-			uint expectedSize = MESSAGE_MIN_SIZE;
+			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -317,10 +317,10 @@ LobbyMessage::LobbyMessage(char *buffer, uint length)
 
 }
 
-char *LobbyMessage::Serialize(uint *length)
+char *LobbyMessage::Serialize(uint32_t *length)
 {
 	char *buffer, *originalBuffer;
-	uint messageSize;
+	uint32_t messageSize;
 	switch(type)
 	{
 		case MATCH_LIST_REQUEST:
@@ -360,21 +360,21 @@ char *LobbyMessage::Serialize(uint *length)
 			buffer += sizeof(returnedMatchesCount);
 
 			//Put the match descriptions in
-			for(uint i = 0; i < returnedMatchesCount; i++)
+			for(uint32_t i = 0; i < returnedMatchesCount; i++)
 			{
 				//New match description
 				memcpy(buffer, &matchDescriptions[i].status, sizeof(enum Status));
 				buffer += sizeof(enum Status);
-				memcpy(buffer, &matchDescriptions[i].ID, sizeof(uint));
-				buffer += sizeof(uint);
-				memcpy(buffer, &matchDescriptions[i].currentPlayerCount, sizeof(uint));
-				buffer += sizeof(uint);
-				memcpy(buffer, &matchDescriptions[i].maxPlayers, sizeof(uint));
-				buffer += sizeof(uint);
+				memcpy(buffer, &matchDescriptions[i].ID, sizeof(uint32_t));
+				buffer += sizeof(uint32_t);
+				memcpy(buffer, &matchDescriptions[i].currentPlayerCount, sizeof(uint32_t));
+				buffer += sizeof(uint32_t);
+				memcpy(buffer, &matchDescriptions[i].maxPlayers, sizeof(uint32_t));
+				buffer += sizeof(uint32_t);
 				memcpy(buffer, &matchDescriptions[i].name, MAX_MATCHNAME_LEN);
 				buffer += MAX_MATCHNAME_LEN;
-				memcpy(buffer, &matchDescriptions[i].timeCreated, sizeof(time_t));
-				buffer += sizeof(time_t);
+				memcpy(buffer, &matchDescriptions[i].timeCreated, sizeof(int64_t));
+				buffer += sizeof(int64_t);
 			}
 			break;
 		}
@@ -405,8 +405,8 @@ char *LobbyMessage::Serialize(uint *length)
 			buffer += MESSAGE_MIN_SIZE;
 
 			//Options
-			memcpy(buffer, &options.maxPlayers, sizeof(uint));
-			buffer += sizeof(uint);
+			memcpy(buffer, &options.maxPlayers, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 			memcpy(buffer, &options.name, MAX_MATCHNAME_LEN);
 			buffer += MAX_MATCHNAME_LEN;
 
@@ -425,8 +425,8 @@ char *LobbyMessage::Serialize(uint *length)
 			buffer += MESSAGE_MIN_SIZE;
 
 			//options
-			memcpy(buffer, &options.maxPlayers, sizeof(uint));
-			buffer += sizeof(uint);
+			memcpy(buffer, &options.maxPlayers, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 			memcpy(buffer, &options.name, MAX_MATCHNAME_LEN);
 			buffer += MAX_MATCHNAME_LEN;
 
@@ -447,16 +447,16 @@ char *LobbyMessage::Serialize(uint *length)
 			//New match description
 			memcpy(buffer, &matchDescription.status, sizeof(enum Status));
 			buffer += sizeof(enum Status);
-			memcpy(buffer, &matchDescription.ID, sizeof(uint));
-			buffer += sizeof(uint);
-			memcpy(buffer, &matchDescription.currentPlayerCount, sizeof(uint));
-			buffer += sizeof(uint);
-			memcpy(buffer, &matchDescription.maxPlayers, sizeof(uint));
-			buffer += sizeof(uint);
+			memcpy(buffer, &matchDescription.ID, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
+			memcpy(buffer, &matchDescription.currentPlayerCount, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
+			memcpy(buffer, &matchDescription.maxPlayers, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 			memcpy(buffer, &matchDescription.name, MAX_MATCHNAME_LEN);
 			buffer += MAX_MATCHNAME_LEN;
-			memcpy(buffer, &matchDescription.timeCreated, sizeof(time_t));
-			buffer += sizeof(time_t);
+			memcpy(buffer, &matchDescription.timeCreated, sizeof(int64_t));
+			buffer += sizeof(int64_t);
 			break;
 		}
 		//Joining a match already created
@@ -498,10 +498,10 @@ char *LobbyMessage::Serialize(uint *length)
 			buffer += sizeof(returnedPlayersCount);
 
 			//Copy over the memory for the player descriptions
-			for(uint i = 0; i < returnedPlayersCount; i++)
+			for(uint32_t i = 0; i < returnedPlayersCount; i++)
 			{
-				memcpy(buffer, &playerDescriptions[i].ID, sizeof(uint));
-				buffer += sizeof(uint);
+				memcpy(buffer, &playerDescriptions[i].ID, sizeof(uint32_t));
+				buffer += sizeof(uint32_t);
 				memcpy(buffer, &playerDescriptions[i].name, PLAYER_NAME_SIZE);
 				buffer += PLAYER_NAME_SIZE;
 				memcpy(buffer, &playerDescriptions[i].team, sizeof(enum TeamNumber));
@@ -513,16 +513,16 @@ char *LobbyMessage::Serialize(uint *length)
 			//Match Description
 			memcpy(buffer, &matchDescription.status, sizeof(enum Status));
 			buffer += sizeof(enum Status);
-			memcpy(buffer, &matchDescription.ID, sizeof(uint));
-			buffer += sizeof(uint);
-			memcpy(buffer, &matchDescription.currentPlayerCount, sizeof(uint));
-			buffer += sizeof(uint);
-			memcpy(buffer, &matchDescription.maxPlayers, sizeof(uint));
-			buffer += sizeof(uint);
+			memcpy(buffer, &matchDescription.ID, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
+			memcpy(buffer, &matchDescription.currentPlayerCount, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
+			memcpy(buffer, &matchDescription.maxPlayers, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 			memcpy(buffer, &matchDescription.name, MAX_MATCHNAME_LEN);
 			buffer += MAX_MATCHNAME_LEN;
-			memcpy(buffer, &matchDescription.timeCreated, sizeof(time_t));
-			buffer += sizeof(time_t);
+			memcpy(buffer, &matchDescription.timeCreated, sizeof(int64_t));
+			buffer += sizeof(int64_t);
 
 			break;
 		}
@@ -552,10 +552,10 @@ char *LobbyMessage::Serialize(uint *length)
 			buffer += MESSAGE_MIN_SIZE;
 
 			//Put the stats struct in
-			memcpy(buffer, &serverStats.numMatches, sizeof(uint));
-			buffer += sizeof(uint);
-			memcpy(buffer, &serverStats.numPlayers, sizeof(uint));
-			buffer += sizeof(uint);
+			memcpy(buffer, &serverStats.numMatches, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
+			memcpy(buffer, &serverStats.numPlayers, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 
 			break;
 		}

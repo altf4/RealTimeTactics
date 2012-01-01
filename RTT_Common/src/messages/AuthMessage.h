@@ -16,7 +16,7 @@ using namespace std;
 namespace RTT
 {
 
-enum AuthMechanism
+enum AuthMechanism: uint32_t
 {
 	HASHED_SALTED_PASS = 0,
 	SSH_KEY,

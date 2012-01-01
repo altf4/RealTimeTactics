@@ -18,8 +18,9 @@
 #include <sys/time.h>
 
 #define MAX_MATCHNAME_LEN 20
-#define MATCH_DESCR_SIZE sizeof(enum Status) + (sizeof(uint)*3) + MAX_MATCHNAME_LEN + sizeof(time_t)
-#define MATCH_OPTIONS_SIZE sizeof(uint) + MAX_MATCHNAME_LEN
+#define MATCH_DESCR_SIZE sizeof(enum Status) + (sizeof(uint32_t)*3) + \
+		MAX_MATCHNAME_LEN + sizeof(int64_t)
+#define MATCH_OPTIONS_SIZE sizeof(uint32_t) + MAX_MATCHNAME_LEN
 using namespace std;
 
 namespace RTT
@@ -28,7 +29,7 @@ namespace RTT
 class Team;
 class Player;
 
-enum Status
+enum Status: uint32_t
 {
 	WAITING_FOR_PLAYERS,
 	IN_PROGRESS,
@@ -39,18 +40,18 @@ enum Status
 struct MatchDescription
 {
 	enum Status status;
-	uint ID;
-	uint maxPlayers;
-	uint currentPlayerCount;
+	uint32_t ID;
+	uint32_t maxPlayers;
+	uint32_t currentPlayerCount;
 	char name[MAX_MATCHNAME_LEN];
-	time_t timeCreated;
+	int64_t timeCreated;
 };
 
 //A fixed size collection of options for match creation
 //	List of options necessary upon creation of the Match
 struct MatchOptions
 {
-	uint maxPlayers;
+	uint32_t maxPlayers;
 	char name[MAX_MATCHNAME_LEN];
 };
 
@@ -107,13 +108,13 @@ private:
 	//The current status of the match
 	enum Status status;
 	//Globally unique identifier for the match on this server
-	uint ID;
+	uint32_t ID;
 	//Maximum number of players allowed for this match
-	uint maxPlayers;
-	uint currentPlayerCount;
+	uint32_t maxPlayers;
+	uint32_t currentPlayerCount;
 	//Truncated at MAX_MATCHNAME_LEN chars
 	string name;
-	time_t timeCreated;
+	int64_t timeCreated;
 
 	Player *GetFirstPlayer();
 
