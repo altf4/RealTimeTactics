@@ -91,8 +91,8 @@ bool RTT_Ogre_3D::go(void)
 
     rttCamera = rttSceneManager->createCamera("PrimaryCamera"); //Create our primary camera in our screen manager
     //The camera needs positioning
-    rttCamera->setPosition(Vector3(2.25,7.5,8.5)); // Position it at 80 in Z direction
-    rttCamera->lookAt(Vector3(2.25,0,-5)); // Look back along -Z
+    rttCamera->setPosition(Vector3(2.25,10.5,6.5)); // Position it at 80 in Z direction
+    rttCamera->lookAt(Vector3(2.25,0,-4)); // Look back along -Z
     rttCamera->setNearClipDistance(5); // This is how close an object can be to the camera before it is "clipped", or not rendered
 
     // Create one viewport, entire window, this is where the camera view is rendered
@@ -191,7 +191,7 @@ bool RTT_Ogre_3D::go(void)
     mainLight->setPosition(20,30,15);
     mainLight->setCastShadows(true);
 
-    rttSceneManager->setSkyDome(true, "Examples/CloudySky2", 2, 3);
+    rttSceneManager->setSkyDome(true, "Examples/CloudySky", 2, 3);
 
     //END OBJECTS       ************************************************************************************************
 
