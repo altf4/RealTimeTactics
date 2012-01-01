@@ -5,7 +5,7 @@
 // Description : Message class sent while player is in the server lobby
 //============================================================================
 
-#define SERVER_STATS_SIZE sizeof(uint) + sizeof(uint)
+#define SERVER_STATS_SIZE sizeof(uint32_t) + sizeof(uint32_t)
 
 #include "Message.h"
 #include "../Match.h"
