@@ -9,7 +9,8 @@
 #define PLAYER_H_
 
 #define PLAYER_NAME_SIZE 20
-#define PLAYER_DESCR_SIZE sizeof(uint) + PLAYER_NAME_SIZE + sizeof(enum TeamNumber) + sizeof(enum TeamColor)
+#define PLAYER_DESCR_SIZE sizeof(uint32_t) + PLAYER_NAME_SIZE + \
+	sizeof(enum TeamNumber) + sizeof(enum TeamColor)
 
 #include <vector>
 #include "Unit.h"

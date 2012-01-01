@@ -9,6 +9,7 @@
 #define UNIT_H_
 
 #include <stdlib.h>
+#include <stdint.h>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ namespace RTT
 {
 
 //The six possible directions to face or move on a hex gameboard
-enum direction
+enum direction: uint32_t
 {
 	NORTHEAST,
 	NORTHWEST,
