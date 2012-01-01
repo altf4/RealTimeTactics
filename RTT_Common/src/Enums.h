@@ -8,10 +8,12 @@
 #ifndef ENUMS_H_
 #define ENUMS_H_
 
+#include <stdint.h>
+
 namespace RTT
 {
 
-enum TeamNumber: uint
+enum TeamNumber: uint32_t
 {
 	SPECTATOR = 0,
 	TEAM_1 = 1,

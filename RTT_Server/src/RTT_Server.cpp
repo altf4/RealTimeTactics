@@ -22,8 +22,6 @@
 
 #include "Player.h"
 
-#include <stdint.h>
-
 using namespace std;
 using namespace RTT;
 

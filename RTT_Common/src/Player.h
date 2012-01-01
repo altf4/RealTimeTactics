@@ -16,6 +16,7 @@
 #include "Match.h"
 #include <string>
 #include "Enums.h"
+#include <stdint.h>
 
 using namespace std;
 
@@ -29,7 +30,7 @@ class Match;
 //	to other Players for display
 struct PlayerDescription
 {
-	uint ID;
+	uint32_t ID;
 	char name[PLAYER_NAME_SIZE];
 	enum TeamNumber team;
 	enum TeamColor color;
