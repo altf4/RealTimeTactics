@@ -1,0 +1,44 @@
+#######################
+Building from source:
+#######################
+
+###########
+Eclipse:
+###########
+
+We use Eclipse as an IDE, and it is strongly recommended if you want to proceed. Unfortunately, the version in the Ubuntu repositories is rather old. So go and grab the latest from the web. Make sure it is the Eclipse CDT. (Not the one marked "for Linux developers")
+
+############
+Importing into eclipse:
+############
+
+The necessary Eclipse files are already in the repository ready for an easy import. Just hit:
+
+File-> Import-> General-> Existing Projects into Workspace
+
+Then select the RTT parent directory, and it will automatically recognize all the sub-projects.
+
+#############
+Eclipse pkg-config plugin
+#############
+
+GTK uses pkg-config to automatically load its necessary depencies.
+(Since there are a lot) But Eclipse by itself doesn't have support
+for this. YOu have to install the pkg-config plugin from the 
+Eclipse Marketplace. (Free of course)
+
+Go to Help-> Marketplace-> 
+	Then search for "pkg-config" and it should come up. Hit
+	the install button and it will just work.
+
+#############
+Dependencies:
+#############
+
+RTT depends on a few packages that are easily available through the Ubuntu repositories:
+
+sudo apt-get install libsparsehash-dev libgtkmm-3.0-dev libois-dev libssl-dev
+
+
+
+
