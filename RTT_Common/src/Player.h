@@ -9,13 +9,15 @@
 #define PLAYER_H_
 
 #define PLAYER_NAME_SIZE 20
-#define PLAYER_DESCR_SIZE sizeof(uint) + PLAYER_NAME_SIZE + sizeof(enum TeamNumber) + sizeof(enum TeamColor)
+#define PLAYER_DESCR_SIZE sizeof(uint32_t) + PLAYER_NAME_SIZE + \
+	sizeof(enum TeamNumber) + sizeof(enum TeamColor)
 
 #include <vector>
 #include "Unit.h"
 #include "Match.h"
 #include <string>
 #include "Enums.h"
+#include <stdint.h>
 
 using namespace std;
 
@@ -29,7 +31,7 @@ class Match;
 //	to other Players for display
 struct PlayerDescription
 {
-	uint ID;
+	uint32_t ID;
 	char name[PLAYER_NAME_SIZE];
 	enum TeamNumber team;
 	enum TeamColor color;

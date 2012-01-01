@@ -124,6 +124,8 @@
 									<listOptionValue builtIn="false" value="RTT_Common"/>
 									<listOptionValue builtIn="false" value="RTT_Client_Core"/>
 									<listOptionValue builtIn="false" value="pthread"/>
+									<listOptionValue builtIn="false" value="boost_date_time"/>
+									<listOptionValue builtIn="false" value="crypto"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.1491907197" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="../../RTT_Common/Debug"/>

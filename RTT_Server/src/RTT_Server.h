@@ -31,6 +31,8 @@ using tr1::hash;
 #define SERVER_VERSION_MINOR	0
 #define SERVER_VERSION_REV		1
 
+#define DEFAULT_SERVER_PORT 23000
+
 struct eqint
 {
   bool operator()(int s1, int s2) const

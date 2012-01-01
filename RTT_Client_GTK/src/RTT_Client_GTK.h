@@ -8,6 +8,7 @@
 #ifndef RTT_CLIENT_GTK_H_
 #define RTT_CLIENT_GTK_H_
 
+#include <stdint.h>
 
 void connect_click();
 void quit_server_click();
@@ -24,6 +25,8 @@ void LaunchServerConnectPane();
 void LaunchMatchLobbyPane(PlayerDescription *playerDescriptions, uint playerCount);
 
 void InitGlobalWidgets();
+
+bool GetPasswordTerminal(string plaintext, unsigned char *hash);
 
 //Callback Thread managing events from the server
 void *CallbackThread(void * parm);

@@ -16,7 +16,7 @@ AuthMessage::AuthMessage()
 
 }
 
-AuthMessage::AuthMessage(char *buffer, uint length)
+AuthMessage::AuthMessage(char *buffer, uint32_t length)
 {
 	if( length < MESSAGE_MIN_SIZE )
 	{
@@ -36,7 +36,7 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 			//Uses: 1) Message Type
 			//		2) Version Number
 
-			uint expectedSize = MESSAGE_MIN_SIZE + (sizeof(uint)*3);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + (sizeof(uint32_t)*3);
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -57,7 +57,7 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 			//		2) Version Number
 			//		3) AuthMechanism
 
-			uint expectedSize = MESSAGE_MIN_SIZE + (sizeof(uint)*3)
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + (sizeof(uint32_t)*3)
 					+ sizeof(authMechanism);
 			if( length != expectedSize)
 			{
@@ -82,7 +82,7 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 			//		2) Username
 			//		3) Hashed password
 
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(username)
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(username)
 					+ sizeof(hashedPassword);
 			if( length != expectedSize)
 			{
@@ -100,7 +100,7 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 		{
 			//Uses: 1) authSuccess
 			//		2) Your new Player ID
-			uint expectedSize = MESSAGE_MIN_SIZE + sizeof(authSuccess) + PLAYER_DESCR_SIZE;
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(authSuccess) + PLAYER_DESCR_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -113,8 +113,8 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 			//Player ID that joined
 			memcpy(&playerDescription.name, buffer, PLAYER_NAME_SIZE);
 			buffer += PLAYER_NAME_SIZE;
-			memcpy(&playerDescription.ID, buffer, sizeof(uint));
-			buffer += sizeof(uint);
+			memcpy(&playerDescription.ID, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 			memcpy(&playerDescription.color, buffer, sizeof(enum TeamColor));
 			buffer += sizeof(enum TeamColor);
 			memcpy(&playerDescription.team, buffer, sizeof(enum TeamNumber));
@@ -131,7 +131,7 @@ AuthMessage::AuthMessage(char *buffer, uint length)
 	serializeError = false;
 }
 
-char *AuthMessage::Serialize(uint *length)
+char *AuthMessage::Serialize(uint32_t *length)
 {
 	char *buffer, *originalBuffer;
 	switch(type)
@@ -143,7 +143,7 @@ char *AuthMessage::Serialize(uint *length)
 			//		2) Version Number
 
 			//Allocate the memory and assign it to *buffer
-			uint messageSize = MESSAGE_MIN_SIZE	+ (sizeof(uint)*3);
+			uint32_t messageSize = MESSAGE_MIN_SIZE	+ (sizeof(uint32_t)*3);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
@@ -167,8 +167,8 @@ char *AuthMessage::Serialize(uint *length)
 			//		2) Version Number
 			//		3) AuthMechanism
 
-			uint messageSize = MESSAGE_MIN_SIZE + sizeof(authMechanism)
-							+ (sizeof(uint)*3);
+			uint32_t messageSize = MESSAGE_MIN_SIZE + sizeof(authMechanism)
+							+ (sizeof(uint32_t)*3);
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
@@ -193,7 +193,7 @@ char *AuthMessage::Serialize(uint *length)
 			//		2) Username
 			//		3) Hashed password
 
-			uint messageSize = MESSAGE_MIN_SIZE + sizeof(username)
+			uint32_t messageSize = MESSAGE_MIN_SIZE + sizeof(username)
 					+ sizeof(hashedPassword);
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
@@ -213,7 +213,7 @@ char *AuthMessage::Serialize(uint *length)
 		}
 		case SERVER_AUTH_REPLY:
 		{
-			uint messageSize = MESSAGE_MIN_SIZE + sizeof(authSuccess) + PLAYER_DESCR_SIZE;
+			uint32_t messageSize = MESSAGE_MIN_SIZE + sizeof(authSuccess) + PLAYER_DESCR_SIZE;
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
@@ -229,8 +229,8 @@ char *AuthMessage::Serialize(uint *length)
 			//Put the player description in
 			memcpy(buffer, &playerDescription.name, PLAYER_NAME_SIZE);
 			buffer += PLAYER_NAME_SIZE;
-			memcpy(buffer, &playerDescription.ID, sizeof(uint));
-			buffer += sizeof(uint);
+			memcpy(buffer, &playerDescription.ID, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 			memcpy(buffer, &playerDescription.color, sizeof(enum TeamColor));
 			buffer += sizeof(enum TeamColor);
 			memcpy(buffer, &playerDescription.team, sizeof(enum TeamNumber));
