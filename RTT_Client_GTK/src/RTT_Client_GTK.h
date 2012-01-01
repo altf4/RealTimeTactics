@@ -26,6 +26,8 @@ void LaunchMatchLobbyPane(PlayerDescription *playerDescriptions, uint playerCoun
 
 void InitGlobalWidgets();
 
+bool GetPasswordTerminal(string plaintext, unsigned char *hash);
+
 //Callback Thread managing events from the server
 void *CallbackThread(void * parm);
 

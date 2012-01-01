@@ -15,6 +15,7 @@
 #include <vector>
 #include <pthread.h>
 #include "boost/date_time/posix_time/posix_time.hpp"
+#include <openssl/sha.h>
 
 using namespace std;
 using namespace Gtk;
@@ -535,6 +536,19 @@ void *CallbackThread(void * parm)
 
 
 	}
+}
+
+//Asks the user for their password over terminal
+//Sets *hash to the SHA256 hash of the input password
+bool GetPasswordTerminal(string plaintext, unsigned char *hash)
+{
+	//Do the hash
+	SHA256_CTX sha256;
+	SHA256_Init(&sha256);
+	SHA256_Update(&sha256, plaintext.c_str(), plaintext.length());
+	SHA256_Final(hash, &sha256);
+
+	return true;
 }
 
 int main( int argc, char **argv)
