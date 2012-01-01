@@ -205,7 +205,6 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
-			delete lobby_message;
 			delete options_available;
 
 			//********************************
@@ -304,7 +303,6 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 						//Error in write, do something?
 						cerr << "ERROR: Message send returned failure.\n";
 					}
-					delete lobby_message;
 					delete match_join;
 
 					//*******************************
