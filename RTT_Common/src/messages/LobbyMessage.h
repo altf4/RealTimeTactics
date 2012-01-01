@@ -30,17 +30,17 @@ enum LobbyResult: char
 struct ServerStats
 {
 	//Total number of matches on server right now
-	uint numMatches;
+	uint32_t numMatches;
 	//Total number of players on server right now
-	uint numPlayers;
+	uint32_t numPlayers;
 };
 
 class LobbyMessage: public Message
 {
 public:
-	uint requestedPage;
-	uint returnedMatchesCount;
-	uint returnedPlayersCount;
+	uint32_t requestedPage;
+	uint32_t returnedMatchesCount;
+	uint32_t returnedPlayersCount;
 	//A list of queried matches
 	struct MatchDescription *matchDescriptions;
 	//Newly created match
@@ -48,7 +48,7 @@ public:
 	struct PlayerDescription *playerDescriptions;
 	struct MatchOptions options;
 	//ID of a match to join
-	uint ID;
+	uint32_t ID;
 	struct ServerStats serverStats;
 
 

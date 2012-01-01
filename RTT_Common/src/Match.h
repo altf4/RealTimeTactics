@@ -28,7 +28,7 @@ namespace RTT
 class Team;
 class Player;
 
-enum Status
+enum Status: uint32_t
 {
 	WAITING_FOR_PLAYERS,
 	IN_PROGRESS,
@@ -39,18 +39,18 @@ enum Status
 struct MatchDescription
 {
 	enum Status status;
-	uint ID;
-	uint maxPlayers;
-	uint currentPlayerCount;
+	uint32_t ID;
+	uint32_t maxPlayers;
+	uint32_t currentPlayerCount;
 	char name[MAX_MATCHNAME_LEN];
-	time_t timeCreated;
+	int64_t timeCreated;
 };
 
 //A fixed size collection of options for match creation
 //	List of options necessary upon creation of the Match
 struct MatchOptions
 {
-	uint maxPlayers;
+	uint32_t maxPlayers;
 	char name[MAX_MATCHNAME_LEN];
 };
 

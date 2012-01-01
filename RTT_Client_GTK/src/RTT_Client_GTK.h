@@ -8,6 +8,7 @@
 #ifndef RTT_CLIENT_GTK_H_
 #define RTT_CLIENT_GTK_H_
 
+#include <stdint.h>
 
 void connect_click();
 void quit_server_click();
