@@ -599,7 +599,7 @@ string Usage()
 	string out;
 
 	out += "Line of Fire Server Usage:\n";
-	out += "\t RTT_Server -p PORT\n\n";
+	out += "\t RTT_Server [-p PORT]\n\n";
 	out += "\t -p PORT == TCP Port number to listen for connections on.\n";
 	return out;
 }
