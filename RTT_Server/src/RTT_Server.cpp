@@ -90,9 +90,7 @@ int main(int argc, char **argv)
 	//Check that all parameters were entered
 	if( !portEntered )
 	{
-		cerr << "You did not enter a port number\n";
-		cerr << Usage();
-		exit(-1);
+		serverPortNumber = DEFAULT_SERVER_PORT;
 	}
 
 	//Set up the TCP sockets
