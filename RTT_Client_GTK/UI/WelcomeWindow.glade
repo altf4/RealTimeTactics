@@ -151,6 +151,7 @@
                                 <property name="margin_right">100</property>
                                 <property name="max_length">15</property>
                                 <property name="invisible_char">•</property>
+                                <property name="text" translatable="yes">127.0.0.1</property>
                                 <property name="invisible_char_set">True</property>
                               </object>
                               <packing>
@@ -191,7 +192,7 @@
                                 <property name="margin_right">100</property>
                                 <property name="max_length">8</property>
                                 <property name="invisible_char">•</property>
-                                <property name="text" translatable="yes">4321</property>
+                                <property name="text" translatable="yes">23000</property>
                                 <property name="invisible_char_set">True</property>
                               </object>
                               <packing>
