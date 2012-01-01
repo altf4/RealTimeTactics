@@ -10,9 +10,9 @@ src/ClientProtocolHandler.d: ../src/ClientProtocolHandler.cpp \
  ../../RTT_Common/src/messages/../Match.h \
  ../../RTT_Common/src/messages/ErrorMessage.h \
  ../../RTT_Common/src/messages/AuthMessage.h \
+ ../../RTT_Common/src/messages/../Player.h \
  ../../RTT_Common/src/messages/MatchLobbyMessage.h \
  ../../RTT_Common/src/messages/../Map.h \
- ../../RTT_Common/src/messages/../Player.h \
  ../../RTT_Common/src/messages/../Enums.h
 
 ../src/ClientProtocolHandler.h:
@@ -49,10 +49,10 @@ src/ClientProtocolHandler.d: ../src/ClientProtocolHandler.cpp \
 
 ../../RTT_Common/src/messages/AuthMessage.h:
 
+../../RTT_Common/src/messages/../Player.h:
+
 ../../RTT_Common/src/messages/MatchLobbyMessage.h:
 
 ../../RTT_Common/src/messages/../Map.h:
-
-../../RTT_Common/src/messages/../Player.h:
 
 ../../RTT_Common/src/messages/../Enums.h:
