@@ -51,7 +51,7 @@ bool RTT_Ogre_Base::configure(void)
 //Setup our scene manager
 void RTT_Ogre_Base::chooseSceneManager(void)
 {
-	rttSceneManager = rttRoot->createSceneManager("RTTSceneManager"); //Create a generic screen manager
+	rttSceneManager = rttRoot->createSceneManager("DefaultSceneManager"); //Create a generic screen manager
 }
 
 void RTT_Ogre_Base::createCamera(void)
