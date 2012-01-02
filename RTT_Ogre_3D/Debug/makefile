@@ -44,7 +44,7 @@ all: RTT_Ogre_3D
 RTT_Ogre_3D: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L/usr/lib/OGRE -L/usr/include/OGRE/Terrain -L/usr/include/OGRE -L/home/mark/workspace/rapidxml-1.13 -L/home/mark/RTT/RTT_Ogre_3D/tinyxml -o "RTT_Ogre_3D" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++  -o "RTT_Ogre_3D" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

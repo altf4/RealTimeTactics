@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lOgreMain -lOIS -lOgreTerrain
+LIBS :=
 
