@@ -20,6 +20,8 @@
 #include "ServerProtocolHandler.h"
 #include <iterator>
 
+#include "Player.h"
+
 using namespace std;
 using namespace RTT;
 
@@ -88,9 +90,7 @@ int main(int argc, char **argv)
 	//Check that all parameters were entered
 	if( !portEntered )
 	{
-		cerr << "You did not enter a port number\n";
-		cerr << Usage();
-		exit(-1);
+		serverPortNumber = DEFAULT_SERVER_PORT;
 	}
 
 	//Set up the TCP sockets
@@ -157,11 +157,11 @@ int main(int argc, char **argv)
 
 void *MainListen(void * param)
 {
-	int mainSocket = (int)param;
+	intptr_t mainSocket = (intptr_t)param;
 	//Main loop, just listens for new TCP connections and sends them off to MainClientThread
 	for(;;)
 	{
-		int ConnectFD = accept(mainSocket, NULL, NULL);
+		intptr_t ConnectFD = accept(mainSocket, NULL, NULL);
 
 		if(0 > ConnectFD)
 		{
@@ -179,11 +179,11 @@ void *MainListen(void * param)
 
 void *CallbackListen(void * param)
 {
-	int callbackSocket = (int)param;
+	intptr_t callbackSocket = (intptr_t)param;
 	//listen for new TCP connections and sends them off to CallbackClientThread
 	for(;;)
 	{
-		int ConnectFD = accept(callbackSocket, NULL, NULL);
+		intptr_t ConnectFD = accept(callbackSocket, NULL, NULL);
 
 		if(0 > ConnectFD)
 		{
@@ -202,7 +202,7 @@ void *CallbackListen(void * param)
 
 void *MainClientThread(void * parm)
 {
-	int ConnectFD = (int)parm;
+	intptr_t ConnectFD = (intptr_t)parm;
 
 	//First, authenticate the client
 	Player *player = GetNewClient(ConnectFD);
@@ -259,7 +259,7 @@ void *MainClientThread(void * parm)
 //	When we get it, save the created socket into the relevant player object
 void *CallbackClientThread(void * parm)
 {
-	int connectBackSocket = (int)parm;
+	intptr_t connectBackSocket = (intptr_t)parm;
 
 	//*******************************
 	// Receive Callback Register
@@ -599,7 +599,7 @@ string Usage()
 	string out;
 
 	out += "Line of Fire Server Usage:\n";
-	out += "\t RTT_Server -p PORT\n\n";
+	out += "\t RTT_Server [-p PORT]\n\n";
 	out += "\t -p PORT == TCP Port number to listen for connections on.\n";
 	return out;
 }

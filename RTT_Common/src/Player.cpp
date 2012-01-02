@@ -79,3 +79,4 @@ void Player::SetColor(enum TeamColor newColor)
 	color = newColor;
 	description.color = newColor;
 }
+

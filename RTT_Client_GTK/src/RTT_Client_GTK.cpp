@@ -15,12 +15,18 @@
 #include <arpa/inet.h>
 #include <vector>
 #include <pthread.h>
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include <openssl/sha.h>
 
 using namespace std;
 using namespace Gtk;
+using boost::posix_time::ptime;
+using boost::posix_time::time_duration;
+using boost::gregorian::date;
 using namespace RTT;
 
 Glib::RefPtr<Builder> welcome_builder;
+ptime epoch(date(1970,boost::gregorian::Jan,1));
 
 Window *welcome_window = NULL;
 
@@ -259,7 +265,11 @@ void list_matches()
 		row[columns->maxPlayers] = (int)descriptions[i].maxPlayers;
 		row[columns->currentPlayers] = (int)descriptions[i].currentPlayerCount;
 		row[columns->name] = descriptions[i].name;
-		row[columns->timeCreated] = ctime(&descriptions[i].timeCreated) ;
+
+		ptime time = epoch + boost::posix_time::seconds(descriptions[i].timeCreated);
+		string timeString = to_simple_string(time);
+
+		row[columns->timeCreated] = timeString;
 	}
 
 	view->append_column("ID", columns->matchID);
@@ -598,6 +608,19 @@ void *CallbackThread(void * parm)
 
 
 	}
+}
+
+//Asks the user for their password over terminal
+//Sets *hash to the SHA256 hash of the input password
+bool GetPasswordTerminal(string plaintext, unsigned char *hash)
+{
+	//Do the hash
+	SHA256_CTX sha256;
+	SHA256_Init(&sha256);
+	SHA256_Update(&sha256, plaintext.c_str(), plaintext.length());
+	SHA256_Final(hash, &sha256);
+
+	return true;
 }
 
 int main( int argc, char **argv)

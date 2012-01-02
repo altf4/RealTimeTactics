@@ -1,0 +1,32 @@
+
+// blender material: ClayBlue
+material ClayBlue 
+{
+    receive_shadows on
+    technique b2ogre_1325032599.440791
+    {
+        pass b2ogre_1325032599.440802
+        {
+            ambient 0.0 0.25305062532424927 0.8500000238418579 1.0
+            diffuse 0.0 0.20244050327599794 0.6800000292062762 1.0
+            specular 0.0 0.0 0.0 1.0 12.5
+            emissive 0.0 0.0 0.0 1.0
+            alpha_to_coverage off
+            colour_write on
+            cull_hardware clockwise
+            depth_check on
+            depth_func less_equal
+            depth_write on
+            illumination_stage 
+            light_clip_planes off
+            light_scissor off
+            lighting on
+            normalise_normals off
+            polygon_mode solid
+            scene_blend one zero
+            scene_blend_op add
+            shading gouraud
+            transparent_sorting on
+        }
+    }
+}

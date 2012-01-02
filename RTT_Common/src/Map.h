@@ -9,9 +9,10 @@
 #define MAP_H_
 
 #define MAP_NAME_LEN 20
-#define MAP_DESCR_SIZE MAP_NAME_LEN + sizeof(uint) + sizeof(uint)
+#define MAP_DESCR_SIZE MAP_NAME_LEN + sizeof(uint32_t) + sizeof(uint32_t)
 
 #include "stdlib.h"
+#include <stdint.h>
 
 using namespace std;
 
@@ -22,9 +23,9 @@ struct MapDescription
 {
 	char name[MAP_NAME_LEN];
 	//X direction
-	uint width;
+	uint32_t width;
 	//Y direction
-	uint length;
+	uint32_t length;
 };
 
 class Map

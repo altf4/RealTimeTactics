@@ -1,0 +1,367 @@
+<scene exported_by="mark" formatVersion="1.0.1" previous_export_time="1325026279.280613" export_time="1325032599.441111" >
+	<nodes >
+		<node name="Cylinder.018" >
+			<position y="0.030569" x="1.624660" z="-2.815266" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.018">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileOne.004.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileOne.004" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileOne.004">" />
+			</entity>
+		</node>
+		<node name="Cylinder.019" >
+			<position y="0.086583" x="-0.405526" z="-2.110542" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.019">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileThree.005.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileThree.005" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileThree.005">" />
+			</entity>
+		</node>
+		<node name="Cylinder.017" >
+			<position y="0.066787" x="0.409134" z="-2.110542" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.017">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileFour.004.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileFour.004" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileFour.004">" />
+			</entity>
+		</node>
+		<node name="Cylinder.016" >
+			<position y="0.043610" x="1.219134" z="-2.110542" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.016">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileThree.004.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileThree.004" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileThree.004">" />
+			</entity>
+		</node>
+		<node name="Cylinder.015" >
+			<position y="0.000000" x="1.624660" z="-0.000000" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.015">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileOne.003.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileOne.003" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileOne.003">" />
+			</entity>
+		</node>
+		<node name="Cylinder.014" >
+			<position y="0.000000" x="0.814660" z="-0.000000" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.014">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileTwo.003.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileTwo.003" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileTwo.003">" />
+			</entity>
+		</node>
+		<node name="Cylinder.013" >
+			<position y="0.000000" x="0.814660" z="-0.000000" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.013">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileFour.003.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileFour.003" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileFour.003">" />
+			</entity>
+		</node>
+		<node name="Cylinder.012" >
+			<position y="0.000000" x="1.624660" z="-0.000000" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.012">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileThree.003.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileThree.003" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileThree.003">" />
+			</entity>
+		</node>
+		<node name="Cylinder.011" >
+			<position y="0.000000" x="1.624660" z="-1.405629" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.011">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileThree.002.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileThree.002" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileThree.002">" />
+			</entity>
+		</node>
+		<node name="Cylinder.010" >
+			<position y="0.000000" x="0.814660" z="-1.405629" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.010">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileFour.002.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileFour.002" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileFour.002">" />
+			</entity>
+		</node>
+		<node name="Cylinder.009" >
+			<position y="0.000000" x="0.814660" z="-1.405629" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.009">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileTwo.002.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileTwo.002" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileTwo.002">" />
+			</entity>
+		</node>
+		<node name="Cylinder.008" >
+			<position y="0.000000" x="1.624660" z="-1.405629" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.008">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileOne.002.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileOne.002" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileOne.002">" />
+			</entity>
+		</node>
+		<node name="Cylinder.007" >
+			<position y="0.000000" x="0.000000" z="-1.405629" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.007">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileOne.001.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileOne.001" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileOne.001">" />
+			</entity>
+		</node>
+		<node name="Cylinder.006" >
+			<position y="0.000000" x="-0.810000" z="-1.405629" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.006">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileTwo.001.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileTwo.001" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileTwo.001">" />
+			</entity>
+		</node>
+		<node name="Cylinder.005" >
+			<position y="0.000000" x="-0.810000" z="-1.405629" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.005">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileFour.001.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileFour.001" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileFour.001">" />
+			</entity>
+		</node>
+		<node name="Cylinder.004" >
+			<position y="0.000000" x="0.000000" z="-1.405629" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.004">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileThree.001.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileThree.001" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileThree.001">" />
+			</entity>
+		</node>
+		<node name="Marine2" >
+			<position y="0.587850" x="-0.385834" z="-2.131073" />
+			<rotation qy="0.000000" qx="0.000000" qz="0.000000" qw="1.000000" />
+			<scale y="0.200000" x="0.200000" z="0.200000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBMarine2">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="Marine2.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="Marine2" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "MEMarine2">" />
+			</entity>
+		</node>
+		<node name="Cylinder.003" >
+			<position y="0.000000" x="0.000000" z="-0.000000" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.003">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileThree.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileThree" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileThree">" />
+			</entity>
+		</node>
+		<node name="Cylinder.002" >
+			<position y="0.000000" x="-0.810000" z="-0.000000" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.002">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileFour.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileFour" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileFour">" />
+			</entity>
+		</node>
+		<node name="Cylinder.001" >
+			<position y="0.000000" x="-0.810000" z="-0.000000" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder.001">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileTwo.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileTwo" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileTwo">" />
+			</entity>
+		</node>
+		<node name="Cylinder" >
+			<position y="0.000000" x="0.000000" z="-0.000000" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCylinder">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="TileOne.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="TileOne" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "METileOne">" />
+			</entity>
+		</node>
+		<node name="Circle" >
+			<position y="0.000000" x="0.000000" z="-0.000000" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBCircle">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="Circle.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="Circle" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "MECircle">" />
+			</entity>
+		</node>
+		<node name="Lamp" >
+			<position y="5.727865" x="3.076245" z="-1.005454" />
+			<rotation qy="0.764926" qx="0.133329" qz="-0.119507" qw="0.618733" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<light shadow="true" type="directional" name="Lamp" powerScale="0.800000011920929" >
+				<position y="5.727865" x="3.076245" z="-1.005454" />
+				<lightAttenuation range="5000" quadratic="0.0" constant="1.0" linear="0.03333335240683057" />
+				<direction y="-0.936" x="-0.056" z="0.348" />
+				<colourDiffuse r="1.0" b="1.0" g="1.0" />
+				<colourSpecular r="1.0" b="1.0" g="1.0" />
+				<colourShadow r="1.0" b="1.0" g="1.0" />
+			</light>
+		</node>
+		<node name="Camera" >
+			<position y="6.199557" x="0.211320" z="4.930320" />
+			<rotation qy="0.000000" qx="0.382684" qz="-0.000000" qw="0.923880" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<camera projectionType="perspective" fov="33.39848846798724" name="Camera" >
+				<clipping nearPlaneDist="0.10000000149011612" farPlaneDist="100.0" />
+			</camera>
+		</node>
+		<node name="Marine1" >
+			<position y="0.587850" x="0.796916" z="0.006963" />
+			<rotation qy="1.000000" qx="-0.000000" qz="-0.000000" qw="0.000000" />
+			<scale y="0.200000" x="0.200000" z="0.200000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBMarine1">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="Marine1.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="Marine1" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "MEMarine1">" />
+			</entity>
+		</node>
+		<node name="Rhino" >
+			<position y="0.277750" x="-1.169532" z="-0.673862" />
+			<rotation qy="0.000000" qx="0.000000" qz="-0.000000" qw="1.000000" />
+			<scale y="1.000000" x="1.000000" z="1.000000" />
+			<user_data type="Blender IDProperty" name="cycles_visibility" value="<bpy id property from "OBRhino">" />
+			<game >
+				<sensors />
+				<actuators />
+			</game>
+			<entity anisotropic_friction="False" lock_trans_y="False" damping_trans="0.03999999910593033" damping_rot="0.10000000149011612" inertia_tensor="0.4000000059604645" actor="False" velocity_min="0.0" lock_trans_z="False" physics_type="STATIC" lock_trans_x="False" meshFile="Rhino.mesh" friction_y="1.0" friction_x="1.0" friction_z="1.0" velocity_max="0.0" ghost="False" name="Rhino" mass_radius="1.0" mass="1.0" lock_rot_x="False" lock_rot_y="False" lock_rot_z="False" >
+				<user_data type="Blender IDProperty" name="cycles" value="<bpy id property from "MERhino">" />
+			</entity>
+		</node>
+	</nodes>
+	<externals >
+		<item type="material" >
+			<file name="/home/mark/workspace/ogretest/Claytan.material" />
+		</item>
+		<item type="material" >
+			<file name="/home/mark/workspace/ogretest/Claygreen.material" />
+		</item>
+		<item type="material" >
+			<file name="/home/mark/workspace/ogretest/ClayRed.material" />
+		</item>
+		<item type="material" >
+			<file name="/home/mark/workspace/ogretest/Material.012.material" />
+		</item>
+		<item type="material" >
+			<file name="/home/mark/workspace/ogretest/ClayBlue.material" />
+		</item>
+	</externals>
+	<environment >
+		<colourBackground r="0.0" b="0.0" g="0.0" />
+		<colourAmbient r="0.0" b="0.0" g="0.0" />
+		<colourDiffuse r="0.0" b="0.0" g="0.0" />
+	</environment>
+</scene>
