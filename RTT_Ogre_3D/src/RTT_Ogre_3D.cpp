@@ -35,7 +35,8 @@ using namespace OIS;
 RTT_Ogre_3D::RTT_Ogre_3D(void)
 	: rttRoot(0),
 	rttResourcesCfg(StringUtil::BLANK),
-	rttPluginsCfg(StringUtil::BLANK)
+	rttPluginsCfg(StringUtil::BLANK),
+	rttShutdown(false)
 {
 }
 //-------------------------------------------------------------------------------------
@@ -60,6 +61,7 @@ bool RTT_Ogre_3D::go(void)
 
     // construct Ogre::Root root node
     rttRoot = new Root(rttPluginsCfg);
+
 
 
     // set up resources
@@ -215,8 +217,11 @@ bool RTT_Ogre_3D::go(void)
     pl.insert(make_pair(string("WINDOW"), windowHndStr.str()));
 
     rttInputManager = InputManager::createInputSystem( pl );
-    rttKeyboard = static_cast<Keyboard*>(rttInputManager->createInputObject(OISKeyboard, false ));
-    rttMouse = static_cast<Mouse*>(rttInputManager->createInputObject(OISMouse, false ));
+    rttKeyboard = static_cast<Keyboard*>(rttInputManager->createInputObject(OISKeyboard, true ));
+    rttMouse = static_cast<Mouse*>(rttInputManager->createInputObject(OISMouse, true ));
+
+    //rttMouse->setEventCallback(this);
+    rttKeyboard->setEventCallback(this);
 
     windowResized(rttWindow);    //Set initial mouse clipping size
     WindowEventUtilities::addWindowEventListener(rttWindow, this);    //Register as a Window listener
@@ -274,43 +279,57 @@ void RTT_Ogre_3D::windowClosed(RenderWindow* rw)
     }
 }
 
+bool RTT_Ogre_3D::keyPressed( const KeyEvent& evt )
+{
+	switch (evt.key)
+	{
+	case KC_ESCAPE:
+		LogManager::getSingletonPtr()->logMessage("Quitting!!!");
+	    rttShutdown = true;
+	    break;
+	case KC_NUMPAD4:
+		LogManager::getSingletonPtr()->logMessage("Moving North West");
+		break;
+	case KC_NUMPAD5:
+		LogManager::getSingletonPtr()->logMessage("Moving North");
+		break;
+	case KC_NUMPAD6:
+		LogManager::getSingletonPtr()->logMessage("Moving North East");
+		break;
+	case KC_NUMPAD1:
+		LogManager::getSingletonPtr()->logMessage("Moving South West");
+		break;
+	case KC_NUMPAD2:
+		LogManager::getSingletonPtr()->logMessage("Moving South");
+		break;
+	case KC_NUMPAD3:
+		LogManager::getSingletonPtr()->logMessage("Moving South East");
+		break;
+	default:
+	    break;
+	}
+	return true;
+}
+
+bool RTT_Ogre_3D::keyReleased( const KeyEvent& evt )
+{
+	return true;
+}
+
+
 bool RTT_Ogre_3D::frameRenderingQueued(const FrameEvent& evt)
 {
     if(rttWindow->isClosed())
         return false;
-
+    if(rttShutdown)
+    	return false;
     //Need to capture/update each device
     rttKeyboard->capture();
     rttMouse->capture();
 
-    if(rttKeyboard->isKeyDown(KC_ESCAPE))//Quit
-    {
-        return false;
-    }
-    if(rttKeyboard->isKeyDown(KC_NUMPAD4))//Move North West
-    {
-    	LogManager::getSingletonPtr()->logMessage("Move North West");
-    }
-    if(rttKeyboard->isKeyDown(KC_NUMPAD5))//Move North
-    {
-    	LogManager::getSingletonPtr()->logMessage("Move North");
-    }
-    if(rttKeyboard->isKeyDown(KC_NUMPAD6))//Move North East
-    {
-    	LogManager::getSingletonPtr()->logMessage("Move North East");
-    }
-    if(rttKeyboard->isKeyDown(KC_NUMPAD1))//Move South West
-    {
-    	LogManager::getSingletonPtr()->logMessage("Move South West");
-    }
-    if(rttKeyboard->isKeyDown(KC_NUMPAD2))//Move South
-    {
-    	LogManager::getSingletonPtr()->logMessage("Move South");
-    }
-    if(rttKeyboard->isKeyDown(KC_NUMPAD3))//Move South East
-    {
-    	LogManager::getSingletonPtr()->logMessage("Move South East");
-    }
+
+
+
     return true;
 }
 

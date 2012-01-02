@@ -14,13 +14,14 @@
 #include <OISKeyboard.h>
 #include <OISMouse.h>
 #include <OgreWindowEventUtilities.h>
+#include <vector>
 
 using namespace Ogre;
 using namespace OIS;
 
 namespace RTT
 {
-	class RTT_Ogre_3D : public WindowEventListener, public FrameListener
+	class RTT_Ogre_3D : public WindowEventListener, public FrameListener, public OIS::KeyListener//, public OIS::MouseListener
 	{
 	public:
 		RTT_Ogre_3D(void);
@@ -36,10 +37,14 @@ namespace RTT
 	    InputManager* rttInputManager;
 	    Mouse*    rttMouse;
 	    Keyboard* rttKeyboard;
+	    vector<bool> rttKeyDown;
 	protected:
 	    virtual void windowResized(RenderWindow* rw); //WindowEventListener
 	    virtual void windowClosed(RenderWindow* rw); //WindowEventListener
 	    virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);//FrameListener
+	    virtual bool keyPressed(const KeyEvent& evt );
+	    virtual bool keyReleased(const KeyEvent& evt );
+	    bool rttShutdown;
 	};
 }
 
