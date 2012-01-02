@@ -16,6 +16,10 @@
 #include <OgreEntity.h>
 #include <OgreWindowEventUtilities.h>
 #include <OgreStringConverter.h>
+#include <OISEvents.h>
+#include <OISInputManager.h>
+#include <OISKeyboard.h>
+#include <OISMouse.h>
 
 #include <string>
 
@@ -25,6 +29,7 @@
 using namespace RTT;
 using namespace Ogre;
 using namespace std;
+using namespace OIS;
 
 //-------------------------------------------------------------------------------------
 RTT_Ogre_3D::RTT_Ogre_3D(void)
@@ -36,6 +41,10 @@ RTT_Ogre_3D::RTT_Ogre_3D(void)
 //-------------------------------------------------------------------------------------
 RTT_Ogre_3D::~RTT_Ogre_3D(void)
 {
+	//Remove ourself as a Window listener
+	WindowEventUtilities::removeWindowEventListener(rttWindow, this);
+	windowClosed(rttWindow);
+	//Kill Ogre
 	delete rttRoot;
 }
 
@@ -91,8 +100,8 @@ bool RTT_Ogre_3D::go(void)
 
     rttCamera = rttSceneManager->createCamera("PrimaryCamera"); //Create our primary camera in our screen manager
     //The camera needs positioning
-    rttCamera->setPosition(Vector3(2.25,10.5,6.5)); // Position it at 80 in Z direction
-    rttCamera->lookAt(Vector3(2.25,0,-4)); // Look back along -Z
+    rttCamera->setPosition(Ogre::Vector3(2.25,10.5,6.5)); // Position it at 80 in Z direction
+    rttCamera->lookAt(Ogre::Vector3(2.25,0,-4)); // Look back along -Z
     rttCamera->setNearClipDistance(5); // This is how close an object can be to the camera before it is "clipped", or not rendered
 
     // Create one viewport, entire window, this is where the camera view is rendered
@@ -124,7 +133,7 @@ bool RTT_Ogre_3D::go(void)
     float posY = 0;
     float posZ = 0;
     Entity* tileVector[4][4];
-    std::string tileType = "DirtTile";
+    string tileType = "DirtTile";
     SceneNode* nodeVector[4][4];
     Entity* blueMarine = rttSceneManager->createEntity("BlueMarine", "BlueMarine.mesh");
     blueMarine->setCastShadows(true);
@@ -133,7 +142,7 @@ bool RTT_Ogre_3D::go(void)
     blueMarineNode->yaw(Degree(90));
     Entity* redMarine = rttSceneManager->createEntity("RedMarine", "RedMarine.mesh");
     redMarine->setCastShadows(true);
-    SceneNode* redMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("RedMarine", Vector3(3*1.5,0,-3*1.732 -.866));
+    SceneNode* redMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("RedMarine", Ogre::Vector3(3*1.5,0,-3*1.732 -.866));
     redMarineNode->attachObject(redMarine);
     redMarineNode->yaw(Degree(-90));
 
@@ -148,7 +157,7 @@ bool RTT_Ogre_3D::go(void)
     		}
     		tileVector[i][n] = rttSceneManager->createEntity(tileType + Ogre::StringConverter::toString(i) + Ogre::StringConverter::toString(n), "DirtTile.mesh", "RTT");
     		tileVector[i][n]->setCastShadows(true);
-    		nodeVector[i][n] = rttSceneManager->getRootSceneNode()->createChildSceneNode(tileType + Ogre::StringConverter::toString(i) + Ogre::StringConverter::toString(n), Vector3(i*1.5, posY,posZ));
+    		nodeVector[i][n] = rttSceneManager->getRootSceneNode()->createChildSceneNode(tileType + Ogre::StringConverter::toString(i) + Ogre::StringConverter::toString(n), Ogre::Vector3(i*1.5, posY,posZ));
     		nodeVector[i][n]->attachObject(tileVector[i][n]);
     	}
     }
@@ -161,12 +170,12 @@ bool RTT_Ogre_3D::go(void)
 
     Entity* dirtTile2 = rttSceneManager->createEntity("DirtTile2", "DirtTile.mesh");
     dirtTile2->setCastShadows(true);
-    SceneNode* dirtTile2Node = rttSceneManager->getRootSceneNode()->createChildSceneNode("DirtTile2", Vector3(1.5,0,-.866));
+    SceneNode* dirtTile2Node = rttSceneManager->getRootSceneNode()->createChildSceneNode("DirtTile2", Ogre::Vector3(1.5,0,-.866));
     dirtTile2Node->attachObject(dirtTile2);
 
     Entity* dirtTile3 = rttSceneManager->createEntity("DirtTile3", "DirtTile.mesh");
     dirtTile3->setCastShadows(true);
-    SceneNode* dirtTile3Node = rttSceneManager->getRootSceneNode()->createChildSceneNode("DirtTile3", Vector3(3,0,0));
+    SceneNode* dirtTile3Node = rttSceneManager->getRootSceneNode()->createChildSceneNode("DirtTile3", Ogre::Vector3(3,0,0));
     dirtTile3Node->attachObject(dirtTile3);
 
     Entity* blueMarine = rttSceneManager->createEntity("BlueMarine", "BlueMarine.mesh");
@@ -179,7 +188,7 @@ bool RTT_Ogre_3D::go(void)
     Entity* groundPlane = rttSceneManager->createEntity("Ground", "Plane.mesh");
     groundPlane->setMaterialName("Claygreen");
     groundPlane->setCastShadows(false);
-    SceneNode* groundPlaneNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Ground", Vector3(2.25,0,0));
+    SceneNode* groundPlaneNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Ground", Ogre::Vector3(2.25,0,0));
     groundPlaneNode->attachObject(groundPlane);
     //groundPlaneNode->scale(25,25,25);
 
@@ -195,7 +204,25 @@ bool RTT_Ogre_3D::go(void)
 
     //END OBJECTS       ************************************************************************************************
 
+    //OIS Input system startup
+    LogManager::getSingletonPtr()->logMessage("*** Initializing OIS ***");
+    ParamList pl;
+    size_t windowHnd = 0;
+    ostringstream windowHndStr;
+
+    rttWindow->getCustomAttribute("WINDOW", &windowHnd);
+    windowHndStr << windowHnd;
+    pl.insert(make_pair(string("WINDOW"), windowHndStr.str()));
+
+    rttInputManager = InputManager::createInputSystem( pl );
+    rttKeyboard = static_cast<Keyboard*>(rttInputManager->createInputObject(OISKeyboard, false ));
+    rttMouse = static_cast<Mouse*>(rttInputManager->createInputObject(OISMouse, false ));
+
+    windowResized(rttWindow);    //Set initial mouse clipping size
+    WindowEventUtilities::addWindowEventListener(rttWindow, this);    //Register as a Window listener
+
     //where the magic happens:  Render loop!!!
+    /*
     while(true)
     {
         // Pump window messages for nice behaviour
@@ -209,10 +236,83 @@ bool RTT_Ogre_3D::go(void)
         // Render a frame
         if(!rttRoot->renderOneFrame()) return false;
     }
+    */
+
+    rttRoot->addFrameListener(this);
+
+    rttRoot->startRendering();
 
     return true;
 }
 
+//Adjust mouse clipping area
+void RTT_Ogre_3D::windowResized(RenderWindow* rw)
+{
+    unsigned int width, height, depth;
+    int left, top;
+    rw->getMetrics(width, height, depth, left, top);
+
+    const MouseState &ms = rttMouse->getMouseState();
+    ms.width = width;
+    ms.height = height;
+}
+
+//Unattach OIS before window shutdown (very important under Linux)
+void RTT_Ogre_3D::windowClosed(RenderWindow* rw)
+{
+    //Only close for window that created OIS
+    if( rw == rttWindow )
+    {
+        if( rttInputManager )
+        {
+            rttInputManager->destroyInputObject( rttMouse );
+            rttInputManager->destroyInputObject( rttKeyboard );
+
+            InputManager::destroyInputSystem(rttInputManager);
+            rttInputManager = 0;
+        }
+    }
+}
+
+bool RTT_Ogre_3D::frameRenderingQueued(const FrameEvent& evt)
+{
+    if(rttWindow->isClosed())
+        return false;
+
+    //Need to capture/update each device
+    rttKeyboard->capture();
+    rttMouse->capture();
+
+    if(rttKeyboard->isKeyDown(KC_ESCAPE))//Quit
+    {
+        return false;
+    }
+    if(rttKeyboard->isKeyDown(KC_NUMPAD4))//Move North West
+    {
+    	LogManager::getSingletonPtr()->logMessage("Move North West");
+    }
+    if(rttKeyboard->isKeyDown(KC_NUMPAD5))//Move North
+    {
+    	LogManager::getSingletonPtr()->logMessage("Move North");
+    }
+    if(rttKeyboard->isKeyDown(KC_NUMPAD6))//Move North East
+    {
+    	LogManager::getSingletonPtr()->logMessage("Move North East");
+    }
+    if(rttKeyboard->isKeyDown(KC_NUMPAD1))//Move South West
+    {
+    	LogManager::getSingletonPtr()->logMessage("Move South West");
+    }
+    if(rttKeyboard->isKeyDown(KC_NUMPAD2))//Move South
+    {
+    	LogManager::getSingletonPtr()->logMessage("Move South");
+    }
+    if(rttKeyboard->isKeyDown(KC_NUMPAD3))//Move South East
+    {
+    	LogManager::getSingletonPtr()->logMessage("Move South East");
+    }
+    return true;
+}
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 #define WIN32_LEAN_AND_MEAN

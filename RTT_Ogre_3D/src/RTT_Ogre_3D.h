@@ -9,12 +9,18 @@
 #define RTT_Ogre_3D_H_
 
 #include <OgreRoot.h>
+#include <OISEvents.h>
+#include <OISInputManager.h>
+#include <OISKeyboard.h>
+#include <OISMouse.h>
+#include <OgreWindowEventUtilities.h>
 
 using namespace Ogre;
+using namespace OIS;
 
 namespace RTT
 {
-	class RTT_Ogre_3D
+	class RTT_Ogre_3D : public WindowEventListener, public FrameListener
 	{
 	public:
 		RTT_Ogre_3D(void);
@@ -27,6 +33,13 @@ namespace RTT
 	    RenderWindow* rttWindow; // Ogre render window
 	    SceneManager* rttSceneManager; // Ogre Screen Manager
 	    Camera* rttCamera; // Ogre primary camera
+	    InputManager* rttInputManager;
+	    Mouse*    rttMouse;
+	    Keyboard* rttKeyboard;
+	protected:
+	    virtual void windowResized(RenderWindow* rw); //WindowEventListener
+	    virtual void windowClosed(RenderWindow* rw); //WindowEventListener
+	    virtual bool frameRenderingQueued(const Ogre::FrameEvent& evt);//FrameListener
 	};
 }
 
