@@ -8,18 +8,25 @@
 #ifndef __RTT_Ogre_Base_h_
 #define __RTT_Ogre_Base_h_
 
+#include <OgreCamera.h>
+#include <OgreEntity.h>
+#include <OgreLogManager.h>
 #include <OgreRoot.h>
+#include <OgreViewport.h>
+#include <OgreSceneManager.h>
+#include <OgreRenderWindow.h>
+#include <OgreConfigFile.h>
+#include <OgreWindowEventUtilities.h>
 #include <OISEvents.h>
 #include <OISInputManager.h>
 #include <OISKeyboard.h>
 #include <OISMouse.h>
-#include <OgreWindowEventUtilities.h>
 
 using namespace Ogre;
 using namespace OIS;
 
-namespace RTT
-{
+//namespace RTT
+//{
 	class RTT_Ogre_Base : public FrameListener, public WindowEventListener, public KeyListener, public MouseListener
 	{
 		public:
@@ -69,6 +76,6 @@ namespace RTT
 			Mouse*    rttMouse;
 			Keyboard* rttKeyboard;
 	};
-}
+//}
 
 #endif // #ifndef __RTT_Ogre_Base_h_

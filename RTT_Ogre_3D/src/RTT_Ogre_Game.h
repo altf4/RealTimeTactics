@@ -10,10 +10,8 @@
 #define RTT_OGRE_GAME_H_
 
 #include "RTT_Ogre_Base.h"
-#include <OgreRoot.h>
-#include <OgreEntity.h>
 
-using namespace RTT;
+//using namespace RTT;
 
 class RTT_Ogre_Game : public RTT_Ogre_Base
 {

@@ -7,25 +7,8 @@
 //============================================================================
 
 #include "RTT_Ogre_Base.h"
-#include <OgreException.h>
-#include <OgreRoot.h>
-#include <OgreConfigFile.h>
-#include <OgreCamera.h>
-#include <OgreViewport.h>
-#include <OgreSceneManager.h>
-#include <OgreRenderWindow.h>
-#include <OgreEntity.h>
-#include <OgreWindowEventUtilities.h>
-#include <OgreStringConverter.h>
-#include <OISEvents.h>
-#include <OISInputManager.h>
-#include <OISKeyboard.h>
-#include <OISMouse.h>
 
-#include <vector>
-
-
-using namespace RTT;
+//using namespace RTT;
 using namespace Ogre;
 using namespace OIS;
 
@@ -35,7 +18,7 @@ RTT_Ogre_Base::RTT_Ogre_Base(void)
     rttCamera(0),
     rttSceneManager(0),
     rttWindow(0),
-    rttResourcesCfg(StringUtil::BLANK),
+    rttResourcesCfg(Ogre::StringUtil::BLANK),
     rttPluginsCfg(StringUtil::BLANK),
     rttShutDown(false),
     rttInputManager(0),

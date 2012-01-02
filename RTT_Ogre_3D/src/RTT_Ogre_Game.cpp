@@ -8,15 +8,13 @@
 
 #include "RTT_Ogre_Game.h"
 
-#include <OgreRoot.h>
-#include <OgreEntity.h>
 #include <string>
 #include <vector>
 
 using namespace Ogre;
 using namespace std;
 using namespace OIS;
-using namespace RTT;
+//using namespace RTT;
 
 //-------------------------------------------------------------------------------------
 RTT_Ogre_Game::RTT_Ogre_Game(void)
