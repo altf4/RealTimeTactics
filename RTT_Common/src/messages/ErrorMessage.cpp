@@ -16,9 +16,9 @@ ErrorMessage::ErrorMessage()
 
 }
 
-ErrorMessage::ErrorMessage(char *buffer, uint length)
+ErrorMessage::ErrorMessage(char *buffer, uint32_t length)
 {
-	uint expectedSize = MESSAGE_MIN_SIZE + sizeof(errorType);
+	uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(errorType);
 	if( length != expectedSize )
 	{
 		serializeError = true;
@@ -35,12 +35,12 @@ ErrorMessage::ErrorMessage(char *buffer, uint length)
 
 }
 
-char *ErrorMessage::Serialize(uint *length)
+char *ErrorMessage::Serialize(uint32_t *length)
 {
 	char *buffer, *originalBuffer;
-	uint messageSize;
+	uint32_t messageSize;
 
-	messageSize = MESSAGE_MIN_SIZE +sizeof(errorType);
+	messageSize = MESSAGE_MIN_SIZE + sizeof(errorType);
 	buffer = (char*)malloc(messageSize);
 	originalBuffer = buffer;
 

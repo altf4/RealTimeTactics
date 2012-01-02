@@ -186,6 +186,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 			}
 			delete query_reply;
 
+			delete lobby_message;
 			return IN_MAIN_LOBBY;
 		}
 		case MATCH_CREATE_REQUEST:
@@ -201,6 +202,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
 				delete options_available;
+				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			delete options_available;
@@ -214,6 +216,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				//Error
 				cerr << "ERROR: Reading from client failed.\n";
 				SendError(ConnectFD, PROTOCOL_ERROR);
+				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			if( options_chosen_init->type !=  MATCH_CREATE_OPTIONS_CHOSEN)
@@ -222,6 +225,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				cerr << "ERROR: Client gave us the wrong message type.\n";
 				SendError(ConnectFD, PROTOCOL_ERROR);
 				delete options_chosen_init;
+				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -231,6 +235,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 			{
 				cerr << "ERROR: Client asked an invalid number of max playersb.\n";
 				SendError(ConnectFD, INVALID_MAX_PLAYERS);
+				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -240,6 +245,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 			{
 				//TODO: Find a better error message hereb
 				SendError(ConnectFD, TOO_BUSY);
+				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			delete options_chosen;
@@ -256,10 +262,11 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				//TODO: This case is awkward. Should probably
 				//	remove player from the match?
 				cerr << "ERROR: Message send returned failure.\n";
+				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			delete create_reply;
-
+			delete lobby_message;
 			return IN_MATCH_LOBBY;
 		}
 		case MATCH_JOIN_REQUEST:
@@ -309,7 +316,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 							notification);
 					pthread_rwlock_unlock(&matchListLock);
 					delete notification;
-
+					delete lobby_message;
 					return IN_MATCH_LOBBY;
 				}
 				case LOBBY_MATCH_IS_FULL:
@@ -338,6 +345,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 					break;
 				}
 				SendError(ConnectFD, errorType);
+				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 		}
@@ -363,6 +371,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				cerr << "ERROR: Message send returned failure.\n";
 			}
 			delete stats_reply;
+			delete lobby_message;
 			return IN_MAIN_LOBBY;
 		}
 		case MATCH_EXIT_SERVER_NOTIFICATION:
@@ -378,11 +387,13 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				cerr << "ERROR: Message send returned failure.\n";
 			}
 			delete exit_server;
+			delete lobby_message;
 			return EXITING_SERVER;
 		}
 		default:
 		{
 			SendError(ConnectFD, PROTOCOL_ERROR);
+			delete lobby_message;
 			return IN_MAIN_LOBBY;
 		}
 	}
@@ -441,6 +452,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			if( player->currentMatch == NULL )
 			{
 				SendError(connectFD, NOT_IN_THAT_MATCH);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			if( LeaveMatch(player) )
@@ -456,11 +468,13 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 					cerr << "ERROR: Message send returned failure.\n";
 				}
 				delete leave_ack;
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			else
 			{
 				SendError(connectFD, NOT_IN_THAT_MATCH);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 		}
@@ -469,6 +483,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			if( player->currentMatch == NULL )
 			{
 				SendError(connectFD, PROTOCOL_ERROR);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -477,6 +492,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			//Is this not a self change?
@@ -487,6 +503,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				{
 					//Error, there is no such Match
 					SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
+					delete match_lobby_message;
 					return IN_MAIN_LOBBY;
 				}
 			}
@@ -531,6 +548,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			if( player->currentMatch == NULL )
 			{
 				SendError(connectFD, PROTOCOL_ERROR);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -539,6 +557,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			//Is this not a self change?
@@ -549,6 +568,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				{
 					//Error, there is no such Match
 					SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
+					delete match_lobby_message;
 					return IN_MAIN_LOBBY;
 				}
 			}
@@ -591,6 +611,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			if( player->currentMatch == NULL )
 			{
 				SendError(connectFD, PROTOCOL_ERROR);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -599,6 +620,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			//Is this not a self change?
@@ -609,6 +631,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				{
 					//Error, there is no such Match
 					SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
+					delete match_lobby_message;
 					return IN_MAIN_LOBBY;
 				}
 			}
@@ -624,6 +647,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				//Error, there is no such player
 				SendError(connectFD, NO_SUCH_PLAYER);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			pthread_rwlock_unlock(&playerListLock);
@@ -660,6 +684,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			if( player->currentMatch == NULL )
 			{
 				SendError(connectFD, PROTOCOL_ERROR);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -668,6 +693,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			//Is this this not the leader?
@@ -675,6 +701,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -715,6 +742,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			if( player->currentMatch == NULL )
 			{
 				SendError(connectFD, PROTOCOL_ERROR);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -723,6 +751,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			//Is this this not the leader?
@@ -730,6 +759,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -770,6 +800,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			if( player->currentMatch == NULL )
 			{
 				SendError(connectFD, PROTOCOL_ERROR);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -778,6 +809,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			//Is this this not the leader?
@@ -785,6 +817,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -825,6 +858,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			if( player->currentMatch == NULL )
 			{
 				SendError(connectFD, PROTOCOL_ERROR);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -833,6 +867,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 			//Is this this not the leader?
@@ -840,6 +875,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
+				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
 
@@ -881,9 +917,11 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 		default:
 		{
 			SendError(connectFD, PROTOCOL_ERROR);
+			delete match_lobby_message;
 			return IN_MATCH_LOBBY;
 		}
 	}
+	delete match_lobby_message;
 	return IN_MATCH_LOBBY;
 }
 
