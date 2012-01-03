@@ -18,6 +18,13 @@ using namespace std;
 namespace RTT
 {
 
+//A coordinate (x, y) position on the gameboard
+struct Coordinate
+{
+	uint32_t x;
+	uint32_t y;
+};
+
 class Tile
 {
 public:

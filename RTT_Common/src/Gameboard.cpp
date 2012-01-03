@@ -73,7 +73,7 @@ int Gameboard::BuildGraph(Unit *unit, Edge *edge_array, double *weight_array)
 			//For each direction
 			for( int k = 0; k < 6; k++ )
 			{
-				nextWeight = GetMovementCost(tiles[i][j], static_cast<direction>(k), unit);
+				nextWeight = GetMovementCost(tiles[i][j], static_cast<Direction>(k), unit);
 				//Accumulate how many outgoing edges there are
 				if( nextWeight != -1)
 				{
@@ -100,7 +100,7 @@ int Gameboard::BuildGraph(Unit *unit, Edge *edge_array, double *weight_array)
 
 //Returns the weight (IE: Movement cost) of moving in the given direction
 //	Returns -1 when impassable.
-double Gameboard::GetMovementCost(Tile *fromTile, direction dir, Unit *unit)
+double Gameboard::GetMovementCost(Tile *fromTile, Direction dir, Unit *unit)
 {
 	//If this tile is impassable, then don't bother even looking
 	if( !fromTile->isPassable )
