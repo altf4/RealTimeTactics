@@ -65,7 +65,7 @@ public:
 
 	//Returns the weight (IE: Movement cost) of moving in the given direction
 	//	Returns -1 when impassible.
-	double GetMovementCost(Tile *tile, direction dir, Unit *unit);
+	double GetMovementCost(Tile *tile, Direction dir, Unit *unit);
 
 
 private:
