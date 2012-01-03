@@ -4,13 +4,19 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/ClientProtocolHandler.cpp 
+../src/ClientProtocolHandler.cpp \
+../src/GameCommands.cpp \
+../src/GameEvents.cpp 
 
 OBJS += \
-./src/ClientProtocolHandler.o 
+./src/ClientProtocolHandler.o \
+./src/GameCommands.o \
+./src/GameEvents.o 
 
 CPP_DEPS += \
-./src/ClientProtocolHandler.d 
+./src/ClientProtocolHandler.d \
+./src/GameCommands.d \
+./src/GameEvents.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
