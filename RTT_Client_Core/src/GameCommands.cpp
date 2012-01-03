@@ -5,6 +5,6 @@
 // Description : Commands sent to the game server by client
 //============================================================================
 
-
+#include "GameCommands.h"
 
 
