@@ -14,6 +14,29 @@
 namespace RTT
 {
 
+//********************************************
+//				Result Types
+//********************************************
+
+enum MovementSuccess: uint32_t
+{
+	MOVEMENT_SUCCESS = 0,	//Total success
+	UNIT_CANT_REACH,		//Tried to move too far
+	INVALID_DESTINATION,	//Tried to move off gameboard or impassible terrain
+	UNIT_DOESNT_EXIST,
+	UNIT_CANNOT_MOVE,
+	NOT_UNITS_TURN,
+};
+
+struct MovementResult
+{
+	enum MovementSuccess result;
+
+	//Used in error conditions to help if the client is unsynced:
+
+	//This is the position that the unit SHOULD be at
+	uint32_t originalX, originalY;
+};
 
 //********************************************
 //				Movement Commands
@@ -31,8 +54,7 @@ struct MovementResult MoveUnit(uint32_t unitID, enum Direction direction);
 //	destination - The Coordinate of the tile being moved to
 //		NOTE: The unit will also by default made to face the direction of the last hop
 //	returns - A MovementResult struct describing the success or error of the move
-struct MovementResult MoveUnit(Unit *unit, struct Coordinate destination,
-		struct Coordinate to);
+struct MovementResult MoveUnit(Unit *unit, struct Coordinate destination);
 
 //Make a unit change the direction it is facing
 //	unitID - The ID of the unit to move
@@ -46,28 +68,17 @@ bool ChangeUnitFacing(uint32_t unitID, enum Direction direction);
 
 
 //********************************************
-//				Result Types
+//				Match Commands
 //********************************************
 
-struct MovementResult
-{
-	enum MovementSuccess result;
+//Pause the match
+bool PauseMatch();
 
-	//Used in error conditions to help if the client is unsynced:
+//Unpause Match
+bool UnPauseMatch();
 
-	//This is the position that the unit SHOULD be at
-	uint32_t originalX, originalY;
-};
-
-enum MovementSuccess: uint32_t
-{
-	MOVEMENT_SUCCESS = 0,	//Total success
-	UNIT_CANT_REACH,		//Tried to move too far
-	INVALID_DESTINATION,	//Tried to move off gameboard or impassible terrain
-	UNIT_DOESNT_EXIST,
-	UNIT_CANNOT_MOVE,
-	NOT_UNITS_TURN,
-};
+//Give up and leave to the MainLobby
+bool SurrenderMatch();
 
 }
 #endif /* GAMECOMMANDS_H_ */
