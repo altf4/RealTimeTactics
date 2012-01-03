@@ -6,6 +6,6 @@
 //					client is being notified about.
 //============================================================================
 
-
+#include "GameEvents.h"
 
 
