@@ -18,6 +18,7 @@
 #include <string>
 #include "Enums.h"
 #include <stdint.h>
+#include <pthread.h>
 
 using namespace std;
 
@@ -41,15 +42,6 @@ class Player
 {
 public:
 
-
-	vector <Unit*> units;
-
-	//The match that this player is currently in
-	Match *currentMatch;
-	//Socket to receive MatchLobby messages from server on
-	int callbackSocket;
-	struct PlayerDescription description;
-
 	Player();
 
 	//For when c strings are easier, or std::strings are
@@ -60,17 +52,29 @@ public:
 	uint GetID();
 	enum TeamNumber GetTeam();
 	enum TeamColor GetColor();
+	int GetCallbackSocket();
+	uint GetCurrentMatchID();
+	struct PlayerDescription GetDescription();
 
 	void SetName(string newName);
 	void SetID(uint newID);
 	void SetTeam(enum TeamNumber newTeam);
 	void SetColor(enum TeamColor newColor);
+	void SetCallbackSocket(int socket);
+	void SetCurrentMatchID(int matchID);
 
 private:
+	pthread_rwlock_t lock;
 	string name;
 	uint ID;
 	enum TeamNumber team;
 	enum TeamColor color;
+	//Socket to receive MatchLobby messages from server on
+	int callbackSocket;
+	struct PlayerDescription description;
+	vector <Unit*> units;
+	//The match that this player is currently in
+	uint currentMatchID;
 };
 
 }
