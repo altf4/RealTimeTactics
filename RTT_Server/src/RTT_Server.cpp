@@ -280,15 +280,16 @@ void *CallbackClientThread(void * parm)
 	MatchLobbyMessage *match_callback_reply =
 			(MatchLobbyMessage*)connect_back_reply;
 
-	pthread_rwlock_wrlock(&playerListLock);
-
+	pthread_rwlock_rdlock(&playerListLock);
 	Player *player = playerList[match_callback_reply->playerID];
+	pthread_rwlock_unlock(&playerListLock);
+
 	//We got the correct player on the first try. Yay!
 	if( match_callback_reply->playerID == player->GetID())
 	{
 		//The client should now be listening for a message on this socket
-		player->callbackSocket = connectBackSocket;
-		pthread_rwlock_unlock(&playerListLock);
+		player->SetCallbackSocket(connectBackSocket);
+
 		return NULL;
 	}
 	//This was the wrong player!
@@ -298,7 +299,6 @@ void *CallbackClientThread(void * parm)
 	{
 		int returnSocket;
 
-		pthread_rwlock_unlock(&playerListLock);
 		pthread_rwlock_wrlock(&waitPoolLock);
 
 		//Store player into waitPool:
@@ -321,7 +321,7 @@ void *CallbackClientThread(void * parm)
 				returnSocket = connectBackWaitPool[player->GetID()];
 				connectBackWaitPool.erase(player->GetID());
 				pthread_rwlock_unlock(&waitPoolLock);
-				player->callbackSocket = returnSocket;
+				player->SetCallbackSocket(returnSocket);
 				return NULL;
 			}
 		}
@@ -441,7 +441,7 @@ uint GetPlayerDescriptions(uint matchID, PlayerDescription *descArray)
 				joinedMatch->teams[i]->players.begin();
 		for(; it != joinedMatch->teams[i]->players.end(); it++ )
 		{
-			descArray[count] = (*it)->description;
+			descArray[count] = (*it)->GetDescription();
 			count++;
 		}
 	}
@@ -454,7 +454,7 @@ uint GetPlayerDescriptions(uint matchID, PlayerDescription *descArray)
 uint RegisterNewMatch(Player *player, struct MatchOptions options)
 {
 	//The player's current match must be empty to join a new one
-	if( player->currentMatch != NULL )
+	if( player->GetCurrentMatchID() != 0 )
 	{
 		return 0;
 	}
@@ -474,7 +474,7 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 	pthread_rwlock_unlock(&matchListLock);
 
 	//Put the match in this player's current match
-	player->currentMatch = match;
+	player->SetCurrentMatchID(match->GetID());
 	//Put the player in this match's player list
 	match->AddPlayer(player, TEAM_1);
 
@@ -488,7 +488,7 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 {
 	pthread_rwlock_rdlock(&matchListLock);
 	//The player's current match must be empty to join a new one
-	if( player->currentMatch != NULL )
+	if( player->GetCurrentMatchID() != 0 )
 	{
 		pthread_rwlock_unlock(&matchListLock);
 		return LOBBY_ALREADY_IN_MATCH;
@@ -513,7 +513,7 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 
 	pthread_rwlock_wrlock(&matchListLock);
 	matchList[matchID]->AddPlayer(player, TEAM_1);
-	player->currentMatch = matchList[matchID];
+	player->SetCurrentMatchID(matchList[matchID]->GetID());
 	pthread_rwlock_unlock(&matchListLock);
 
 	return LOBBY_SUCCESS;
@@ -526,11 +526,11 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 bool LeaveMatch(Player *player)
 {
 	bool foundOne = false;
-	if( player->currentMatch == NULL)
+	if( player->GetCurrentMatchID() == 0)
 	{
 		return false;
 	}
-	uint matchID = player->currentMatch->GetID();
+	uint matchID = player->GetCurrentMatchID();
 
 	pthread_rwlock_wrlock(&matchListLock);
 	if( matchList.count(matchID) == 0 )
@@ -544,7 +544,7 @@ bool LeaveMatch(Player *player)
 		pthread_rwlock_unlock(&matchListLock);
 		return false;
 	}
-	player->currentMatch = NULL;
+	player->SetCurrentMatchID(0);
 
 	//If this was the last player in the match
 	if( matchList[matchID]->GetCurrentPlayerCount() == 0 )
@@ -577,7 +577,7 @@ void QuitServer(Player *player)
 	{
 		return;
 	}
-	if( player->currentMatch != NULL)
+	if( player->GetCurrentMatchID() != 0)
 	{
 		//Leave any matches currently in
 		LeaveMatch(player);
