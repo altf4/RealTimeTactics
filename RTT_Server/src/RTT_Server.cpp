@@ -436,6 +436,8 @@ uint GetPlayerDescriptions(uint matchID, PlayerDescription *descArray)
 	}
 
 	Match *joinedMatch = matchList[matchID];
+	pthread_rwlock_unlock(&matchListLock);
+
 	uint count = 0;
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
@@ -447,7 +449,6 @@ uint GetPlayerDescriptions(uint matchID, PlayerDescription *descArray)
 			count++;
 		}
 	}
-	pthread_rwlock_unlock(&matchListLock);
 	return count;
 }
 //Creates a new match and places it into matchList
@@ -488,24 +489,30 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 //	Returns an enum of the success or failure condition
 enum LobbyResult JoinMatch(Player *player, uint matchID)
 {
-	pthread_rwlock_rdlock(&matchListLock);
+	if( player == NULL )
+	{
+		return LOBBY_PLAYER_NULL;
+	}
+
 	//The player's current match must be empty to join a new one
 	if( player->GetCurrentMatchID() != 0 )
 	{
-		pthread_rwlock_unlock(&matchListLock);
 		return LOBBY_ALREADY_IN_MATCH;
 	}
+
+	pthread_rwlock_rdlock(&matchListLock);
 	if( matchList.count(matchID) == 0)
 	{
 		pthread_rwlock_unlock(&matchListLock);
 		return LOBBY_MATCH_DOESNT_EXIST;
 	}
-	if( matchList[matchID]->GetCurrentPlayerCount() == matchList[matchID]->GetMaxPlayers())
+	Match *foundMatch = matchList[matchID];
+	pthread_rwlock_unlock(&matchListLock);
+
+	if( foundMatch->GetCurrentPlayerCount() == foundMatch->GetMaxPlayers())
 	{
-		pthread_rwlock_unlock(&matchListLock);
 		return LOBBY_MATCH_IS_FULL;
 	}
-	pthread_rwlock_unlock(&matchListLock);
 
 	//TODO: Check for permission to enter
 //	if(permission is not granted)
@@ -513,10 +520,8 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 //		return NOT_ALLOWED_IN;
 //	}
 
-	pthread_rwlock_wrlock(&matchListLock);
-	matchList[matchID]->AddPlayer(player, TEAM_1);
-	player->SetCurrentMatchID(matchList[matchID]->GetID());
-	pthread_rwlock_unlock(&matchListLock);
+	foundMatch->AddPlayer(player, TEAM_1);
+	player->SetCurrentMatchID(foundMatch->GetID());
 
 	return LOBBY_SUCCESS;
 }
@@ -534,29 +539,31 @@ bool LeaveMatch(Player *player)
 	}
 	uint matchID = player->GetCurrentMatchID();
 
-	pthread_rwlock_wrlock(&matchListLock);
+	pthread_rwlock_rdlock(&matchListLock);
 	if( matchList.count(matchID) == 0 )
 	{
 		pthread_rwlock_unlock(&matchListLock);
 		return false;
 	}
-	foundOne = matchList[matchID]->RemovePlayer( player->GetID() );
+	Match *foundMatch = matchList[matchID];
+	pthread_rwlock_unlock(&matchListLock);
+
+	foundOne = foundMatch->RemovePlayer( player->GetID() );
 	if( !foundOne )
 	{
-		pthread_rwlock_unlock(&matchListLock);
 		return false;
 	}
 	player->SetCurrentMatchID(0);
 
 	//If this was the last player in the match
-	if( matchList[matchID]->GetCurrentPlayerCount() == 0 )
+	if( foundMatch->GetCurrentPlayerCount() == 0 )
 	{
-		delete matchList[matchID];
+		delete foundMatch;
+		pthread_rwlock_wrlock(&matchListLock);
 		matchList.erase(matchID);
 		pthread_rwlock_unlock(&matchListLock);
 		return true;
 	}
-	pthread_rwlock_unlock(&matchListLock);
 
 	//*******************************
 	// Send Client Notifications
@@ -564,9 +571,7 @@ bool LeaveMatch(Player *player)
 	MatchLobbyMessage *notification = new MatchLobbyMessage();
 	notification->type = PLAYER_LEFT_MATCH_NOTIFICATION;
 	notification->playerID = player->GetID();
-	pthread_rwlock_rdlock(&matchListLock);
-	NotifyClients(matchList[matchID], notification);
-	pthread_rwlock_unlock(&matchListLock);
+	NotifyClients(foundMatch, notification);
 	delete notification;
 	return true;
 }

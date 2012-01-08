@@ -96,7 +96,7 @@ public:
 	bool AddPlayer(Player *player, enum TeamNumber teamNum);
 	bool RemovePlayer( uint playerID );
 	Player *GetPlayer( uint playerID );
-	bool ChangeTeam(uint playerID, enum TeamNumber newTeam);
+	bool ChangeTeam(Player *player, enum TeamNumber newTeam);
 	bool StartMatch();
 
 
