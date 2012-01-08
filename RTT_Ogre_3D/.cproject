@@ -20,13 +20,21 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.exe.debug.1484600857." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.exe.debug.198444912" name="Linux GCC" superClass="cdt.managedbuild.toolchain.gnu.exe.debug">
 							<targetPlatform id="cdt.managedbuild.target.gnu.platform.exe.debug.1017601970" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.exe.debug"/>
-							<builder buildPath="${workspace_loc:/RTT_Ogre_3D/Debug}" id="cdt.managedbuild.target.gnu.builder.exe.debug.850559522" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.debug"/>
+							<builder buildPath="${workspace_loc:/RTT_Ogre_3D/Debug}" id="cdt.managedbuild.target.gnu.builder.exe.debug.850559522" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" superClass="cdt.managedbuild.target.gnu.builder.exe.debug">
+								<outputEntries>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Debug"/>
+									<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="outputPath" name="Release"/>
+								</outputEntries>
+							</builder>
 							<tool id="cdt.managedbuild.tool.gnu.archiver.base.1789305169" name="GCC Archiver" superClass="cdt.managedbuild.tool.gnu.archiver.base"/>
 							<tool command="g++" commandLinePattern="${COMMAND} ${FLAGS} ${OUTPUT_FLAG}${OUTPUT_PREFIX}${OUTPUT} ${INPUTS}" id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.939232043" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug">
 								<option id="gnu.cpp.compiler.exe.debug.option.optimization.level.1194334061" name="Optimization Level" superClass="gnu.cpp.compiler.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.953069477" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1339796842" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/include/OGRE"/>
+									<listOptionValue builtIn="false" value="../../RTT_Common/src"/>
+									<listOptionValue builtIn="false" value="../../RTT_Client_Core/src"/>
+									<listOptionValue builtIn="false" value="&quot;${OGRE_LOC}/include&quot;"/>
 									<listOptionValue builtIn="false" value="/usr/include/OGRE/Terrain"/>
 									<listOptionValue builtIn="false" value="/usr/lib/OGRE"/>
 									<listOptionValue builtIn="false" value="/usr/include/OIS"/>
@@ -37,21 +45,26 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1994212534" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.848190369" name="Optimization Level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" valueType="enumerated"/>
 								<option id="gnu.c.compiler.exe.debug.option.debugging.level.401643304" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.include.paths.1028509900" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/include/OGRE"/>
+									<listOptionValue builtIn="false" value="/usr/include/OGRE/Terrain"/>
+									<listOptionValue builtIn="false" value="/usr/lib/OGRE"/>
+									<listOptionValue builtIn="false" value="/usr/include/OIS"/>
+									<listOptionValue builtIn="false" value="/usr/share/OGRE/Samples/Common/include"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1765995737" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.677654433" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.895655205" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.paths.1385716187" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
-									<listOptionValue builtIn="false" value="/usr/lib/OGRE"/>
-									<listOptionValue builtIn="false" value="/usr/include/OGRE/Terrain"/>
-									<listOptionValue builtIn="false" value="/usr/include/OGRE"/>
-									<listOptionValue builtIn="false" value="/home/mark/workspace/rapidxml-1.13"/>
-									<listOptionValue builtIn="false" value="/home/mark/RTT/RTT_Ogre_3D/tinyxml"/>
+									<listOptionValue builtIn="false" value="../../RTT_Client_Core/Debug"/>
+									<listOptionValue builtIn="false" value="../../RTT_Common/Debug"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1514638550" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="OgreMain"/>
+									<listOptionValue builtIn="false" value="RTT_Common"/>
+									<listOptionValue builtIn="false" value="RTT_Client_Core"/>
 									<listOptionValue builtIn="false" value="OIS"/>
-									<listOptionValue builtIn="false" value="OgreTerrain"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.723522577" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -59,10 +72,20 @@
 								</inputType>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.assembler.exe.debug.619455548" name="GCC Assembler" superClass="cdt.managedbuild.tool.gnu.assembler.exe.debug">
+								<option id="gnu.both.asm.option.include.paths.1987440232" name="Include paths (-I)" superClass="gnu.both.asm.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="/usr/include/OGRE"/>
+									<listOptionValue builtIn="false" value="/usr/include/OGRE/Terrain"/>
+									<listOptionValue builtIn="false" value="/usr/lib/OGRE"/>
+									<listOptionValue builtIn="false" value="/usr/include/OIS"/>
+									<listOptionValue builtIn="false" value="/usr/share/OGRE/Samples/Common/include"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.assembler.input.317497256" superClass="cdt.managedbuild.tool.gnu.assembler.input"/>
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<sourceEntries>
+						<entry excluding="RTT_Ogre_Map.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
@@ -125,6 +148,9 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<sourceEntries>
+						<entry excluding="RTT_Ogre_Map.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>

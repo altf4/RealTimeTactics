@@ -449,6 +449,7 @@ void *CallbackThread(void * parm)
 				pthread_rwlock_wrlock(&globalLock);
 				//Do stuff here
 				pthread_rwlock_unlock(&globalLock);
+
 			}
 			case COLOR_CHANGE:
 			{
