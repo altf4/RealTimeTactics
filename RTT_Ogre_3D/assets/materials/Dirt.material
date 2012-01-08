@@ -1,21 +1,22 @@
 
 // blender material: Dirt
-material Dirt 
+material Dirt : Ogre/DepthShadowmap/BasicTemplateMaterial
 {
+	set_texture_alias MainTexture MyTexture.jpg
     receive_shadows on
     technique b2ogre_1325298497.731574
     {
 	pass perlight
 	{	
 		// Base bump map
-		texture_unit normalmap
-		{
-			texture Dirt_512_normal.png
-               		tex_address_mode wrap
-                	scale 1.0 1.0
-                	tex_coord_set 0
-                	colour_op replace
-		}
+		//texture_unit normalmap
+		//{
+		//texture Dirt_512_normal.png
+           //   		tex_address_mode wrap
+          //     	scale 1.0 1.0
+         //       	tex_coord_set 0
+         //       	colour_op replace
+		//}
 	}
         pass b2ogre_1325298497.731643
         {
@@ -39,6 +40,7 @@ material Dirt
             scene_blend_op add
             shading gouraud
             transparent_sorting on
+            
             texture_unit b2ogre_1325298497.732614
             {
                 texture Dirt_512_Color.png
@@ -55,6 +57,25 @@ material Dirt
                 scale 1.0 1.0
                 colour_op modulate
             }
+            // Decal pass
+        pass Decal
+        {
+            // base colours, not needed for rendering, but as information
+            // to lighting pass categorisation routine
+            lighting off
+            // Really basic vertex program
+            vertex_program_ref Ogre/BasicVertexPrograms/AmbientOneTexture
+            {
+                param_named ambient float4 1 1 1 1
+            }
+            scene_blend modulate
+ 
+            texture_unit
+            {
+                texture_alias MainTexture
+                tex_address_mode clamp
+            }
+        }
 	
 
         }

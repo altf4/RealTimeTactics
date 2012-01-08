@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lOgreMain -lOIS -lOgreTerrain
+LIBS := -lOgreMain -lRTT_Common -lRTT_Client_Core -lOIS
 

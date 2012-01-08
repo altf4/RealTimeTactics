@@ -1,11 +1,26 @@
-
-// blender material: Claygreen
-material Claygreen
+// Generic Shadow caster material (floating point shadowmap)
+material Ogre/DepthShadowmap/Caster/Float
 {
-    receive_shadows on
-    technique b2ogre_1325032599.437635
+    technique
     {
-        // This technique supports dynamic shadows
+        pass 
+        {
+            vertex_program_ref Ogre/DepthShadowmap/CasterVP
+            {
+            }
+            fragment_program_ref Ogre/DepthShadowmap/CasterFP
+            {
+            }
+        }
+    }
+}
+ 
+// Basic materials which support shadows as a seperate scheme
+material Ogre/DepthShadowmap/BasicTemplateMaterial
+{
+    // This technique supports dynamic shadows
+    technique
+    {
         // Base ambient pass
         pass Ambient
         {
@@ -54,7 +69,6 @@ material Claygreen
         pass Decal
         {
             // base colours, not needed for rendering, but as information
-            //diffuse 0.1875122336672579 0.20783362698307073 0.0806940925224735 1.0
             // to lighting pass categorisation routine
             lighting off
             // Really basic vertex program
