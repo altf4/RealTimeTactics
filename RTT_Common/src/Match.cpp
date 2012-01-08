@@ -29,6 +29,7 @@ Match::Match(Player *player)
 
 Match::~Match()
 {
+	pthread_rwlock_wrlock(&lock);
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
 		if( teams[i] != NULL )
@@ -36,6 +37,7 @@ Match::~Match()
 			delete teams[i];
 		}
 	}
+	pthread_rwlock_unlock(&lock);
 }
 
 //SET methods
@@ -183,7 +185,7 @@ enum GameSpeed Match::GetGamespeed()
 
 bool Match::AddPlayer(Player *player, enum TeamNumber teamNum)
 {
-	pthread_rwlock_wrlock(&lock);
+	pthread_rwlock_rdlock(&lock);
 	if( currentPlayerCount >= maxPlayers )
 	{
 		pthread_rwlock_unlock(&lock);
@@ -194,45 +196,49 @@ bool Match::AddPlayer(Player *player, enum TeamNumber teamNum)
 		pthread_rwlock_unlock(&lock);
 		return false;
 	}
+	pthread_rwlock_unlock(&lock);
+
 	teams[teamNum]->AddPlayer(player);
+
+	pthread_rwlock_wrlock(&lock);
 	currentPlayerCount++;
 	description.currentPlayerCount++;
-
 	pthread_rwlock_unlock(&lock);
+
 	return true;
 }
 
 bool Match::RemovePlayer( uint playerID )
 {
-	pthread_rwlock_wrlock(&lock);
+
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
 		if( teams[i]->RemovePlayer(playerID))
 		{
+			uint nextID = GetFirstPlayerID();
+
+			pthread_rwlock_wrlock(&lock);
+			leaderID = nextID;
 			currentPlayerCount--;
 			description.currentPlayerCount--;
-			leaderID = GetFirstPlayerID();
 			pthread_rwlock_unlock(&lock);
+
 			return true;
 		}
 	}
-	pthread_rwlock_unlock(&lock);
 	return false;
 }
 
 Player* Match::GetPlayer( uint playerID )
 {
-	pthread_rwlock_rdlock(&lock);
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
 		Player *player = teams[i]->GetPlayer(playerID);
 		if( player != NULL)
 		{
-			pthread_rwlock_unlock(&lock);
 			return player;
 		}
 	}
-	pthread_rwlock_unlock(&lock);
 	return NULL;
 }
 
@@ -241,38 +247,31 @@ Player* Match::GetPlayer( uint playerID )
 //	Returns 0 if there are no more players
 uint Match::GetFirstPlayerID()
 {
-	pthread_rwlock_rdlock(&lock);
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
 		uint retID = teams[i]->GetFirstPlayerID();
 		if( retID > 0 )
 		{
-			pthread_rwlock_unlock(&lock);
 			return retID;
 		}
 	}
-	pthread_rwlock_unlock(&lock);
 	return 0;
 }
 
-bool Match::ChangeTeam(uint playerID, enum TeamNumber newTeam)
+bool Match::ChangeTeam(Player *player, enum TeamNumber newTeam)
 {
 	if( newTeam > REFEREE)
 	{
 		return false;
 	}
-	pthread_rwlock_wrlock(&lock);
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
-		if( teams[i]->RemovePlayer(playerID) == true)
+		if( teams[i]->RemovePlayer(player->GetID()) == true)
 		{
-			Player *player;
 			teams[newTeam]->AddPlayer(player);
-			pthread_rwlock_unlock(&lock);
 			return true;
 		}
 	}
-	pthread_rwlock_unlock(&lock);
 	return false;
 }
 

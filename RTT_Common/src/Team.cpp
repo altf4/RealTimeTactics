@@ -14,6 +14,7 @@ using namespace RTT;
 Team::Team(enum TeamNumber newTeam)
 {
 	team = newTeam;
+	pthread_rwlock_init(&lock, NULL);
 }
 
 Player *Team::GetPlayer(uint playerID)
@@ -61,9 +62,9 @@ uint Team::GetFirstPlayerID()
 	pthread_rwlock_rdlock(&lock);
 	if(players.size() > 0)
 	{
-		uint temp = players[0]->GetID();
+		Player *temp = players[0];
 		pthread_rwlock_unlock(&lock);
-		return temp;
+		return temp->GetID();
 	}
 	pthread_rwlock_unlock(&lock);
 	return 0;

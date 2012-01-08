@@ -108,7 +108,7 @@ Player *RTT::GetNewClient(int ConnectFD)
 	if( authresult == AUTH_SUCCESS)
 	{
 		pthread_rwlock_wrlock(&playerIDLock);
-		uint ID = lastPlayerID++;
+		uint ID = ++lastPlayerID;
 		pthread_rwlock_unlock(&playerIDLock);
 
 		player = new Player(client_auth->username, ID);
@@ -147,6 +147,13 @@ Player *RTT::GetNewClient(int ConnectFD)
 //	Returns a enum LobbyReturn to describe the end state
 enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 {
+	if( player == NULL )
+	{
+		return EXITING_SERVER;
+	}
+
+	uint playerMatchID = player->GetCurrentMatchID();
+
 	//********************************
 	// Receive Initial Lobby Message
 	//********************************
@@ -286,6 +293,8 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 
 					pthread_rwlock_rdlock(&matchListLock);
 					Match *joinedMatch = matchList[lobby_message->ID];
+					pthread_rwlock_unlock(&matchListLock);
+
 					match_join->matchDescription = joinedMatch->GetDescription();
 
 					//Put in the player descriptions of current members
@@ -296,7 +305,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 							match_join->playerDescriptions);
 					match_join->returnedPlayersCount = count;
 
-					pthread_rwlock_unlock(&matchListLock);
+
 
 					if(  Message::WriteMessage(match_join, ConnectFD) == false)
 					{
@@ -311,10 +320,8 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 					MatchLobbyMessage *notification = new MatchLobbyMessage();
 					notification->type = PLAYER_JOINED_MATCH_NOTIFICATION;
 					notification->playerDescription = player->GetDescription();
-					pthread_rwlock_rdlock(&matchListLock);
-					NotifyClients(matchList[player->GetCurrentMatchID()],
-							notification);
-					pthread_rwlock_unlock(&matchListLock);
+
+					NotifyClients(joinedMatch,	notification);
 					delete notification;
 					delete lobby_message;
 					return IN_MATCH_LOBBY;
@@ -438,6 +445,17 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 		return EXITING_SERVER;
 	}
 
+	uint matchID = player->GetCurrentMatchID();
+	uint playerID = player->GetID();
+
+	pthread_rwlock_rdlock(&matchListLock);
+	Match *playersMatch = NULL;
+	if( matchList.count(matchID) != 0)
+	{
+		playersMatch = matchList[matchID];
+	}
+	pthread_rwlock_unlock(&matchListLock);
+
 	//********************************
 	// Receive Initial Lobby Message
 	//********************************
@@ -449,8 +467,6 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 		SendError(connectFD, PROTOCOL_ERROR);
 		return EXITING_SERVER;
 	}
-	uint matchID = player->GetCurrentMatchID();
-	uint playerID = player->GetID();
 
 	MatchLobbyMessage *match_lobby_message = (MatchLobbyMessage*)match_lobby_message_init;
 	switch (match_lobby_message->type)
@@ -495,19 +511,19 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			pthread_rwlock_wrlock(&matchListLock);
-			if( matchList.count(matchID) == 0)
+			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
 				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
+
 			//Is this not a self change?
 			if( playerID != match_lobby_message->playerID )
 			{
 				//Is this this not the leader?
-				if( matchList[matchID]->GetLeaderID() != playerID)
+				if( playersMatch->GetLeaderID() != playerID)
 				{
 					//Error, there is no such Match
 					SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -516,9 +532,21 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				}
 			}
 
-			bool changed = matchList[matchID]->ChangeTeam(
-					match_lobby_message->playerID, match_lobby_message->newTeam);
-			pthread_rwlock_unlock(&matchListLock);
+			Player *changingPlayer = NULL;
+			bool changed = false;
+
+			pthread_rwlock_wrlock(&playerListLock);
+			if( playerList.count(match_lobby_message->playerID) > 0 )
+			{
+				changingPlayer = playerList[match_lobby_message->playerID];
+				pthread_rwlock_unlock(&playerListLock);
+				playersMatch->ChangeTeam(changingPlayer
+					, match_lobby_message->newTeam);
+			}
+			else
+			{
+				pthread_rwlock_unlock(&playerListLock);
+			}
 
 			//*******************************
 			// Send CHANGE TEAM REPLY
@@ -542,10 +570,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				notification->type = TEAM_CHANGED_NOTIFICATION;
 				notification->newTeam = match_lobby_message->newTeam;
 				notification->playerID = match_lobby_message->playerID;
-				pthread_rwlock_rdlock(&matchListLock);
-				NotifyClients(matchList[matchID],
-						notification);
-				pthread_rwlock_unlock(&matchListLock);
+				NotifyClients(playersMatch, notification);
 				delete notification;
 			}
 
@@ -560,8 +585,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			pthread_rwlock_wrlock(&matchListLock);
-			if( matchList.count(matchID) == 0)
+			if(playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
@@ -572,7 +596,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			if( playerID != match_lobby_message->playerID )
 			{
 				//Is this this not the leader?
-				if( matchList[matchID]->GetLeaderID() != playerID)
+				if( playersMatch->GetLeaderID() != playerID)
 				{
 					//Error, there is no such Match
 					SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -581,8 +605,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				}
 			}
 
-			bool started = matchList[matchID]->StartMatch();
-			pthread_rwlock_unlock(&matchListLock);
+			bool started = playersMatch->StartMatch();
 
 			//*******************************
 			// Send START MATCH REPLY
@@ -605,9 +628,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				//TODO: Make sure each client is ready. IE: Listed for replies
 				MatchLobbyMessage *notification = new MatchLobbyMessage();
 				notification->type = MATCH_START_NOTIFICATION;
-				pthread_rwlock_rdlock(&matchListLock);
-				NotifyClients(matchList[matchID], notification);
-				pthread_rwlock_unlock(&matchListLock);
+				NotifyClients(playersMatch, notification);
 				delete notification;
 			}
 
@@ -622,8 +643,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			pthread_rwlock_wrlock(&matchListLock);
-			if( matchList.count(matchID) == 0)
+			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
@@ -634,7 +654,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			if( playerID != match_lobby_message->playerID )
 			{
 				//Is this this not the leader?
-				if( matchList[matchID]->GetLeaderID() != playerID)
+				if(playersMatch->GetLeaderID() != playerID)
 				{
 					//Error, there is no such Match
 					SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -642,7 +662,6 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 					return IN_MAIN_LOBBY;
 				}
 			}
-			pthread_rwlock_unlock(&matchListLock);
 
 			pthread_rwlock_rdlock(&playerListLock);
 			if( playerList.count(match_lobby_message->playerID) != 0 )
@@ -653,9 +672,9 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			else
 			{
 				//Error, there is no such player
+				pthread_rwlock_unlock(&playerListLock);
 				SendError(connectFD, NO_SUCH_PLAYER);
 				delete match_lobby_message;
-				pthread_rwlock_unlock(&playerListLock);
 				return IN_MAIN_LOBBY;
 			}
 			pthread_rwlock_unlock(&playerListLock);
@@ -679,9 +698,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			MatchLobbyMessage *notification = new MatchLobbyMessage();
 			notification->type = COLOR_CHANGED_NOTIFICATION;
 			notification->newColor = match_lobby_message->newColor;
-			pthread_rwlock_rdlock(&matchListLock);
-			NotifyClients(matchList[matchID], notification);
-			pthread_rwlock_unlock(&matchListLock);
+			NotifyClients(playersMatch, notification);
 			delete notification;
 
 			break;
@@ -695,8 +712,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			pthread_rwlock_wrlock(&matchListLock);
-			if( matchList.count(matchID) == 0)
+			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
@@ -704,7 +720,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 			//Is this this not the leader?
-			if( matchList[matchID]->GetLeaderID() != playerID)
+			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -712,9 +728,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			matchList[matchID]->SetMap(match_lobby_message->mapDescription);
-
-			pthread_rwlock_unlock(&matchListLock);
+			playersMatch->SetMap(match_lobby_message->mapDescription);
 
 			//*******************************
 			// Send CHANGE MAP REPLY
@@ -735,9 +749,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			MatchLobbyMessage *notification = new MatchLobbyMessage();
 			notification->type = MAP_CHANGED_NOTIFICATION;
 			notification->mapDescription = match_lobby_message->mapDescription;
-			pthread_rwlock_rdlock(&matchListLock);
-			NotifyClients(matchList[matchID], notification);
-			pthread_rwlock_unlock(&matchListLock);
+			NotifyClients(playersMatch, notification);
 			delete notification;
 
 			break;
@@ -751,8 +763,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			pthread_rwlock_wrlock(&matchListLock);
-			if( matchList.count(matchID) == 0)
+			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
@@ -760,7 +771,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 			//Is this this not the leader?
-			if( matchList[matchID]->GetLeaderID() != playerID)
+			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -768,9 +779,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			matchList[matchID]->SetVictoryCondition(match_lobby_message->newVictCond);
-
-			pthread_rwlock_unlock(&matchListLock);
+			playersMatch->SetVictoryCondition(match_lobby_message->newVictCond);
 
 			//*************************************
 			// Send Change Victory Condition Reply
@@ -791,9 +800,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			MatchLobbyMessage *notification = new MatchLobbyMessage();
 			notification->type = VICTORY_COND_CHANGED_NOTIFICATION;
 			notification->newVictCond = match_lobby_message->newVictCond;
-			pthread_rwlock_rdlock(&matchListLock);
-			NotifyClients(matchList[matchID], notification);
-			pthread_rwlock_unlock(&matchListLock);
+			NotifyClients(playersMatch, notification);
 			delete notification;
 
 			break;
@@ -807,8 +814,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			pthread_rwlock_wrlock(&matchListLock);
-			if( matchList.count(matchID) == 0)
+			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
@@ -816,7 +822,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 			//Is this this not the leader?
-			if( matchList[matchID]->GetLeaderID() != playerID)
+			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -824,9 +830,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			matchList[matchID]->SetGamespeed(match_lobby_message->newSpeed);
-
-			pthread_rwlock_unlock(&matchListLock);
+			playersMatch->SetGamespeed(match_lobby_message->newSpeed);
 
 			//*******************************
 			// Send Change Game Speed Reply
@@ -847,9 +851,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			MatchLobbyMessage *notification = new MatchLobbyMessage();
 			notification->type = GAME_SPEED_CHANGED_NOTIFICATION;
 			notification->newSpeed = match_lobby_message->newSpeed;
-			pthread_rwlock_rdlock(&matchListLock);
-			NotifyClients(matchList[matchID], notification);
-			pthread_rwlock_unlock(&matchListLock);
+			NotifyClients(playersMatch, notification);
 			delete notification;
 
 			break;
@@ -863,8 +865,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			pthread_rwlock_wrlock(&matchListLock);
-			if( matchList.count(matchID) == 0)
+			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, MATCH_DOESNT_EXIST);
@@ -872,7 +873,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 			//Is this this not the leader?
-			if( matchList[matchID]->GetLeaderID() != playerID)
+			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -880,10 +881,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			bool removed = matchList[matchID]->RemovePlayer(
-					match_lobby_message->playerID);
-
-			pthread_rwlock_unlock(&matchListLock);
+			bool removed = playersMatch->RemovePlayer(match_lobby_message->playerID);
 
 			//*******************************
 			// Send Kick Player Reply
@@ -906,9 +904,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				MatchLobbyMessage *notification = new MatchLobbyMessage();
 				notification->type = PLAYER_LEFT_MATCH_NOTIFICATION;
 				notification->playerID = match_lobby_message->playerID;
-				pthread_rwlock_rdlock(&matchListLock);
-				NotifyClients(matchList[matchID], notification);
-				pthread_rwlock_unlock(&matchListLock);
+				NotifyClients(playersMatch, notification);
 				delete notification;
 			}
 
