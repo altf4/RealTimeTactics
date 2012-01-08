@@ -152,7 +152,9 @@ int main(int argc, char **argv)
 
 	//TODO: stupid hack to keep the threads alive. replace later
 	while(true)
-	{}
+	{
+		sleep(1000);
+	}
 }
 
 void *MainListen(void * param)
@@ -410,7 +412,7 @@ uint GetMatchDescriptions(uint page, MatchDescription *descArray)
 			pthread_rwlock_unlock(&matchListLock);
 			return i;
 		}
-		descArray[i] = it.pos->second->description;
+		descArray[i] = it.pos->second->GetDescription();
 		it++;
 	}
 
@@ -437,11 +439,11 @@ uint GetPlayerDescriptions(uint matchID, PlayerDescription *descArray)
 	uint count = 0;
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
-		vector<Player*>::iterator it =
-				joinedMatch->teams[i]->players.begin();
-		for(; it != joinedMatch->teams[i]->players.end(); it++ )
+		vector<struct PlayerDescription> descriptions =
+				joinedMatch->teams[i]->GetPlayerDescriptions();
+		for(uint j = 0; j < descriptions.size(); j++)
 		{
-			descArray[count] = (*it)->GetDescription();
+			descArray[count] = descriptions[j];
 			count++;
 		}
 	}
