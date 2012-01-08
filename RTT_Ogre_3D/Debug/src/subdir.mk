@@ -6,17 +6,20 @@
 CPP_SRCS += \
 ../src/RTT_Ogre_Base.cpp \
 ../src/RTT_Ogre_Game.cpp \
-../src/RTT_Ogre_Map.cpp 
+../src/RTT_Ogre_Map.cpp \
+../src/RTT_Ogre_Unit.cpp 
 
 OBJS += \
 ./src/RTT_Ogre_Base.o \
 ./src/RTT_Ogre_Game.o \
-./src/RTT_Ogre_Map.o 
+./src/RTT_Ogre_Map.o \
+./src/RTT_Ogre_Unit.o 
 
 CPP_DEPS += \
 ./src/RTT_Ogre_Base.d \
 ./src/RTT_Ogre_Game.d \
-./src/RTT_Ogre_Map.d 
+./src/RTT_Ogre_Map.d \
+./src/RTT_Ogre_Unit.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

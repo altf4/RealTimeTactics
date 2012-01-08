@@ -11,7 +11,7 @@
 
 #include <vector>
 #include "RTT_Ogre_Base.h"
-
+#include "RTT_Ogre_Unit.h"
 
 
 
@@ -22,15 +22,13 @@ class RTT_Ogre_Game : public RTT_Ogre_Base
 	public:
     	RTT_Ogre_Game(void);
     	virtual ~RTT_Ogre_Game(void);
+
 	protected:
     	virtual void createScene(void);
-    	virtual void moveCharacter(const RTT::Direction &arg);
+    	virtual void moveUnit(const RTT::Direction &arg, RTT_Ogre_Unit &arg2);
     	virtual bool keyPressed( const KeyEvent &arg );
-    	virtual void buildPlayers(void);
-    	Ogre::Entity* mainPlayer;
-    	Ogre::SceneNode* mainPlayerNode;
-    	int unitX;
-    	int unitY;
+    	virtual void buildUnits(void);
+    	RTT_Ogre_Unit mainPlayer;
 };
 
 #endif /* RTT_OGRE_GAME_H_ */

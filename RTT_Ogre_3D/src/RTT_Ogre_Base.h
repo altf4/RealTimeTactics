@@ -24,6 +24,7 @@
 #include "GameCommands.h"
 #include "GameEvents.h"
 #include "Unit.h"
+#include "RTT_Ogre_Unit.h"
 
 using namespace Ogre;
 using namespace OIS;
@@ -45,7 +46,7 @@ using namespace OIS;
 			virtual void createCamera(void);
 			virtual void createFrameListener(void);
 			virtual void createScene(void) = 0; // Override in RTT_Ogre_Game
-			virtual void moveCharacter(const RTT::Direction &arg) = 0;// Override in RTT_Ogre_Game
+			//virtual void moveUnit(const RTT::Direction &arg) = 0;// Override in RTT_Ogre_Game
 			virtual void destroyScene(void);
 			virtual void createViewports(void);
 			virtual void setupResources(void);
