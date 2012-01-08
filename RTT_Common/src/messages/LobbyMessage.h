@@ -25,6 +25,7 @@ enum LobbyResult: char
 	LOBBY_MATCH_DOESNT_EXIST,
 	LOBBY_NOT_ALLOWED_IN,
 	LOBBY_ALREADY_IN_MATCH,
+	LOBBY_PLAYER_NULL,
 };
 
 struct ServerStats

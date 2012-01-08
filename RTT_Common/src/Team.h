@@ -31,9 +31,22 @@ class Team
 public:
 
 	enum TeamNumber team;
-	vector <Player*> players;
 
 	Team(enum TeamNumber newTeam);
+
+	Player *GetPlayer(uint playerID);
+	bool RemovePlayer(uint playerID);
+	void AddPlayer(Player *newPlayer);
+	uint GetFirstPlayerID();
+	vector <Player*> GetPlayers();
+
+	vector<struct PlayerDescription> GetPlayerDescriptions();
+
+private:
+	//Lock for the players list
+	pthread_rwlock_t lock;
+
+	vector <Player*> players;
 };
 
 }

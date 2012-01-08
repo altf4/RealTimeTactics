@@ -65,19 +65,6 @@ public:
 	//Teams involved
 	Team* teams[MAX_TEAMS];
 
-	//The "Leader" player who can make changes to match settings
-	Player *leader;
-
-	struct MatchDescription description;
-
-	//Map to be used in the match
-	//TODO: Make this a full map object
-	struct MapDescription map;
-
-	enum VictoryCondition victoryCondition;
-
-	enum GameSpeed gameSpeed;
-
 	// chargingActions is the global list of actions which have not yet been triggered
 	// chargedActions is the list of actions which are on queue to be triggered
 	vector <Action*> chargingActions, chargedActions;
@@ -89,6 +76,10 @@ public:
 	void SetStatus(enum Status newStatus);
 	void SetMaxPlayers(uint maxPlayers);
 	void SetName(string newName);
+	void SetLeaderID(uint nextLeader);
+	void SetMap(struct MapDescription newMap);
+	void SetVictoryCondition(enum VictoryCondition newVict);
+	void SetGamespeed(enum GameSpeed newSpeed);
 
 	enum Status GetStatus();
 	uint GetID();
@@ -96,14 +87,22 @@ public:
 	uint GetCurrentPlayerCount();
 	string GetName();
 	time_t GetTimeCreated();
+	uint GetLeaderID();
+	struct MatchDescription GetDescription();
+	struct MapDescription GetMap();
+	enum VictoryCondition GetVictoryCondition();
+	enum GameSpeed GetGamespeed();
 
 	bool AddPlayer(Player *player, enum TeamNumber teamNum);
 	bool RemovePlayer( uint playerID );
 	Player *GetPlayer( uint playerID );
-	bool ChangeTeam(uint playerID, enum TeamNumber newTeam);
+	bool ChangeTeam(Player *player, enum TeamNumber newTeam);
 	bool StartMatch();
 
+
 private:
+	//Lock for this match
+	pthread_rwlock_t lock;
 
 	//The current status of the match
 	enum Status status;
@@ -116,7 +115,16 @@ private:
 	string name;
 	int64_t timeCreated;
 
-	Player *GetFirstPlayer();
+	//The "Leader" player who can make changes to match settings
+	uint leaderID;
+	struct MatchDescription description;
+	//Map to be used in the match
+	//TODO: Make this a full map object
+	struct MapDescription map;
+	enum VictoryCondition victoryCondition;
+	enum GameSpeed gameSpeed;
+
+	uint GetFirstPlayerID();
 
 };
 
