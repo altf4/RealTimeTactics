@@ -9,7 +9,14 @@
 #ifndef RTT_OGRE_MAP_H_
 #define RTT_OGRE_MAP_H_
 
+//namespace RTT
+//{
+	class RTT_Ogre_Map
+	{
+	public:
+	private:
+	protected:
+	};
 
-
-
+//}
 #endif /* RTT_OGRE_MAP_H_ */

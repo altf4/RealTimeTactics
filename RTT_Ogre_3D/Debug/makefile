@@ -44,7 +44,7 @@ all: RTT_Ogre_3D
 RTT_Ogre_3D: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++  -o "RTT_Ogre_3D" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L../../RTT_Client_Core/Debug -L../../RTT_Common/Debug -o "RTT_Ogre_3D" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

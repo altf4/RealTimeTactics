@@ -58,9 +58,10 @@ void RTT_Ogre_Base::createCamera(void)
 {
     rttCamera = rttSceneManager->createCamera("PrimaryCamera"); //Create our primary camera in our screen manager
     //The camera needs positioning
-    rttCamera->setPosition(Ogre::Vector3(2.25,10.5,6.5)); // Center on the gameboard and possition above
+    rttCamera->setPosition(Ogre::Vector3(2.25,10.5,6.5)); // Center on the gameboard and position above
     rttCamera->lookAt(Ogre::Vector3(2.25,0,-4)); // Look back along -Z slightly for an "isometric" like view
     rttCamera->setNearClipDistance(5); // This is how close an object can be to the camera before it is "clipped", or not rendered
+    //rttCamera->yaw(Degree(90));
 }
 
 void RTT_Ogre_Base::createFrameListener(void)
@@ -211,38 +212,7 @@ void RTT_Ogre_Base::windowClosed(RenderWindow* renderWindow)
     }
 }
 
-//Buffered keyboard input and game keybindings
-bool RTT_Ogre_Base::keyPressed( const KeyEvent& evt )
-{
-	switch (evt.key)
-	{
-	case KC_ESCAPE:
-		LogManager::getSingletonPtr()->logMessage("Quitting!!!");
-	    rttShutDown = true;
-	    break;
-	case KC_NUMPAD4:
-		LogManager::getSingletonPtr()->logMessage("Moving North West");
-		break;
-	case KC_NUMPAD5:
-		LogManager::getSingletonPtr()->logMessage("Moving North");
-		break;
-	case KC_NUMPAD6:
-		LogManager::getSingletonPtr()->logMessage("Moving North East");
-		break;
-	case KC_NUMPAD1:
-		LogManager::getSingletonPtr()->logMessage("Moving South West");
-		break;
-	case KC_NUMPAD2:
-		LogManager::getSingletonPtr()->logMessage("Moving South");
-		break;
-	case KC_NUMPAD3:
-		LogManager::getSingletonPtr()->logMessage("Moving South East");
-		break;
-	default:
-	    break;
-	}
-	return true;
-}
+
 
 bool RTT_Ogre_Base::keyReleased( const KeyEvent& evt )
 {

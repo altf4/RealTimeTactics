@@ -23,7 +23,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I/usr/include/OGRE -I"/usr/lib/OGRE/include" -I/usr/include/OGRE/Terrain -I/usr/lib/OGRE -I/usr/include/OIS -I/usr/share/OGRE/Samples/Common/include -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
+	g++ -I/usr/include/OGRE -I../../RTT_Common/src -I../../RTT_Client_Core/src -I"/usr/lib/OGRE/include" -I/usr/include/OGRE/Terrain -I/usr/lib/OGRE -I/usr/include/OIS -I/usr/share/OGRE/Samples/Common/include -O0 -g3 -Wall -c -fmessage-length=0 -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o"$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

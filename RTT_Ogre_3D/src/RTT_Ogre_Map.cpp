@@ -6,6 +6,14 @@
 //               Based on Ogre Tutorial framework
 //============================================================================
 
+#include "RTT_Ogre_Map.h"
+
+//using namespace RTT;
+
+//RTT_Ogre_Map::RTT_Ogre_Map()
+//{
+
+//}
 
 
 

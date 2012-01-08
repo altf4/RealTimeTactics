@@ -32,6 +32,8 @@
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.953069477" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1339796842" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/include/OGRE"/>
+									<listOptionValue builtIn="false" value="../../RTT_Common/src"/>
+									<listOptionValue builtIn="false" value="../../RTT_Client_Core/src"/>
 									<listOptionValue builtIn="false" value="&quot;${OGRE_LOC}/include&quot;"/>
 									<listOptionValue builtIn="false" value="/usr/include/OGRE/Terrain"/>
 									<listOptionValue builtIn="false" value="/usr/lib/OGRE"/>
@@ -54,9 +56,14 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.677654433" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.895655205" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
-								<option id="gnu.cpp.link.option.paths.1385716187" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths"/>
+								<option id="gnu.cpp.link.option.paths.1385716187" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="../../RTT_Client_Core/Debug"/>
+									<listOptionValue builtIn="false" value="../../RTT_Common/Debug"/>
+								</option>
 								<option id="gnu.cpp.link.option.libs.1514638550" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="OgreMain"/>
+									<listOptionValue builtIn="false" value="RTT_Common"/>
+									<listOptionValue builtIn="false" value="RTT_Client_Core"/>
 									<listOptionValue builtIn="false" value="OIS"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.723522577" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">

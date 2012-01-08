@@ -14,10 +14,12 @@
 using namespace Ogre;
 using namespace std;
 using namespace OIS;
-//using namespace RTT;
+using namespace RTT;
 
 //-------------------------------------------------------------------------------------
-RTT_Ogre_Game::RTT_Ogre_Game(void)
+RTT_Ogre_Game::RTT_Ogre_Game(void):
+		mainPlayer(0),
+		mainPlayerNode(0)
 {
 }
 //-------------------------------------------------------------------------------------
@@ -26,18 +28,117 @@ RTT_Ogre_Game::~RTT_Ogre_Game(void)
 }
 
 //-------------------------------------------------------------------------------------
+void RTT_Ogre_Game::moveCharacter(const RTT::Direction& moveDirection)
+{
+	Ogre::Vector3 playerLocChange = mainPlayerNode->getPosition();
+	int facingDirection = 0;
+	switch(moveDirection)
+	{
+	case EAST:
+		unitX++;
+		facingDirection = 90;
+		break;
+	case NORTHWEST:
+		unitX--;
+		unitY++;
+		facingDirection = -150;
+		break;
+	case NORTHEAST:
+		unitX++;
+		unitY++;
+		facingDirection = 150;
+		break;
+	case WEST:
+		unitX--;
+		facingDirection = -90;
+		break;
+	case SOUTHWEST:
+		unitX--;
+		unitY--;
+		facingDirection = -30;
+		break;
+	case SOUTHEAST:
+		unitX++;
+		unitY--;
+		facingDirection = 30;
+		break;
+	default:
+		break;
+	}
+
+	LogManager::getSingletonPtr()->logMessage("Moving: " + Ogre::StringConverter::toString(unitX) +"," + Ogre::StringConverter::toString(unitY));
+	if(unitY%2 != 0)
+	{
+		mainPlayerNode->setPosition(Ogre::Vector3(unitX*1.732-.866,0,-unitY*1.5));
+	}
+	else
+		mainPlayerNode->setPosition(Ogre::Vector3(unitX*1.732,0,-unitY*1.5));
+
+	mainPlayerNode->resetOrientation();
+	mainPlayerNode->yaw(Degree(facingDirection));
+
+}
+
+//Buffered keyboard input and game keybindings
+bool RTT_Ogre_Game::keyPressed( const KeyEvent& evt )
+{
+	switch (evt.key)
+	{
+	case KC_ESCAPE:
+		LogManager::getSingletonPtr()->logMessage("Quitting!!!");
+	    rttShutDown = true;
+	    break;
+	case KC_NUMPAD7://Move North West
+		moveCharacter(NORTHWEST);
+		break;
+	case KC_NUMPAD4://Move North EDIT::::::::WEST!
+		moveCharacter(WEST);
+		break;
+	case KC_NUMPAD9://Move North East
+		moveCharacter(NORTHEAST);
+		break;
+	case KC_NUMPAD1://Move South West
+		moveCharacter(SOUTHWEST);
+		break;
+	case KC_NUMPAD6://Move South  EDIT:::::::::EAST!
+		moveCharacter(EAST);
+		break;
+	case KC_NUMPAD3://Move South East
+		moveCharacter(SOUTHEAST);
+		break;
+	default:
+	    break;
+	}
+	return true;
+}
+
+void RTT_Ogre_Game::buildPlayers(void)
+{
+    mainPlayer = rttSceneManager->createEntity("BlueMarine", "BlueMarine.mesh");
+    mainPlayer->setCastShadows(true);
+    mainPlayerNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("BlueMarine");
+    mainPlayerNode->attachObject(mainPlayer);
+    mainPlayerNode->yaw(Degree(150));
+    unitX = 0;
+    unitY = 0;
+}
+
 void RTT_Ogre_Game::createScene(void)
 {
 	// Set ambient light and shadows
     rttSceneManager->setAmbientLight(ColourValue(0, 0, 0));
     rttSceneManager->setShadowTechnique(SHADOWTYPE_TEXTURE_ADDITIVE);
     //Shadowmaps	EXPERIMENTAL  **********BROKEN************
-    /*
-    rttSceneManager->setShadowTexturePixelFormat();
+
+    rttSceneManager->setShadowTexturePixelFormat(Ogre::PF_FLOAT32_R);
     rttSceneManager->setShadowTextureSelfShadow(true);
-    rttSceneManager->setShadowTextureCasterMaterial("ShadowCaster");
-    rttSceneManager->setShadowTextureReceiverMaterial("ShadowReceiver");
-    */
+    //rttSceneManager->setShadowCasterRenderBackFaces(false);
+    rttSceneManager->setShadowTextureCasterMaterial("Ogre/DepthShadowmap/Caster/Float");
+    //rttSceneManager->setShadowTextureReceiverMaterial("Ogre/DepthShadowmap/BasicTemplateMaterial");
+    rttSceneManager->setShadowTextureSize(1024);
+
+    buildPlayers();
+
     //HACKED  Proof of concept/scratchboard
 
     int tileSize = 1;
@@ -47,30 +148,30 @@ void RTT_Ogre_Game::createScene(void)
     Entity* tileVector[4][4];
     string tileType = "DirtTile";
     SceneNode* nodeVector[4][4];
-    Entity* blueMarine = rttSceneManager->createEntity("BlueMarine", "BlueMarine.mesh");
-    blueMarine->setCastShadows(true);
-    SceneNode* blueMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("BlueMarine");
-    blueMarineNode->attachObject(blueMarine);
-    blueMarineNode->yaw(Degree(90));
+    //Entity* blueMarine = rttSceneManager->createEntity("BlueMarine", "BlueMarine.mesh");
+    //blueMarine->setCastShadows(true);
+    //SceneNode* blueMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("BlueMarine");
+    //blueMarineNode->attachObject(blueMarine);
+    //blueMarineNode->yaw(Degree(90));
     Entity* redMarine = rttSceneManager->createEntity("RedMarine", "RedMarine.mesh");
     redMarine->setCastShadows(true);
-    SceneNode* redMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("RedMarine", Ogre::Vector3(3*1.5,0,-3*1.732 -.866));
+    SceneNode* redMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("RedMarine", Ogre::Vector3(3*1.732 -.866,0,-3*1.5));
     redMarineNode->attachObject(redMarine);
-    redMarineNode->yaw(Degree(-90));
+    redMarineNode->yaw(Degree(-30));
 
-    for(int i=0;i < 4*tileSize; i+=tileSize)//build our columns
+    for(int x=0;x < 4*tileSize; x+=tileSize)//build our columns
     {
-    	for(int n=0; n<4*tileSize;n+=tileSize)//build our rows
+    	for(int y=0; y<4*tileSize;y+=tileSize)//build our rows
     	{
-    		posZ = -n *1.732;
-    		if(i%2 != 0)//test for odd
+    		posX = x *1.732;
+    		if(y%2 != 0)//test for odd
     		{
-    			posZ -= .866; //steps up
+    			posX -= .866; //steps over
     		}
-    		tileVector[i][n] = rttSceneManager->createEntity(tileType + Ogre::StringConverter::toString(i) + Ogre::StringConverter::toString(n), "DirtTile.mesh", "RTT");
-    		tileVector[i][n]->setCastShadows(true);
-    		nodeVector[i][n] = rttSceneManager->getRootSceneNode()->createChildSceneNode(tileType + Ogre::StringConverter::toString(i) + Ogre::StringConverter::toString(n), Ogre::Vector3(i*1.5, posY,posZ));
-    		nodeVector[i][n]->attachObject(tileVector[i][n]);
+    		tileVector[x][y] = rttSceneManager->createEntity(tileType + Ogre::StringConverter::toString(x) + Ogre::StringConverter::toString(y), "DirtTile.mesh", "RTT");
+    		tileVector[x][y]->setCastShadows(true);
+    		nodeVector[x][y] = rttSceneManager->getRootSceneNode()->createChildSceneNode(tileType + Ogre::StringConverter::toString(x) + Ogre::StringConverter::toString(y), Ogre::Vector3(posX, posY, -y*1.5));
+    		nodeVector[x][y]->attachObject(tileVector[x][y]);
     	}
     }
 
@@ -111,8 +212,6 @@ void RTT_Ogre_Game::createScene(void)
     //mainLight->mCastShadows=true;
     mainLight->setPosition(20,30,15);
     mainLight->setCastShadows(true);
-
-    rttSceneManager->setSkyDome(true, "Examples/CloudySky", 2, 3);
 
     //END OBJECTS       ************************************************************************************************
 }
