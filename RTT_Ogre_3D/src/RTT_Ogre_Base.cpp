@@ -58,8 +58,8 @@ void RTT_Ogre_Base::createCamera(void)
 {
     rttCamera = rttSceneManager->createCamera("PrimaryCamera"); //Create our primary camera in our screen manager
     //The camera needs positioning
-    rttCamera->setPosition(Ogre::Vector3(2.25,10.5,6.5)); // Center on the gameboard and position above
-    rttCamera->lookAt(Ogre::Vector3(2.25,0,-4)); // Look back along -Z slightly for an "isometric" like view
+    rttCamera->setPosition(Ogre::Vector3(5.5,10.5,6.5)); // Center on the gameboard and position above
+    rttCamera->lookAt(Ogre::Vector3(5.5,0,-4)); // Look back along -Z slightly for an "isometric" like view
     rttCamera->setNearClipDistance(5); // This is how close an object can be to the camera before it is "clipped", or not rendered
     //rttCamera->yaw(Degree(90));
 }

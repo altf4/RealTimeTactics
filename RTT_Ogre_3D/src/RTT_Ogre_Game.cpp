@@ -126,8 +126,9 @@ bool RTT_Ogre_Game::keyPressed( const KeyEvent& evt )
 
 void RTT_Ogre_Game::buildUnits(void)
 {
-    mainPlayer.unitEntity = rttSceneManager->createEntity("BlueMarine", "BlueMarine.mesh");
+    mainPlayer.unitEntity = rttSceneManager->createEntity("BlueMarine", "ColorMarine.mesh");
     mainPlayer.unitEntity->setCastShadows(true);
+    mainPlayer.unitEntity->setMaterialName("ColorMarine");
     mainPlayer.unitNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("BlueMarine");
     mainPlayer.unitNode->attachObject(mainPlayer.unitEntity);
     mainPlayer.unitNode->yaw(Degree(150));
@@ -156,9 +157,9 @@ void RTT_Ogre_Game::createScene(void)
     float posX = 0;
     float posY = 0;
     float posZ = 0;
-    Entity* tileVector[4][4];
+    Entity* tileVector[8][8];
     string tileType = "DirtTile";
-    SceneNode* nodeVector[4][4];
+    SceneNode* nodeVector[8][8];
     //Entity* blueMarine = rttSceneManager->createEntity("BlueMarine", "BlueMarine.mesh");
     //blueMarine->setCastShadows(true);
     //SceneNode* blueMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("BlueMarine");
@@ -166,13 +167,13 @@ void RTT_Ogre_Game::createScene(void)
     //blueMarineNode->yaw(Degree(90));
     Entity* redMarine = rttSceneManager->createEntity("RedMarine", "RedMarine.mesh");
     redMarine->setCastShadows(true);
-    SceneNode* redMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("RedMarine", Ogre::Vector3(3*1.732 -.866,0,-3*1.5));
+    SceneNode* redMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("RedMarine", Ogre::Vector3(7*1.732 -.866,0,-7*1.5));
     redMarineNode->attachObject(redMarine);
     redMarineNode->yaw(Degree(-30));
 
-    for(int x=0;x < 4*tileSize; x+=tileSize)//build our columns
+    for(int x=0;x < 8*tileSize; x+=tileSize)//build our columns
     {
-    	for(int y=0; y<4*tileSize;y+=tileSize)//build our rows
+    	for(int y=0; y<8*tileSize;y+=tileSize)//build our rows
     	{
     		posX = x *1.732;
     		if(y%2 != 0)//test for odd
@@ -185,6 +186,38 @@ void RTT_Ogre_Game::createScene(void)
     		nodeVector[x][y]->attachObject(tileVector[x][y]);
     	}
     }
+
+	Entity* hescoTest = rttSceneManager->createEntity("Hesco", "Hesco.mesh");
+	hescoTest->setCastShadows(true);
+	SceneNode* hescoNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Hesco", Ogre::Vector3(2*1.732 -.866,-.5,-1*1.5));
+	hescoNode->attachObject(hescoTest);
+	hescoNode->yaw(Degree(90));
+	hescoTest = rttSceneManager->createEntity("Hesco2", "Hesco.mesh");
+	hescoTest->setCastShadows(true);
+	hescoNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Hesco2", Ogre::Vector3(3*1.732 -.866,-1,-1*1.5));
+	hescoNode->attachObject(hescoTest);
+	hescoNode->yaw(Degree(90));
+	hescoTest = rttSceneManager->createEntity("Hesco3", "Hesco.mesh");
+	hescoTest->setCastShadows(true);
+	hescoNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Hesco3", Ogre::Vector3(4*1.732 -.866,-1.5,-1*1.5));
+	hescoNode->attachObject(hescoTest);
+	hescoNode->yaw(Degree(90));
+
+	hescoTest = rttSceneManager->createEntity("Hesco4", "Hesco.mesh");
+	hescoTest->setCastShadows(true);
+	hescoNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Hesco4", Ogre::Vector3(5*1.732 ,0,-6*1.5));
+	hescoNode->attachObject(hescoTest);
+	hescoNode->yaw(Degree(30));
+	hescoTest = rttSceneManager->createEntity("Hesco5", "Hesco.mesh");
+	hescoTest->setCastShadows(true);
+	hescoNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Hesco5", Ogre::Vector3(6*1.732 -.866,-.5,-5*1.5));
+	hescoNode->attachObject(hescoTest);
+	hescoNode->yaw(Degree(30));
+	hescoTest = rttSceneManager->createEntity("Hesco6", "Hesco.mesh");
+	hescoTest->setCastShadows(true);
+	hescoNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Hesco6", Ogre::Vector3(6*1.732 ,-1,-4*1.5));
+	hescoNode->attachObject(hescoTest);
+	hescoNode->yaw(Degree(30));
 
     //end HACK
     Entity* groundPlane = rttSceneManager->createEntity("Ground", "Plane.mesh");
