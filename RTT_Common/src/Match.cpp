@@ -22,8 +22,9 @@ Match::Match(Player *player)
 	{
 		teams[i] = new Team((enum TeamNumber)i);
 	}
-	leader = player;
+	leaderID = player->GetID();
 	currentPlayerCount = 0;
+	pthread_rwlock_init(&lock, NULL);
 }
 
 Match::~Match()
@@ -40,122 +41,218 @@ Match::~Match()
 //SET methods
 void Match::SetID(uint newID)
 {
+	pthread_rwlock_wrlock(&lock);
 	ID = newID;
 	description.ID = newID;
+	pthread_rwlock_unlock(&lock);
 }
 
 void Match::SetStatus(enum Status newStatus)
 {
+	pthread_rwlock_wrlock(&lock);
 	status = newStatus;
 	description.status = newStatus;
+	pthread_rwlock_unlock(&lock);
 }
 
 void Match::SetMaxPlayers(uint newMaxPlayers)
 {
+	pthread_rwlock_wrlock(&lock);
 	maxPlayers = newMaxPlayers;
 	description.maxPlayers = newMaxPlayers;
+	pthread_rwlock_unlock(&lock);
 }
 
 void Match::SetName(string newName)
 {
+	pthread_rwlock_wrlock(&lock);
 	name = newName;
 	name.resize(MAX_MATCHNAME_LEN);
 	strncpy(description.name, newName.c_str(), MAX_MATCHNAME_LEN);
+	pthread_rwlock_unlock(&lock);
+}
+
+void Match::SetLeaderID(uint nextLeader)
+{
+	pthread_rwlock_wrlock(&lock);
+	leaderID = nextLeader;
+	pthread_rwlock_unlock(&lock);
+}
+
+void Match::SetMap(struct MapDescription newMap)
+{
+	pthread_rwlock_wrlock(&lock);
+	map = newMap;
+	pthread_rwlock_unlock(&lock);
+}
+
+void Match::SetVictoryCondition(enum VictoryCondition newVict)
+{
+	pthread_rwlock_wrlock(&lock);
+	victoryCondition = newVict;
+	pthread_rwlock_unlock(&lock);
+}
+
+void Match::SetGamespeed(enum GameSpeed newSpeed)
+{
+	pthread_rwlock_wrlock(&lock);
+	gameSpeed = newSpeed;
+	pthread_rwlock_unlock(&lock);
 }
 
 //GET methods
 enum Status Match::GetStatus()
 {
-	return status;
+	pthread_rwlock_rdlock(&lock);
+	enum Status tempStatus = status;
+	pthread_rwlock_unlock(&lock);
+	return tempStatus;
 }
 
 uint Match::GetID()
 {
-	return ID;
+	pthread_rwlock_rdlock(&lock);
+	uint tempID = ID;
+	pthread_rwlock_unlock(&lock);
+	return tempID;
 }
 
 uint Match::GetMaxPlayers()
 {
-	return maxPlayers;
+	pthread_rwlock_rdlock(&lock);
+	uint tempMax = maxPlayers;
+	pthread_rwlock_unlock(&lock);
+	return tempMax;
 }
 
 uint Match::GetCurrentPlayerCount()
 {
-	return currentPlayerCount;
+	pthread_rwlock_rdlock(&lock);
+	uint tempCurr = currentPlayerCount;
+	pthread_rwlock_unlock(&lock);
+	return tempCurr;
 }
 
 string Match::GetName()
 {
-	return name;
+	pthread_rwlock_rdlock(&lock);
+	string tempName = name;
+	pthread_rwlock_unlock(&lock);
+	return tempName;
+}
+
+uint Match::GetLeaderID()
+{
+	pthread_rwlock_rdlock(&lock);
+	uint tempID = ID;
+	pthread_rwlock_unlock(&lock);
+	return tempID;
+}
+
+struct MatchDescription Match::GetDescription()
+{
+	pthread_rwlock_rdlock(&lock);
+	struct MatchDescription tempDesc = description;
+	pthread_rwlock_unlock(&lock);
+	return tempDesc;
+}
+
+struct MapDescription Match::GetMap()
+{
+	pthread_rwlock_rdlock(&lock);
+	struct MapDescription tempMap = map;
+	pthread_rwlock_unlock(&lock);
+	return tempMap;
+}
+
+enum VictoryCondition Match::GetVictoryCondition()
+{
+	pthread_rwlock_rdlock(&lock);
+	enum VictoryCondition tempVict = victoryCondition;
+	pthread_rwlock_unlock(&lock);
+	return tempVict;
+}
+
+enum GameSpeed Match::GetGamespeed()
+{
+	pthread_rwlock_rdlock(&lock);
+	enum GameSpeed tempSpeed = gameSpeed;
+	pthread_rwlock_unlock(&lock);
+	return tempSpeed;
 }
 
 bool Match::AddPlayer(Player *player, enum TeamNumber teamNum)
 {
+	pthread_rwlock_wrlock(&lock);
 	if( currentPlayerCount >= maxPlayers )
 	{
+		pthread_rwlock_unlock(&lock);
 		return false;
 	}
 	if( teamNum > REFEREE)
 	{
+		pthread_rwlock_unlock(&lock);
 		return false;
 	}
-	teams[teamNum]->players.push_back(player);
+	teams[teamNum]->AddPlayer(player);
 	currentPlayerCount++;
 	description.currentPlayerCount++;
 
+	pthread_rwlock_unlock(&lock);
 	return true;
 }
 
 bool Match::RemovePlayer( uint playerID )
 {
+	pthread_rwlock_wrlock(&lock);
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
-		vector<Player*>::iterator it = teams[i]->players.begin();
-		for( ; it != teams[i]->players.end(); it++ )
+		if( teams[i]->RemovePlayer(playerID))
 		{
-			if( (*it)->GetID() == playerID )
-			{
-				teams[i]->players.erase(it);
-				currentPlayerCount--;
-				description.currentPlayerCount--;
-				leader = GetFirstPlayer();
-				return true;
-			}
+			currentPlayerCount--;
+			description.currentPlayerCount--;
+			leaderID = GetFirstPlayerID();
+			pthread_rwlock_unlock(&lock);
+			return true;
 		}
 	}
+	pthread_rwlock_unlock(&lock);
 	return false;
 }
 
 Player* Match::GetPlayer( uint playerID )
 {
+	pthread_rwlock_rdlock(&lock);
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
-		vector<Player*>::iterator it = teams[i]->players.begin();
-		for( ; it != teams[i]->players.end(); it++ )
+		Player *player = teams[i]->GetPlayer(playerID);
+		if( player != NULL)
 		{
-			if( (*it)->GetID() == playerID )
-			{
-				return (*it);
-			}
+			pthread_rwlock_unlock(&lock);
+			return player;
 		}
 	}
-	return false;
+	pthread_rwlock_unlock(&lock);
+	return NULL;
 }
 
 //Get the first Player in the teams lists
 //	For use in getting the next leader when one leaves
-//	Returns NULL if there are no more players
-Player* Match::GetFirstPlayer()
+//	Returns 0 if there are no more players
+uint Match::GetFirstPlayerID()
 {
+	pthread_rwlock_rdlock(&lock);
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
-		vector<Player*>::iterator it = teams[i]->players.begin();
-		for( ; it != teams[i]->players.end(); it++ )
+		uint retID = teams[i]->GetFirstPlayerID();
+		if( retID > 0 )
 		{
-			return *it;
+			pthread_rwlock_unlock(&lock);
+			return retID;
 		}
 	}
-	return NULL;
+	pthread_rwlock_unlock(&lock);
+	return 0;
 }
 
 bool Match::ChangeTeam(uint playerID, enum TeamNumber newTeam)
@@ -164,22 +261,18 @@ bool Match::ChangeTeam(uint playerID, enum TeamNumber newTeam)
 	{
 		return false;
 	}
+	pthread_rwlock_wrlock(&lock);
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
-		vector<Player*>::iterator it = teams[i]->players.begin();
-		for( ; it != teams[i]->players.end(); it++ )
+		if( teams[i]->RemovePlayer(playerID) == true)
 		{
-			if( (*it)->GetID() == playerID )
-			{
-				//Remove player from existing team
-				teams[i]->players.erase(it);
-				//Add to new team
-				teams[newTeam]->players.push_back(*it);
-				(*it)->SetTeam(newTeam);
-				return true;
-			}
+			Player *player;
+			teams[newTeam]->AddPlayer(player);
+			pthread_rwlock_unlock(&lock);
+			return true;
 		}
 	}
+	pthread_rwlock_unlock(&lock);
 	return false;
 }
 

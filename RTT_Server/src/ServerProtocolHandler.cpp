@@ -286,7 +286,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 
 					pthread_rwlock_rdlock(&matchListLock);
 					Match *joinedMatch = matchList[lobby_message->ID];
-					match_join->matchDescription = joinedMatch->description;
+					match_join->matchDescription = joinedMatch->GetDescription();
 
 					//Put in the player descriptions of current members
 					match_join->playerDescriptions = (struct PlayerDescription*)
@@ -432,6 +432,12 @@ enum AuthResult RTT::AuthenticateClient(char *username, unsigned char *hashedPas
 //	Returns a enum LobbyReturn to describe the end state
 enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 {
+	if( player == NULL )
+	{
+		cerr << "ERROR: Tried to process MatchLobby command for NULL player\n";
+		return EXITING_SERVER;
+	}
+
 	//********************************
 	// Receive Initial Lobby Message
 	//********************************
@@ -444,6 +450,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 		return EXITING_SERVER;
 	}
 	uint matchID = player->GetCurrentMatchID();
+	uint playerID = player->GetID();
 
 	MatchLobbyMessage *match_lobby_message = (MatchLobbyMessage*)match_lobby_message_init;
 	switch (match_lobby_message->type)
@@ -497,10 +504,10 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 			//Is this not a self change?
-			if( player->GetID() != match_lobby_message->playerID )
+			if( playerID != match_lobby_message->playerID )
 			{
 				//Is this this not the leader?
-				if( matchList[matchID]->leader != player)
+				if( matchList[matchID]->GetLeaderID() != playerID)
 				{
 					//Error, there is no such Match
 					SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -546,7 +553,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 		}
 		case START_MATCH_REQUEST:
 		{
-			if( player->GetCurrentMatchID() == 0 )
+			if( matchID == 0 )
 			{
 				SendError(connectFD, PROTOCOL_ERROR);
 				delete match_lobby_message;
@@ -562,10 +569,10 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 			//Is this not a self change?
-			if( player->GetID() != match_lobby_message->playerID )
+			if( playerID != match_lobby_message->playerID )
 			{
 				//Is this this not the leader?
-				if( matchList[matchID]->leader != player)
+				if( matchList[matchID]->GetLeaderID() != playerID)
 				{
 					//Error, there is no such Match
 					SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -608,7 +615,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 		}
 		case CHANGE_COLOR_REQUEST:
 		{
-			if( player->GetCurrentMatchID() == 0 )
+			if( matchID == 0 )
 			{
 				SendError(connectFD, PROTOCOL_ERROR);
 				delete match_lobby_message;
@@ -624,10 +631,10 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 			//Is this not a self change?
-			if( player->GetID() != match_lobby_message->playerID )
+			if( playerID != match_lobby_message->playerID )
 			{
 				//Is this this not the leader?
-				if( matchList[matchID]->leader != player)
+				if( matchList[matchID]->GetLeaderID() != playerID)
 				{
 					//Error, there is no such Match
 					SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -697,7 +704,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 			//Is this this not the leader?
-			if( matchList[matchID]->leader != player)
+			if( matchList[matchID]->GetLeaderID() != playerID)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -705,7 +712,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			matchList[matchID]->map = match_lobby_message->mapDescription;
+			matchList[matchID]->SetMap(match_lobby_message->mapDescription);
 
 			pthread_rwlock_unlock(&matchListLock);
 
@@ -753,7 +760,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 			//Is this this not the leader?
-			if( matchList[matchID]->leader != player)
+			if( matchList[matchID]->GetLeaderID() != playerID)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -761,8 +768,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			matchList[matchID]->victoryCondition =
-					match_lobby_message->newVictCond;
+			matchList[matchID]->SetVictoryCondition(match_lobby_message->newVictCond);
 
 			pthread_rwlock_unlock(&matchListLock);
 
@@ -810,7 +816,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 			//Is this this not the leader?
-			if( matchList[matchID]->leader != player)
+			if( matchList[matchID]->GetLeaderID() != playerID)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -818,7 +824,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			matchList[matchID]->gameSpeed =	match_lobby_message->newSpeed;
+			matchList[matchID]->SetGamespeed(match_lobby_message->newSpeed);
 
 			pthread_rwlock_unlock(&matchListLock);
 
@@ -866,7 +872,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 			//Is this this not the leader?
-			if( matchList[matchID]->leader != player)
+			if( matchList[matchID]->GetLeaderID() != playerID)
 			{
 				//Error, there is no such Match
 				SendError(connectFD, NOT_ALLOWED_TO_CHANGE_THAT);
@@ -941,8 +947,9 @@ bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
 	}
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
-		vector<Player*>::iterator it = match->teams[i]->players.begin();
-		for( ; it != match->teams[i]->players.end(); it++ )
+		vector<Player*> players = match->teams[i]->GetPlayers();
+		vector<Player*>::iterator it = players.begin();
+		for( ; it != players.end(); it++ )
 		{
 			int recvSocket = (*it)->GetCallbackSocket();
 			if( recvSocket >= 0 )
