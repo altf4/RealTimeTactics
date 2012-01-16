@@ -27,7 +27,7 @@
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.1353015389" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.other.other.650008777" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -pthread -DGSEAL_ENABLE -fPIC" valueType="string"/>
 								<option id="gnu.cpp.compiler.option.include.paths.336989087" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/lib/x86_64-linux-gnu/glib-2.0/include"/>
+									<listOptionValue builtIn="false" value="/usr/lib/i386-linux-gnu/glib-2.0/include"/>
 									<listOptionValue builtIn="false" value="/usr/include/glib-2.0"/>
 									<listOptionValue builtIn="false" value="/usr/include/gdk-pixbuf-2.0"/>
 									<listOptionValue builtIn="false" value="/usr/include/atk-1.0"/>
@@ -63,7 +63,7 @@
 								<option defaultValue="gnu.c.optimization.level.none" id="gnu.c.compiler.exe.debug.option.optimization.level.1243683731" name="Optimization Level" superClass="gnu.c.compiler.exe.debug.option.optimization.level" valueType="enumerated"/>
 								<option id="gnu.c.compiler.exe.debug.option.debugging.level.1432852698" name="Debug Level" superClass="gnu.c.compiler.exe.debug.option.debugging.level" value="gnu.c.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.c.compiler.option.include.paths.2037517186" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/usr/lib/x86_64-linux-gnu/glib-2.0/include"/>
+									<listOptionValue builtIn="false" value="/usr/lib/i386-linux-gnu/glib-2.0/include"/>
 									<listOptionValue builtIn="false" value="/usr/include/glib-2.0"/>
 									<listOptionValue builtIn="false" value="/usr/include/gdk-pixbuf-2.0"/>
 									<listOptionValue builtIn="false" value="/usr/include/atk-1.0"/>
@@ -178,7 +178,7 @@
 					</externalSetting>
 					<externalSetting contentTypes="org.eclipse.cdt.core.cxxSource">
 						<entry flags="BUILTIN" kind="includePath" name="/usr/include/glib-2.0"/>
-						<entry flags="BUILTIN" kind="includePath" name="/usr/lib/x86_64-linux-gnu/glib-2.0/include"/>
+						<entry flags="BUILTIN" kind="includePath" name="/usr/lib/i386-linux-gnu/glib-2.0/include"/>
 						<entry flags="BUILTIN" kind="includePath" name="/usr/include/gdk-pixbuf-2.0"/>
 						<entry flags="BUILTIN" kind="includePath" name="/usr/include/atk-1.0"/>
 						<entry flags="BUILTIN" kind="includePath" name="/usr/include/pango-1.0"/>
@@ -207,7 +207,7 @@
 					</externalSetting>
 					<externalSetting contentTypes="org.eclipse.cdt.core.cSource">
 						<entry flags="BUILTIN" kind="includePath" name="/usr/include/glib-2.0"/>
-						<entry flags="BUILTIN" kind="includePath" name="/usr/lib/x86_64-linux-gnu/glib-2.0/include"/>
+						<entry flags="BUILTIN" kind="includePath" name="/usr/lib/i386-linux-gnu/glib-2.0/include"/>
 						<entry flags="BUILTIN" kind="includePath" name="/usr/include/gdk-pixbuf-2.0"/>
 						<entry flags="BUILTIN" kind="includePath" name="/usr/include/atk-1.0"/>
 						<entry flags="BUILTIN" kind="includePath" name="/usr/include/pango-1.0"/>
