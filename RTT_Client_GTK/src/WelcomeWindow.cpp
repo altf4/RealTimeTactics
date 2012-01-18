@@ -226,8 +226,47 @@ void WelcomeWindow::quit_server_click()
 void WelcomeWindow::on_teamNumber_combo_changed(const Glib::ustring& path,
 		const Gtk::TreeIter& iter)
 {
-	//OMGWTFBBQ This actually works. Just put something here
-	//player_list_view->
+	pthread_rwlock_wrlock(&globalLock);
+
+	//Get the row of the currently selected player
+	Glib::RefPtr<TreeSelection> selection = player_list_view->get_selection();
+	TreeModel::iterator selectedIter = selection->get_selected();
+	TreeModel::Row playerRow = *(selectedIter);
+
+	PlayerListColumns playerColumns;
+	TeamComboColumns teamColumns;
+
+	//Get the row of the selected team (in the combobox, each item is a row)
+	TreeModel::Row teamRow = (*iter);
+	int newTeam = teamRow[teamColumns.teamNum];
+
+	//Properly set the ComboBox text
+	if( newTeam == 0 )
+	{
+		playerRow[playerColumns.teamName] = "Spectator";
+	}
+	else if( newTeam == 9 )
+	{
+		playerRow[playerColumns.teamName] = "Referee";
+	}
+	else
+	{
+		stringstream temp;
+		temp << "Team " << newTeam;
+		playerRow[playerColumns.teamName] = temp.str();
+	}
+
+	//Get set the new team number back into the combobox's data
+	TreeValueProxy<Glib::RefPtr<TreeModel> > teamNumberListStore =
+			playerRow[playerColumns.teamChosen];
+	Glib::RefPtr<TreeModel> treeModelPtr = teamNumberListStore;
+	TreeModel::iterator chosenTeamIter = treeModelPtr->get_iter(path);
+	TreeModel::Row existingTeamRow = (*chosenTeamIter);
+	existingTeamRow[teamColumns.teamNum] = newTeam;
+
+	player_list_view->show_all();
+
+	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::list_matches()
@@ -330,34 +369,34 @@ void WelcomeWindow::LaunchServerConnectPane()
 void WelcomeWindow::PopulateTeamNumberCombo()
 {
 	TreeModel::Row row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = "TEAM_1";
+	row[teamNumberColumns->teamNum] = 1;
 	row[teamNumberColumns->teamString] = "Team 1";
 	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = "TEAM_2";
+	row[teamNumberColumns->teamNum] = 2;
 	row[teamNumberColumns->teamString] = "Team 2";
 	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = "TEAM_3";
+	row[teamNumberColumns->teamNum] = 3;
 	row[teamNumberColumns->teamString] = "Team 3";
 	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = "TEAM_4";
+	row[teamNumberColumns->teamNum] = 4;
 	row[teamNumberColumns->teamString] = "Team 4";
 	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = "TEAM_5";
+	row[teamNumberColumns->teamNum] = 5;
 	row[teamNumberColumns->teamString] = "Team 5";
 	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = "TEAM_6";
+	row[teamNumberColumns->teamNum] = 6;
 	row[teamNumberColumns->teamString] = "Team 6";
 	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = "TEAM_7";
+	row[teamNumberColumns->teamNum] = 7;
 	row[teamNumberColumns->teamString] = "Team 7";
 	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = "TEAM_8";
+	row[teamNumberColumns->teamNum] = 8;
 	row[teamNumberColumns->teamString] = "Team 8";
 	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = "REFEREE";
+	row[teamNumberColumns->teamNum] = 9;
 	row[teamNumberColumns->teamString] = "Referee";
 	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = "SPECTATOR";
+	row[teamNumberColumns->teamNum] = 0;
 	row[teamNumberColumns->teamString] = "Spectator";
 }
 
@@ -387,7 +426,7 @@ void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
 		row[playerColumns->name] = string(playerDescriptions[i].name);
 		row[playerColumns->ID] = playerDescriptions[i].ID;
 		row[playerColumns->teamChosen] = teamNumberListStore;
-		row[playerColumns->teamName] = string("Pick One!");
+		row[playerColumns->teamName] = string("Team 1");
 	}
 
 	player_list_view->append_column("Name", playerColumns->name);

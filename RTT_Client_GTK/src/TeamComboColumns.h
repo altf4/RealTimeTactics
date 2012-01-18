@@ -11,7 +11,7 @@
 #include <gtkmm.h>
 
 //Tree model columns for the Combo CellRenderer in the TreeView column:
-class TeamComboColumns : public Gtk::TreeModel::ColumnRecord
+class TeamComboColumns : public Gtk::TreeModelColumnRecord
 {
 public:
 
@@ -19,7 +19,7 @@ public:
 	{ add(teamString); add(teamNum); }
 
 	//The values from which the user may choose.
-	TreeModelColumn<Glib::ustring> teamNum;
+	TreeModelColumn<int> teamNum;
 	//Extra information to help the user to choose.
 	TreeModelColumn<Glib::ustring> teamString;
 };
