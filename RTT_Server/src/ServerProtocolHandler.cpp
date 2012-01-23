@@ -400,7 +400,8 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 		default:
 		{
 			SendError(ConnectFD, PROTOCOL_ERROR);
-			delete lobby_message;
+			delete lobby_message_init;
+			lobby_message_init = NULL;
 			return IN_MAIN_LOBBY;
 		}
 	}
@@ -913,7 +914,8 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 		default:
 		{
 			SendError(connectFD, PROTOCOL_ERROR);
-			delete match_lobby_message;
+			delete match_lobby_message_init;
+			match_lobby_message_init = NULL;
 			return IN_MATCH_LOBBY;
 		}
 	}
