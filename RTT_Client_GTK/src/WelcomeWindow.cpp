@@ -6,6 +6,7 @@
 //============================================================================
 
 #include "WelcomeWindow.h"
+#include "Team.h"
 
 using namespace RTT;
 
@@ -69,6 +70,9 @@ void WelcomeWindow::connect_click()
 	{
 		statusbar->push("Connection Successful!");
 		LaunchMainLobbyPane();
+
+		//Launch the Callback Thread
+		pthread_create(&threadID, NULL, CallbackThread, NULL);
 	}
 	else
 	{
@@ -228,33 +232,29 @@ void WelcomeWindow::on_teamNumber_combo_changed(const Glib::ustring& path,
 {
 	pthread_rwlock_wrlock(&globalLock);
 
+	PlayerListColumns playerColumns;
+	TeamComboColumns teamColumns;
+
 	//Get the row of the currently selected player
 	Glib::RefPtr<TreeSelection> selection = player_list_view->get_selection();
 	TreeModel::iterator selectedIter = selection->get_selected();
 	TreeModel::Row playerRow = *(selectedIter);
 
-	PlayerListColumns playerColumns;
-	TeamComboColumns teamColumns;
-
 	//Get the row of the selected team (in the combobox, each item is a row)
 	TreeModel::Row teamRow = (*iter);
 	int newTeam = teamRow[teamColumns.teamNum];
 
-	//Properly set the ComboBox text
-	if( newTeam == 0 )
+	int changedPlayerID = playerRow[playerColumns.ID];
+	if(ChangeTeam(changedPlayerID, (enum TeamNumber)newTeam) == false)
 	{
-		playerRow[playerColumns.teamName] = "Spectator";
+		cerr << "WARNING: Change of team on the server failed\n";
+		match_lobby_status->push("Could not change player's team");
+		player_list_view->show_all();
+		pthread_rwlock_unlock(&globalLock);
+		return;
 	}
-	else if( newTeam == 9 )
-	{
-		playerRow[playerColumns.teamName] = "Referee";
-	}
-	else
-	{
-		stringstream temp;
-		temp << "Team " << newTeam;
-		playerRow[playerColumns.teamName] = temp.str();
-	}
+
+	playerRow[playerColumns.teamName] = Team::TeamNumberToString((enum TeamNumber)newTeam);
 
 	//Get set the new team number back into the combobox's data
 	TreeValueProxy<Glib::RefPtr<TreeModel> > teamNumberListStore =
@@ -366,38 +366,43 @@ void WelcomeWindow::LaunchServerConnectPane()
 	match_lobby_box->set_visible(false);
 }
 
-void WelcomeWindow::PopulateTeamNumberCombo()
+Glib::RefPtr<Gtk::ListStore> WelcomeWindow::PopulateTeamNumberCombo()
 {
-	TreeModel::Row row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = 1;
-	row[teamNumberColumns->teamString] = "Team 1";
-	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = 2;
-	row[teamNumberColumns->teamString] = "Team 2";
-	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = 3;
-	row[teamNumberColumns->teamString] = "Team 3";
-	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = 4;
-	row[teamNumberColumns->teamString] = "Team 4";
-	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = 5;
-	row[teamNumberColumns->teamString] = "Team 5";
-	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = 6;
-	row[teamNumberColumns->teamString] = "Team 6";
-	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = 7;
-	row[teamNumberColumns->teamString] = "Team 7";
-	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = 8;
-	row[teamNumberColumns->teamString] = "Team 8";
-	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = 9;
-	row[teamNumberColumns->teamString] = "Referee";
-	row = *(teamNumberListStore->append());
-	row[teamNumberColumns->teamNum] = 0;
-	row[teamNumberColumns->teamString] = "Spectator";
+	TeamComboColumns teamColumns;
+	Glib::RefPtr<Gtk::ListStore> listStore = Gtk::ListStore::create(teamColumns);
+
+	TreeModel::Row row = *(listStore->append());
+	row[teamColumns.teamNum] = 1;
+	row[teamColumns.teamString] = "Team 1";
+	row = *(listStore->append());
+	row[teamColumns.teamNum] = 2;
+	row[teamColumns.teamString] = "Team 2";
+	row = *(listStore->append());
+	row[teamColumns.teamNum] = 3;
+	row[teamColumns.teamString] = "Team 3";
+	row = *(listStore->append());
+	row[teamColumns.teamNum] = 4;
+	row[teamColumns.teamString] = "Team 4";
+	row = *(listStore->append());
+	row[teamColumns.teamNum] = 5;
+	row[teamColumns.teamString] = "Team 5";
+	row = *(listStore->append());
+	row[teamColumns.teamNum] = 6;
+	row[teamColumns.teamString] = "Team 6";
+	row = *(listStore->append());
+	row[teamColumns.teamNum] = 7;
+	row[teamColumns.teamString] = "Team 7";
+	row = *(listStore->append());
+	row[teamColumns.teamNum] = 8;
+	row[teamColumns.teamString] = "Team 8";
+	row = *(listStore->append());
+	row[teamColumns.teamNum] = 9;
+	row[teamColumns.teamString] = "Referee";
+	row = *(listStore->append());
+	row[teamColumns.teamNum] = 0;
+	row[teamColumns.teamString] = "Spectator";
+
+	return listStore;
 }
 
 void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
@@ -415,9 +420,7 @@ void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
 	playerListStore = ListStore::create(*playerColumns);
 	player_list_view->set_model(playerListStore);
 
-	teamNumberColumns = new TeamComboColumns();
-	teamNumberListStore = Gtk::ListStore::create(*teamNumberColumns);
-	PopulateTeamNumberCombo();
+	teamNumberListStore = PopulateTeamNumberCombo();
 
 	//Add a new row (for ourselves)
 	for(uint i = 0; i < playerCount; i++)
@@ -426,7 +429,7 @@ void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
 		row[playerColumns->name] = string(playerDescriptions[i].name);
 		row[playerColumns->ID] = playerDescriptions[i].ID;
 		row[playerColumns->teamChosen] = teamNumberListStore;
-		row[playerColumns->teamName] = string("Team 1");
+		row[playerColumns->teamName] = Team::TeamNumberToString(playerDescriptions[i].team);
 	}
 
 	player_list_view->append_column("Name", playerColumns->name);

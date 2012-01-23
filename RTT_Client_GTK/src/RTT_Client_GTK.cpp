@@ -42,9 +42,6 @@ int main( int argc, char **argv)
 
 	pthread_rwlock_init(&window->globalLock, NULL);
 
-	//Launch the Callback Thread
-	pthread_create(&window->threadID, NULL, CallbackThread, NULL);
-
 	Main::run(*window);
 }
 
@@ -89,7 +86,34 @@ void *CallbackThread(void * parm)
 			case TEAM_CHANGE:
 			{
 				pthread_rwlock_wrlock(&window->globalLock);
-				//Do stuff here
+				PlayerListColumns playerColumns;
+				TeamComboColumns teamColumns;
+
+				TreeModel::Children rows = window->playerListStore->children();
+				TreeModel::iterator r;
+				for(r=rows.begin(); r!=rows.end(); r++)
+				{
+					TreeModel::Row playerRow=*r;
+					int ID = playerRow[playerColumns.ID];
+					if( ID == (int)change.playerID )
+					{
+						playerRow[playerColumns.teamName] =
+								Team::TeamNumberToString((enum TeamNumber)change.team);
+
+//						//Get set the new team number back into the combobox's data
+//						TreeValueProxy<Glib::RefPtr<TreeModel> > teamNumberListStore =
+//								playerRow[playerColumns.teamChosen];
+//						Glib::RefPtr<TreeModel> treeModelPtr = teamNumberListStore;
+//						TreeModel::iterator chosenTeamIter = treeModelPtr->get_iter("0");
+//						TreeModel::Row existingTeamRow = (*chosenTeamIter);
+//						existingTeamRow[teamColumns.teamNum] = change.team;
+//						existingTeamRow[teamColumns.teamString] =
+//								Team::TeamNumberToString((enum TeamNumber)change.team);
+
+						window->player_list_view->show_all();
+						break;
+					}
+				}
 				pthread_rwlock_unlock(&window->globalLock);
 
 			}
@@ -147,11 +171,16 @@ void *CallbackThread(void * parm)
 			{
 				if( window->playerDescription.ID !=	change.playerDescription.ID)
 				{
+					PlayerListColumns playerColumns;
+
 					pthread_rwlock_wrlock(&window->globalLock);
-					//Add a new row (for ourselves)
+					//Add a new row for the new player
 					TreeModel::Row row = *(window->playerListStore->append());
-					row[window->playerColumns->name] = change.playerDescription.name;
-//					row[playerColumns->team] = change.playerDescription.team;
+					row[playerColumns.name] = change.playerDescription.name;
+					row[playerColumns.teamChosen] =
+							window->PopulateTeamNumberCombo();
+					row[playerColumns.teamName] =
+							Team::TeamNumberToString((enum TeamNumber)change.team);
 					row[window->playerColumns->ID] = change.playerDescription.ID;
 					window->player_list_view->show_all();
 

@@ -264,11 +264,14 @@ bool Match::ChangeTeam(Player *player, enum TeamNumber newTeam)
 	{
 		return false;
 	}
+	//TODO: Probably don't need to loop through all teams. The player keeps a record
+	//		of what the old team number is
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
 		if( teams[i]->RemovePlayer(player->GetID()) == true)
 		{
 			teams[newTeam]->AddPlayer(player);
+			player->SetTeam(newTeam);
 			return true;
 		}
 	}
