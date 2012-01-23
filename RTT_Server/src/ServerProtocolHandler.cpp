@@ -545,7 +545,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			{
 				changingPlayer = playerList[match_lobby_message->playerID];
 				pthread_rwlock_unlock(&playerListLock);
-				playersMatch->ChangeTeam(changingPlayer
+				changed = playersMatch->ChangeTeam(changingPlayer
 					, match_lobby_message->newTeam);
 			}
 			else
