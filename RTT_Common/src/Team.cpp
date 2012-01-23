@@ -90,3 +90,51 @@ vector <Player*> Team::GetPlayers()
 	pthread_rwlock_unlock(&lock);
 	return temp;
 }
+
+string Team::TeamNumberToString(enum TeamNumber teamNum)
+{
+	switch(teamNum)
+	{
+		case SPECTATOR:
+		{
+			return "Spectator";
+		}
+		case TEAM_1:
+		{
+			return "Team 1";
+		}
+		case TEAM_2:
+		{
+			return "Team 2";
+		}
+		case TEAM_3:
+		{
+			return "Team 3";
+		}
+		case TEAM_4:
+		{
+			return "Team 4";
+		}
+		case TEAM_5:
+		{
+			return "Team 5";
+		}
+		case TEAM_6:
+		{
+			return "Team 6";
+		}
+		case TEAM_7:
+		{
+			return "Team 7";
+		}
+		case TEAM_8:
+		{
+			return "Team 8";
+		}
+		case REFEREE:
+		{
+			return "Referee";
+		}
+	}
+	return "WTF, This is not a team";
+}

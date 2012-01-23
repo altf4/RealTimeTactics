@@ -100,7 +100,7 @@ public:
 	void LaunchServerConnectPane();
 	void LaunchMatchLobbyPane(PlayerDescription *playerDescriptions, uint playerCount);
 
-	void PopulateTeamNumberCombo();
+	Glib::RefPtr<Gtk::ListStore> PopulateTeamNumberCombo();
 
 	bool GetPasswordTerminal(string plaintext, unsigned char *hash);
 };
