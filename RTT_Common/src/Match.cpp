@@ -74,13 +74,6 @@ void Match::SetName(string newName)
 	pthread_rwlock_unlock(&lock);
 }
 
-void Match::SetLeaderID(uint nextLeader)
-{
-	pthread_rwlock_wrlock(&lock);
-	leaderID = nextLeader;
-	pthread_rwlock_unlock(&lock);
-}
-
 void Match::SetMap(struct MapDescription newMap)
 {
 	pthread_rwlock_wrlock(&lock);
@@ -100,6 +93,23 @@ void Match::SetGamespeed(enum GameSpeed newSpeed)
 	pthread_rwlock_wrlock(&lock);
 	gameSpeed = newSpeed;
 	pthread_rwlock_unlock(&lock);
+}
+
+//Returns false if the given ID is not in this match
+bool Match::SetLeader(uint newID)
+{
+	pthread_rwlock_wrlock(&lock);
+	if( GetPlayer(newID) == NULL)
+	{
+		pthread_rwlock_unlock(&lock);
+		return false;
+	}
+	else
+	{
+		leaderID = newID;
+		pthread_rwlock_unlock(&lock);
+		return true;
+	}
 }
 
 //GET methods

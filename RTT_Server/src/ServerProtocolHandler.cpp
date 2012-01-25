@@ -857,6 +857,52 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 
 			break;
 		}
+		case CHANGE_LEADER_REQUEST:
+		{
+			if( matchID == 0 )
+			{
+				SendError(connectFD, PROTOCOL_ERROR);
+				delete match_lobby_message;
+				return IN_MAIN_LOBBY;
+			}
+
+			if( playersMatch == NULL)
+			{
+				//Error, there is no such Match
+				SendError(connectFD, MATCH_DOESNT_EXIST);
+				delete match_lobby_message;
+				return IN_MAIN_LOBBY;
+			}
+
+			bool changed = playersMatch->SetLeader(match_lobby_message->playerID);
+
+			//*******************************
+			// Send Change Leader Reply
+			//*******************************
+			MatchLobbyMessage *change_leader_reply = new MatchLobbyMessage();
+			change_leader_reply->type = CHANGE_LEADER_REPLY;
+			change_leader_reply->changeAccepted = changed;
+			if(  Message::WriteMessage(change_leader_reply, connectFD) == false)
+			{
+				//Error in write, do something?
+				cerr << "ERROR: Message send returned failure.\n";
+			}
+			delete change_leader_reply;
+
+			if( changed )
+			{
+				//*******************************
+				// Send Client Notifications
+				//*******************************
+				MatchLobbyMessage *notification = new MatchLobbyMessage();
+				notification->type = CHANGE_LEADER_NOTIFICATION;
+				notification->playerID = match_lobby_message->playerID;
+				NotifyClients(playersMatch, notification);
+				delete notification;
+			}
+
+			return IN_MATCH_LOBBY;
+		}
 		case KICK_PLAYER_REQUEST:
 		{
 			if( matchID == 0 )

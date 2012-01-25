@@ -80,6 +80,8 @@ public:
 	void SetMap(struct MapDescription newMap);
 	void SetVictoryCondition(enum VictoryCondition newVict);
 	void SetGamespeed(enum GameSpeed newSpeed);
+	//Returns false if the given ID is not in this match
+	bool SetLeader(uint newID);
 
 	enum Status GetStatus();
 	uint GetID();
