@@ -35,6 +35,7 @@ enum CallbackType
 	PLAYER_LEFT,
 	KICKED,
 	PLAYER_JOINED,
+	LEADER_CHANGE,
 	MATCH_STARTED,
 	CALLBACK_ERROR,
 };
@@ -152,6 +153,11 @@ bool ChangeSpeed(enum GameSpeed speed);
 //	Must be the leader
 //	Returns true if successfully changed
 bool ChangeVictoryCondition(enum VictoryCondition victory);
+
+//Give another player in the match the leader permissions
+//	Must be the leader
+//	Returns true if the leader status successfully given
+bool ChangeLeader(uint newLeaderID);
 
 //Kick the given player from the match
 //	Must be the leader

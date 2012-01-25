@@ -680,6 +680,49 @@ bool RTT::ChangeVictoryCondition(enum VictoryCondition victory)
 	return false;
 }
 
+//Give another player in the match the leader permissions
+//	Must be the leader
+//	Returns true if the leader status successfully given
+bool RTT::ChangeLeader(uint newLeaderID)
+{
+	//********************************
+	// Send Change Leader Request
+	//********************************
+	MatchLobbyMessage *change_leader_req = new MatchLobbyMessage();
+	change_leader_req->type = CHANGE_LEADER_REQUEST;
+	change_leader_req->playerID = newLeaderID;
+	if( Message::WriteMessage(change_leader_req, connectFD) == false)
+	{
+		//Error in write
+		delete change_leader_req;
+		return false;
+	}
+	delete change_leader_req;
+
+	//**********************************
+	// Receive Change Leader Reply
+	//**********************************
+	Message *message = Message::ReadMessage(connectFD);
+	if( message == NULL)
+	{
+		return false;
+	}
+	if( message->type != CHANGE_LEADER_REPLY)
+	{
+		delete message;
+		return false;
+	}
+	MatchLobbyMessage *change_leader_reply = (MatchLobbyMessage*)message;
+	if( change_leader_reply->changeAccepted )
+	{
+		delete change_leader_reply;
+		return true;
+	}
+
+	delete change_leader_reply;
+	return false;
+}
+
 //Kick the given player from the match
 //	Must be the leader
 //	Returns true if successfully kicked
@@ -1017,6 +1060,27 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 				return change;
 			}
 			delete victory_changed_ack;
+			break;
+		}
+		case CHANGE_LEADER_NOTIFICATION:
+		{
+			//Get what we need from the message
+			change.type = LEADER_CHANGE;
+			change.playerID = match_message->playerID;
+
+			//***********************************
+			// Send Victory Condition Changed Ack
+			//***********************************
+			MatchLobbyMessage *leader_changed_ack = new MatchLobbyMessage();
+			leader_changed_ack->type = CHANGE_LEADER_ACK;
+			if( Message::WriteMessage(leader_changed_ack, connectBackSocket) == false)
+			{
+				//Error in write
+				delete leader_changed_ack;
+				delete match_message;
+				return change;
+			}
+			delete leader_changed_ack;
 			break;
 		}
 		case MATCH_START_NOTIFICATION:
