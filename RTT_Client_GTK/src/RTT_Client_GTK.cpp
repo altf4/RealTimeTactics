@@ -159,7 +159,17 @@ void *CallbackThread(void * parm)
 						window->playerListStore->erase(r);
 					}
 				}
-
+				for(r=rows.begin(); r!=rows.end(); r++)
+				{
+					TreeModel::Row row=*r;
+					uint ID = row[window->playerColumns->ID];
+					if( ID == change.newLeaderID )
+					{
+						row[window->playerColumns->isLeader] = true;
+					}
+				}
+				window->currentMatch.leaderID = change.newLeaderID;
+				window->player_list_view->show_all();
 				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
@@ -182,10 +192,34 @@ void *CallbackThread(void * parm)
 					row[playerColumns.teamName] =
 							Team::TeamNumberToString((enum TeamNumber)change.team);
 					row[window->playerColumns->ID] = change.playerDescription.ID;
+					row[window->playerColumns->isLeader] = false;
 					window->player_list_view->show_all();
 
 					pthread_rwlock_unlock(&window->globalLock);
 				}
+				break;
+			}
+			case LEADER_CHANGE:
+			{
+				pthread_rwlock_wrlock(&window->globalLock);
+				window->currentMatch.leaderID = change.playerID;
+				TreeModel::Children rows = window->playerListStore->children();
+				TreeModel::iterator r;
+				for(r=rows.begin(); r!=rows.end(); r++)
+				{
+					TreeModel::Row row=*r;
+					uint ID = row[window->playerColumns->ID];
+					if( ID == change.playerID)
+					{
+						row[window->playerColumns->isLeader] = true;
+					}
+					else
+					{
+						row[window->playerColumns->isLeader] = false;
+					}
+				}
+				window->player_list_view->show_all();
+				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case MATCH_STARTED:

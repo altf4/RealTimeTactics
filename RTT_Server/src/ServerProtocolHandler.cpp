@@ -262,7 +262,10 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 			//***************************
 			LobbyMessage *create_reply = new LobbyMessage();
 			create_reply->type = MATCH_CREATE_REPLY;
-			create_reply->ID = matchID;
+			pthread_rwlock_rdlock(&matchListLock);
+			Match *joinedMatch = matchList[matchID];
+			create_reply->matchDescription = joinedMatch->GetDescription();
+			pthread_rwlock_unlock(&matchListLock);
 			if(  Message::WriteMessage(create_reply, ConnectFD) == false)
 			{
 				//Error in write, do something?
@@ -951,6 +954,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				MatchLobbyMessage *notification = new MatchLobbyMessage();
 				notification->type = PLAYER_LEFT_MATCH_NOTIFICATION;
 				notification->playerID = match_lobby_message->playerID;
+				notification->newLeaderID = playersMatch->GetLeaderID();
 				NotifyClients(playersMatch, notification);
 				delete notification;
 			}

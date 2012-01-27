@@ -64,7 +64,7 @@ struct CallbackChange
 	enum VictoryCondition victory;
 
 	//PLAYER_LEFT
-	//Only the playerID
+	uint newLeaderID;
 
 	//KICKED (nothing)
 
@@ -100,20 +100,22 @@ bool ExitServer();
 uint ListMatches(uint page, MatchDescription *matchArray);
 
 //Create a new Match on the server, and join that Match
-//	Options: The match options needed to create a game
+//	options: The match options needed to create a game
+//  outMatchDesc: Output variable for the match description that is created
 //	Returns: true if the match is created successfully
 //	Should immediately follow with InitializeCallback()
-bool CreateMatch(struct MatchOptions options);
+bool CreateMatch(struct MatchOptions options, struct MatchDescription *outMatchDesc);
 
 //Joins the match at the given ID
 //	matchID: The server's unique ID for the chosen match
 //	descPtr: The address of a pointer to PlayerDescription.
 //    The current players in the match are given here
+//  outMatchDesc: Output variable for the match description that is created
 
-//	playerCount: Output variable for the returned player count
 //	Returns: true if the match is joined successfully
 //	Should immediately follow with InitializeCallback()
-uint JoinMatch(uint matchID, PlayerDescription *descPtr);
+uint JoinMatch(uint matchID, PlayerDescription *descPtr,
+		struct MatchDescription *outMatchDesc);
 
 //Leaves the match at the given ID
 //	matchID: The server's unique ID for the chosen match
