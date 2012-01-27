@@ -117,7 +117,7 @@ void WelcomeWindow::create_match_submit_click()
 	options.maxPlayers = maxPlayers + 2; //+2 since the combo starts at 2
 	strncpy(options.name, match_name_entry->get_text().c_str(), sizeof(options.name));
 
-	if (CreateMatch(options) )
+	if (CreateMatch(options, &currentMatch) )
 	{
 		LaunchMatchLobbyPane(&playerDescription, 1);
 	}
@@ -157,6 +157,7 @@ void WelcomeWindow::leave_match_click()
 
 	if( LeaveMatch() )
 	{
+		currentMatch.ID = 0;
 		LaunchMainLobbyPane();
 	}
 	else
@@ -200,13 +201,15 @@ void WelcomeWindow::join_match_click()
 
 	PlayerDescription playerDescriptions[MAX_PLAYERS_IN_MATCH];
 
-	uint playerCount = JoinMatch(matchID, playerDescriptions);
+	uint playerCount = JoinMatch(matchID, playerDescriptions, &currentMatch);
 	if( playerCount > 0 )
 	{
+		currentMatch.ID = matchID;
 		LaunchMatchLobbyPane(playerDescriptions, playerCount);
 	}
 	else
 	{
+		currentMatch.ID = 0;
 		status_lobby->push("Failed to join match. Is it full?");
 		pthread_rwlock_unlock(&globalLock);
 		return;
@@ -426,12 +429,21 @@ void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
 	for(uint i = 0; i < playerCount; i++)
 	{
 		TreeModel::Row row = *(playerListStore->append());
+		if( playerDescriptions[i].ID == currentMatch.leaderID)
+		{
+			row[playerColumns->isLeader] = true;
+		}
+		else
+		{
+			row[playerColumns->isLeader] = false;
+		}
 		row[playerColumns->name] = string(playerDescriptions[i].name);
 		row[playerColumns->ID] = playerDescriptions[i].ID;
 		row[playerColumns->teamChosen] = teamNumberListStore;
 		row[playerColumns->teamName] = Team::TeamNumberToString(playerDescriptions[i].team);
 	}
 
+	player_list_view->append_column("Leader", playerColumns->isLeader);
 	player_list_view->append_column("Name", playerColumns->name);
 
 	TreeView::Column* pColumn = manage( new Gtk::TreeView::Column("Team") );

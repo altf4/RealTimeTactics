@@ -23,6 +23,7 @@ Match::Match(Player *player)
 		teams[i] = new Team((enum TeamNumber)i);
 	}
 	leaderID = player->GetID();
+	description.leaderID = leaderID;
 	currentPlayerCount = 0;
 	pthread_rwlock_init(&lock, NULL);
 }
@@ -107,6 +108,7 @@ bool Match::SetLeader(uint newID)
 	else
 	{
 		leaderID = newID;
+		description.leaderID = newID;
 		pthread_rwlock_unlock(&lock);
 		return true;
 	}
@@ -156,7 +158,7 @@ string Match::GetName()
 uint Match::GetLeaderID()
 {
 	pthread_rwlock_rdlock(&lock);
-	uint tempID = ID;
+	uint tempID = leaderID;
 	pthread_rwlock_unlock(&lock);
 	return tempID;
 }
@@ -226,9 +228,12 @@ bool Match::RemovePlayer( uint playerID )
 		if( teams[i]->RemovePlayer(playerID))
 		{
 			uint nextID = GetFirstPlayerID();
-
 			pthread_rwlock_wrlock(&lock);
-			leaderID = nextID;
+			if( leaderID == playerID )
+			{
+				leaderID = nextID;
+				description.leaderID = nextID;
+			}
 			currentPlayerCount--;
 			description.currentPlayerCount--;
 			pthread_rwlock_unlock(&lock);

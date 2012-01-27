@@ -571,6 +571,7 @@ bool LeaveMatch(Player *player)
 	MatchLobbyMessage *notification = new MatchLobbyMessage();
 	notification->type = PLAYER_LEFT_MATCH_NOTIFICATION;
 	notification->playerID = player->GetID();
+	notification->newLeaderID = foundMatch->GetLeaderID();
 	NotifyClients(foundMatch, notification);
 	delete notification;
 	return true;

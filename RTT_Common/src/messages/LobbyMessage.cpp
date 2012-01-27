@@ -100,6 +100,8 @@ LobbyMessage::LobbyMessage(char *buffer, uint32_t length)
 				buffer += MAX_MATCHNAME_LEN;
 				memcpy(&matchDescriptions[i].timeCreated, buffer, sizeof(int64_t));
 				buffer += sizeof(int64_t);
+				memcpy(&matchDescriptions[i].leaderID, buffer, sizeof(uint32_t));
+				buffer += sizeof(uint32_t);
 			}
 
 			break;
@@ -181,6 +183,8 @@ LobbyMessage::LobbyMessage(char *buffer, uint32_t length)
 			buffer += MAX_MATCHNAME_LEN;
 			memcpy(&matchDescription.timeCreated, buffer, sizeof(int64_t));
 			buffer += sizeof(int64_t);
+			memcpy(&matchDescription.leaderID, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 
 			break;
 
@@ -251,6 +255,8 @@ LobbyMessage::LobbyMessage(char *buffer, uint32_t length)
 			buffer += MAX_MATCHNAME_LEN;
 			memcpy(&matchDescription.timeCreated, buffer, sizeof(int64_t));
 			buffer += sizeof(int64_t);
+			memcpy(&matchDescription.leaderID, buffer, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 
 			break;
 		}
@@ -375,6 +381,8 @@ char *LobbyMessage::Serialize(uint32_t *length)
 				buffer += MAX_MATCHNAME_LEN;
 				memcpy(buffer, &matchDescriptions[i].timeCreated, sizeof(int64_t));
 				buffer += sizeof(int64_t);
+				memcpy(buffer, &matchDescriptions[i].leaderID, sizeof(uint32_t));
+				buffer += sizeof(uint32_t);
 			}
 			break;
 		}
@@ -457,6 +465,8 @@ char *LobbyMessage::Serialize(uint32_t *length)
 			buffer += MAX_MATCHNAME_LEN;
 			memcpy(buffer, &matchDescription.timeCreated, sizeof(int64_t));
 			buffer += sizeof(int64_t);
+			memcpy(buffer, &matchDescription.leaderID, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 			break;
 		}
 		//Joining a match already created
@@ -523,6 +533,8 @@ char *LobbyMessage::Serialize(uint32_t *length)
 			buffer += MAX_MATCHNAME_LEN;
 			memcpy(buffer, &matchDescription.timeCreated, sizeof(int64_t));
 			buffer += sizeof(int64_t);
+			memcpy(buffer, &matchDescription.leaderID, sizeof(uint32_t));
+			buffer += sizeof(uint32_t);
 
 			break;
 		}

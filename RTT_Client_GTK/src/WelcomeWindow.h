@@ -83,6 +83,7 @@ public:
 	pthread_t threadID;
 
 	PlayerDescription playerDescription;
+	MatchDescription currentMatch;
 
 	void on_teamNumber_combo_changed(const Glib::ustring&, const Gtk::TreeIter&);
 	void connect_click();

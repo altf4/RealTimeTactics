@@ -425,8 +425,10 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case PLAYER_LEFT_MATCH_NOTIFICATION:
 		{
 			//Uses: 1) Message Type
-			//		2) Player ID
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(playerID);
+			//		2) Player ID who left
+			//		3) Player ID of new leader
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(playerID) +
+					sizeof(newLeaderID);
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -436,6 +438,10 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			//Player ID that left
 			memcpy(&playerID, buffer, sizeof(playerID));
 			buffer += sizeof(playerID);
+
+			//Player ID of new leader
+			memcpy(&newLeaderID, buffer, sizeof(newLeaderID));
+			buffer += sizeof(newLeaderID);
 
 			break;
 		}
@@ -1082,17 +1088,21 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case PLAYER_LEFT_MATCH_NOTIFICATION:
 		{
 			//Uses: 1) Message Type
-			//		2) Player ID
-			messageSize = MESSAGE_MIN_SIZE + sizeof(playerID);
+			//		2) Player ID who left
+			//		3) Player ID of new leader
+			messageSize = MESSAGE_MIN_SIZE + sizeof(playerID) + sizeof(newLeaderID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
 			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
-			//Put the type in
+			//Player ID who left
 			memcpy(buffer, &playerID, sizeof(playerID));
 			buffer += sizeof(playerID);
+			//Player ID of new leader
+			memcpy(buffer, &newLeaderID, sizeof(newLeaderID));
+			buffer += sizeof(newLeaderID);
 
 			break;
 		}

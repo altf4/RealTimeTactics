@@ -31,6 +31,7 @@ public:
 	uint32_t playerID;
 	struct PlayerDescription playerDescription;
 	uint32_t portNum;
+	uint32_t newLeaderID;
 
 	MatchLobbyMessage();
 	~MatchLobbyMessage();
