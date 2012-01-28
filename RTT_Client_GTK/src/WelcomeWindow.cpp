@@ -272,6 +272,41 @@ void WelcomeWindow::on_teamNumber_combo_changed(const Glib::ustring& path,
 	pthread_rwlock_unlock(&globalLock);
 }
 
+void WelcomeWindow::on_leader_toggled(const Glib::ustring& path)
+{
+	pthread_rwlock_wrlock(&globalLock);
+	PlayerListColumns playerColumns;
+
+	Glib::RefPtr<TreeModel> playerModelPtr = playerListStore;
+	TreeModel::iterator chosenPlayerIter = playerModelPtr->get_iter(path);
+	TreeModel::Row chosenPlayerRow = (*chosenPlayerIter);
+	uint newLeaderID = chosenPlayerRow[playerColumns.ID];
+
+	if(ChangeLeader(newLeaderID) == false)
+	{
+		cerr << "WARNING: Change of leader on the server failed\n";
+		match_lobby_status->push("Could not change the leader");
+		player_list_view->show_all();
+		pthread_rwlock_unlock(&globalLock);
+		return;
+	}
+
+	TreeModel::Children rows = playerListStore->children();
+	TreeModel::iterator r;
+	for(r=rows.begin(); r!=rows.end(); r++)
+	{
+		TreeModel::Row row=*r;
+		row[playerColumns.isLeader] = false;
+		row[playerColumns.leaderSelectable] = false;
+	}
+	chosenPlayerRow[playerColumns.isLeader] = true;
+	currentMatch.leaderID = newLeaderID;
+
+	player_list_view->show_all();
+
+	pthread_rwlock_unlock(&globalLock);
+}
+
 void WelcomeWindow::list_matches()
 {
 	ptime epoch(date(1970,boost::gregorian::Jan,1));
@@ -425,10 +460,15 @@ void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
 
 	teamNumberListStore = PopulateTeamNumberCombo();
 
-	//Add a new row (for ourselves)
+	//Add a new row for each player
 	for(uint i = 0; i < playerCount; i++)
 	{
 		TreeModel::Row row = *(playerListStore->append());
+
+		row[playerColumns->name] = string(playerDescriptions[i].name);
+		row[playerColumns->ID] = playerDescriptions[i].ID;
+		row[playerColumns->teamChosen] = teamNumberListStore;
+		row[playerColumns->teamName] = Team::TeamNumberToString(playerDescriptions[i].team);
 		if( playerDescriptions[i].ID == currentMatch.leaderID)
 		{
 			row[playerColumns->isLeader] = true;
@@ -437,13 +477,29 @@ void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
 		{
 			row[playerColumns->isLeader] = false;
 		}
-		row[playerColumns->name] = string(playerDescriptions[i].name);
-		row[playerColumns->ID] = playerDescriptions[i].ID;
-		row[playerColumns->teamChosen] = teamNumberListStore;
-		row[playerColumns->teamName] = Team::TeamNumberToString(playerDescriptions[i].team);
+		if(playerDescription.ID == currentMatch.leaderID)
+		{
+			row[playerColumns->leaderSelectable] = true;
+		}
+		else
+		{
+			row[playerColumns->leaderSelectable] = false;
+		}
 	}
 
-	player_list_view->append_column("Leader", playerColumns->isLeader);
+	CellRendererToggle *toggleRender = Gtk::manage( new Gtk::CellRendererToggle() );
+	int cols_count = player_list_view->append_column("Leader", *toggleRender);
+	Gtk::TreeViewColumn* toggleRenderColumn = player_list_view->get_column(cols_count-1);
+	if(toggleRenderColumn)
+	{
+		toggleRenderColumn->add_attribute(
+				toggleRender->property_active(), playerColumns->isLeader);
+		toggleRenderColumn->add_attribute(
+				toggleRender->property_activatable(), playerColumns->leaderSelectable);
+	}
+	toggleRender->signal_toggled().connect(sigc::mem_fun(*this,
+		        &WelcomeWindow::on_leader_toggled));
+
 	player_list_view->append_column("Name", playerColumns->name);
 
 	TreeView::Column* pColumn = manage( new Gtk::TreeView::Column("Team") );
@@ -462,6 +518,7 @@ void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
 	pRenderer->signal_changed().connect(
 			sigc::mem_fun(*this, &WelcomeWindow::on_teamNumber_combo_changed));
 
+	player_list_view->set_rules_hint(true);
 	player_list_view->show_all();
 }
 
