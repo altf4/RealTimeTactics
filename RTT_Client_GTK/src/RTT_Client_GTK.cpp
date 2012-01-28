@@ -167,6 +167,18 @@ void *CallbackThread(void * parm)
 					{
 						row[window->playerColumns->isLeader] = true;
 					}
+					else
+					{
+						row[window->playerColumns->isLeader] = false;
+					}
+					if(window->playerDescription.ID == change.newLeaderID)
+					{
+						row[window->playerColumns->leaderSelectable] = true;
+					}
+					else
+					{
+						row[window->playerColumns->leaderSelectable] = false;
+					}
 				}
 				window->currentMatch.leaderID = change.newLeaderID;
 				window->player_list_view->show_all();
@@ -193,6 +205,14 @@ void *CallbackThread(void * parm)
 							Team::TeamNumberToString((enum TeamNumber)change.team);
 					row[window->playerColumns->ID] = change.playerDescription.ID;
 					row[window->playerColumns->isLeader] = false;
+					if(window->playerDescription.ID == window->currentMatch.leaderID)
+					{
+						row[window->playerColumns->leaderSelectable] = true;
+					}
+					else
+					{
+						row[window->playerColumns->leaderSelectable] = false;
+					}
 					window->player_list_view->show_all();
 
 					pthread_rwlock_unlock(&window->globalLock);
@@ -216,6 +236,14 @@ void *CallbackThread(void * parm)
 					else
 					{
 						row[window->playerColumns->isLeader] = false;
+					}
+					if(window->playerDescription.ID == window->currentMatch.leaderID)
+					{
+						row[window->playerColumns->leaderSelectable] = true;
+					}
+					else
+					{
+						row[window->playerColumns->leaderSelectable] = false;
 					}
 				}
 				window->player_list_view->show_all();

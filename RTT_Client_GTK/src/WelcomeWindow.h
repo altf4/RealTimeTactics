@@ -94,6 +94,7 @@ public:
 	void list_matches_click();
 	void leave_match_click();
 	void custom_server_click();
+	void on_leader_toggled(const Glib::ustring& path);
 
 	void list_matches();
 
