@@ -877,7 +877,12 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				return IN_MAIN_LOBBY;
 			}
 
-			bool changed = playersMatch->SetLeader(match_lobby_message->playerID);
+			bool changed = false;
+			//Only allow the current leader to set a new leader
+			if( playerID ==  playersMatch->GetLeaderID())
+			{
+				changed = playersMatch->SetLeader(match_lobby_message->playerID);
+			}
 
 			//*******************************
 			// Send Change Leader Reply
