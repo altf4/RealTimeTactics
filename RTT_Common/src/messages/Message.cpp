@@ -102,6 +102,8 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case CHANGE_VICTORY_COND_REPLY:
 		case CHANGE_GAME_SPEED_REQUEST:
 		case CHANGE_GAME_SPEED_REPLY:
+		case CHANGE_LEADER_REQUEST:
+		case CHANGE_LEADER_REPLY:
 		case KICK_PLAYER_REQUEST:
 		case KICK_PLAYER_REPLY:
 		case CALLBACK_REGISTER:
@@ -121,6 +123,8 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case GAME_SPEED_CHANGED_ACK:
 		case VICTORY_COND_CHANGED_NOTIFICATION:
 		case VICTORY_COND_CHANGED_ACK:
+		case CHANGE_LEADER_NOTIFICATION:
+		case CHANGE_LEADER_ACK:
 		case MATCH_START_NOTIFICATION:
 		case MATCH_START_ACK:
 		{

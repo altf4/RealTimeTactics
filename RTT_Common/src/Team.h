@@ -42,6 +42,8 @@ public:
 
 	vector<struct PlayerDescription> GetPlayerDescriptions();
 
+	static string TeamNumberToString(enum TeamNumber teamNum);
+
 private:
 	//Lock for the players list
 	pthread_rwlock_t lock;

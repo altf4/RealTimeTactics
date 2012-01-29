@@ -65,6 +65,7 @@
 									<listOptionValue builtIn="false" value="RTT_Common"/>
 									<listOptionValue builtIn="false" value="RTT_Client_Core"/>
 									<listOptionValue builtIn="false" value="OIS"/>
+									<listOptionValue builtIn="false" value="crypto"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.723522577" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

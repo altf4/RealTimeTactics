@@ -1,0 +1,12 @@
+<job>
+	<jobName>Sniper</jobName>
+	<maxHealth>300</maxHealth>
+	<maxEnergy>300</maxEnergy>
+	<verticalMovement>2</verticalMovement>
+	<horizontalMovement>8</horizontalMovement>
+	<speed>10</speed>
+	<baseVision>5</baseVision>
+	<basicAttackRange>4</basicAttackRange>
+	<basicAttackDamage>8</basicAttackDamage>
+	<graphicsHash>9a4821d5e3629fb5f10db06c405fba0ff6b4b22a</graphicsHash>
+</job>

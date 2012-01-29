@@ -11,8 +11,10 @@ using namespace RTT;
 
 static uint lastIDGiven = 0;
 
-Unit::Unit()
+Unit::Unit( )
+	: Job("something")
 {
+
 	ID = lastIDGiven++;
 }
 

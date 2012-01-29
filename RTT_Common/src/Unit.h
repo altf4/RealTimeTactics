@@ -10,6 +10,8 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <string>
+#include "Job.h"
 
 using namespace std;
 
@@ -27,47 +29,38 @@ enum Direction: uint32_t
 	EAST
 };
 
-class Unit
+class Unit : public Job
 {
 
 public:
 
-	uint maxHealth;
 	uint currentHealth;
-
-	uint maxEnergy;
 	uint currentEnergy;
 
-	uint verticalMovement;
-	uint horizontalMovement;
-
-	//How many charge points accumulated per round
-	//	IE: How quickly this unit gets to have a turn
-	//	(Not how far it can walk)
-	uint speed;
+	//Charge for this player's turn
 	uint currentCharge;
 
 	//How many movement points the unit has
 	//	Each tile takes up a certain number of movement points
-	double movement;
 	double currentMovement;
 
 	Direction directionFacing;
 
+	//Unique identifier for this unit.
+	//	NOT an index into any list
+	uint ID;
 
-	//Empty constructor
-	Unit();
+	//The name of this Unit. Given by the client
+	// The client can choose to name his Units unique things to distinguish them
+	string unitName;
+
+
+	Unit( );
 
 	//Returns true if the given Unit is the same one as this
 	//	IE: The actual same unit. Not another unit with the same properties
 	//	Does this by comparing ID's
 	bool Equals(Unit *testUnit);
-
-	//TODO: Skills, class, etc...
-
-	//Unique identifier for this unit.
-	//	NOT an index into any list
-	uint ID;
 
 };
 

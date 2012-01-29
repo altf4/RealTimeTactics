@@ -23,6 +23,7 @@ Match::Match(Player *player)
 		teams[i] = new Team((enum TeamNumber)i);
 	}
 	leaderID = player->GetID();
+	description.leaderID = leaderID;
 	currentPlayerCount = 0;
 	pthread_rwlock_init(&lock, NULL);
 }
@@ -74,13 +75,6 @@ void Match::SetName(string newName)
 	pthread_rwlock_unlock(&lock);
 }
 
-void Match::SetLeaderID(uint nextLeader)
-{
-	pthread_rwlock_wrlock(&lock);
-	leaderID = nextLeader;
-	pthread_rwlock_unlock(&lock);
-}
-
 void Match::SetMap(struct MapDescription newMap)
 {
 	pthread_rwlock_wrlock(&lock);
@@ -100,6 +94,24 @@ void Match::SetGamespeed(enum GameSpeed newSpeed)
 	pthread_rwlock_wrlock(&lock);
 	gameSpeed = newSpeed;
 	pthread_rwlock_unlock(&lock);
+}
+
+//Returns false if the given ID is not in this match
+bool Match::SetLeader(uint newID)
+{
+	pthread_rwlock_wrlock(&lock);
+	if( GetPlayer(newID) == NULL)
+	{
+		pthread_rwlock_unlock(&lock);
+		return false;
+	}
+	else
+	{
+		leaderID = newID;
+		description.leaderID = newID;
+		pthread_rwlock_unlock(&lock);
+		return true;
+	}
 }
 
 //GET methods
@@ -146,7 +158,7 @@ string Match::GetName()
 uint Match::GetLeaderID()
 {
 	pthread_rwlock_rdlock(&lock);
-	uint tempID = ID;
+	uint tempID = leaderID;
 	pthread_rwlock_unlock(&lock);
 	return tempID;
 }
@@ -216,9 +228,12 @@ bool Match::RemovePlayer( uint playerID )
 		if( teams[i]->RemovePlayer(playerID))
 		{
 			uint nextID = GetFirstPlayerID();
-
 			pthread_rwlock_wrlock(&lock);
-			leaderID = nextID;
+			if( leaderID == playerID )
+			{
+				leaderID = nextID;
+				description.leaderID = nextID;
+			}
 			currentPlayerCount--;
 			description.currentPlayerCount--;
 			pthread_rwlock_unlock(&lock);
@@ -264,11 +279,14 @@ bool Match::ChangeTeam(Player *player, enum TeamNumber newTeam)
 	{
 		return false;
 	}
+	//TODO: Probably don't need to loop through all teams. The player keeps a record
+	//		of what the old team number is
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
 		if( teams[i]->RemovePlayer(player->GetID()) == true)
 		{
 			teams[newTeam]->AddPlayer(player);
+			player->SetTeam(newTeam);
 			return true;
 		}
 	}
