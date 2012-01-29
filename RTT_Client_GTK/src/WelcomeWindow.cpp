@@ -279,6 +279,14 @@ void WelcomeWindow::on_leader_toggled(const Glib::ustring& path)
 
 	Glib::RefPtr<TreeModel> playerModelPtr = playerListStore;
 	TreeModel::iterator chosenPlayerIter = playerModelPtr->get_iter(path);
+	if(!chosenPlayerIter)
+	{
+		cerr << "ERROR: Invalid player row selected for changing leader\n";
+		match_lobby_status->push("Could not change the leader");
+		player_list_view->show_all();
+		pthread_rwlock_unlock(&globalLock);
+		return;
+	}
 	TreeModel::Row chosenPlayerRow = (*chosenPlayerIter);
 	uint newLeaderID = chosenPlayerRow[playerColumns.ID];
 

@@ -90,10 +90,15 @@ void *CallbackThread(void * parm)
 				TeamComboColumns teamColumns;
 
 				TreeModel::Children rows = window->playerListStore->children();
-				TreeModel::iterator r;
-				for(r=rows.begin(); r!=rows.end(); r++)
+				TreeModel::iterator rowIter;
+				for(rowIter=rows.begin(); rowIter!=rows.end(); rowIter++)
 				{
-					TreeModel::Row playerRow=*r;
+					if(!rowIter)
+					{
+						cerr << "ERROR: A player row was corrupt\n";
+						continue;
+					}
+					TreeModel::Row playerRow=*rowIter;
 					int ID = playerRow[playerColumns.ID];
 					if( ID == (int)change.playerID )
 					{
@@ -149,19 +154,24 @@ void *CallbackThread(void * parm)
 			{
 				pthread_rwlock_wrlock(&window->globalLock);
 				TreeModel::Children rows = window->playerListStore->children();
-				TreeModel::iterator r;
-				for(r=rows.begin(); r!=rows.end(); r++)
+				TreeModel::iterator rowIter;
+				for(rowIter=rows.begin(); rowIter!=rows.end(); rowIter++)
 				{
-					TreeModel::Row row=*r;
+					if(!rowIter)
+					{
+						cerr << "ERROR: A player row was corrupt\n";
+						continue;
+					}
+					TreeModel::Row row=*rowIter;
 					uint ID = row[window->playerColumns->ID];
 					if( ID == change.playerID)
 					{
-						window->playerListStore->erase(r);
+						window->playerListStore->erase(rowIter);
 					}
 				}
-				for(r=rows.begin(); r!=rows.end(); r++)
+				for(rowIter=rows.begin(); rowIter!=rows.end(); rowIter++)
 				{
-					TreeModel::Row row=*r;
+					TreeModel::Row row=*rowIter;
 					uint ID = row[window->playerColumns->ID];
 					if( ID == change.newLeaderID )
 					{
@@ -191,18 +201,19 @@ void *CallbackThread(void * parm)
 			}
 			case PLAYER_JOINED:
 			{
+				pthread_rwlock_wrlock(&window->globalLock);
+
 				if( window->playerDescription.ID !=	change.playerDescription.ID)
 				{
 					PlayerListColumns playerColumns;
 
-					pthread_rwlock_wrlock(&window->globalLock);
 					//Add a new row for the new player
 					TreeModel::Row row = *(window->playerListStore->append());
 					row[playerColumns.name] = change.playerDescription.name;
 					row[playerColumns.teamChosen] =
 							window->PopulateTeamNumberCombo();
-					row[playerColumns.teamName] =
-							Team::TeamNumberToString((enum TeamNumber)change.team);
+					row[playerColumns.teamName] = Team::TeamNumberToString(
+							(enum TeamNumber)change.playerDescription.team);
 					row[window->playerColumns->ID] = change.playerDescription.ID;
 					row[window->playerColumns->isLeader] = false;
 					if(window->playerDescription.ID == window->currentMatch.leaderID)
@@ -214,36 +225,43 @@ void *CallbackThread(void * parm)
 						row[window->playerColumns->leaderSelectable] = false;
 					}
 					window->player_list_view->show_all();
-
-					pthread_rwlock_unlock(&window->globalLock);
 				}
+				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case LEADER_CHANGE:
 			{
+				PlayerListColumns playerColumns;
 				pthread_rwlock_wrlock(&window->globalLock);
+
 				window->currentMatch.leaderID = change.playerID;
+
 				TreeModel::Children rows = window->playerListStore->children();
-				TreeModel::iterator r;
-				for(r=rows.begin(); r!=rows.end(); r++)
+				TreeModel::iterator rowIter;
+				for(rowIter = rows.begin(); rowIter != rows.end(); rowIter++)
 				{
-					TreeModel::Row row=*r;
-					uint ID = row[window->playerColumns->ID];
+					if(!rowIter)
+					{
+						cerr << "ERROR: A player row was corrupt\n";
+						continue;
+					}
+					TreeModel::Row row = *rowIter;
+					uint ID = row[playerColumns.ID];
 					if( ID == change.playerID)
 					{
-						row[window->playerColumns->isLeader] = true;
+						row[playerColumns.isLeader] = true;
 					}
 					else
 					{
-						row[window->playerColumns->isLeader] = false;
+						row[playerColumns.isLeader] = false;
 					}
-					if(window->playerDescription.ID == window->currentMatch.leaderID)
+					if(window->playerDescription.ID == change.playerID)
 					{
-						row[window->playerColumns->leaderSelectable] = true;
+						row[playerColumns.leaderSelectable] = true;
 					}
 					else
 					{
-						row[window->playerColumns->leaderSelectable] = false;
+						row[playerColumns.leaderSelectable] = false;
 					}
 				}
 				window->player_list_view->show_all();
