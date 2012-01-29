@@ -78,6 +78,9 @@ enum MessageType: char
 	//Change game speed
 	CHANGE_GAME_SPEED_REQUEST,
 	CHANGE_GAME_SPEED_REPLY,
+	//Change match leader
+	CHANGE_LEADER_REQUEST,
+	CHANGE_LEADER_REPLY,
 	//Kick player
 	KICK_PLAYER_REQUEST,
 	KICK_PLAYER_REPLY,
@@ -112,6 +115,9 @@ enum MessageType: char
 	//Victory condition changed
 	VICTORY_COND_CHANGED_NOTIFICATION,
 	VICTORY_COND_CHANGED_ACK,
+	//Leader has changed
+	CHANGE_LEADER_NOTIFICATION,
+	CHANGE_LEADER_ACK,
 	//The match has started!
 	MATCH_START_NOTIFICATION,
 	MATCH_START_ACK,

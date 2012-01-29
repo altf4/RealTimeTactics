@@ -18,7 +18,7 @@
 #include <sys/time.h>
 
 #define MAX_MATCHNAME_LEN 20
-#define MATCH_DESCR_SIZE sizeof(enum Status) + (sizeof(uint32_t)*3) + \
+#define MATCH_DESCR_SIZE sizeof(enum Status) + (sizeof(uint32_t)*4) + \
 		MAX_MATCHNAME_LEN + sizeof(int64_t)
 #define MATCH_OPTIONS_SIZE sizeof(uint32_t) + MAX_MATCHNAME_LEN
 using namespace std;
@@ -45,6 +45,7 @@ struct MatchDescription
 	uint32_t currentPlayerCount;
 	char name[MAX_MATCHNAME_LEN];
 	int64_t timeCreated;
+	uint32_t leaderID;
 };
 
 //A fixed size collection of options for match creation
@@ -80,6 +81,8 @@ public:
 	void SetMap(struct MapDescription newMap);
 	void SetVictoryCondition(enum VictoryCondition newVict);
 	void SetGamespeed(enum GameSpeed newSpeed);
+	//Returns false if the given ID is not in this match
+	bool SetLeader(uint newID);
 
 	enum Status GetStatus();
 	uint GetID();

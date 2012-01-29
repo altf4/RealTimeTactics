@@ -264,7 +264,7 @@ uint RTT::ListMatches(uint page, MatchDescription *matchArray)
 //Create a new Match on the server, and join that Match
 //	connectFD: Socket File descriptor of the server
 //	Returns: true if the match is created successfully
-bool RTT::CreateMatch(struct MatchOptions options)
+bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outMatchDesc)
 {
 	//********************************
 	// Send Match Create Request
@@ -317,20 +317,20 @@ bool RTT::CreateMatch(struct MatchOptions options)
 	//**********************************
 	// Receive Match Create Reply
 	//**********************************
-	Message *create_reply = Message::ReadMessage(connectFD);
-	if( create_reply == NULL)
+	Message *create_reply_init = Message::ReadMessage(connectFD);
+	if( create_reply_init == NULL)
 	{
 		return false;
 	}
-	if( create_reply->type != MATCH_CREATE_REPLY)
+	if( create_reply_init->type != MATCH_CREATE_REPLY)
 	{
-		delete create_reply;
+		delete create_reply_init;
 		return false;
 	}
+	LobbyMessage *create_reply = (LobbyMessage*)create_reply_init;
+	*outMatchDesc = create_reply->matchDescription;
 	delete create_reply;
-
 	return true;
-
 }
 
 //Joins the match at the given ID
@@ -339,7 +339,8 @@ bool RTT::CreateMatch(struct MatchOptions options)
 //		The current players in the match are given here
 //	matchID: The server's unique ID for the chosen match
 //	Returns: true if the match is joined successfully
-uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr)
+uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr,
+		struct MatchDescription *outMatchDesc)
 {
 	//********************************
 	// Send Match Join Request
@@ -380,6 +381,8 @@ uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr)
 	{
 		descPtr[i] = join_reply->playerDescriptions[i];
 	}
+
+	*outMatchDesc = join_reply->matchDescription;
 
 	delete join_reply_init;
 	return count;
@@ -680,6 +683,49 @@ bool RTT::ChangeVictoryCondition(enum VictoryCondition victory)
 	return false;
 }
 
+//Give another player in the match the leader permissions
+//	Must be the leader
+//	Returns true if the leader status successfully given
+bool RTT::ChangeLeader(uint newLeaderID)
+{
+	//********************************
+	// Send Change Leader Request
+	//********************************
+	MatchLobbyMessage *change_leader_req = new MatchLobbyMessage();
+	change_leader_req->type = CHANGE_LEADER_REQUEST;
+	change_leader_req->playerID = newLeaderID;
+	if( Message::WriteMessage(change_leader_req, connectFD) == false)
+	{
+		//Error in write
+		delete change_leader_req;
+		return false;
+	}
+	delete change_leader_req;
+
+	//**********************************
+	// Receive Change Leader Reply
+	//**********************************
+	Message *message = Message::ReadMessage(connectFD);
+	if( message == NULL)
+	{
+		return false;
+	}
+	if( message->type != CHANGE_LEADER_REPLY)
+	{
+		delete message;
+		return false;
+	}
+	MatchLobbyMessage *change_leader_reply = (MatchLobbyMessage*)message;
+	if( change_leader_reply->changeAccepted )
+	{
+		delete change_leader_reply;
+		return true;
+	}
+
+	delete change_leader_reply;
+	return false;
+}
+
 //Kick the given player from the match
 //	Must be the leader
 //	Returns true if successfully kicked
@@ -897,6 +943,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//Get what we need from the message
 			change.type = PLAYER_LEFT;
 			change.playerID = match_message->playerID;
+			change.newLeaderID = match_message->newLeaderID;
 
 			//***********************************
 			// Send Player Left Ack
@@ -1017,6 +1064,27 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 				return change;
 			}
 			delete victory_changed_ack;
+			break;
+		}
+		case CHANGE_LEADER_NOTIFICATION:
+		{
+			//Get what we need from the message
+			change.type = LEADER_CHANGE;
+			change.playerID = match_message->playerID;
+
+			//***********************************
+			// Send Victory Condition Changed Ack
+			//***********************************
+			MatchLobbyMessage *leader_changed_ack = new MatchLobbyMessage();
+			leader_changed_ack->type = CHANGE_LEADER_ACK;
+			if( Message::WriteMessage(leader_changed_ack, connectBackSocket) == false)
+			{
+				//Error in write
+				delete leader_changed_ack;
+				delete match_message;
+				return change;
+			}
+			delete leader_changed_ack;
 			break;
 		}
 		case MATCH_START_NOTIFICATION:
