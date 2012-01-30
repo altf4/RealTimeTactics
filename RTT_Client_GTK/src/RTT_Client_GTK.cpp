@@ -39,6 +39,8 @@ int main( int argc, char **argv)
 			sigc::mem_fun(*window, &WelcomeWindow::join_match_click));
 	window->leave_match_button->signal_clicked().connect(
 			sigc::mem_fun(*window, &WelcomeWindow::leave_match_click));
+	window->speed_combo->signal_changed().connect(
+			sigc::mem_fun(*window, &WelcomeWindow::speed_combo_changed));
 
 	pthread_rwlock_init(&window->globalLock, NULL);
 
@@ -73,7 +75,7 @@ void InitWidgets()
 	refBuilder->get_widget("leave_match_button", window->leave_match_button);
 	refBuilder->get_widget("match_lobby_status", window->match_lobby_status);
 	refBuilder->get_widget("player_list_view", window->player_list_view);
-
+	refBuilder->get_widget("speed_combo", window->speed_combo);
 }
 
 void *CallbackThread(void * parm)
@@ -139,7 +141,8 @@ void *CallbackThread(void * parm)
 			case SPEED_CHANGE:
 			{
 				pthread_rwlock_wrlock(&window->globalLock);
-				//Do stuff here
+				window->speed_combo->set_active(change.speed);
+//				cout << "Speed Changed" << endl;
 				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}

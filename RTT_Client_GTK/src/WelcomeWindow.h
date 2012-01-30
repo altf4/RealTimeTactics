@@ -73,6 +73,7 @@ public:
 	Button *leave_match_button;
 	Statusbar *match_lobby_status;
 	TreeView *player_list_view;
+	ComboBoxText *speed_combo;
 
 	PlayerListColumns *playerColumns;
 	Glib::RefPtr<ListStore> playerListStore;
@@ -95,6 +96,7 @@ public:
 	void leave_match_click();
 	void custom_server_click();
 	void on_leader_toggled(const Glib::ustring& path);
+	void speed_combo_changed();
 
 	void list_matches();
 
