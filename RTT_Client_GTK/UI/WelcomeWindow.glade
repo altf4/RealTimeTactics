@@ -816,7 +816,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="box21">
+                  <object class="GtkBox" id="match_stats_box">
                     <property name="width_request">150</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -934,6 +934,7 @@
                               <item translatable="yes">Really Fast</item>
                               <item translatable="yes">Ridiculous Speed</item>
                             </items>
+                            <signal name="changed" handler="speed_combo_changed" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
