@@ -408,6 +408,20 @@ void WelcomeWindow::list_matches()
 	match_lists->show_all();
 }
 
+//Swaps out the widgets which are only used when we are the match leader
+// isLeader: True is we are the leader, false if not
+void WelcomeWindow::WelcomeWindow::swap_leader_widgets(bool isLeader)
+{
+	speed_combo->set_visible(isLeader);
+	speed_label->set_visible(!isLeader);
+
+	win_condition_combo->set_visible(isLeader);
+	victory_cond_label->set_visible(!isLeader);
+
+	map_name_combo->set_visible(isLeader);
+	map_set_label->set_visible(!isLeader);
+}
+
 //Hides other windows (WelcomeWindow) and shows LobbyWindow
 void WelcomeWindow::LaunchMainLobbyPane()
 {
@@ -502,16 +516,12 @@ void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
 		if(playerDescription.ID == currentMatch.leaderID)
 		{
 			row[playerColumns->leaderSelectable] = true;
-			//Swap out the game speed combo box and label
-			speed_combo->set_visible(true);
-			speed_label->set_visible(false);
+			swap_leader_widgets(true);
 		}
 		else
 		{
 			row[playerColumns->leaderSelectable] = false;
-			//Swap out the game speed combo box and label
-			speed_combo->set_visible(false);
-			speed_label->set_visible(true);
+			swap_leader_widgets(false);
 		}
 	}
 

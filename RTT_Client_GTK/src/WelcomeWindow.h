@@ -73,8 +73,12 @@ public:
 	Button *leave_match_button;
 	Statusbar *match_lobby_status;
 	TreeView *player_list_view;
+	ComboBoxText *map_name_combo;
 	ComboBoxText *speed_combo;
+	ComboBoxText *win_condition_combo;
 	Label *speed_label;
+	Label *victory_cond_label;
+	Label *map_set_label;
 
 	PlayerListColumns *playerColumns;
 	Glib::RefPtr<ListStore> playerListStore;
@@ -100,6 +104,9 @@ public:
 	void speed_combo_changed();
 
 	void list_matches();
+	//Swaps out the widgets which are only used when we are the match leader
+	// isLeader: True is we are the leader, false if not
+	void swap_leader_widgets(bool isLeader);
 
 	void LaunchMainLobbyPane();
 	void LaunchServerConnectPane();
