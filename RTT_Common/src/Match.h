@@ -102,6 +102,7 @@ public:
 	bool ChangeTeam(Player *player, enum TeamNumber newTeam);
 	bool StartMatch();
 
+	static string GameSpeedToString(enum GameSpeed speed);
 
 private:
 	//Lock for this match

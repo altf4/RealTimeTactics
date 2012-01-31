@@ -74,6 +74,7 @@ public:
 	Statusbar *match_lobby_status;
 	TreeView *player_list_view;
 	ComboBoxText *speed_combo;
+	Label *speed_label;
 
 	PlayerListColumns *playerColumns;
 	Glib::RefPtr<ListStore> playerListStore;
