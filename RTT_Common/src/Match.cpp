@@ -297,3 +297,30 @@ bool Match::StartMatch()
 {
 
 }
+
+string Match::GameSpeedToString(enum GameSpeed speed)
+{
+	switch(speed)
+	{
+		case SPEED_SLOW:
+		{
+			return "Slow";
+			break;
+		}
+		case SPEED_NORMAL:
+		{
+			return "Normal";
+			break;
+		}
+		case SPEED_FAST:
+		{
+			return "Fast";
+			break;
+		}
+		case SPEED_FASTEST:
+		{
+			return "Fastest";
+			break;
+		}
+	}
+}

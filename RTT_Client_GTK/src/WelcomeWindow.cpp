@@ -502,10 +502,16 @@ void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
 		if(playerDescription.ID == currentMatch.leaderID)
 		{
 			row[playerColumns->leaderSelectable] = true;
+			//Swap out the game speed combo box and label
+			speed_combo->set_visible(true);
+			speed_label->set_visible(false);
 		}
 		else
 		{
 			row[playerColumns->leaderSelectable] = false;
+			//Swap out the game speed combo box and label
+			speed_combo->set_visible(false);
+			speed_label->set_visible(true);
 		}
 	}
 

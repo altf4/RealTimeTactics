@@ -76,6 +76,7 @@ void InitWidgets()
 	refBuilder->get_widget("match_lobby_status", window->match_lobby_status);
 	refBuilder->get_widget("player_list_view", window->player_list_view);
 	refBuilder->get_widget("speed_combo", window->speed_combo);
+	refBuilder->get_widget("speed_label", window->speed_label);
 }
 
 void *CallbackThread(void * parm)
@@ -141,8 +142,7 @@ void *CallbackThread(void * parm)
 			case SPEED_CHANGE:
 			{
 				pthread_rwlock_wrlock(&window->globalLock);
-				window->speed_combo->set_active(change.speed);
-//				cout << "Speed Changed" << endl;
+				window->speed_label->set_text(Match::GameSpeedToString(change.speed));
 				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
@@ -187,10 +187,16 @@ void *CallbackThread(void * parm)
 					if(window->playerDescription.ID == change.newLeaderID)
 					{
 						row[window->playerColumns->leaderSelectable] = true;
+						//Swap out the game speed combo box and label
+						window->speed_combo->set_visible(true);
+						window->speed_label->set_visible(false);
 					}
 					else
 					{
 						row[window->playerColumns->leaderSelectable] = false;
+						//Swap out the game speed combo box and label
+						window->speed_combo->set_visible(false);
+						window->speed_label->set_visible(true);
 					}
 				}
 				window->currentMatch.leaderID = change.newLeaderID;
@@ -261,10 +267,16 @@ void *CallbackThread(void * parm)
 					if(window->playerDescription.ID == change.playerID)
 					{
 						row[playerColumns.leaderSelectable] = true;
+						//Swap out the game speed combo box and label
+						window->speed_combo->set_visible(true);
+						window->speed_label->set_visible(false);
 					}
 					else
 					{
 						row[playerColumns.leaderSelectable] = false;
+						//Swap out the game speed combo box and label
+						window->speed_combo->set_visible(false);
+						window->speed_label->set_visible(true);
 					}
 				}
 				window->player_list_view->show_all();

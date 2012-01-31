@@ -931,8 +931,7 @@
                               <item translatable="yes">Slow</item>
                               <item translatable="yes">Normal</item>
                               <item translatable="yes">Fast</item>
-                              <item translatable="yes">Really Fast</item>
-                              <item translatable="yes">Ridiculous Speed</item>
+                              <item translatable="yes">Fastest</item>
                             </items>
                             <signal name="changed" handler="speed_combo_changed" swapped="no"/>
                           </object>
@@ -940,6 +939,21 @@
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="speed_label">
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Speed</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="pack_type">end</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
