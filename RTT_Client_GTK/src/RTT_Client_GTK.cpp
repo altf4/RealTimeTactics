@@ -77,6 +77,10 @@ void InitWidgets()
 	refBuilder->get_widget("player_list_view", window->player_list_view);
 	refBuilder->get_widget("speed_combo", window->speed_combo);
 	refBuilder->get_widget("speed_label", window->speed_label);
+	refBuilder->get_widget("victory_cond_label", window->victory_cond_label);
+	refBuilder->get_widget("map_set_label", window->map_set_label);
+	refBuilder->get_widget("win_condition_combo", window->win_condition_combo);
+	refBuilder->get_widget("map_name_combo", window->map_name_combo);
 }
 
 void *CallbackThread(void * parm)
@@ -187,16 +191,12 @@ void *CallbackThread(void * parm)
 					if(window->playerDescription.ID == change.newLeaderID)
 					{
 						row[window->playerColumns->leaderSelectable] = true;
-						//Swap out the game speed combo box and label
-						window->speed_combo->set_visible(true);
-						window->speed_label->set_visible(false);
+						window->swap_leader_widgets(true);
 					}
 					else
 					{
 						row[window->playerColumns->leaderSelectable] = false;
-						//Swap out the game speed combo box and label
-						window->speed_combo->set_visible(false);
-						window->speed_label->set_visible(true);
+						window->swap_leader_widgets(false);
 					}
 				}
 				window->currentMatch.leaderID = change.newLeaderID;
@@ -268,15 +268,13 @@ void *CallbackThread(void * parm)
 					{
 						row[playerColumns.leaderSelectable] = true;
 						//Swap out the game speed combo box and label
-						window->speed_combo->set_visible(true);
-						window->speed_label->set_visible(false);
+						window->swap_leader_widgets(true);
 					}
 					else
 					{
 						row[playerColumns.leaderSelectable] = false;
 						//Swap out the game speed combo box and label
-						window->speed_combo->set_visible(false);
-						window->speed_label->set_visible(true);
+						window->swap_leader_widgets(false);
 					}
 				}
 				window->player_list_view->show_all();
