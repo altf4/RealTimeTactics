@@ -41,6 +41,8 @@ int main( int argc, char **argv)
 			sigc::mem_fun(*window, &WelcomeWindow::leave_match_click));
 	window->speed_combo->signal_changed().connect(
 			sigc::mem_fun(*window, &WelcomeWindow::speed_combo_changed));
+	window->win_condition_combo->signal_changed().connect(
+			sigc::mem_fun(*window, &WelcomeWindow::victory_combo_changed));
 
 	pthread_rwlock_init(&window->globalLock, NULL);
 
@@ -153,7 +155,8 @@ void *CallbackThread(void * parm)
 			case VICTORY_CHANGE:
 			{
 				pthread_rwlock_wrlock(&window->globalLock);
-				//Do stuff here
+				window->victory_cond_label->set_text(
+						Match::VictoryConditionToString(change.victory));
 				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}

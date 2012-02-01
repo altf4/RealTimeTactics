@@ -1001,9 +1001,10 @@ Condition: </property>
                             <property name="can_focus">False</property>
                             <items>
                               <item translatable="yes">Deathmatch</item>
-                              <item translatable="yes">CTF</item>
+                              <item translatable="yes">Capture the Flag</item>
                               <item translatable="yes">King of the Hill</item>
                             </items>
+                            <signal name="changed" handler="victory_combo_changed" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>

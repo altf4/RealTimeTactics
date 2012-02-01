@@ -305,22 +305,45 @@ string Match::GameSpeedToString(enum GameSpeed speed)
 		case SPEED_SLOW:
 		{
 			return "Slow";
-			break;
 		}
 		case SPEED_NORMAL:
 		{
 			return "Normal";
-			break;
 		}
 		case SPEED_FAST:
 		{
 			return "Fast";
-			break;
 		}
 		case SPEED_FASTEST:
 		{
 			return "Fastest";
-			break;
+		}
+		default:
+		{
+			return "WTF, this is not a speed";
+		}
+	}
+}
+
+string Match::VictoryConditionToString(enum VictoryCondition victory)
+{
+	switch(victory)
+	{
+		case DEATHMATCH:
+		{
+			return "Deathmatch";
+		}
+		case CAPTURE_THE_FLAG:
+		{
+			return "Capture the Flag";
+		}
+		case KING_OF_THE_HILL:
+		{
+			return "King of the Hill";
+		}
+		default:
+		{
+			return "WTF, this is not a victory condition";
 		}
 	}
 }
