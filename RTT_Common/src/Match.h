@@ -102,7 +102,9 @@ public:
 	bool ChangeTeam(Player *player, enum TeamNumber newTeam);
 	bool StartMatch();
 
+	//TODO: Evaluate if this is the best place for these functions.
 	static string GameSpeedToString(enum GameSpeed speed);
+	static string VictoryConditionToString(enum VictoryCondition victory);
 
 private:
 	//Lock for this match
