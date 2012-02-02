@@ -343,6 +343,24 @@ void WelcomeWindow::victory_combo_changed()
 	pthread_rwlock_unlock(&globalLock);
 }
 
+void WelcomeWindow::map_combo_changed()
+{
+	pthread_rwlock_wrlock(&globalLock);
+	char rowID = win_condition_combo->get_active_row_number();
+	struct MapDescription map;
+	map.length = 12;
+	map.width = 8;
+	strcpy(map.name, "Sweet Map");
+	if( ChangeMap(map) == false)
+	{
+		cerr << "ERROR: Server rejected change of victory condition\n";
+		match_lobby_status->push("Could not change victory condition");
+		pthread_rwlock_unlock(&globalLock);
+		return;
+	}
+	pthread_rwlock_unlock(&globalLock);
+}
+
 void WelcomeWindow::list_matches()
 {
 	ptime epoch(date(1970,boost::gregorian::Jan,1));
