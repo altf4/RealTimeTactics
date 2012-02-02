@@ -858,6 +858,7 @@
                               <item translatable="yes">Even Cooler Map</item>
                               <item translatable="yes">ZOMG</item>
                             </items>
+                            <signal name="changed" handler="map_combo_changed" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>

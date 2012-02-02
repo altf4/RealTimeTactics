@@ -79,6 +79,7 @@ public:
 	Label *speed_label;
 	Label *victory_cond_label;
 	Label *map_set_label;
+	Label *map_size_label;
 
 	PlayerListColumns *playerColumns;
 	Glib::RefPtr<ListStore> playerListStore;
@@ -103,6 +104,7 @@ public:
 	void on_leader_toggled(const Glib::ustring& path);
 	void speed_combo_changed();
 	void victory_combo_changed();
+	void map_combo_changed();
 
 	void list_matches();
 	//Swaps out the widgets which are only used when we are the match leader

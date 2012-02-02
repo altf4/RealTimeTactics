@@ -43,6 +43,9 @@ int main( int argc, char **argv)
 			sigc::mem_fun(*window, &WelcomeWindow::speed_combo_changed));
 	window->win_condition_combo->signal_changed().connect(
 			sigc::mem_fun(*window, &WelcomeWindow::victory_combo_changed));
+	window->map_name_combo->signal_changed().connect(
+			sigc::mem_fun(*window, &WelcomeWindow::map_combo_changed));
+
 
 	pthread_rwlock_init(&window->globalLock, NULL);
 
@@ -83,6 +86,7 @@ void InitWidgets()
 	refBuilder->get_widget("map_set_label", window->map_set_label);
 	refBuilder->get_widget("win_condition_combo", window->win_condition_combo);
 	refBuilder->get_widget("map_name_combo", window->map_name_combo);
+	refBuilder->get_widget("map_size_label", window->map_size_label);
 }
 
 void *CallbackThread(void * parm)
@@ -141,7 +145,11 @@ void *CallbackThread(void * parm)
 			case MAP_CHANGE:
 			{
 				pthread_rwlock_wrlock(&window->globalLock);
-				//Do stuff here
+				stringstream ss;
+				ss << change.mapDescription.width;
+				ss << " x ";
+				ss << change.mapDescription.length;
+				window->map_size_label->set_text(ss.str());
 				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
