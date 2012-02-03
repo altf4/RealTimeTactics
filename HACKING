@@ -2,9 +2,30 @@
 Building from source:
 #######################
 
-###########
-Eclipse:
-###########
+#############
+Dependencies:
+#############
+
+RTT depends on a few packages that are easily available through the Ubuntu repositories:
+
+sudo apt-get install libsparsehash-dev libgtkmm-3.0-dev libois-dev libssl-dev
+
+########################
+OGRE 3D
+########################
+
+The version of OGRE in the default Ubuntu repositories is old / incomplete. So
+instead, we use the offical OGRE PPA, avaialble form here:
+
+https://launchpad.net/~ogre-team/+archive/ogre
+
+Also, we require (for now) the OGRE sample media packs:
+
+sudo apt-get install ogre-samples-media ogre-samples-source
+
+###########################
+Building Using Eclipse:
+###########################
 
 We use Eclipse as an IDE, and it is strongly recommended if you want to proceed. Unfortunately, the version in the Ubuntu repositories is rather old. So go and grab the latest from the web. Make sure it is the Eclipse CDT. (Not the one marked "for Linux developers")
 
@@ -31,23 +52,19 @@ Go to Help-> Marketplace->
 	Then search for "pkg-config" and it should come up. Hit
 	the install button and it will just work.
 
-#############
-Dependencies:
-#############
+###########################
+Building Not Using Eclipse:
+###########################
 
-RTT depends on a few packages that are easily available through the Ubuntu repositories:
+Just navigate to the main directory (where this file is located) and run:
 
-sudo apt-get install libsparsehash-dev libgtkmm-3.0-dev libois-dev libssl-dev
+	make
+	sudo make install
 
-########################
-OGRE 3D
-########################
+If you make changes, you may need to clean the source code in order to have it build properly again:
 
-The version of OGRE in the default Ubuntu repositories is old / incomplete. So
-instead, we use the offical OGRE PPA, avaialble form here:
+	make clean
 
-https://launchpad.net/~ogre-team/+archive/ogre
+If you want to uninstall the program:
 
-Also, we require (for now) the OGRE sample media packs:
-
-sudo apt-get install ogre-samples-media ogre-samples-source
+	make uninstall

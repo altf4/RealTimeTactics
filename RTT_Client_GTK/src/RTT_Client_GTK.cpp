@@ -18,7 +18,24 @@ int main( int argc, char **argv)
 	Main kit(argc, argv);
 
 	refBuilder = Gtk::Builder::create();
-	refBuilder->add_from_file("UI/WelcomeWindow.glade");
+	try
+	{
+		refBuilder->add_from_file(WELCOME_WINDOW_GLADE_PATH_USRSHARE);
+	}
+	catch(Glib::FileError error)
+	{
+		cerr << "WARNING: WelcomeWindow.glade not found in /usr/share/RTT/GTK/UI/";
+		try
+		{
+			refBuilder->add_from_file(WELCOME_WINDOW_GLADE_PATH_RELATIVE);
+		}
+		catch(Glib::FileError error)
+		{
+			cerr << "ERROR: WelcomeWindow.glade also not found in relative path UI/";
+			exit(EXIT_FAILURE);
+		}
+	}
+
 	refBuilder->get_widget_derived("window_welcome", window);
 
 	InitWidgets();
