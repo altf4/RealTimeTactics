@@ -19,7 +19,7 @@ namespace RTT
 {
 
 //The six possible directions to face or move on a hex gameboard
-enum Direction: uint32_t
+enum Direction: char
 {
 	NORTHEAST,
 	NORTHWEST,
