@@ -10,15 +10,35 @@
 #include <stdint.h>
 #include "Tile.h"
 #include "Unit.h"
+#include <google/dense_hash_map>
+
+using google::dense_hash_map;
+using tr1::hash;
 
 namespace RTT
 {
 
 //********************************************
+//				Unit List
+//********************************************
+struct eqint
+{
+  bool operator()(uint32_t s1, uint32_t s2) const
+  {
+    return (s1 == s2);
+  }
+};
+
+//Define types, so it's easier to refer to later
+//Key : Player ID
+typedef dense_hash_map<uint32_t, Unit*, hash<uint32_t>, eqint> UnitList;
+
+
+//********************************************
 //				Result Types
 //********************************************
 
-enum MovementSuccess: uint32_t
+enum MovementSuccess: char
 {
 	MOVEMENT_SUCCESS = 0,	//Total success
 	UNIT_CANT_REACH,		//Tried to move too far
@@ -54,7 +74,7 @@ struct MovementResult MoveUnit(uint32_t unitID, enum Direction direction);
 //	destination - The Coordinate of the tile being moved to
 //		NOTE: The unit will also by default made to face the direction of the last hop
 //	returns - A MovementResult struct describing the success or error of the move
-struct MovementResult MoveUnit(Unit *unit, struct Coordinate destination);
+struct MovementResult MoveUnit(uint32_t unitID, struct Coordinate destination);
 
 //Make a unit change the direction it is facing
 //	unitID - The ID of the unit to move
