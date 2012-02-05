@@ -71,6 +71,7 @@ public:
 
 	//Third Pane Widgets
 	Button *leave_match_button;
+	Button *launch_match_button;
 	Statusbar *match_lobby_status;
 	TreeView *player_list_view;
 	ComboBoxText *map_name_combo;
@@ -101,6 +102,7 @@ public:
 	void list_matches_click();
 	void leave_match_click();
 	void custom_server_click();
+	void launch_match_click();
 	void on_leader_toggled(const Glib::ustring& path);
 	void speed_combo_changed();
 	void victory_combo_changed();

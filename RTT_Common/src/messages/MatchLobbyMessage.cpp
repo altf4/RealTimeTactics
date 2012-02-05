@@ -106,7 +106,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case START_MATCH_REQUEST:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
