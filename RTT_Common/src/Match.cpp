@@ -295,7 +295,7 @@ bool Match::ChangeTeam(Player *player, enum TeamNumber newTeam)
 
 bool Match::StartMatch()
 {
-
+	return true;
 }
 
 string Match::GameSpeedToString(enum GameSpeed speed)

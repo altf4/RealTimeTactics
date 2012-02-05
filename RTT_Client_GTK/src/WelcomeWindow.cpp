@@ -440,6 +440,21 @@ void WelcomeWindow::list_matches()
 	match_lists->show_all();
 }
 
+void WelcomeWindow::launch_match_click()
+{
+	pthread_rwlock_wrlock(&globalLock);
+	if(StartMatch())
+	{
+		system("RTT_Ogre_3D");
+		match_lobby_status->push("Was that fun, or WHAT?!");
+	}
+	else
+	{
+		match_lobby_status->push("Failed to start match");
+	}
+	pthread_rwlock_unlock(&globalLock);
+}
+
 //Swaps out the widgets which are only used when we are the match leader
 // isLeader: True is we are the leader, false if not
 void WelcomeWindow::WelcomeWindow::swap_leader_widgets(bool isLeader)

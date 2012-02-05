@@ -62,7 +62,8 @@ int main( int argc, char **argv)
 			sigc::mem_fun(*window, &WelcomeWindow::victory_combo_changed));
 	window->map_name_combo->signal_changed().connect(
 			sigc::mem_fun(*window, &WelcomeWindow::map_combo_changed));
-
+	window->launch_match_button->signal_clicked().connect(
+			sigc::mem_fun(*window, &WelcomeWindow::launch_match_click));
 
 	pthread_rwlock_init(&window->globalLock, NULL);
 
@@ -104,6 +105,7 @@ void InitWidgets()
 	refBuilder->get_widget("win_condition_combo", window->win_condition_combo);
 	refBuilder->get_widget("map_name_combo", window->map_name_combo);
 	refBuilder->get_widget("map_size_label", window->map_size_label);
+	refBuilder->get_widget("launch_match_button", window->launch_match_button);
 }
 
 void *CallbackThread(void * parm)
@@ -311,8 +313,15 @@ void *CallbackThread(void * parm)
 			}
 			case MATCH_STARTED:
 			{
-				//TODO: Start the game!!!
-				cout << "Game is starting in 3... 2... 1...\n";
+				pthread_rwlock_wrlock(&window->globalLock);
+
+				//If we are the leader, then don't bother with anything here
+				//	We take care of launching the match in the button press
+				if(window->playerDescription.ID != window->currentMatch.leaderID)
+				{
+					system("RTT_Ogre_3D");
+				}
+				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case CALLBACK_ERROR:
