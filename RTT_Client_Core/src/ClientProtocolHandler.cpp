@@ -790,25 +790,53 @@ bool RTT::StartMatch()
 	//**********************************
 	// Receive Start Match Reply
 	//**********************************
+	Message *start_match_init = Message::ReadMessage(connectFD);
+	if( start_match_init == NULL)
+	{
+		return false;
+	}
+	if( start_match_init->type != START_MATCH_REPLY)
+	{
+		delete start_match_init;
+		return false;
+	}
+	MatchLobbyMessage *start_match_reply = (MatchLobbyMessage*)start_match_init;
+	if( !start_match_reply->changeAccepted )
+	{
+		delete start_match_reply;
+		return false;
+	}
+	delete start_match_reply;
+
+	//********************************
+	// Send Register for Match
+	//********************************
+	MatchLobbyMessage *register_match = new MatchLobbyMessage();
+	register_match->type = REGISTER_FOR_MATCH;
+	if( Message::WriteMessage(register_match, connectFD) == false)
+	{
+		//Error in write
+		delete register_match;
+		return false;
+	}
+	delete register_match;
+
+	//**********************************
+	// Receive Register Reply
+	//**********************************
 	Message *message = Message::ReadMessage(connectFD);
 	if( message == NULL)
 	{
 		return false;
 	}
-	if( message->type != START_MATCH_REPLY)
+	if( message->type != REGISTER_REPLY)
 	{
 		delete message;
 		return false;
 	}
-	MatchLobbyMessage *start_match_reply = (MatchLobbyMessage*)message;
-	if( start_match_reply->changeAccepted )
-	{
-		delete start_match_reply;
-		return true;
-	}
 
-	delete start_match_reply;
-	return false;
+	delete message;
+	return true;
 }
 
 
@@ -1091,9 +1119,6 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 		{
 			//TODO: Must accept first
 
-			//Get what we need from the message
-			change.type = MATCH_STARTED;
-
 			//***********************************
 			// Send Match Started Ack
 			//***********************************
@@ -1108,6 +1133,37 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 				return change;
 			}
 			delete match_started_ack;
+
+			//********************************
+			// Send Register for Match
+			//********************************
+			MatchLobbyMessage *register_match = new MatchLobbyMessage();
+			register_match->type = REGISTER_FOR_MATCH;
+			if( Message::WriteMessage(register_match, connectFD) == false)
+			{
+				//Error in write
+				delete register_match;
+				break;
+			}
+			delete register_match;
+
+			//**********************************
+			// Receive Register Reply
+			//**********************************
+			Message *message = Message::ReadMessage(connectFD);
+			if( message == NULL)
+			{
+				break;
+			}
+			if( message->type != REGISTER_REPLY)
+			{
+				delete message;
+				break;
+			}
+
+			//Indicates success of match starting
+			change.type = MATCH_STARTED;
+
 			break;
 		}
 		default:

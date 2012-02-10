@@ -94,6 +94,8 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case CHANGE_TEAM_REPLY:
 		case START_MATCH_REQUEST:
 		case START_MATCH_REPLY:
+		case REGISTER_FOR_MATCH:
+		case REGISTER_REPLY:
 		case CHANGE_COLOR_REQUEST:
 		case CHANGE_COLOR_REPLY:
 		case CHANGE_MAP_REQUEST:

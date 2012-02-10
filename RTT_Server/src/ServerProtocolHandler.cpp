@@ -639,14 +639,60 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				delete notification;
 			}
 
+			break;
+		}
+		case REGISTER_FOR_MATCH:
+		{
+			if( matchID == 0 )
+			{
+				SendError(connectFD, PROTOCOL_ERROR);
+				delete match_lobby_message;
+				return IN_MAIN_LOBBY;
+			}
+
+			if(playersMatch == NULL)
+			{
+				//Error, there is no such Match
+				SendError(connectFD, MATCH_DOESNT_EXIST);
+				delete match_lobby_message;
+				return IN_MAIN_LOBBY;
+			}
+
+
 			uint maxPlayers = playersMatch->GetMaxPlayers();
 			int callbackSocket = player->GetCallbackSocket();
 			enum GameSpeed speed = playersMatch->GetGamespeed();
 
-//			waitingPool->Register(playerID, matchID, maxPlayers, callbackSocket,
-//					connectFD, speed);
+			enum MatchLoopResult matchResult = waitingPool->Register(
+					playerID, matchID, maxPlayers, callbackSocket, connectFD, speed);
+			//TODO: Do something with the results of a match
+			switch(matchResult)
+			{
+				case MATCH_VICTORY:
+				{
+					break;
+				}
+				case MATCH_DEFEAT:
+				{
+					break;
+				}
+				case MATCH_DRAW:
+				{
+					break;
+				}
+				case MATCH_NO_CONTEST:
+				{
+					break;
+				}
+				case MATCH_ERROR:
+				{
+					break;
+				}
+			}
 
-			break;
+			delete match_lobby_message;
+			cout << "Got match result for " << player->GetName() << "\n";
+			return IN_MAIN_LOBBY;
 		}
 		case CHANGE_COLOR_REQUEST:
 		{

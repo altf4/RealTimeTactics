@@ -63,9 +63,12 @@ enum MessageType: char
 	//Change what team a player is on
 	CHANGE_TEAM_REQUEST,
 	CHANGE_TEAM_REPLY,
-	//Start the match
+	//Request match to begin
 	START_MATCH_REQUEST,
 	START_MATCH_REPLY,
+	//Register for the match start (play the match)
+	REGISTER_FOR_MATCH,
+	REGISTER_REPLY,
 	//Change color of a player
 	CHANGE_COLOR_REQUEST,
 	CHANGE_COLOR_REPLY,

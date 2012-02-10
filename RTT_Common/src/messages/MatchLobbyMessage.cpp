@@ -132,6 +132,30 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 
 			break;
 		}
+		case REGISTER_FOR_MATCH:
+		{
+			//Uses: 1) Message Type
+			uint32_t expectedSize = MESSAGE_MIN_SIZE;
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			break;
+		}
+		case REGISTER_REPLY:
+		{
+			//Uses: 1) Message Type
+			uint32_t expectedSize = MESSAGE_MIN_SIZE;
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			break;
+		}
 		case CHANGE_COLOR_REQUEST:
 		{
 			//Uses: 1) Message Type
@@ -787,6 +811,32 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			//Change accepted
 			memcpy(buffer, &changeAccepted, sizeof(changeAccepted));
 			buffer += sizeof(changeAccepted);
+
+			break;
+		}
+		case REGISTER_FOR_MATCH:
+		{
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE;
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
+
+			break;
+		}
+		case REGISTER_REPLY:
+		{
+			//Uses: 1) Message Type
+			messageSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Put the type in
+			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			buffer += MESSAGE_MIN_SIZE;
 
 			break;
 		}

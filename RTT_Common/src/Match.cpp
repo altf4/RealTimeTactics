@@ -332,23 +332,23 @@ uint Match::GameSpeedTouSeconds(enum GameSpeed speed)
 	{
 		case SPEED_SLOW:
 		{
-			return 1000;
+			return 1000000;
 		}
 		case SPEED_NORMAL:
 		{
-			return 844;
+			return 844000;
 		}
 		case SPEED_FAST:
 		{
-			return 666;
+			return 666000;
 		}
 		case SPEED_FASTEST:
 		{
-			return 500;
+			return 500000;
 		}
 		default:
 		{
-			return 844;
+			return 844000;
 		}
 	}
 }
