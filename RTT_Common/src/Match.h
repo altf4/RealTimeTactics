@@ -104,6 +104,8 @@ public:
 
 	//TODO: Evaluate if this is the best place for these functions.
 	static string GameSpeedToString(enum GameSpeed speed);
+	//Converts a GameSpeed enum into the number of microseconds between game ticks
+	static uint GameSpeedTouSeconds(enum GameSpeed speed);
 	static string VictoryConditionToString(enum VictoryCondition victory);
 
 private:

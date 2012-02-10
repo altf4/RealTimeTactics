@@ -22,6 +22,7 @@
 #include <signal.h>
 
 #include "Player.h"
+#include "WaitingPool.h"
 
 using namespace std;
 using namespace RTT;
@@ -42,6 +43,8 @@ pthread_rwlock_t waitPoolLock;
 
 uint serverPortNumber;
 
+WaitingPool *waitingPool;
+
 int main(int argc, char **argv)
 {
 	matchList.set_empty_key(-1);
@@ -56,6 +59,8 @@ int main(int argc, char **argv)
 	pthread_rwlock_init(&matchIDLock, NULL);
 	pthread_rwlock_init(&playerIDLock, NULL);
 	pthread_rwlock_init(&waitPoolLock, NULL);
+
+	waitingPool = new WaitingPool();
 
 	// We expect write failures to occur but we want to handle them where
 	// the error occurs rather than in a SIGPIPE handler.

@@ -325,6 +325,34 @@ string Match::GameSpeedToString(enum GameSpeed speed)
 	}
 }
 
+//Converts a GameSpeed enum into the number of microseconds between game ticks
+uint Match::GameSpeedTouSeconds(enum GameSpeed speed)
+{
+	switch(speed)
+	{
+		case SPEED_SLOW:
+		{
+			return 1000;
+		}
+		case SPEED_NORMAL:
+		{
+			return 844;
+		}
+		case SPEED_FAST:
+		{
+			return 666;
+		}
+		case SPEED_FASTEST:
+		{
+			return 500;
+		}
+		default:
+		{
+			return 844;
+		}
+	}
+}
+
 string Match::VictoryConditionToString(enum VictoryCondition victory)
 {
 	switch(victory)

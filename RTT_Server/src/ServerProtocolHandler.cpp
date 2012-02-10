@@ -13,6 +13,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
+#include "WaitingPool.h"
 
 using namespace std;
 using namespace RTT;
@@ -27,6 +28,8 @@ extern pthread_rwlock_t playerListLock;
 extern pthread_rwlock_t playerIDLock;
 extern pthread_rwlock_t waitPoolLock;
 extern uint lastPlayerID;
+
+extern WaitingPool *waitingPool;
 
 //Negotiates the hello messages and authentication to a new client
 //	Returns a new Player object, NULL on error
@@ -635,6 +638,13 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				NotifyClients(playersMatch, notification);
 				delete notification;
 			}
+
+			uint maxPlayers = playersMatch->GetMaxPlayers();
+			int callbackSocket = player->GetCallbackSocket();
+			enum GameSpeed speed = playersMatch->GetGamespeed();
+
+//			waitingPool->Register(playerID, matchID, maxPlayers, callbackSocket,
+//					connectFD, speed);
 
 			break;
 		}

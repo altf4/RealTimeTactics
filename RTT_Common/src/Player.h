@@ -13,7 +13,6 @@
 	sizeof(enum TeamNumber) + sizeof(enum TeamColor)
 
 #include <vector>
-#include "Unit.h"
 #include "Match.h"
 #include <string>
 #include "Enums.h"
@@ -72,7 +71,6 @@ private:
 	//Socket to receive MatchLobby messages from server on
 	int callbackSocket;
 	struct PlayerDescription description;
-	vector <Unit*> units;
 	//The match that this player is currently in
 	uint currentMatchID;
 };
