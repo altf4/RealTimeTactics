@@ -12,7 +12,7 @@
 #include <vector>
 #include "RTT_Ogre_Base.h"
 #include "RTT_Ogre_Unit.h"
-
+#include "RTT_Ogre_Player.h"
 
 
 using namespace RTT;
@@ -25,10 +25,14 @@ class RTT_Ogre_Game : public RTT_Ogre_Base
 
 	protected:
     	virtual void createScene(void);
-    	virtual void moveUnit(const RTT::Direction &arg, RTT_Ogre_Unit &arg2);
+    	virtual void faceUnit(RTT_Ogre_Unit &arg2);
+    	virtual void moveUnit(RTT_Ogre_Unit &arg2);
+    	virtual void moveCursor(const RTT::Direction &arg);
     	virtual bool keyPressed( const KeyEvent &arg );
     	virtual void buildUnits(void);
-    	RTT_Ogre_Unit mainPlayer;
+		RTT_Ogre_Unit playerCursor;
+    	RTT_Ogre_Player mainPlayer;
+    	bool isMoving;
 };
 
 #endif /* RTT_OGRE_GAME_H_ */

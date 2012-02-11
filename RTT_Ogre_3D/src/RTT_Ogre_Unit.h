@@ -22,6 +22,7 @@ namespace RTT
 		Ogre::SceneNode* unitNode;
 		int locationX;
 		int locationY;
+		Direction facingDir;
 	private:
 	protected:
 	};
