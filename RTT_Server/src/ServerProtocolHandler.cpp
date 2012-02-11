@@ -738,7 +738,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			// Send CHANGE MAP REPLY
 			//*******************************
 			MatchLobbyMessage *change_map_reply = new MatchLobbyMessage();
-			change_map_reply->type = MAP_CHANGED_NOTIFICATION;
+			change_map_reply->type = CHANGE_MAP_REPLY;
 			change_map_reply->changeAccepted = true;
 			if(  Message::WriteMessage(change_map_reply, connectFD) == false)
 			{

@@ -42,6 +42,8 @@ enum TeamColor: char
 enum VictoryCondition: char
 {
 	DEATHMATCH,
+	CAPTURE_THE_FLAG,
+	KING_OF_THE_HILL,
 };
 
 enum GameSpeed: char

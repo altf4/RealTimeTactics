@@ -295,5 +295,55 @@ bool Match::ChangeTeam(Player *player, enum TeamNumber newTeam)
 
 bool Match::StartMatch()
 {
+	return true;
+}
 
+string Match::GameSpeedToString(enum GameSpeed speed)
+{
+	switch(speed)
+	{
+		case SPEED_SLOW:
+		{
+			return "Slow";
+		}
+		case SPEED_NORMAL:
+		{
+			return "Normal";
+		}
+		case SPEED_FAST:
+		{
+			return "Fast";
+		}
+		case SPEED_FASTEST:
+		{
+			return "Fastest";
+		}
+		default:
+		{
+			return "WTF, this is not a speed";
+		}
+	}
+}
+
+string Match::VictoryConditionToString(enum VictoryCondition victory)
+{
+	switch(victory)
+	{
+		case DEATHMATCH:
+		{
+			return "Deathmatch";
+		}
+		case CAPTURE_THE_FLAG:
+		{
+			return "Capture the Flag";
+		}
+		case KING_OF_THE_HILL:
+		{
+			return "King of the Hill";
+		}
+		default:
+		{
+			return "WTF, this is not a victory condition";
+		}
+	}
 }

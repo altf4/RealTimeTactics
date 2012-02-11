@@ -8,6 +8,9 @@
 #ifndef RTT_CLIENT_GTK_H_
 #define RTT_CLIENT_GTK_H_
 
+#define WELCOME_WINDOW_GLADE_PATH_USRSHARE "/usr/share/RTT/GTK/UI/WelcomeWindow.glade"
+#define WELCOME_WINDOW_GLADE_PATH_RELATIVE "UI/WelcomeWindow.glade"
+
 #include <gtkmm.h>
 
 void *CallbackThread(void * parm);

@@ -73,6 +73,7 @@ using namespace OIS;
 			RenderWindow* rttWindow;
 			String rttResourcesCfg;
 			String rttPluginsCfg;
+			String rttOgreCfg;
 
 			bool rttShutDown;
 

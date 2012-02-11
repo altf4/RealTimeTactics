@@ -18,7 +18,24 @@ int main( int argc, char **argv)
 	Main kit(argc, argv);
 
 	refBuilder = Gtk::Builder::create();
-	refBuilder->add_from_file("UI/WelcomeWindow.glade");
+	try
+	{
+		refBuilder->add_from_file(WELCOME_WINDOW_GLADE_PATH_USRSHARE);
+	}
+	catch(Glib::FileError error)
+	{
+		cerr << "WARNING: WelcomeWindow.glade not found in /usr/share/RTT/GTK/UI/";
+		try
+		{
+			refBuilder->add_from_file(WELCOME_WINDOW_GLADE_PATH_RELATIVE);
+		}
+		catch(Glib::FileError error)
+		{
+			cerr << "ERROR: WelcomeWindow.glade also not found in relative path UI/";
+			exit(EXIT_FAILURE);
+		}
+	}
+
 	refBuilder->get_widget_derived("window_welcome", window);
 
 	InitWidgets();
@@ -39,6 +56,14 @@ int main( int argc, char **argv)
 			sigc::mem_fun(*window, &WelcomeWindow::join_match_click));
 	window->leave_match_button->signal_clicked().connect(
 			sigc::mem_fun(*window, &WelcomeWindow::leave_match_click));
+	window->speed_combo->signal_changed().connect(
+			sigc::mem_fun(*window, &WelcomeWindow::speed_combo_changed));
+	window->win_condition_combo->signal_changed().connect(
+			sigc::mem_fun(*window, &WelcomeWindow::victory_combo_changed));
+	window->map_name_combo->signal_changed().connect(
+			sigc::mem_fun(*window, &WelcomeWindow::map_combo_changed));
+	window->launch_match_button->signal_clicked().connect(
+			sigc::mem_fun(*window, &WelcomeWindow::launch_match_click));
 
 	pthread_rwlock_init(&window->globalLock, NULL);
 
@@ -73,7 +98,14 @@ void InitWidgets()
 	refBuilder->get_widget("leave_match_button", window->leave_match_button);
 	refBuilder->get_widget("match_lobby_status", window->match_lobby_status);
 	refBuilder->get_widget("player_list_view", window->player_list_view);
-
+	refBuilder->get_widget("speed_combo", window->speed_combo);
+	refBuilder->get_widget("speed_label", window->speed_label);
+	refBuilder->get_widget("victory_cond_label", window->victory_cond_label);
+	refBuilder->get_widget("map_set_label", window->map_set_label);
+	refBuilder->get_widget("win_condition_combo", window->win_condition_combo);
+	refBuilder->get_widget("map_name_combo", window->map_name_combo);
+	refBuilder->get_widget("map_size_label", window->map_size_label);
+	refBuilder->get_widget("launch_match_button", window->launch_match_button);
 }
 
 void *CallbackThread(void * parm)
@@ -132,21 +164,26 @@ void *CallbackThread(void * parm)
 			case MAP_CHANGE:
 			{
 				pthread_rwlock_wrlock(&window->globalLock);
-				//Do stuff here
+				stringstream ss;
+				ss << change.mapDescription.width;
+				ss << " x ";
+				ss << change.mapDescription.length;
+				window->map_size_label->set_text(ss.str());
 				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case SPEED_CHANGE:
 			{
 				pthread_rwlock_wrlock(&window->globalLock);
-				//Do stuff here
+				window->speed_label->set_text(Match::GameSpeedToString(change.speed));
 				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case VICTORY_CHANGE:
 			{
 				pthread_rwlock_wrlock(&window->globalLock);
-				//Do stuff here
+				window->victory_cond_label->set_text(
+						Match::VictoryConditionToString(change.victory));
 				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
@@ -184,10 +221,12 @@ void *CallbackThread(void * parm)
 					if(window->playerDescription.ID == change.newLeaderID)
 					{
 						row[window->playerColumns->leaderSelectable] = true;
+						window->swap_leader_widgets(true);
 					}
 					else
 					{
 						row[window->playerColumns->leaderSelectable] = false;
+						window->swap_leader_widgets(false);
 					}
 				}
 				window->currentMatch.leaderID = change.newLeaderID;
@@ -258,10 +297,14 @@ void *CallbackThread(void * parm)
 					if(window->playerDescription.ID == change.playerID)
 					{
 						row[playerColumns.leaderSelectable] = true;
+						//Swap out the game speed combo box and label
+						window->swap_leader_widgets(true);
 					}
 					else
 					{
 						row[playerColumns.leaderSelectable] = false;
+						//Swap out the game speed combo box and label
+						window->swap_leader_widgets(false);
 					}
 				}
 				window->player_list_view->show_all();
@@ -270,8 +313,15 @@ void *CallbackThread(void * parm)
 			}
 			case MATCH_STARTED:
 			{
-				//TODO: Start the game!!!
-				cout << "Game is starting in 3... 2... 1...\n";
+				pthread_rwlock_wrlock(&window->globalLock);
+
+				//If we are the leader, then don't bother with anything here
+				//	We take care of launching the match in the button press
+				if(window->playerDescription.ID != window->currentMatch.leaderID)
+				{
+					system("RTT_Ogre_3D");
+				}
+				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case CALLBACK_ERROR:

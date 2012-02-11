@@ -146,8 +146,72 @@ void RTT_Ogre_Base::go(void)
     rttResourcesCfg = "resources_d.cfg";
     rttPluginsCfg = "plugins_d.cfg";
 #else
-    rttResourcesCfg = "resources.cfg";
-    rttPluginsCfg = "plugins.cfg";
+	//Prefer the global /usr/share/RTT/Ogre/resources.cfg
+	ifstream resourcesFileAbsolute("/usr/share/RTT/Ogre/resources.cfg");
+	if (resourcesFileAbsolute.good())
+	{
+		cout << "INFO: Using /usr/share/RTT/Ogre/resources.cfg\n";
+		rttResourcesCfg = "/usr/share/RTT/Ogre/resources.cfg";
+	}
+	else
+	{
+		ifstream resourcesFileRelative("resources.cfg");
+		if (resourcesFileRelative.good())
+		{
+			cout << "INFO: Using resources.cfg\n";
+			rttResourcesCfg = "resources.cfg";
+		}
+		else
+		{
+			cerr << "ERROR: Could not find a resources.cfg file\n";
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	//Prefer the global /usr/share/RTT/Ogre/plugins.cfg
+	ifstream pluginsFileAbsolute("/usr/share/RTT/Ogre/plugins.cfg");
+	if (pluginsFileAbsolute.good())
+	{
+		cout << "INFO: Using /usr/share/RTT/Ogre/plugins.cfg\n";
+		rttPluginsCfg = "/usr/share/RTT/Ogre/plugins.cfg";
+	}
+	else
+	{
+		ifstream pluginsFileRelative("plugins.cfg");
+		if (pluginsFileRelative.good())
+		{
+			cout << "INFO: Using plugins.cfg\n";
+			rttPluginsCfg = "plugins.cfg";
+		}
+		else
+		{
+			cerr << "ERROR: Could not find a plugins.cfg file\n";
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	//Prefer the global /usr/share/RTT/Ogre/ogre.cfg
+	ifstream ogreCfgFileAbsolute("/usr/share/RTT/Ogre/ogre.cfg");
+	if (ogreCfgFileAbsolute.good())
+	{
+		cout << "INFO: Using /usr/share/RTT/Ogre/ogre.cfg\n";
+		rttOgreCfg = "/usr/share/RTT/Ogre/ogre.cfg";
+	}
+	else
+	{
+		ifstream ogreCfgFileRelative("ogre.cfg");
+		if (ogreCfgFileRelative.good())
+		{
+			cout << "INFO: Using ogre.cfg\n";
+			rttOgreCfg = "ogre.cfg";
+		}
+		else
+		{
+			cerr << "ERROR: Could not find a ogre.cfg file\n";
+			exit(EXIT_FAILURE);
+		}
+	}
+
 #endif
 
     if (!setup())
@@ -162,7 +226,7 @@ void RTT_Ogre_Base::go(void)
 
 bool RTT_Ogre_Base::setup(void)
 {
-    rttRoot = new Root(rttPluginsCfg);// construct Ogre::Root root node
+    rttRoot = new Root(rttPluginsCfg, rttOgreCfg);// construct Ogre::Root root node
     setupResources();//Setup our game data
     //If our configuration fails then quit
     if (!configure())
