@@ -664,6 +664,7 @@
                             <property name="label" translatable="yes">Set as Private</property>
                             <property name="use_action_appearance">False</property>
                             <property name="visible">True</property>
+                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="use_action_appearance">False</property>
@@ -816,7 +817,7 @@
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="box21">
+                  <object class="GtkBox" id="match_stats_box">
                     <property name="width_request">150</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
@@ -858,11 +859,27 @@
                               <item translatable="yes">Even Cooler Map</item>
                               <item translatable="yes">ZOMG</item>
                             </items>
+                            <signal name="changed" handler="map_combo_changed" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="map_set_label">
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Map</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="pack_type">end</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
@@ -931,14 +948,29 @@
                               <item translatable="yes">Slow</item>
                               <item translatable="yes">Normal</item>
                               <item translatable="yes">Fast</item>
-                              <item translatable="yes">Really Fast</item>
-                              <item translatable="yes">Ridiculous Speed</item>
+                              <item translatable="yes">Fastest</item>
                             </items>
+                            <signal name="changed" handler="speed_combo_changed" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="speed_label">
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Speed</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="pack_type">end</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
@@ -971,14 +1003,30 @@ Condition: </property>
                             <property name="can_focus">False</property>
                             <items>
                               <item translatable="yes">Deathmatch</item>
-                              <item translatable="yes">CTF</item>
+                              <item translatable="yes">Capture the Flag</item>
                               <item translatable="yes">King of the Hill</item>
                             </items>
+                            <signal name="changed" handler="victory_combo_changed" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="victory_cond_label">
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Victory</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="pack_type">end</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
@@ -1044,6 +1092,7 @@ Condition: </property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="use_action_appearance">False</property>
+                    <signal name="clicked" handler="launch_match_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>

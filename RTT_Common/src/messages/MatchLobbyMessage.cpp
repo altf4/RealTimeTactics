@@ -106,7 +106,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case START_MATCH_REQUEST:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -183,7 +183,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 
 			//new map
 			memcpy(&mapDescription.name, buffer, MAP_NAME_LEN);
-			buffer += sizeof(mapDescription);
+			buffer += MAP_NAME_LEN;
 			memcpy(&mapDescription.length, buffer, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
 			memcpy(&mapDescription.width, buffer, sizeof(uint32_t));
@@ -539,7 +539,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 
 			//Map description
 			memcpy(&mapDescription.name, buffer, MAP_NAME_LEN);
-			buffer += sizeof(mapDescription);
+			buffer += MAP_NAME_LEN;
 			memcpy(&mapDescription.length, buffer, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
 			memcpy(&mapDescription.width, buffer, sizeof(uint32_t));
@@ -842,7 +842,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 
 			//New color
 			memcpy(buffer, &mapDescription.name, MAP_NAME_LEN);
-			buffer += sizeof(mapDescription);
+			buffer += MAP_NAME_LEN;
 			memcpy(buffer, &mapDescription.length, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
 			memcpy(buffer, &mapDescription.width, sizeof(uint32_t));
@@ -1204,7 +1204,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 
 			//Put the map description in
 			memcpy(buffer, &mapDescription.name, MAP_NAME_LEN);
-			buffer += sizeof(mapDescription);
+			buffer += MAP_NAME_LEN;
 			memcpy(buffer, &mapDescription.length, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
 			memcpy(buffer, &mapDescription.width, sizeof(uint32_t));

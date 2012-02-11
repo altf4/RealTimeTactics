@@ -315,6 +315,52 @@ void WelcomeWindow::on_leader_toggled(const Glib::ustring& path)
 	pthread_rwlock_unlock(&globalLock);
 }
 
+void WelcomeWindow::speed_combo_changed()
+{
+	pthread_rwlock_wrlock(&globalLock);
+	char rowID = speed_combo->get_active_row_number();
+	if( ChangeSpeed((enum GameSpeed)rowID) == false)
+	{
+		cerr << "ERROR: Server rejected change of game speed\n";
+		match_lobby_status->push("Could not change game speed");
+		pthread_rwlock_unlock(&globalLock);
+		return;
+	}
+	pthread_rwlock_unlock(&globalLock);
+}
+
+void WelcomeWindow::victory_combo_changed()
+{
+	pthread_rwlock_wrlock(&globalLock);
+	char rowID = win_condition_combo->get_active_row_number();
+	if( ChangeVictoryCondition((enum VictoryCondition)rowID) == false)
+	{
+		cerr << "ERROR: Server rejected change of victory condition\n";
+		match_lobby_status->push("Could not change victory condition");
+		pthread_rwlock_unlock(&globalLock);
+		return;
+	}
+	pthread_rwlock_unlock(&globalLock);
+}
+
+void WelcomeWindow::map_combo_changed()
+{
+	pthread_rwlock_wrlock(&globalLock);
+	char rowID = win_condition_combo->get_active_row_number();
+	struct MapDescription map;
+	map.length = 12;
+	map.width = 8;
+	strcpy(map.name, "Sweet Map");
+	if( ChangeMap(map) == false)
+	{
+		cerr << "ERROR: Server rejected change of victory condition\n";
+		match_lobby_status->push("Could not change victory condition");
+		pthread_rwlock_unlock(&globalLock);
+		return;
+	}
+	pthread_rwlock_unlock(&globalLock);
+}
+
 void WelcomeWindow::list_matches()
 {
 	ptime epoch(date(1970,boost::gregorian::Jan,1));
@@ -392,6 +438,35 @@ void WelcomeWindow::list_matches()
 	view->append_column("Time Created", columns->timeCreated);
 
 	match_lists->show_all();
+}
+
+void WelcomeWindow::launch_match_click()
+{
+	pthread_rwlock_wrlock(&globalLock);
+	if(StartMatch())
+	{
+		system("RTT_Ogre_3D");
+		match_lobby_status->push("Was that fun, or WHAT?!");
+	}
+	else
+	{
+		match_lobby_status->push("Failed to start match");
+	}
+	pthread_rwlock_unlock(&globalLock);
+}
+
+//Swaps out the widgets which are only used when we are the match leader
+// isLeader: True is we are the leader, false if not
+void WelcomeWindow::WelcomeWindow::swap_leader_widgets(bool isLeader)
+{
+	speed_combo->set_visible(isLeader);
+	speed_label->set_visible(!isLeader);
+
+	win_condition_combo->set_visible(isLeader);
+	victory_cond_label->set_visible(!isLeader);
+
+	map_name_combo->set_visible(isLeader);
+	map_set_label->set_visible(!isLeader);
 }
 
 //Hides other windows (WelcomeWindow) and shows LobbyWindow
@@ -488,10 +563,12 @@ void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
 		if(playerDescription.ID == currentMatch.leaderID)
 		{
 			row[playerColumns->leaderSelectable] = true;
+			swap_leader_widgets(true);
 		}
 		else
 		{
 			row[playerColumns->leaderSelectable] = false;
+			swap_leader_widgets(false);
 		}
 	}
 
