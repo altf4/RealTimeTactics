@@ -657,14 +657,26 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
+			//*******************************
+			// Send Register Reply
+			//*******************************
+			MatchLobbyMessage *register_reply = new MatchLobbyMessage();
+			register_reply->type = REGISTER_REPLY;
+			if(  Message::WriteMessage(register_reply, connectFD) == false)
+			{
+				//Error in write, do something?
+				cerr << "ERROR: Message send returned failure.\n";
+				delete register_reply;
+				break;
+			}
+			delete register_reply;
 
-
-			uint maxPlayers = playersMatch->GetMaxPlayers();
+			uint currentPlayers = playersMatch->GetCurrentPlayerCount();
 			int callbackSocket = player->GetCallbackSocket();
 			enum GameSpeed speed = playersMatch->GetGamespeed();
 
 			enum MatchLoopResult matchResult = waitingPool->Register(
-					playerID, matchID, maxPlayers, callbackSocket, connectFD, speed);
+					playerID, matchID, currentPlayers, callbackSocket, connectFD, speed);
 			//TODO: Do something with the results of a match
 			switch(matchResult)
 			{

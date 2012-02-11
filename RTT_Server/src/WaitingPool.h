@@ -28,7 +28,7 @@ struct eqint2
 
 struct PoolEntry
 {
-	uint maxPlayers;
+	uint currentPlayers;
 	uint playerID;
 	int callbackSocket;
 	int receiveSocket;
@@ -36,7 +36,7 @@ struct PoolEntry
 };
 
 //Key : Match unique ID
-typedef dense_hash_map<int, vector<PoolEntry>, hash<int>, eqint2> PlayerWaitingPool;
+typedef dense_hash_map<int, vector<struct PoolEntry>, hash<int>, eqint2> PlayerWaitingPool;
 
 namespace RTT
 {
@@ -51,11 +51,20 @@ public:
 	//Register a player with this pool
 	// blocking call on success
 	// Returns: an enumeration describing the match's result status
-	enum MatchLoopResult Register(uint playerID, uint matchID, uint maxPlayers,
+	enum MatchLoopResult Register(uint playerID, uint matchID, uint currentPlayers,
 			int callbackSocket, int receiveSocket, enum GameSpeed speed);
 
 private:
 	PlayerWaitingPool pool;
+	pthread_mutex_t poolLock;
+
+	bool SetEntry(uint matchID, PoolEntry entry, uint currentPlayers);
+	void DeleteMatch(uint matchID);
+	//Sets playerID = 0 if no Entry found. Ugly. Sorry.
+	PoolEntry GetEntry(uint matchID, uint playerID);
+	uint GetMatchPlayerCount(uint matchID);
+	void WakePlayers(uint matchID);
+	void LockPlayer(uint matchID, uint playerID);
 
 };
 

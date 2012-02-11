@@ -808,6 +808,11 @@ bool RTT::StartMatch()
 	}
 	delete start_match_reply;
 
+	return RegisterForMatch();
+}
+
+bool RTT::RegisterForMatch()
+{
 	//********************************
 	// Send Register for Match
 	//********************************
@@ -1133,33 +1138,6 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 				return change;
 			}
 			delete match_started_ack;
-
-			//********************************
-			// Send Register for Match
-			//********************************
-			MatchLobbyMessage *register_match = new MatchLobbyMessage();
-			register_match->type = REGISTER_FOR_MATCH;
-			if( Message::WriteMessage(register_match, connectFD) == false)
-			{
-				//Error in write
-				delete register_match;
-				break;
-			}
-			delete register_match;
-
-			//**********************************
-			// Receive Register Reply
-			//**********************************
-			Message *message = Message::ReadMessage(connectFD);
-			if( message == NULL)
-			{
-				break;
-			}
-			if( message->type != REGISTER_REPLY)
-			{
-				delete message;
-				break;
-			}
 
 			//Indicates success of match starting
 			change.type = MATCH_STARTED;

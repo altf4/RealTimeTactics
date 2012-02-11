@@ -830,7 +830,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case REGISTER_REPLY:
 		{
 			//Uses: 1) Message Type
-			messageSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			messageSize = MESSAGE_MIN_SIZE;
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 

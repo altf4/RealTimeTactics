@@ -447,6 +447,7 @@ void WelcomeWindow::launch_match_click()
 	{
 		system("RTT_Ogre_3D");
 		match_lobby_status->push("Was that fun, or WHAT?!");
+		LaunchMainLobbyPane();
 	}
 	else
 	{

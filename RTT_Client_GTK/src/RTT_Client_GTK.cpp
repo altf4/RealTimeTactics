@@ -319,7 +319,15 @@ void *CallbackThread(void * parm)
 				//	We take care of launching the match in the button press
 				if(window->playerDescription.ID != window->currentMatch.leaderID)
 				{
-					system("RTT_Ogre_3D");
+					if(RegisterForMatch())
+					{
+						system("RTT_Ogre_3D");
+						window->LaunchMainLobbyPane();
+					}
+					else
+					{
+						cerr << "WARNING: Failed to register for match\n";
+					}
 				}
 				pthread_rwlock_unlock(&window->globalLock);
 				break;
