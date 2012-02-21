@@ -8,12 +8,12 @@
 #ifndef RTT_OGRE_UNIT_H_
 #define RTT_OGRE_UNIT_H_
 
-#include "Unit.h"
+
 #include "RTT_Ogre_Base.h"
 
 namespace RTT
 {
-	class RTT_Ogre_Unit :public Unit
+	class RTT_Ogre_Unit
 	{
 	public:
 		RTT_Ogre_Unit();
@@ -22,6 +22,7 @@ namespace RTT
 		Ogre::SceneNode* unitNode;
 		int locationX;
 		int locationY;
+		int moveRange;
 		Direction facingDir;
 	private:
 	protected:

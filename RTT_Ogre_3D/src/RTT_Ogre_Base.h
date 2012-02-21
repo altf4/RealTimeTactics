@@ -23,7 +23,6 @@
 #include <OISMouse.h>
 #include "GameCommands.h"
 #include "GameEvents.h"
-#include "Unit.h"
 #include "RTT_Ogre_Unit.h"
 
 using namespace Ogre;

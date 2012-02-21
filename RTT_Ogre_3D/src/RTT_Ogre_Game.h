@@ -25,11 +25,13 @@ class RTT_Ogre_Game : public RTT_Ogre_Base
 
 	protected:
     	virtual void createScene(void);
-    	virtual void faceUnit(RTT_Ogre_Unit &arg2);
-    	virtual void moveUnit(RTT_Ogre_Unit &arg2);
+    	virtual void faceUnit(RTT_Ogre_Unit &arg);
+    	virtual void moveUnit(RTT_Ogre_Unit &arg);
     	virtual void moveCursor(const RTT::Direction &arg);
-    	virtual bool keyPressed( const KeyEvent &arg );
+    	virtual bool keyPressed( const KeyEvent &arg);
     	virtual void buildUnits(void);
+    	virtual void showRange(RTT_Ogre_Unit &arg, bool &arg2);
+    	virtual void makeMove(RTT_Ogre_Unit &arg);
 		RTT_Ogre_Unit playerCursor;
     	RTT_Ogre_Player mainPlayer;
     	bool isMoving;

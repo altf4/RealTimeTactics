@@ -22,8 +22,9 @@ namespace RTT
 	public:
 		RTT_Ogre_Player();
 		virtual ~RTT_Ogre_Player();
-		std::vector<RTT_Ogre_Unit*> units;
+		RTT_Ogre_Unit ogreUnits;
 		uint currentUnit;
+		SceneNode* rangeNode[6][6];
 		RTT::TeamNumber Team;
 	};
 
