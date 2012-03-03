@@ -8,7 +8,7 @@ Dependencies:
 
 RTT depends on a few packages that are easily available through the Ubuntu repositories:
 
-sudo apt-get install libsparsehash-dev libgtkmm-3.0-dev libois-dev libssl-dev
+sudo apt-get install libsparsehash-dev libgtkmm-3.0-dev libois-dev libssl-dev libboost-dev libboost-date-time1.48-dev
 
 ########################
 OGRE 3D
