@@ -8,7 +8,7 @@ Dependencies:
 
 RTT depends on a few packages that are easily available through the Ubuntu repositories:
 
-sudo apt-get install libsparsehash-dev libgtkmm-3.0-dev libois-dev libssl-dev
+sudo apt-get install libsparsehash-dev libgtkmm-3.0-dev libois-dev libssl-dev libboost-dev libboost-date-time1.48-dev
 
 ########################
 OGRE 3D
@@ -38,19 +38,6 @@ The necessary Eclipse files are already in the repository ready for an easy impo
 File-> Import-> General-> Existing Projects into Workspace
 
 Then select the RTT parent directory, and it will automatically recognize all the sub-projects.
-
-#############
-Eclipse pkg-config plugin
-#############
-
-GTK uses pkg-config to automatically load its necessary depencies.
-(Since there are a lot) But Eclipse by itself doesn't have support
-for this. YOu have to install the pkg-config plugin from the 
-Eclipse Marketplace. (Free of course)
-
-Go to Help-> Marketplace-> 
-	Then search for "pkg-config" and it should come up. Hit
-	the install button and it will just work.
 
 ###########################
 Building Not Using Eclipse:
