@@ -7,13 +7,14 @@
 
 #include "RTT_Server.h"
 #include "ServerProtocolHandler.h"
+#include "MatchLoop.h"
+
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <iostream>
-#include "WaitingPool.h"
 
 using namespace std;
 using namespace RTT;
@@ -28,8 +29,6 @@ extern pthread_rwlock_t playerListLock;
 extern pthread_rwlock_t playerIDLock;
 extern pthread_rwlock_t waitPoolLock;
 extern uint lastPlayerID;
-
-extern WaitingPool *waitingPool;
 
 //Negotiates the hello messages and authentication to a new client
 //	Returns a new Player object, NULL on error
@@ -361,6 +360,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
+			break;
 		}
 		case SERVER_STATS_REQUEST:
 		{
@@ -412,6 +412,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 		}
 	}
 	delete lobby_message;
+	return IN_MAIN_LOBBY;	//TODO: IS this the right place to return?
 }
 
 //Authenticates the given username/password with the server
@@ -671,40 +672,14 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			}
 			delete register_reply;
 
-			uint currentPlayers = playersMatch->GetCurrentPlayerCount();
-			int callbackSocket = player->GetCallbackSocket();
-			enum GameSpeed speed = playersMatch->GetGamespeed();
-
-			enum MatchLoopResult matchResult = waitingPool->Register(
-					playerID, matchID, currentPlayers, callbackSocket, connectFD, speed);
-			//TODO: Do something with the results of a match
-			switch(matchResult)
+			if(playersMatch->RegisterPlayer(playerID))
 			{
-				case MATCH_VICTORY:
-				{
-					break;
-				}
-				case MATCH_DEFEAT:
-				{
-					break;
-				}
-				case MATCH_DRAW:
-				{
-					break;
-				}
-				case MATCH_NO_CONTEST:
-				{
-					break;
-				}
-				case MATCH_ERROR:
-				{
-					break;
-				}
+				pthread_t matchLoopThread;
+				pthread_create(&matchLoopThread, NULL, MatchLoop, (void*)playersMatch);
 			}
 
 			delete match_lobby_message;
-			cout << "Got match result for " << player->GetName() << "\n";
-			return IN_MAIN_LOBBY;
+			return IN_GAME;
 		}
 		case CHANGE_COLOR_REQUEST:
 		{

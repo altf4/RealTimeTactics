@@ -16,14 +16,17 @@ using namespace std;
 // The "realtime" thread that signals
 // speed - The speed at which this match should run
 // Returns: an enumeration describing the match's result status
-enum MatchLoopResult MatchLoop(enum GameSpeed speed)
+void *MatchLoop(void *ptr)
 {
+	Match *match = (Match*)ptr;
+
+	GameSpeed speed = match->GetGamespeed();
 	uint tickDelta = Match::GameSpeedTouSeconds(speed);
+
 	//Lock to ensure that only one timer tick thread can happen at once
 	pthread_mutex_t tickLock;
 	pthread_mutex_init(&tickLock, NULL);
 
-	enum MatchLoopResult result;
 	uint count = 0;
 
 	while(true)
@@ -34,8 +37,7 @@ enum MatchLoopResult MatchLoop(enum GameSpeed speed)
 		//TODO: If the match has ended, somehow
 		if(count == 12)
 		{
-			result = MATCH_VICTORY;
-			return result;
+			return NULL;
 		}
 
 		//Thread that gets called when the timer tick hits
@@ -43,7 +45,7 @@ enum MatchLoopResult MatchLoop(enum GameSpeed speed)
 		pthread_create(&timerTickThreadID, NULL, TimerTick, (void*)&tickLock);
 	}
 
-	//return result;
+	return NULL;
 }
 
 void *TimerTick(void *param)

@@ -102,6 +102,11 @@ public:
 	bool ChangeTeam(Player *player, enum TeamNumber newTeam);
 	bool StartMatch();
 
+	//Register that the given player is ready to start the match
+	//	returns - true if the player is the last one in
+	//		IE: This fact is important for the server to spawn a match loop thread
+	bool RegisterPlayer(uint playerID);
+
 	//TODO: Evaluate if this is the best place for these functions.
 	static string GameSpeedToString(enum GameSpeed speed);
 	//Converts a GameSpeed enum into the number of microseconds between game ticks
@@ -122,6 +127,7 @@ private:
 	//Truncated at MAX_MATCHNAME_LEN chars
 	string name;
 	int64_t timeCreated;
+	vector<uint32_t> registeredPlayers;
 
 	//The "Leader" player who can make changes to match settings
 	uint leaderID;

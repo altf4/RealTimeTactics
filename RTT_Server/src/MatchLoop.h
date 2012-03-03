@@ -29,9 +29,8 @@ enum MatchLoopResult: char
 
 //The main loop for a single RTT match
 // The "realtime" thread that signals
-// speed - The speed at which this match should run
-// Returns: an enumeration describing
-enum MatchLoopResult MatchLoop(enum GameSpeed speed);
+// ptr - Void pointer to the match to start
+void *MatchLoop(void *ptr);
 
 //Thread that gets launched every timer tick in order to handle
 void *TimerTick(void *param);

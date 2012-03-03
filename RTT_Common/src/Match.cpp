@@ -375,3 +375,25 @@ string Match::VictoryConditionToString(enum VictoryCondition victory)
 		}
 	}
 }
+
+//Register that the given player is ready to start the match
+//	returns - true if the player is the last one in
+//		IE: This fact is important for the server to spawn a match loop thread
+bool Match::RegisterPlayer(uint playerID)
+{
+	pthread_rwlock_wrlock(&lock);
+
+	registeredPlayers.push_back(playerID);
+
+	//If now full:
+	if(registeredPlayers.size() == currentPlayerCount)
+	{
+		pthread_rwlock_unlock(&lock);
+		return true;
+	}
+
+	pthread_rwlock_unlock(&lock);
+	return false;
+
+
+}
