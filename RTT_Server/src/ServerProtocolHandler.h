@@ -51,6 +51,12 @@ enum LobbyReturn ProcessLobbyCommand(int connectFD, Player *player);
 //	Returns a enum LobbyReturn to describe the end state
 enum LobbyReturn ProcessMatchLobbyCommand(int connectFD, Player *player);
 
+//Processes one game command
+//	Starts out by listening on the given socket for a GameMessage
+//	Executes the game protocol
+//	Returns a enum LobbyReturn to describe the end state
+enum LobbyReturn ProcessGameCommand(int connectFD, Player *player);
+
 //Establishes the player's receive socket
 //	Sets the player's receiveSocket
 //	connectFD: The old socket, used to tell the client we're ready

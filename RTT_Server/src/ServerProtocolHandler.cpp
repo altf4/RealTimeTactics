@@ -1021,6 +1021,15 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 	return IN_MATCH_LOBBY;
 }
 
+//Processes one game command
+//	Starts out by listening on the given socket for a GameMessage
+//	Executes the game protocol
+//	Returns a enum LobbyReturn to describe the end state
+enum LobbyReturn RTT::ProcessGameCommand(int connectFD, Player *player)
+{
+	return IN_GAME;
+}
+
 //Send a message of type Error to the client
 void  RTT::SendError(int connectFD, enum ErrorType errorType)
 {
