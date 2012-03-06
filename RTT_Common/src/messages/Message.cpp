@@ -13,6 +13,7 @@
 #include "LobbyMessage.h"
 #include "ErrorMessage.h"
 #include "MatchLobbyMessage.h"
+#include "GameMessage.h"
 
 using namespace std;
 using namespace RTT;
@@ -131,6 +132,17 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case MATCH_START_ACK:
 		{
 			MatchLobbyMessage *message = new MatchLobbyMessage(buffer, length);
+			if( message->serializeError == true )
+			{
+				delete message;
+				return NULL;
+			}
+			return message;
+		}
+		case MOVE_UNIT_DIRECTION_REQUEST:
+		case MOVE_UNIT_DIRECTION_REPLY:
+		{
+			GameMessage *message = new GameMessage(buffer, length);
 			if( message->serializeError == true )
 			{
 				delete message;

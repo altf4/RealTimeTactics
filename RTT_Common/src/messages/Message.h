@@ -128,6 +128,12 @@ enum MessageType: char
 	//*******************
 	//   Error Message
 	//*******************
+	MOVE_UNIT_DIRECTION_REQUEST,
+	MOVE_UNIT_DIRECTION_REPLY,
+
+	//*******************
+	//   Error Message
+	//*******************
 	MESSAGE_ERROR,
 
 	//TODO: Fill this out as they become needed / invented
