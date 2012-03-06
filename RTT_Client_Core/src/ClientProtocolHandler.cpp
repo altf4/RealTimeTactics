@@ -22,7 +22,7 @@
 using namespace std;
 using namespace RTT;
 
-int connectFD, connectBackSocket;
+int connectFD, callbackSocket;
 string serverIP;
 struct PlayerDescription myPlayerDescription;
 uint callbackPort = 0;
@@ -857,8 +857,8 @@ bool RTT::InitializeCallback()
 {
 	//Make a new connection to the given port
 	struct sockaddr_in stSockAddr;
-	connectBackSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (-1 == connectBackSocket)
+	callbackSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (-1 == callbackSocket)
 	{
 		perror("cannot create socket");
 		return false;
@@ -884,10 +884,10 @@ bool RTT::InitializeCallback()
 		return false;
 	}
 
-	if (-1 == connect(connectBackSocket, (struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
+	if (-1 == connect(callbackSocket, (struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
 	{
 		perror("connect failed");
-		close(connectBackSocket);
+		close(callbackSocket);
 		return false;
 	}
 
@@ -897,7 +897,7 @@ bool RTT::InitializeCallback()
 	MatchLobbyMessage *callback_register = new MatchLobbyMessage();
 	callback_register->type = CALLBACK_REGISTER;
 	callback_register->playerID = myPlayerDescription.ID;
-	if( Message::WriteMessage(callback_register, connectBackSocket) == false)
+	if( Message::WriteMessage(callback_register, callbackSocket) == false)
 	{
 		//Error in write
 		delete callback_register;
@@ -919,7 +919,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 	//**********************************
 	// Receive Connect Back Ready
 	//**********************************
-	Message *message = Message::ReadMessage(connectBackSocket);
+	Message *message = Message::ReadMessage(callbackSocket);
 	if( message == NULL)
 	{
 		return change;
@@ -940,7 +940,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			MatchLobbyMessage *team_change_ack = new MatchLobbyMessage();
 			team_change_ack->type = TEAM_CHANGED_ACK;
-			if( Message::WriteMessage(team_change_ack, connectBackSocket) == false)
+			if( Message::WriteMessage(team_change_ack, callbackSocket) == false)
 			{
 				//Error in write
 				delete team_change_ack;
@@ -960,7 +960,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			MatchLobbyMessage *kicked_ack = new MatchLobbyMessage();
 			kicked_ack->type = KICKED_FROM_MATCH_ACK;
-			if( Message::WriteMessage(kicked_ack, connectBackSocket) == false)
+			if( Message::WriteMessage(kicked_ack, callbackSocket) == false)
 			{
 				//Error in write
 				delete kicked_ack;
@@ -983,7 +983,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			MatchLobbyMessage *player_left_ack = new MatchLobbyMessage();
 			player_left_ack->type = PLAYER_LEFT_MATCH_ACK;
-			if( Message::WriteMessage(player_left_ack, connectBackSocket) == false)
+			if( Message::WriteMessage(player_left_ack, callbackSocket) == false)
 			{
 				//Error in write
 				delete player_left_ack;
@@ -1004,7 +1004,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			MatchLobbyMessage *player_joined_ack = new MatchLobbyMessage();
 			player_joined_ack->type = PLAYER_JOINED_MATCH_ACK;
-			if( Message::WriteMessage(player_joined_ack, connectBackSocket) == false)
+			if( Message::WriteMessage(player_joined_ack, callbackSocket) == false)
 			{
 				//Error in write
 				delete player_joined_ack;
@@ -1026,7 +1026,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			MatchLobbyMessage *color_change_ack = new MatchLobbyMessage();
 			color_change_ack->type = COLOR_CHANGED_ACK;
-			if( Message::WriteMessage(color_change_ack, connectBackSocket) == false)
+			if( Message::WriteMessage(color_change_ack, callbackSocket) == false)
 			{
 				//Error in write
 				delete color_change_ack;
@@ -1047,7 +1047,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			MatchLobbyMessage *map_changed_ack = new MatchLobbyMessage();
 			map_changed_ack->type = MAP_CHANGED_ACK;
-			if( Message::WriteMessage(map_changed_ack, connectBackSocket) == false)
+			if( Message::WriteMessage(map_changed_ack, callbackSocket) == false)
 			{
 				//Error in write
 				delete map_changed_ack;
@@ -1068,7 +1068,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			MatchLobbyMessage *speed_changed_ack = new MatchLobbyMessage();
 			speed_changed_ack->type = GAME_SPEED_CHANGED_ACK;
-			if( Message::WriteMessage(speed_changed_ack, connectBackSocket) == false)
+			if( Message::WriteMessage(speed_changed_ack, callbackSocket) == false)
 			{
 				//Error in write
 				delete speed_changed_ack;
@@ -1089,7 +1089,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			MatchLobbyMessage *victory_changed_ack = new MatchLobbyMessage();
 			victory_changed_ack->type = VICTORY_COND_CHANGED_ACK;
-			if( Message::WriteMessage(victory_changed_ack, connectBackSocket) == false)
+			if( Message::WriteMessage(victory_changed_ack, callbackSocket) == false)
 			{
 				//Error in write
 				delete victory_changed_ack;
@@ -1110,7 +1110,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			MatchLobbyMessage *leader_changed_ack = new MatchLobbyMessage();
 			leader_changed_ack->type = CHANGE_LEADER_ACK;
-			if( Message::WriteMessage(leader_changed_ack, connectBackSocket) == false)
+			if( Message::WriteMessage(leader_changed_ack, callbackSocket) == false)
 			{
 				//Error in write
 				delete leader_changed_ack;
@@ -1130,7 +1130,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			MatchLobbyMessage *match_started_ack = new MatchLobbyMessage();
 			match_started_ack->type = MATCH_START_ACK;
 			match_started_ack->changeAccepted = true;
-			if( Message::WriteMessage(match_started_ack, connectBackSocket) == false)
+			if( Message::WriteMessage(match_started_ack, callbackSocket) == false)
 			{
 				//Error in write
 				delete match_started_ack;
@@ -1147,7 +1147,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 		default:
 		{
 			cerr << "ERROR: Received a bad message on the callback socket\n";
-			SendError(connectBackSocket, AUTHENTICATION_ERROR);
+			SendError(callbackSocket, AUTHENTICATION_ERROR);
 			break;
 		}
 	}

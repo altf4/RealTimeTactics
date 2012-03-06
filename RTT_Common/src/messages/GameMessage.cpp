@@ -65,7 +65,9 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) MoveResult enum describing success or failure
-			uint32_t expectedSize = sizeof(type) + sizeof(moveResult);
+			//		3) X coordinate, correct starting location
+			//		4) Y coordinate, correct starting location
+			uint32_t expectedSize = sizeof(type) + sizeof(moveResult) + sizeof(xOld) + sizeof(yOld);
 			if( length != expectedSize)
 			{
 				serializeError = true;
@@ -78,6 +80,12 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 			//Movement Result enumeration
 			memcpy(&moveResult, buffer, sizeof(moveResult));
 			buffer += sizeof(moveResult);
+			//Starting X position
+			memcpy(&xOld, buffer, sizeof(xOld));
+			buffer += sizeof(xOld);
+			//Starting Y position
+			memcpy(&yOld, buffer, sizeof(yOld));
+			buffer += sizeof(yOld);
 			break;
 		}
 		default:
@@ -112,13 +120,13 @@ char *GameMessage::Serialize(uint32_t *length)
 			//Unit ID
 			memcpy(buffer, &unitID, sizeof(unitID));
 			buffer += sizeof(unitID);
-			//Unit ID
+			//X coord
 			memcpy(buffer, &xOld, sizeof(xOld));
 			buffer += sizeof(xOld);
-			//Unit ID
+			//Y coord
 			memcpy(buffer, &yOld, sizeof(yOld));
 			buffer += sizeof(yOld);
-			//Unit ID
+			//Direction enum
 			memcpy(buffer, &direction, sizeof(direction));
 			buffer += sizeof(direction);
 
@@ -128,7 +136,9 @@ char *GameMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) MoveResult enum describing success or failure
-			messageSize =  sizeof(type) + sizeof(moveResult);
+			//		3) X coordinate, correct starting location
+			//		4) Y coordinate, correct starting location
+			messageSize =  sizeof(type) + sizeof(moveResult) + sizeof(xOld) + sizeof(yOld);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
@@ -138,6 +148,12 @@ char *GameMessage::Serialize(uint32_t *length)
 			//Unit ID
 			memcpy(buffer, &moveResult, sizeof(moveResult));
 			buffer += sizeof(moveResult);
+			//X coord
+			memcpy(buffer, &xOld, sizeof(xOld));
+			buffer += sizeof(xOld);
+			//Y coord
+			memcpy(buffer, &yOld, sizeof(yOld));
+			buffer += sizeof(yOld);
 
 			break;
 		}

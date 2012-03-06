@@ -7,9 +7,12 @@
 
 #include "GameCommands.h"
 #include "Gameboard.h"
+#include "ClientProtocolHandler.h"
 
 using namespace std;
 using namespace RTT;
+
+extern int callbackSocket;
 
 //The current gameboard being used this match
 Gameboard *gameboard;
@@ -25,7 +28,7 @@ UnitList units;
 //	direction - The direction to move the unit
 //		NOTE: The unit will also by default made to face the direction moved
 //	returns - A MovementResult struct describing the success or error of the move
-struct MovementResult RTT::MoveUnit(uint32_t unitID, enum Direction direction)
+struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, enum Direction direction)
 {
 	struct MovementResult result;
 
@@ -33,10 +36,45 @@ struct MovementResult RTT::MoveUnit(uint32_t unitID, enum Direction direction)
 	//	that this is invalid.
 	if( units.count(unitID) == 0)
 	{
-		result.result = UNIT_DOESNT_EXIST;
+		result.result = MOVE_NO_SUCH_UNIT;
 		return result;
 	}
 
+	GameMessage *moveRequest = new GameMessage();
+	moveRequest->unitID = unitID;
+	moveRequest->xOld = xOld;
+	moveRequest->yOld = xOld;
+	moveRequest->direction = direction;
+	if(!Message::WriteMessage(moveRequest, callbackSocket))
+	{
+		result.result = MOVE_MESSAGE_SEND_ERROR;
+		delete moveRequest;
+		return result;
+	}
+	delete moveRequest;
+
+	Message *reply = Message::ReadMessage(callbackSocket);
+	if( reply == NULL)
+	{
+		SendError(callbackSocket, PROTOCOL_ERROR);
+		result.result = MOVE_MESSAGE_SEND_ERROR;
+		delete reply;
+		return result;
+	}
+	if( reply->type != MOVE_UNIT_DIRECTION_REPLY)
+	{
+		SendError(callbackSocket, PROTOCOL_ERROR);
+		result.result = MOVE_MESSAGE_SEND_ERROR;
+		delete reply;
+		return result;
+	}
+	GameMessage *moveReply = (GameMessage*)reply;
+	result.result = moveReply->moveResult;
+	result.originalX = moveReply->xOld;
+	result.originalY = moveReply->yOld;
+
+	delete moveReply;
+	return result;
 }
 
 //Move a Unit to a distant tile
