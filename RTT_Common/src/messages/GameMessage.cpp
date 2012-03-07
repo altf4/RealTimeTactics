@@ -88,6 +88,48 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 			buffer += sizeof(yOld);
 			break;
 		}
+		case UNIT_MOVED_DIRECTION_NOTICE:
+		{
+			//Uses: 1) Message Type
+			//		2) Unit ID that moved
+			//		3) X coordinate, starting location
+			//		4) Y coordinate, starting location
+			//		5) Direction unit moved (one hop)
+			uint32_t expectedSize = sizeof(type) + sizeof(unitID) + sizeof(xOld) + sizeof(yOld)
+					+ sizeof(direction);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			//Unit ID
+			memcpy(&unitID, buffer, sizeof(unitID));
+			buffer += sizeof(unitID);
+			//Starting X position
+			memcpy(&xOld, buffer, sizeof(xOld));
+			buffer += sizeof(xOld);
+			//Starting Y position
+			memcpy(&yOld, buffer, sizeof(yOld));
+			buffer += sizeof(yOld);
+			//Direction (enum) moved
+			memcpy(&direction, buffer, sizeof(direction));
+			buffer += sizeof(direction);
+
+			break;
+		}
+		case UNIT_MOVED_DIRECTION_ACK:
+		{
+			//Uses: 1) Message Type
+			uint32_t expectedSize = sizeof(type);
+			if( length != expectedSize)
+			{
+				serializeError = true;
+				return;
+			}
+
+			break;
+		}
 		default:
 		{
 			serializeError = true;
@@ -102,7 +144,7 @@ char *GameMessage::Serialize(uint32_t *length)
 	uint32_t messageSize;
 	switch(type)
 	{
-		case MOVE_UNIT_DIRECTION_REQUEST: //TODO make a new message type
+		case MOVE_UNIT_DIRECTION_REQUEST:
 		{
 			//Uses: 1) Message Type
 			//		2) Unit ID to move
@@ -155,6 +197,48 @@ char *GameMessage::Serialize(uint32_t *length)
 			memcpy(buffer, &yOld, sizeof(yOld));
 			buffer += sizeof(yOld);
 
+			break;
+		}
+		case UNIT_MOVED_DIRECTION_NOTICE:
+		{
+			//Uses: 1) Message Type
+			//		2) Unit ID moved
+			//		3) X coordinate, starting location
+			//		4) Y coordinate, starting location
+			//		5) Direction moved (one hop)
+			messageSize =  sizeof(type) + sizeof(unitID) + sizeof(xOld) + sizeof(yOld)
+					+ sizeof(direction);
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Message type
+			memcpy(buffer, &type, sizeof(type));
+			buffer += sizeof(type);
+			//Unit ID
+			memcpy(buffer, &unitID, sizeof(unitID));
+			buffer += sizeof(unitID);
+			//X coord
+			memcpy(buffer, &xOld, sizeof(xOld));
+			buffer += sizeof(xOld);
+			//Y coord
+			memcpy(buffer, &yOld, sizeof(yOld));
+			buffer += sizeof(yOld);
+			//Direction enum
+			memcpy(buffer, &direction, sizeof(direction));
+			buffer += sizeof(direction);
+
+			break;
+		}
+		case UNIT_MOVED_DIRECTION_ACK:
+		{
+			//Uses: 1) Message Type
+			messageSize =  sizeof(type);
+			buffer = (char*)malloc(messageSize);
+			originalBuffer = buffer;
+
+			//Message type
+			memcpy(buffer, &type, sizeof(type));
+			buffer += sizeof(type);
 			break;
 		}
 		default:

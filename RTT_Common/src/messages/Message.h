@@ -130,6 +130,8 @@ enum MessageType: char
 	//*******************
 	MOVE_UNIT_DIRECTION_REQUEST,
 	MOVE_UNIT_DIRECTION_REPLY,
+	UNIT_MOVED_DIRECTION_NOTICE,
+	UNIT_MOVED_DIRECTION_ACK,
 
 	//*******************
 	//   Error Message
