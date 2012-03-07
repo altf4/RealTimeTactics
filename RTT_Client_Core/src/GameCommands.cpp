@@ -41,6 +41,7 @@ struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, en
 	}
 
 	GameMessage *moveRequest = new GameMessage();
+	moveRequest->type = MOVE_UNIT_DIRECTION_REQUEST;
 	moveRequest->unitID = unitID;
 	moveRequest->xOld = xOld;
 	moveRequest->yOld = xOld;
