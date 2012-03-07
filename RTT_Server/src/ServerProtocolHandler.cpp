@@ -8,6 +8,7 @@
 #include "RTT_Server.h"
 #include "ServerProtocolHandler.h"
 #include "MatchLoop.h"
+#include "messages/GameMessage.h"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -1027,6 +1028,43 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 //	Returns a enum LobbyReturn to describe the end state
 enum LobbyReturn RTT::ProcessGameCommand(int connectFD, Player *player)
 {
+	if(player == NULL)
+	{
+		cerr << "ERROR: Player in game does not exist\n";
+		return EXITING_SERVER;
+	}
+
+	Message *message = Message::ReadMessage(connectFD);
+	if(message == NULL)
+	{
+		//ERROR
+		cerr << "WARNING: Game message read failed\n";
+		SendError(connectFD, PROTOCOL_ERROR);
+		return EXITING_SERVER;
+	}
+	GameMessage *game_message = (GameMessage*)message;
+	switch(game_message->type)
+	{
+		case MOVE_UNIT_DIRECTION_REQUEST:
+		{
+			//TODO: Check to see if the move is legal
+			//TODO: Move the unit around in the gameboard
+
+			GameMessage *move_reply = new GameMessage();
+			move_reply->type = MOVE_UNIT_DIRECTION_REPLY;
+			move_reply->moveResult = MOVE_SUCCESS;
+			GameMessage::WriteMessage(move_reply, connectFD);
+			delete move_reply;
+
+			//TODO: Send notifications out to the other players
+			return IN_GAME;
+		}
+		default:
+		{
+			return IN_GAME;
+		}
+	}
+
 	return IN_GAME;
 }
 
