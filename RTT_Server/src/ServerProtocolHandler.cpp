@@ -1034,6 +1034,16 @@ enum LobbyReturn RTT::ProcessGameCommand(int connectFD, Player *player)
 		return EXITING_SERVER;
 	}
 
+	uint matchID = player->GetCurrentMatchID();
+
+	pthread_rwlock_rdlock(&matchListLock);
+	Match *playersMatch = NULL;
+	if( matchList.count(matchID) != 0)
+	{
+		playersMatch = matchList[matchID];
+	}
+	pthread_rwlock_unlock(&matchListLock);
+
 	Message *message = Message::ReadMessage(connectFD);
 	if(message == NULL)
 	{
@@ -1056,7 +1066,16 @@ enum LobbyReturn RTT::ProcessGameCommand(int connectFD, Player *player)
 			GameMessage::WriteMessage(move_reply, connectFD);
 			delete move_reply;
 
-			//TODO: Send notifications out to the other players
+			GameMessage *move_notice = new GameMessage();
+			move_notice->type = UNIT_MOVED_DIRECTION_NOTICE;
+			move_notice->unitID = game_message->unitID;
+			move_notice->xOld = game_message->xOld;
+			move_notice->yOld = game_message->yOld;
+			move_notice->direction = game_message->direction;
+
+			NotifyClients(playersMatch, move_notice);
+			delete move_notice;
+
 			return IN_GAME;
 		}
 		default:
@@ -1081,7 +1100,7 @@ void  RTT::SendError(int connectFD, enum ErrorType errorType)
 	delete error_msg;
 }
 
-bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
+bool RTT::NotifyClients(Match *match, Message *message)
 {
 	bool fullSuccess = true;
 	if( match == NULL)

@@ -63,8 +63,8 @@ enum LobbyReturn ProcessGameCommand(int connectFD, Player *player);
 //	returns the created socket
 int MatchLobbyConnectBack(int connectFD, uint portNum, Player *player);
 
-//Sends out the given MatchLobbyMessage to all clients in the given match
-bool NotifyClients(Match *match, MatchLobbyMessage *message);
+//Sends out the given Message to all clients in the given match
+bool NotifyClients(Match *match, Message *message);
 
 //Send a message of type Error to the client
 void SendError(int connectFD, enum ErrorType errorType);
