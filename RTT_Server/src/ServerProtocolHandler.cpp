@@ -71,19 +71,17 @@ Player *RTT::GetNewClient(int ConnectFD)
 	//***************************
 	// Send Server Hello
 	//***************************
-	AuthMessage *server_hello = new AuthMessage();
-	server_hello->type = SERVER_HELLO;
-	server_hello->softwareVersion.major = SERVER_VERSION_MAJOR;
-	server_hello->softwareVersion.minor = SERVER_VERSION_MINOR;
-	server_hello->softwareVersion.rev = SERVER_VERSION_REV;
+	AuthMessage server_hello;
+	server_hello.type = SERVER_HELLO;
+	server_hello.softwareVersion.major = SERVER_VERSION_MAJOR;
+	server_hello.softwareVersion.minor = SERVER_VERSION_MINOR;
+	server_hello.softwareVersion.rev = SERVER_VERSION_REV;
 
-	if(  Message::WriteMessage(server_hello, ConnectFD) == false)
+	if(  Message::WriteMessage(&server_hello, ConnectFD) == false)
 	{
 		//Error in write
-		delete server_hello;
 		return NULL;
 	}
-	delete server_hello;
 
 	//***************************
 	// Receive Client Auth
@@ -126,21 +124,19 @@ Player *RTT::GetNewClient(int ConnectFD)
 	//***************************
 	// Send Server Auth Reply
 	//***************************
-	AuthMessage *server_auth_reply = new AuthMessage();
-	server_auth_reply->type = SERVER_AUTH_REPLY;
-	server_auth_reply->authSuccess = authresult;
-	if( player != NULL )
+	AuthMessage server_auth_reply;
+	server_auth_reply.type = SERVER_AUTH_REPLY;
+	server_auth_reply.authSuccess = authresult;
+	if(player != NULL)
 	{
-		server_auth_reply->playerDescription = player->GetDescription();
+		server_auth_reply.playerDescription = player->GetDescription();
 	}
-	if(  Message::WriteMessage(server_auth_reply, ConnectFD) == false)
+	if(Message::WriteMessage(&server_auth_reply, ConnectFD) == false)
 	{
 		//Error in write
-		delete server_auth_reply;
 		return NULL;
 	}
 
-	delete server_auth_reply;
 	return player;
 }
 
@@ -180,21 +176,20 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 			//***************************
 			// Send Query Reply
 			//***************************
-			LobbyMessage *query_reply = new LobbyMessage();
-			query_reply->type = MATCH_LIST_REPLY;
-			query_reply->returnedMatchesCount = matchCount;
-			query_reply->matchDescriptions = (MatchDescription*)
+			LobbyMessage query_reply;
+			query_reply.type = MATCH_LIST_REPLY;
+			query_reply.returnedMatchesCount = matchCount;
+			query_reply.matchDescriptions = (MatchDescription*)
 					malloc(sizeof(struct MatchDescription) * matchCount);
 			for(uint i = 0; i < matchCount; i++ )
 			{
-				query_reply->matchDescriptions[i] = matches[i];
+				query_reply.matchDescriptions[i] = matches[i];
 			}
-			if(  Message::WriteMessage(query_reply, ConnectFD) == false)
+			if(  Message::WriteMessage(&query_reply, ConnectFD) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
 			}
-			delete query_reply;
 
 			delete lobby_message;
 			return IN_MAIN_LOBBY;
@@ -204,18 +199,16 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 			//***************************
 			// Send Options Available
 			//***************************
-			LobbyMessage *options_available = new LobbyMessage();
-			options_available->type = MATCH_CREATE_OPTIONS_AVAILABLE;
-			options_available->options.maxPlayers = MAX_PLAYERS_IN_MATCH;
-			if(  Message::WriteMessage(options_available, ConnectFD) == false)
+			LobbyMessage options_available;
+			options_available.type = MATCH_CREATE_OPTIONS_AVAILABLE;
+			options_available.options.maxPlayers = MAX_PLAYERS_IN_MATCH;
+			if(  Message::WriteMessage(&options_available, ConnectFD) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
-				delete options_available;
 				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
-			delete options_available;
 
 			//********************************
 			// Receive Options Chosen
@@ -263,13 +256,13 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 			//***************************
 			// Send Match Create Reply
 			//***************************
-			LobbyMessage *create_reply = new LobbyMessage();
-			create_reply->type = MATCH_CREATE_REPLY;
+			LobbyMessage create_reply;
+			create_reply.type = MATCH_CREATE_REPLY;
 			pthread_rwlock_rdlock(&matchListLock);
 			Match *joinedMatch = matchList[matchID];
-			create_reply->matchDescription = joinedMatch->GetDescription();
+			create_reply.matchDescription = joinedMatch->GetDescription();
 			pthread_rwlock_unlock(&matchListLock);
-			if(  Message::WriteMessage(create_reply, ConnectFD) == false)
+			if(  Message::WriteMessage(&create_reply, ConnectFD) == false)
 			{
 				//Error in write, do something?
 				//TODO: This case is awkward. Should probably
@@ -278,7 +271,6 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
-			delete create_reply;
 			delete lobby_message;
 			return IN_MATCH_LOBBY;
 		}
@@ -294,41 +286,39 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 					//***************************
 					// Send Match Join Reply
 					//***************************
-					LobbyMessage *match_join = new LobbyMessage();
-					match_join->type = MATCH_JOIN_REPLY;
+					LobbyMessage match_join;
+					match_join.type = MATCH_JOIN_REPLY;
 
 					pthread_rwlock_rdlock(&matchListLock);
 					Match *joinedMatch = matchList[lobby_message->ID];
 					pthread_rwlock_unlock(&matchListLock);
 
-					match_join->matchDescription = joinedMatch->GetDescription();
+					match_join.matchDescription = joinedMatch->GetDescription();
 
 					//Put in the player descriptions of current members
-					match_join->playerDescriptions = (struct PlayerDescription*)
+					match_join.playerDescriptions = (struct PlayerDescription*)
 						malloc(sizeof(struct PlayerDescription) * MAX_PLAYERS_IN_MATCH);
 
 					uint count = GetPlayerDescriptions(joinedMatch->GetID(),
-							match_join->playerDescriptions);
-					match_join->returnedPlayersCount = count;
+						match_join.playerDescriptions);
+					match_join.returnedPlayersCount = count;
 
 
 
-					if(  Message::WriteMessage(match_join, ConnectFD) == false)
+					if(  Message::WriteMessage(&match_join, ConnectFD) == false)
 					{
 						//Error in write, do something?
 						cerr << "ERROR: Message send returned failure.\n";
 					}
-					delete match_join;
 
 					//*******************************
 					// Send Client Notifications
 					//*******************************
-					MatchLobbyMessage *notification = new MatchLobbyMessage();
-					notification->type = PLAYER_JOINED_MATCH_NOTIFICATION;
-					notification->playerDescription = player->GetDescription();
+					MatchLobbyMessage notification;
+					notification.type = PLAYER_JOINED_MATCH_NOTIFICATION;
+					notification.playerDescription = player->GetDescription();
 
-					NotifyClients(joinedMatch,	notification);
-					delete notification;
+					NotifyClients(joinedMatch, &notification);
 					delete lobby_message;
 					return IN_MATCH_LOBBY;
 				}
@@ -368,23 +358,22 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 			//*******************************
 			// Send Server Stats Reply
 			//*******************************
-			LobbyMessage *stats_reply = new LobbyMessage();
-			stats_reply->type = SERVER_STATS_REPLY;
+			LobbyMessage stats_reply;
+			stats_reply.type = SERVER_STATS_REPLY;
 
 			pthread_rwlock_rdlock(&matchListLock);
-			stats_reply->serverStats.numMatches = matchList.size();
+			stats_reply.serverStats.numMatches = matchList.size();
 			pthread_rwlock_unlock(&matchListLock);
 
 			pthread_rwlock_rdlock(&playerListLock);
-			stats_reply->serverStats.numPlayers = playerList.size();
+			stats_reply.serverStats.numPlayers = playerList.size();
 			pthread_rwlock_unlock(&playerListLock);
 
-			if( Message::WriteMessage(stats_reply, ConnectFD) == false )
+			if( Message::WriteMessage(&stats_reply, ConnectFD) == false )
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
 			}
-			delete stats_reply;
 			delete lobby_message;
 			return IN_MAIN_LOBBY;
 		}
@@ -393,14 +382,13 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int ConnectFD, Player *player)
 			//*******************************
 			// Send Exit Server Acknowledge
 			//*******************************
-			LobbyMessage *exit_server = new LobbyMessage();
-			exit_server->type = MATCH_EXIT_SERVER_ACKNOWLEDGE;
-			if(  Message::WriteMessage(exit_server, ConnectFD) == false)
+			LobbyMessage exit_server;
+			exit_server.type = MATCH_EXIT_SERVER_ACKNOWLEDGE;
+			if(  Message::WriteMessage(&exit_server, ConnectFD) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
 			}
-			delete exit_server;
 			delete lobby_message;
 			return EXITING_SERVER;
 		}
@@ -493,14 +481,13 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				//*******************************
 				// Send Match Leave Acknowledge
 				//*******************************
-				MatchLobbyMessage *leave_ack = new MatchLobbyMessage();
-				leave_ack->type = MATCH_LEAVE_ACKNOWLEDGE;
-				if(  Message::WriteMessage(leave_ack, connectFD) == false)
+				MatchLobbyMessage leave_ack;
+				leave_ack.type = MATCH_LEAVE_ACKNOWLEDGE;
+				if(  Message::WriteMessage(&leave_ack, connectFD) == false)
 				{
 					//Error in write, do something?
 					cerr << "ERROR: Message send returned failure.\n";
 				}
-				delete leave_ack;
 				delete match_lobby_message;
 				return IN_MAIN_LOBBY;
 			}
@@ -564,27 +551,25 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			//*******************************
 			// Send CHANGE TEAM REPLY
 			//*******************************
-			MatchLobbyMessage *change_team_reply = new MatchLobbyMessage();
-			change_team_reply->type = CHANGE_TEAM_REPLY;
-			change_team_reply->changeAccepted = changed;
-			if(  Message::WriteMessage(change_team_reply, connectFD) == false)
+			MatchLobbyMessage change_team_reply;
+			change_team_reply.type = CHANGE_TEAM_REPLY;
+			change_team_reply.changeAccepted = changed;
+			if(  Message::WriteMessage(&change_team_reply, connectFD) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
 			}
-			delete change_team_reply;
 
 			if( changed )
 			{
 				//*******************************
 				// Send Client Notifications
 				//*******************************
-				MatchLobbyMessage *notification = new MatchLobbyMessage();
-				notification->type = TEAM_CHANGED_NOTIFICATION;
-				notification->newTeam = match_lobby_message->newTeam;
-				notification->playerID = match_lobby_message->playerID;
-				NotifyClients(playersMatch, notification);
-				delete notification;
+				MatchLobbyMessage notification;
+				notification.type = TEAM_CHANGED_NOTIFICATION;
+				notification.newTeam = match_lobby_message->newTeam;
+				notification.playerID = match_lobby_message->playerID;
+				NotifyClients(playersMatch, &notification);
 			}
 
 			break;
@@ -619,15 +604,14 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			//*******************************
 			// Send START MATCH REPLY
 			//*******************************
-			MatchLobbyMessage *start_match_reply = new MatchLobbyMessage();
-			start_match_reply->type = START_MATCH_REPLY;
-			start_match_reply->changeAccepted = started;
-			if(  Message::WriteMessage(start_match_reply, connectFD) == false)
+			MatchLobbyMessage start_match_reply;
+			start_match_reply.type = START_MATCH_REPLY;
+			start_match_reply.changeAccepted = started;
+			if(  Message::WriteMessage(&start_match_reply, connectFD) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
 			}
-			delete start_match_reply;
 
 			if( started )
 			{
@@ -635,10 +619,9 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 				// Send Client Notifications
 				//*******************************
 				//TODO: Make sure each client is ready. IE: Listed for replies
-				MatchLobbyMessage *notification = new MatchLobbyMessage();
-				notification->type = MATCH_START_NOTIFICATION;
-				NotifyClients(playersMatch, notification);
-				delete notification;
+				MatchLobbyMessage notification;
+				notification.type = MATCH_START_NOTIFICATION;
+				NotifyClients(playersMatch, &notification);
 			}
 
 			break;
@@ -662,16 +645,14 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			//*******************************
 			// Send Register Reply
 			//*******************************
-			MatchLobbyMessage *register_reply = new MatchLobbyMessage();
-			register_reply->type = REGISTER_REPLY;
-			if(  Message::WriteMessage(register_reply, connectFD) == false)
+			MatchLobbyMessage register_reply;
+			register_reply.type = REGISTER_REPLY;
+			if(  Message::WriteMessage(&register_reply, connectFD) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
-				delete register_reply;
 				break;
 			}
-			delete register_reply;
 
 			if(playersMatch->RegisterPlayer(playerID))
 			{
@@ -730,24 +711,22 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			//*******************************
 			// Send CHANGE COLOR REPLY
 			//*******************************
-			MatchLobbyMessage *change_color_reply = new MatchLobbyMessage();
-			change_color_reply->type = CHANGE_COLOR_REPLY;
-			change_color_reply->changeAccepted = true;
-			if(  Message::WriteMessage(change_color_reply, connectFD) == false)
+			MatchLobbyMessage change_color_reply;
+			change_color_reply.type = CHANGE_COLOR_REPLY;
+			change_color_reply.changeAccepted = true;
+			if(  Message::WriteMessage(&change_color_reply, connectFD) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
 			}
-			delete change_color_reply;
 
 			//*******************************
 			// Send Client Notifications
 			//*******************************
-			MatchLobbyMessage *notification = new MatchLobbyMessage();
-			notification->type = COLOR_CHANGED_NOTIFICATION;
-			notification->newColor = match_lobby_message->newColor;
-			NotifyClients(playersMatch, notification);
-			delete notification;
+			MatchLobbyMessage notification;
+			notification.type = COLOR_CHANGED_NOTIFICATION;
+			notification.newColor = match_lobby_message->newColor;
+			NotifyClients(playersMatch, &notification);
 
 			break;
 		}
@@ -781,24 +760,22 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			//*******************************
 			// Send CHANGE MAP REPLY
 			//*******************************
-			MatchLobbyMessage *change_map_reply = new MatchLobbyMessage();
-			change_map_reply->type = CHANGE_MAP_REPLY;
-			change_map_reply->changeAccepted = true;
-			if(  Message::WriteMessage(change_map_reply, connectFD) == false)
+			MatchLobbyMessage change_map_reply;
+			change_map_reply.type = CHANGE_MAP_REPLY;
+			change_map_reply.changeAccepted = true;
+			if(  Message::WriteMessage(&change_map_reply, connectFD) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
 			}
-			delete change_map_reply;
 
 			//*******************************
 			// Send Client Notifications
 			//*******************************
-			MatchLobbyMessage *notification = new MatchLobbyMessage();
-			notification->type = MAP_CHANGED_NOTIFICATION;
-			notification->mapDescription = match_lobby_message->mapDescription;
-			NotifyClients(playersMatch, notification);
-			delete notification;
+			MatchLobbyMessage notification;
+			notification.type = MAP_CHANGED_NOTIFICATION;
+			notification.mapDescription = match_lobby_message->mapDescription;
+			NotifyClients(playersMatch, &notification);
 
 			break;
 		}
@@ -832,24 +809,22 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			//*************************************
 			// Send Change Victory Condition Reply
 			//**************************************
-			MatchLobbyMessage *change_victory_reply = new MatchLobbyMessage();
-			change_victory_reply->type = CHANGE_VICTORY_COND_REPLY;
-			change_victory_reply->changeAccepted = true;
-			if(  Message::WriteMessage(change_victory_reply, connectFD) == false)
+			MatchLobbyMessage change_victory_reply;
+			change_victory_reply.type = CHANGE_VICTORY_COND_REPLY;
+			change_victory_reply.changeAccepted = true;
+			if(  Message::WriteMessage(&change_victory_reply, connectFD) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
 			}
-			delete change_victory_reply;
 
 			//*******************************
 			// Send Client Notifications
 			//*******************************
-			MatchLobbyMessage *notification = new MatchLobbyMessage();
-			notification->type = VICTORY_COND_CHANGED_NOTIFICATION;
-			notification->newVictCond = match_lobby_message->newVictCond;
-			NotifyClients(playersMatch, notification);
-			delete notification;
+			MatchLobbyMessage notification;
+			notification.type = VICTORY_COND_CHANGED_NOTIFICATION;
+			notification.newVictCond = match_lobby_message->newVictCond;
+			NotifyClients(playersMatch, &notification);
 
 			break;
 		}
@@ -883,24 +858,22 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			//*******************************
 			// Send Change Game Speed Reply
 			//*******************************
-			MatchLobbyMessage *change_speed_reply = new MatchLobbyMessage();
-			change_speed_reply->type = CHANGE_GAME_SPEED_REPLY;
-			change_speed_reply->changeAccepted = true;
-			if(  Message::WriteMessage(change_speed_reply, connectFD) == false)
+			MatchLobbyMessage change_speed_reply;
+			change_speed_reply.type = CHANGE_GAME_SPEED_REPLY;
+			change_speed_reply.changeAccepted = true;
+			if(  Message::WriteMessage(&change_speed_reply, connectFD) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
 			}
-			delete change_speed_reply;
 
 			//*******************************
 			// Send Client Notifications
 			//*******************************
-			MatchLobbyMessage *notification = new MatchLobbyMessage();
-			notification->type = GAME_SPEED_CHANGED_NOTIFICATION;
-			notification->newSpeed = match_lobby_message->newSpeed;
-			NotifyClients(playersMatch, notification);
-			delete notification;
+			MatchLobbyMessage notification;
+			notification.type = GAME_SPEED_CHANGED_NOTIFICATION;
+			notification.newSpeed = match_lobby_message->newSpeed;
+			NotifyClients(playersMatch, &notification);
 
 			break;
 		}
@@ -931,26 +904,24 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			//*******************************
 			// Send Change Leader Reply
 			//*******************************
-			MatchLobbyMessage *change_leader_reply = new MatchLobbyMessage();
-			change_leader_reply->type = CHANGE_LEADER_REPLY;
-			change_leader_reply->changeAccepted = changed;
-			if(  Message::WriteMessage(change_leader_reply, connectFD) == false)
+			MatchLobbyMessage change_leader_reply;
+			change_leader_reply.type = CHANGE_LEADER_REPLY;
+			change_leader_reply.changeAccepted = changed;
+			if(  Message::WriteMessage(&change_leader_reply, connectFD) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
 			}
-			delete change_leader_reply;
 
 			if( changed )
 			{
 				//*******************************
 				// Send Client Notifications
 				//*******************************
-				MatchLobbyMessage *notification = new MatchLobbyMessage();
-				notification->type = CHANGE_LEADER_NOTIFICATION;
-				notification->playerID = match_lobby_message->playerID;
-				NotifyClients(playersMatch, notification);
-				delete notification;
+				MatchLobbyMessage notification;
+				notification.type = CHANGE_LEADER_NOTIFICATION;
+				notification.playerID = match_lobby_message->playerID;
+				NotifyClients(playersMatch, &notification);
 			}
 
 			return IN_MATCH_LOBBY;
@@ -985,27 +956,25 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int connectFD, Player *player)
 			//*******************************
 			// Send Kick Player Reply
 			//*******************************
-			MatchLobbyMessage *kick_player_reply = new MatchLobbyMessage();
-			kick_player_reply->type = KICK_PLAYER_REPLY;
-			kick_player_reply->changeAccepted = removed;
-			if(  Message::WriteMessage(kick_player_reply, connectFD) == false)
+			MatchLobbyMessage kick_player_reply;
+			kick_player_reply.type = KICK_PLAYER_REPLY;
+			kick_player_reply.changeAccepted = removed;
+			if(  Message::WriteMessage(&kick_player_reply, connectFD) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
 			}
-			delete kick_player_reply;
 
 			if( removed )
 			{
 				//*******************************
 				// Send Client Notifications
 				//*******************************
-				MatchLobbyMessage *notification = new MatchLobbyMessage();
-				notification->type = PLAYER_LEFT_MATCH_NOTIFICATION;
-				notification->playerID = match_lobby_message->playerID;
-				notification->newLeaderID = playersMatch->GetLeaderID();
-				NotifyClients(playersMatch, notification);
-				delete notification;
+				MatchLobbyMessage notification;
+				notification.type = PLAYER_LEFT_MATCH_NOTIFICATION;
+				notification.playerID = match_lobby_message->playerID;
+				notification.newLeaderID = playersMatch->GetLeaderID();
+				NotifyClients(playersMatch, &notification);
 			}
 
 			break;
@@ -1060,21 +1029,19 @@ enum LobbyReturn RTT::ProcessGameCommand(int connectFD, Player *player)
 			//TODO: Check to see if the move is legal
 			//TODO: Move the unit around in the gameboard
 
-			GameMessage *move_reply = new GameMessage();
-			move_reply->type = MOVE_UNIT_DIRECTION_REPLY;
-			move_reply->moveResult = MOVE_SUCCESS;
-			GameMessage::WriteMessage(move_reply, connectFD);
-			delete move_reply;
+			GameMessage move_reply;
+			move_reply.type = MOVE_UNIT_DIRECTION_REPLY;
+			move_reply.moveResult = MOVE_SUCCESS;
+			GameMessage::WriteMessage(&move_reply, connectFD);
 
-			GameMessage *move_notice = new GameMessage();
-			move_notice->type = UNIT_MOVED_DIRECTION_NOTICE;
-			move_notice->unitID = game_message->unitID;
-			move_notice->xOld = game_message->xOld;
-			move_notice->yOld = game_message->yOld;
-			move_notice->direction = game_message->direction;
+			GameMessage move_notice;
+			move_notice.type = UNIT_MOVED_DIRECTION_NOTICE;
+			move_notice.unitID = game_message->unitID;
+			move_notice.xOld = game_message->xOld;
+			move_notice.yOld = game_message->yOld;
+			move_notice.direction = game_message->direction;
 
-			NotifyClients(playersMatch, move_notice);
-			delete move_notice;
+			NotifyClients(playersMatch, &move_notice);
 
 			return IN_GAME;
 		}
@@ -1090,14 +1057,13 @@ enum LobbyReturn RTT::ProcessGameCommand(int connectFD, Player *player)
 //Send a message of type Error to the client
 void  RTT::SendError(int connectFD, enum ErrorType errorType)
 {
-	ErrorMessage *error_msg = new ErrorMessage();
-	error_msg->type = MESSAGE_ERROR;
-	error_msg->errorType = errorType;
-	if(  Message::WriteMessage(error_msg, connectFD) == false)
+	ErrorMessage error_msg;
+	error_msg.type = MESSAGE_ERROR;
+	error_msg.errorType = errorType;
+	if(  Message::WriteMessage(&error_msg, connectFD) == false)
 	{
 		cerr << "ERROR: Error message send returned failure.\n";
 	}
-	delete error_msg;
 }
 
 bool RTT::NotifyClients(Match *match, Message *message)

@@ -590,12 +590,11 @@ bool LeaveMatch(Player *player)
 	//*******************************
 	// Send Client Notifications
 	//*******************************
-	MatchLobbyMessage *notification = new MatchLobbyMessage();
-	notification->type = PLAYER_LEFT_MATCH_NOTIFICATION;
-	notification->playerID = player->GetID();
-	notification->newLeaderID = foundMatch->GetLeaderID();
-	NotifyClients(foundMatch, notification);
-	delete notification;
+	MatchLobbyMessage notification;
+	notification.type = PLAYER_LEFT_MATCH_NOTIFICATION;
+	notification.playerID = player->GetID();
+	notification.newLeaderID = foundMatch->GetLeaderID();
+	NotifyClients(foundMatch, &notification);
 	return true;
 }
 
