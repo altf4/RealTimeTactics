@@ -16,6 +16,7 @@ Unit::Unit( )
 {
 
 	ID = lastIDGiven++;
+	pthread_mutex_init(&m_unitLock, NULL);
 }
 
 //Returns true if the given Unit is the same one as this

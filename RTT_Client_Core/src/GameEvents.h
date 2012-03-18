@@ -53,17 +53,9 @@ class GameEvents
 	//				Movement Events
 	//********************************************
 
-	//A Unit has moved
-	//	unitID - The ID of the unit moved
-	//	destination - The Coordinate of the tile being moved to
-	//		NOTE: The unit by default should be facing the direction of the last hop moved
-	//		Calls UnitMovedSignal() which must be defined by the caller
-	void UnitMoved(Unit *unit, struct Coordinate source,
-			struct Coordinate destination);
-
 	//Virtual function defined by the caller as a way to hook into this event
-	virtual void UI_UnitMovedSignal(Unit *unit, struct Coordinate source,
-			struct Coordinate destination) = 0;
+	virtual void UI_UnitMovedDirectionSignal(uint32_t unitID, struct Coordinate source,
+			enum Direction direction, enum Direction facing) = 0;
 
 	//A Unit has changed the direction it is facing
 	//	unitID - The ID of the unit moved

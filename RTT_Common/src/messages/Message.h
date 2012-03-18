@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : Unit.h
+// Name        : Message.h
 // Author      : AltF4
 // Copyright   : 2011, GNU GPLv3
 // Description : Message class which is passed to/from client/server
@@ -126,7 +126,7 @@ enum MessageType: char
 	MATCH_START_ACK,
 
 	//*******************
-	//   Error Message
+	//   Game Message
 	//*******************
 	MOVE_UNIT_DIRECTION_REQUEST,
 	MOVE_UNIT_DIRECTION_REPLY,

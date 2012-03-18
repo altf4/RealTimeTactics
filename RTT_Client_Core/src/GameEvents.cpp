@@ -9,6 +9,7 @@
 #include "GameEvents.h"
 #include "messages/Message.h"
 #include "messages/GameMessage.h"
+#include "ClientGameState.h"
 
 #include <iostream>
 
@@ -30,7 +31,34 @@ bool GameEvents::ProcessGameEvent()
 		return false;
 	}
 
+	GameMessage *game_message = (GameMessage*)event_message;
+	switch(game_message->type)
+	{
+		case UNIT_MOVED_DIRECTION_NOTICE:
+		{
+			//TODO: Specify a separate direction to face
+			struct Coordinate source = {game_message->xOld, game_message->yOld};
+
+			ClientGameState::Instance().MoveUnitDirection(game_message->unitID,
+					source,	game_message->direction, game_message->direction);
+
+			//Call the UI's movement code (IE: Move the unit on the screen)
+			UI_UnitMovedDirectionSignal(game_message->unitID,
+					source,	game_message->direction, game_message->direction);
+
+			//Send back an acknowledgment of the move
+			GameMessage unit_moved_reply = GameMessage();
+			unit_moved_reply.type = UNIT_MOVED_DIRECTION_ACK;
+			Message::WriteMessage(&unit_moved_reply, callbackSocket);
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
 	//TODO: Handle the unit moved message!
 
+	delete game_message;
 	return true;
 }

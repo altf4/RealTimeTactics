@@ -44,6 +44,8 @@ public:
 	//	Each tile takes up a certain number of movement points
 	double currentMovement;
 
+	//Position on the gameboard
+	uint x, y;
 	Direction directionFacing;
 
 	//Unique identifier for this unit.
@@ -54,13 +56,15 @@ public:
 	// The client can choose to name his Units unique things to distinguish them
 	string unitName;
 
-
 	Unit( );
 
 	//Returns true if the given Unit is the same one as this
 	//	IE: The actual same unit. Not another unit with the same properties
 	//	Does this by comparing ID's
 	bool Equals(Unit *testUnit);
+
+	//Used for making threadsafe access of the unit when in a list
+	pthread_mutex_t m_unitLock;
 
 };
 
