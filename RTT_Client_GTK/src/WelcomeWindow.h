@@ -10,11 +10,13 @@
 
 #include <gtkmm.h>
 #include <stdint.h>
-#include "ClientProtocolHandler.h"
 #include "RTT_Client_GTK.h"
 #include "MatchListColumns.h"
 #include "PlayerListColumns.h"
 #include "TeamComboColumns.h"
+#include "CallbackHandler.h"
+#include "Player.h"
+
 #include <iostream>
 #include <arpa/inet.h>
 #include <vector>
@@ -37,6 +39,8 @@ public:
 	~WelcomeWindow();
 
 	Glib::RefPtr<Builder> welcome_builder;
+
+	CallbackHandler *m_callbackHandler;
 
 	//The three Welcome Window panes
 	Box *welcome_box;
@@ -86,8 +90,6 @@ public:
 	TeamComboColumns *teamNumberColumns;
 	Glib::RefPtr<Gtk::ListStore> teamNumberListStore;
 
-	pthread_t threadID;
-
 	PlayerDescription playerDescription;
 	MatchDescription currentMatch;
 
@@ -118,6 +120,21 @@ public:
 	Glib::RefPtr<Gtk::ListStore> PopulateTeamNumberCombo();
 
 	bool GetPasswordTerminal(string plaintext, unsigned char *hash);
+
+protected:
+
+	void TeamChangedEvent();
+	void TeamColorChangedEvent();
+	void MapChangedEvent();
+	void GamespeedChangedEvent();
+	void VictoryConditionChangedEvent();
+	void PlayerLeftEvent();
+	void KickedFromMatchEvent();
+	void PlayerJoinedEvent();
+	void LeaderChangedEvent();
+	void MatchStartedEvent();
+	void CallbackErrorEvent();
+
 };
 
 }

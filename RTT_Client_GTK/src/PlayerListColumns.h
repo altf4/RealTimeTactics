@@ -25,7 +25,7 @@ public:
 
 	TreeModelColumn<bool> isLeader;
 	TreeModelColumn<bool> leaderSelectable;
-	TreeModelColumn<string> name;
+	TreeModelColumn<std::string> name;
 	TreeModelColumn<Glib::ustring> teamName;
 	TreeModelColumn<Glib::RefPtr<Gtk::TreeModel> > teamChosen;
 	TreeModelColumn<uint> ID;
