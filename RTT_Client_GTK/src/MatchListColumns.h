@@ -25,8 +25,8 @@ public:
 	TreeModelColumn<int> matchID;
 	TreeModelColumn<int> maxPlayers;
 	TreeModelColumn<int> currentPlayers;
-	TreeModelColumn<string> name;
-	TreeModelColumn<string> timeCreated;
+	TreeModelColumn<std::string> name;
+	TreeModelColumn<std::string> timeCreated;
 };
 
 }

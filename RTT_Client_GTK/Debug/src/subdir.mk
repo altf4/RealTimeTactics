@@ -4,14 +4,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/CallbackHandler.cpp \
 ../src/RTT_Client_GTK.cpp \
 ../src/WelcomeWindow.cpp 
 
 OBJS += \
+./src/CallbackHandler.o \
 ./src/RTT_Client_GTK.o \
 ./src/WelcomeWindow.o 
 
 CPP_DEPS += \
+./src/CallbackHandler.d \
 ./src/RTT_Client_GTK.d \
 ./src/WelcomeWindow.d 
 

@@ -7,6 +7,7 @@
 
 #include "WelcomeWindow.h"
 #include "Team.h"
+#include "ClientProtocolHandler.h"
 
 using namespace RTT;
 
@@ -14,13 +15,285 @@ WelcomeWindow::WelcomeWindow(BaseObjectType* cobject,
 		const Glib::RefPtr<Gtk::Builder>& refBuilder)
 : Gtk::Window(cobject)
 {
-
+	m_callbackHandler = new CallbackHandler();
+	m_callbackHandler->m_sig_team_change.connect(sigc::mem_fun(*this, &WelcomeWindow::TeamChangedEvent));
+	m_callbackHandler->m_sig_color_change.connect(sigc::mem_fun(*this, &WelcomeWindow::TeamColorChangedEvent));
+	m_callbackHandler->m_sig_map_change.connect(sigc::mem_fun(*this, &WelcomeWindow::MapChangedEvent));
+	m_callbackHandler->m_sig_speed_change.connect(sigc::mem_fun(*this, &WelcomeWindow::GamespeedChangedEvent));
+	m_callbackHandler->m_sig_victory_cond_change.connect(sigc::mem_fun(*this, &WelcomeWindow::VictoryConditionChangedEvent));
+	m_callbackHandler->m_sig_player_left.connect(sigc::mem_fun(*this, &WelcomeWindow::PlayerLeftEvent));
+	m_callbackHandler->m_sig_kicked.connect(sigc::mem_fun(*this, &WelcomeWindow::KickedFromMatchEvent));
+	m_callbackHandler->m_sig_player_joined.connect(sigc::mem_fun(*this, &WelcomeWindow::PlayerJoinedEvent));
+	m_callbackHandler->m_sig_leader_change.connect(sigc::mem_fun(*this, &WelcomeWindow::LeaderChangedEvent));
+	m_callbackHandler->m_sig_match_started.connect(sigc::mem_fun(*this, &WelcomeWindow::MatchStartedEvent));
+	m_callbackHandler->m_sig_callback_error.connect(sigc::mem_fun(*this, &WelcomeWindow::CallbackErrorEvent));
 }
 
 WelcomeWindow::~WelcomeWindow()
 {
 
 }
+
+//****************************************************************************
+//**						Callback Event Handlers							**
+//****************************************************************************
+
+void WelcomeWindow::TeamChangedEvent()
+{
+	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
+	if(change.type == CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+	PlayerListColumns playerColumns;
+	TeamComboColumns teamColumns;
+
+	TreeModel::Children rows = playerListStore->children();
+	TreeModel::iterator rowIter;
+	for(rowIter=rows.begin(); rowIter!=rows.end(); rowIter++)
+	{
+		if(!rowIter)
+		{
+			cerr << "ERROR: A player row was corrupt\n";
+			continue;
+		}
+		TreeModel::Row playerRow=*rowIter;
+		int ID = playerRow[playerColumns.ID];
+		if( ID == (int)change.playerID )
+		{
+			playerRow[playerColumns.teamName] =
+					Team::TeamNumberToString((enum TeamNumber)change.team);
+
+//						//Get set the new team number back into the combobox's data
+//						TreeValueProxy<Glib::RefPtr<TreeModel> > teamNumberListStore =
+//								playerRow[playerColumns.teamChosen];
+//						Glib::RefPtr<TreeModel> treeModelPtr = teamNumberListStore;
+//						TreeModel::iterator chosenTeamIter = treeModelPtr->get_iter("0");
+//						TreeModel::Row existingTeamRow = (*chosenTeamIter);
+//						existingTeamRow[teamColumns.teamNum] = change.team;
+//						existingTeamRow[teamColumns.teamString] =
+//								Team::TeamNumberToString((enum TeamNumber)change.team);
+
+			player_list_view->show_all();
+			break;
+		}
+	}
+}
+
+void WelcomeWindow::TeamColorChangedEvent()
+{
+	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
+	if(change.type == CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+	//TODO: Something here!
+}
+
+void WelcomeWindow::MapChangedEvent()
+{
+	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
+	if(change.type == CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+	stringstream ss;
+	ss << change.mapDescription.width;
+	ss << " x ";
+	ss << change.mapDescription.length;
+	map_size_label->set_text(ss.str());
+}
+
+void WelcomeWindow::GamespeedChangedEvent()
+{
+	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
+	if(change.type == CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+	speed_label->set_text(Match::GameSpeedToString(change.speed));
+}
+
+void WelcomeWindow::VictoryConditionChangedEvent()
+{
+	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
+	if(change.type == CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+	victory_cond_label->set_text(
+			Match::VictoryConditionToString(change.victory));
+}
+
+void WelcomeWindow::PlayerLeftEvent()
+{
+	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
+	if(change.type == CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+	TreeModel::Children rows = playerListStore->children();
+	TreeModel::iterator rowIter;
+	for(rowIter=rows.begin(); rowIter!=rows.end(); rowIter++)
+	{
+		if(!rowIter)
+		{
+			cerr << "ERROR: A player row was corrupt\n";
+			continue;
+		}
+		TreeModel::Row row=*rowIter;
+		uint ID = row[playerColumns->ID];
+		if( ID == change.playerID)
+		{
+			playerListStore->erase(rowIter);
+		}
+	}
+	for(rowIter=rows.begin(); rowIter!=rows.end(); rowIter++)
+	{
+		TreeModel::Row row=*rowIter;
+		uint ID = row[playerColumns->ID];
+		if( ID == change.newLeaderID )
+		{
+			row[playerColumns->isLeader] = true;
+		}
+		else
+		{
+			row[playerColumns->isLeader] = false;
+		}
+		if(playerDescription.ID == change.newLeaderID)
+		{
+			row[playerColumns->leaderSelectable] = true;
+			swap_leader_widgets(true);
+		}
+		else
+		{
+			row[playerColumns->leaderSelectable] = false;
+			swap_leader_widgets(false);
+		}
+	}
+	currentMatch.leaderID = change.newLeaderID;
+	player_list_view->show_all();
+}
+
+void WelcomeWindow::KickedFromMatchEvent()
+{
+	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
+	if(change.type == CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+	//TODO: Stuff!
+}
+
+void WelcomeWindow::PlayerJoinedEvent()
+{
+	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
+	if(change.type == CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+	if(playerDescription.ID !=	change.playerDescription.ID)
+	{
+		PlayerListColumns playerColumns;
+
+		//Add a new row for the new player
+		TreeModel::Row row = *(playerListStore->append());
+		row[playerColumns.name] = change.playerDescription.name;
+		row[playerColumns.teamChosen] =	PopulateTeamNumberCombo();
+		row[playerColumns.teamName] = Team::TeamNumberToString(
+				(enum TeamNumber)change.playerDescription.team);
+		row[playerColumns.ID] = change.playerDescription.ID;
+		row[playerColumns.isLeader] = false;
+		if(playerDescription.ID == currentMatch.leaderID)
+		{
+			row[playerColumns.leaderSelectable] = true;
+		}
+		else
+		{
+			row[playerColumns.leaderSelectable] = false;
+		}
+		player_list_view->show_all();
+	}
+}
+
+void WelcomeWindow::LeaderChangedEvent()
+{
+	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
+	if(change.type == CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+	PlayerListColumns playerColumns;
+
+	currentMatch.leaderID = change.playerID;
+
+	TreeModel::Children rows = playerListStore->children();
+	TreeModel::iterator rowIter;
+	for(rowIter = rows.begin(); rowIter != rows.end(); rowIter++)
+	{
+		if(!rowIter)
+		{
+			cerr << "ERROR: A player row was corrupt\n";
+			continue;
+		}
+		TreeModel::Row row = *rowIter;
+		uint ID = row[playerColumns.ID];
+		if( ID == change.playerID)
+		{
+			row[playerColumns.isLeader] = true;
+		}
+		else
+		{
+			row[playerColumns.isLeader] = false;
+		}
+		if(playerDescription.ID == change.playerID)
+		{
+			row[playerColumns.leaderSelectable] = true;
+			//Swap out the game speed combo box and label
+			swap_leader_widgets(true);
+		}
+		else
+		{
+			row[playerColumns.leaderSelectable] = false;
+			//Swap out the game speed combo box and label
+			swap_leader_widgets(false);
+		}
+	}
+	player_list_view->show_all();
+}
+
+void WelcomeWindow::MatchStartedEvent()
+{
+	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
+	if(change.type == CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+	//TODO: Stuff!
+}
+
+void WelcomeWindow::CallbackErrorEvent()
+{
+	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
+	if(change.type == CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+	cerr << "ERROR: Callback receive failed\n";
+}
+
+
 
 void WelcomeWindow::custom_server_click()
 {
@@ -64,7 +337,10 @@ void WelcomeWindow::connect_click()
 		LaunchMainLobbyPane();
 
 		//Launch the Callback Thread
-		pthread_create(&threadID, NULL, CallbackThread, NULL);
+		if(m_callbackHandler != NULL)
+		{
+			m_callbackHandler->Start();
+		}
 	}
 	else
 	{
@@ -186,7 +462,9 @@ void WelcomeWindow::quit_server_click()
 	ExitServer();
 	LaunchServerConnectPane();
 
-	pthread_cancel(threadID);
+	//This will wait for the callback thread to finish
+	delete m_callbackHandler;
+	m_callbackHandler = NULL;
 }
 
 void WelcomeWindow::on_teamNumber_combo_changed(const Glib::ustring& path,
@@ -395,7 +673,7 @@ void WelcomeWindow::launch_match_click()
 
 //Swaps out the widgets which are only used when we are the match leader
 // isLeader: True is we are the leader, false if not
-void WelcomeWindow::WelcomeWindow::swap_leader_widgets(bool isLeader)
+void WelcomeWindow::swap_leader_widgets(bool isLeader)
 {
 	speed_combo->set_visible(isLeader);
 	speed_label->set_visible(!isLeader);
