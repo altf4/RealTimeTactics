@@ -24,18 +24,12 @@ WelcomeWindow::~WelcomeWindow()
 
 void WelcomeWindow::custom_server_click()
 {
-	pthread_rwlock_wrlock(&globalLock);
-
 	statusbar->push("Set server settings, then hit Connect");
 	box_custom->set_visible(true);
-
-	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::connect_click()
 {
-	pthread_rwlock_wrlock(&globalLock);
-
 	statusbar->push("Trying to connect...");
 
 	//A little bit of input validation here
@@ -46,7 +40,6 @@ void WelcomeWindow::connect_click()
 	if (Res == 0)
 	{
 		statusbar->push("Invalid IP address");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
@@ -56,7 +49,6 @@ void WelcomeWindow::connect_click()
 	{
 		//Error occurred
 		statusbar->push("Invalid port number");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
@@ -78,26 +70,20 @@ void WelcomeWindow::connect_click()
 	{
 		statusbar->push("Failed to connect to server");
 	}
-
-	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::create_match_submit_click()
 {
-	pthread_rwlock_wrlock(&globalLock);
-
 	string matchName = match_name_entry->get_text();
 	if(matchName.size() < 1 && matchName.size() > 20)
 	{
 		status_lobby->push("Invalid match name length");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
 	if(create_match_map_combo->get_active_row_number() == -1)
 	{
 		status_lobby->push("Please select a map");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 	string mapName = create_match_map_combo->get_active_text();
@@ -106,7 +92,6 @@ void WelcomeWindow::create_match_submit_click()
 	if( maxPlayers == -1)
 	{
 		status_lobby->push("Please select a maximum number of players");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
@@ -124,37 +109,24 @@ void WelcomeWindow::create_match_submit_click()
 	else
 	{
 		status_lobby->push("Server returned failure to create match");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
-
-	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::create_match_click()
 {
-	pthread_rwlock_wrlock(&globalLock);
-
 	create_match_box->set_visible(true);
 	match_lists->set_visible(false);
-
-	pthread_rwlock_unlock(&globalLock);
 }
 
 //Refresh the match list
 void WelcomeWindow::list_matches_click()
 {
-	pthread_rwlock_wrlock(&globalLock);
-
 	list_matches();
-
-	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::leave_match_click()
 {
-	pthread_rwlock_wrlock(&globalLock);
-
 	if( LeaveMatch() )
 	{
 		currentMatch.ID = 0;
@@ -164,18 +136,14 @@ void WelcomeWindow::leave_match_click()
 	{
 		match_lobby_status->push("Error on server, couldn't leave match");
 	}
-
-	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::join_match_click()
 {
-	pthread_rwlock_wrlock(&globalLock);
 	int page = match_lists->get_current_page();
 	if( page == -1 )
 	{
 		status_lobby->push("Please select a match, and try again");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
@@ -183,7 +151,6 @@ void WelcomeWindow::join_match_click()
 	if( view == NULL )
 	{
 		status_lobby->push("Please select a match, and try again");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
@@ -192,7 +159,6 @@ void WelcomeWindow::join_match_click()
 	if( select->count_selected_rows() != 1)
 	{
 		status_lobby->push("Please select a match, and try again");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 	TreeModel::iterator iter = select->get_selected();
@@ -211,30 +177,21 @@ void WelcomeWindow::join_match_click()
 	{
 		currentMatch.ID = 0;
 		status_lobby->push("Failed to join match. Is it full?");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
-
-	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::quit_server_click()
 {
-	pthread_rwlock_wrlock(&globalLock);
-
 	ExitServer();
 	LaunchServerConnectPane();
 
 	pthread_cancel(threadID);
-
-	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::on_teamNumber_combo_changed(const Glib::ustring& path,
 		const Gtk::TreeIter& iter)
 {
-	pthread_rwlock_wrlock(&globalLock);
-
 	PlayerListColumns playerColumns;
 	TeamComboColumns teamColumns;
 
@@ -253,7 +210,6 @@ void WelcomeWindow::on_teamNumber_combo_changed(const Glib::ustring& path,
 		cerr << "WARNING: Change of team on the server failed\n";
 		match_lobby_status->push("Could not change player's team");
 		player_list_view->show_all();
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
@@ -268,13 +224,10 @@ void WelcomeWindow::on_teamNumber_combo_changed(const Glib::ustring& path,
 	existingTeamRow[teamColumns.teamNum] = newTeam;
 
 	player_list_view->show_all();
-
-	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::on_leader_toggled(const Glib::ustring& path)
 {
-	pthread_rwlock_wrlock(&globalLock);
 	PlayerListColumns playerColumns;
 
 	Glib::RefPtr<TreeModel> playerModelPtr = playerListStore;
@@ -284,7 +237,6 @@ void WelcomeWindow::on_leader_toggled(const Glib::ustring& path)
 		cerr << "ERROR: Invalid player row selected for changing leader\n";
 		match_lobby_status->push("Could not change the leader");
 		player_list_view->show_all();
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 	TreeModel::Row chosenPlayerRow = (*chosenPlayerIter);
@@ -295,7 +247,6 @@ void WelcomeWindow::on_leader_toggled(const Glib::ustring& path)
 		cerr << "WARNING: Change of leader on the server failed\n";
 		match_lobby_status->push("Could not change the leader");
 		player_list_view->show_all();
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
 
@@ -311,41 +262,32 @@ void WelcomeWindow::on_leader_toggled(const Glib::ustring& path)
 	currentMatch.leaderID = newLeaderID;
 
 	player_list_view->show_all();
-
-	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::speed_combo_changed()
 {
-	pthread_rwlock_wrlock(&globalLock);
 	char rowID = speed_combo->get_active_row_number();
 	if( ChangeSpeed((enum GameSpeed)rowID) == false)
 	{
 		cerr << "ERROR: Server rejected change of game speed\n";
 		match_lobby_status->push("Could not change game speed");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
-	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::victory_combo_changed()
 {
-	pthread_rwlock_wrlock(&globalLock);
 	char rowID = win_condition_combo->get_active_row_number();
 	if( ChangeVictoryCondition((enum VictoryCondition)rowID) == false)
 	{
 		cerr << "ERROR: Server rejected change of victory condition\n";
 		match_lobby_status->push("Could not change victory condition");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
-	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::map_combo_changed()
 {
-	pthread_rwlock_wrlock(&globalLock);
 	char rowID = win_condition_combo->get_active_row_number();
 	struct MapDescription map;
 	map.length = 12;
@@ -355,10 +297,8 @@ void WelcomeWindow::map_combo_changed()
 	{
 		cerr << "ERROR: Server rejected change of victory condition\n";
 		match_lobby_status->push("Could not change victory condition");
-		pthread_rwlock_unlock(&globalLock);
 		return;
 	}
-	pthread_rwlock_unlock(&globalLock);
 }
 
 void WelcomeWindow::list_matches()
@@ -442,7 +382,6 @@ void WelcomeWindow::list_matches()
 
 void WelcomeWindow::launch_match_click()
 {
-	pthread_rwlock_wrlock(&globalLock);
 	if(StartMatch())
 	{
 		system("RTT_Ogre_3D");
@@ -452,7 +391,6 @@ void WelcomeWindow::launch_match_click()
 	{
 		match_lobby_status->push("Failed to start match");
 	}
-	pthread_rwlock_unlock(&globalLock);
 }
 
 //Swaps out the widgets which are only used when we are the match leader

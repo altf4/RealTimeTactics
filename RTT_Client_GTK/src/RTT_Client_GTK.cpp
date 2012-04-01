@@ -65,8 +65,6 @@ int main( int argc, char **argv)
 	window->launch_match_button->signal_clicked().connect(
 			sigc::mem_fun(*window, &WelcomeWindow::launch_match_click));
 
-	pthread_rwlock_init(&window->globalLock, NULL);
-
 	Main::run(*window);
 }
 
@@ -117,7 +115,6 @@ void *CallbackThread(void * parm)
 		{
 			case TEAM_CHANGE:
 			{
-				pthread_rwlock_wrlock(&window->globalLock);
 				PlayerListColumns playerColumns;
 				TeamComboColumns teamColumns;
 
@@ -151,45 +148,35 @@ void *CallbackThread(void * parm)
 						break;
 					}
 				}
-				pthread_rwlock_unlock(&window->globalLock);
 
 			}
 			case COLOR_CHANGE:
 			{
-				pthread_rwlock_wrlock(&window->globalLock);
 				//Do stuff here
-				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case MAP_CHANGE:
 			{
-				pthread_rwlock_wrlock(&window->globalLock);
 				stringstream ss;
 				ss << change.mapDescription.width;
 				ss << " x ";
 				ss << change.mapDescription.length;
 				window->map_size_label->set_text(ss.str());
-				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case SPEED_CHANGE:
 			{
-				pthread_rwlock_wrlock(&window->globalLock);
 				window->speed_label->set_text(Match::GameSpeedToString(change.speed));
-				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case VICTORY_CHANGE:
 			{
-				pthread_rwlock_wrlock(&window->globalLock);
 				window->victory_cond_label->set_text(
 						Match::VictoryConditionToString(change.victory));
-				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case PLAYER_LEFT:
 			{
-				pthread_rwlock_wrlock(&window->globalLock);
 				TreeModel::Children rows = window->playerListStore->children();
 				TreeModel::iterator rowIter;
 				for(rowIter=rows.begin(); rowIter!=rows.end(); rowIter++)
@@ -231,7 +218,6 @@ void *CallbackThread(void * parm)
 				}
 				window->currentMatch.leaderID = change.newLeaderID;
 				window->player_list_view->show_all();
-				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case KICKED:
@@ -240,7 +226,6 @@ void *CallbackThread(void * parm)
 			}
 			case PLAYER_JOINED:
 			{
-				pthread_rwlock_wrlock(&window->globalLock);
 
 				if( window->playerDescription.ID !=	change.playerDescription.ID)
 				{
@@ -265,13 +250,11 @@ void *CallbackThread(void * parm)
 					}
 					window->player_list_view->show_all();
 				}
-				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case LEADER_CHANGE:
 			{
 				PlayerListColumns playerColumns;
-				pthread_rwlock_wrlock(&window->globalLock);
 
 				window->currentMatch.leaderID = change.playerID;
 
@@ -308,12 +291,10 @@ void *CallbackThread(void * parm)
 					}
 				}
 				window->player_list_view->show_all();
-				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case MATCH_STARTED:
 			{
-				pthread_rwlock_wrlock(&window->globalLock);
 
 				//If we are the leader, then don't bother with anything here
 				//	We take care of launching the match in the button press
@@ -321,7 +302,6 @@ void *CallbackThread(void * parm)
 				{
 					system("RTT_Ogre_3D");
 				}
-				pthread_rwlock_unlock(&window->globalLock);
 				break;
 			}
 			case CALLBACK_ERROR:
