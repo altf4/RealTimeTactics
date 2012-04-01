@@ -148,7 +148,7 @@ void *CallbackThread(void * parm)
 						break;
 					}
 				}
-
+				break;
 			}
 			case COLOR_CHANGE:
 			{
