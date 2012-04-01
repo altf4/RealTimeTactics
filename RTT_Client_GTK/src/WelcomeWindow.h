@@ -18,7 +18,6 @@
 #include <iostream>
 #include <arpa/inet.h>
 #include <vector>
-#include <pthread.h>
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include <openssl/sha.h>
 
@@ -37,7 +36,6 @@ public:
 	WelcomeWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade);
 	~WelcomeWindow();
 
-	pthread_rwlock_t globalLock;
 	Glib::RefPtr<Builder> welcome_builder;
 
 	//The three Welcome Window panes
