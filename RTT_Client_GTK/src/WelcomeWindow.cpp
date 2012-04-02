@@ -10,6 +10,12 @@
 #include "ClientProtocolHandler.h"
 
 using namespace RTT;
+using namespace Gtk;
+using namespace std;
+
+using boost::posix_time::ptime;
+using boost::posix_time::time_duration;
+using boost::gregorian::date;
 
 WelcomeWindow::WelcomeWindow(BaseObjectType* cobject,
 		const Glib::RefPtr<Gtk::Builder>& refBuilder)

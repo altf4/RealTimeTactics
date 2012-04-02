@@ -13,6 +13,9 @@
 #include "gtkmm.h"
 #include <queue>
 
+namespace RTT
+{
+
 class CallbackHandler
 {
 public:
@@ -49,5 +52,5 @@ private:
 	std::queue<struct CallbackChange> m_changeQueue;
 };
 
-
+}
 #endif /* CALLBACKHANDLER_H_ */

@@ -15,8 +15,7 @@
 #include <string>
 #include <string.h>
 
-using namespace std;
-typedef pair<int, int> Edge;
+typedef std::pair<int, int> Edge;
 namespace RTT
 {
 
@@ -43,7 +42,7 @@ public:
 	uint m_xMax, m_yMax;
 
 	//The 2D vector of tiles (vector of vectors)
-	vector<vector<Tile*> > m_tiles;
+	std::vector<std::vector<Tile*> > m_tiles;
 
 	//Arguments:
 	//	x - Set the maximum longitude of gameboard
@@ -53,7 +52,7 @@ public:
 
 	//Constructor to set Gameboard from file
 	//TODO: Define this file structure
-	Gameboard(string filePath);
+	Gameboard(std::string filePath);
 
 	//Return the tile specified by the given coordinates
 	//Return NULL if there is no such tile

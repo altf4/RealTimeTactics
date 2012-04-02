@@ -19,8 +19,7 @@ Gameboard::Gameboard(uint x_arg, uint y_arg)
 	if( x_arg < 2 || y_arg < 2)
 	{
 		cerr << "ERROR: Invalid gameboard size specified. Too small.\n";
-		throw InvalidGameboardException(
-				"ERROR: Invalid gameboard size specified. Too small.");
+		throw InvalidGameboardException("ERROR: Invalid gameboard size specified. Too small.");
 		return;
 	}
 

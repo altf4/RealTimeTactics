@@ -13,8 +13,6 @@
 #include <vector>
 #include "Unit.h"
 
-using namespace std;
-
 namespace RTT
 {
 
@@ -48,7 +46,7 @@ public:
 	double m_movementCost;
 
 	//List of units currently standing on this tile
-	vector <Unit*> m_unitsPresent;
+	std::vector <Unit*> m_unitsPresent;
 
 	//Whether or not a unit can stand on this tile
 	bool m_isPassable;

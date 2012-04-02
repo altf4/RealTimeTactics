@@ -11,8 +11,6 @@
 
 #include "Message.h"
 
-using namespace std;
-
 namespace RTT
 {
 

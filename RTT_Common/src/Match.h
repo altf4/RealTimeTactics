@@ -21,7 +21,6 @@
 #define MATCH_DESCR_SIZE sizeof(enum Status) + (sizeof(uint32_t)*4) + \
 		MAX_MATCHNAME_LEN + sizeof(int64_t)
 #define MATCH_OPTIONS_SIZE sizeof(uint32_t) + MAX_MATCHNAME_LEN
-using namespace std;
 
 namespace RTT
 {
@@ -68,7 +67,7 @@ public:
 
 	// chargingActions is the global list of actions which have not yet been triggered
 	// chargedActions is the list of actions which are on queue to be triggered
-	vector <Action*> m_chargingActions, m_chargedActions;
+	std::vector <Action*> m_chargingActions, m_chargedActions;
 
 	Match(Player *player);
 	~Match();
@@ -76,7 +75,7 @@ public:
 	void SetID(uint newID);
 	void SetStatus(enum Status newStatus);
 	void SetMaxPlayers(uint maxPlayers);
-	void SetName(string newName);
+	void SetName(std::string newName);
 	void SetLeaderID(uint nextLeader);
 	void SetMap(struct MapDescription newMap);
 	void SetVictoryCondition(enum VictoryCondition newVict);
@@ -88,7 +87,7 @@ public:
 	uint GetID();
 	uint GetMaxPlayers();
 	uint GetCurrentPlayerCount();
-	string GetName();
+	std::string GetName();
 	time_t GetTimeCreated();
 	uint GetLeaderID();
 	struct MatchDescription GetDescription();
@@ -103,8 +102,8 @@ public:
 	bool StartMatch();
 
 	//TODO: Evaluate if this is the best place for these functions.
-	static string GameSpeedToString(enum GameSpeed speed);
-	static string VictoryConditionToString(enum VictoryCondition victory);
+	static std::string GameSpeedToString(enum GameSpeed speed);
+	static std::string VictoryConditionToString(enum VictoryCondition victory);
 
 private:
 	//Lock for this match
@@ -118,7 +117,7 @@ private:
 	uint32_t m_maxPlayers;
 	uint32_t m_currentPlayerCount;
 	//Truncated at MAX_MATCHNAME_LEN chars
-	string m_name;
+	std::string m_name;
 	int64_t m_timeCreated;
 
 	//The "Leader" player who can make changes to match settings

@@ -16,11 +16,6 @@
 #include "messages/MatchLobbyMessage.h"
 #include <google/dense_hash_map>
 
-using namespace std;
-using namespace RTT;
-using google::dense_hash_map;
-using tr1::hash;
-
 #define CHARGE_MAX 100
 //TODO: Read this from config file
 #define MATCHES_PER_PAGE 10
@@ -33,6 +28,9 @@ using tr1::hash;
 
 #define DEFAULT_SERVER_PORT 23000
 
+namespace RTT
+{
+
 struct eqint
 {
   bool operator()(int s1, int s2) const
@@ -43,13 +41,13 @@ struct eqint
 
 //Define types, so it's easier to refer to later
 //Key : Player ID
-typedef dense_hash_map<int, Player*, hash<int>, eqint> PlayerList;
+typedef google::dense_hash_map<int, Player*, std::tr1::hash<int>, eqint> PlayerList;
 //Key : Match unique ID
-typedef dense_hash_map<int, Match*, hash<int>, eqint> MatchList;
+typedef google::dense_hash_map<int, Match*, std::tr1::hash<int>, eqint> MatchList;
 //Key: Player's unique ID
-typedef dense_hash_map<int, int, hash<int>, eqint> ConnectBackWaitPool;
+typedef google::dense_hash_map<int, int, std::tr1::hash<int>, eqint> ConnectBackWaitPool;
 
-string Usage();
+std::string Usage();
 void ProcessRound(Match *match);
 
 void *MainListen(void * param);
@@ -89,5 +87,7 @@ bool LeaveMatch(Player *player);
 //Player has quit the server, clean up any references to it
 //	Deletes the player object
 void QuitServer(Player *player);
+
+}
 
 #endif /* LOF_SERVER_H_ */

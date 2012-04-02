@@ -9,6 +9,8 @@
 #include "gtkmm.h"
 
 using namespace Gtk;
+using namespace RTT;
+using namespace std;
 
 Glib::RefPtr<Gtk::Builder> refBuilder;
 WelcomeWindow *window;

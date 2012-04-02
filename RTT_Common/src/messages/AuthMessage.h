@@ -11,8 +11,6 @@
 #include "Message.h"
 #include "../Player.h"
 
-using namespace std;
-
 namespace RTT
 {
 

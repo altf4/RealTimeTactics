@@ -13,8 +13,6 @@
 #include <string>
 #include "Job.h"
 
-using namespace std;
-
 namespace RTT
 {
 
@@ -52,7 +50,7 @@ public:
 
 	//The name of this Unit. Given by the client
 	// The client can choose to name his Units unique things to distinguish them
-	string m_unitName;
+	std::string m_unitName;
 
 
 	Unit( );

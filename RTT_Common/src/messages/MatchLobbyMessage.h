@@ -13,8 +13,6 @@
 #include "../Player.h"
 #include "../Enums.h"
 
-using namespace std;
-
 namespace RTT
 {
 
