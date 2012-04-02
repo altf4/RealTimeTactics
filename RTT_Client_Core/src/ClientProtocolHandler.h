@@ -37,6 +37,7 @@ enum CallbackType
 	PLAYER_JOINED,
 	LEADER_CHANGE,
 	MATCH_STARTED,
+	CALLBACK_CLOSED,
 	CALLBACK_ERROR,
 };
 struct CallbackChange
@@ -193,6 +194,13 @@ struct CallbackChange ProcessCallbackCommand();
 
 //Send a message of type Error to the client
 void SendError(int socket, enum ErrorType errorType);
+
+//********************************************
+//			Connection Commands
+//********************************************
+
+//Kills the connection to the server uncleanly
+void ShutdownConnection();
 
 }
 

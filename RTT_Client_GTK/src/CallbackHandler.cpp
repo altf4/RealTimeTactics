@@ -19,13 +19,34 @@ CallbackHandler::CallbackHandler()
 
 CallbackHandler::~CallbackHandler()
 {
-
+	if(m_thread != NULL)
+	{
+		m_thread->join();
+	}
 }
 
 
-void CallbackHandler::Start()
+bool CallbackHandler::Start()
 {
-	m_thread = Glib::Thread::create(sigc::mem_fun(*this, &CallbackHandler::CallbackThread), true);
+	if(m_thread == NULL)
+	{
+		m_thread = Glib::Thread::create(sigc::mem_fun(*this, &CallbackHandler::CallbackThread), true);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void CallbackHandler::Stop()
+{
+	ShutdownConnection();
+	if(m_thread != NULL)
+	{
+		m_thread->join();
+	}
+	m_thread = NULL;
 }
 
 struct CallbackChange CallbackHandler::PopCallbackChange()
@@ -114,18 +135,21 @@ void CallbackHandler::CallbackThread()
 
 				break;
 			}
+			case CALLBACK_CLOSED:
+			{
+				m_sig_callback_closed();
+				return;
+			}
 			case CALLBACK_ERROR:
 			{
 				m_sig_callback_error();
 				return;
-				break;
 			}
 			default:
 			{
 				m_sig_callback_error();
 				cerr << "ERROR: Got a bad type from callback. Shouldn't get here\n";
 				return;
-				break;
 			}
 		}
 	}

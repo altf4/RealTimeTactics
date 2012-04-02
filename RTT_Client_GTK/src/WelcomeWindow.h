@@ -133,6 +133,7 @@ protected:
 	void PlayerJoinedEvent();
 	void LeaderChangedEvent();
 	void MatchStartedEvent();
+	void CallbackClosedEvent();
 	void CallbackErrorEvent();
 
 };

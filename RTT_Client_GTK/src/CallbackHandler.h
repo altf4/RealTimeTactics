@@ -20,7 +20,8 @@ public:
 	CallbackHandler();
 	~CallbackHandler();
 
-	void Start();
+	bool Start();
+	void Stop();
 
 	struct CallbackChange PopCallbackChange();
 
@@ -34,6 +35,7 @@ public:
 	Glib::Dispatcher m_sig_player_joined;
 	Glib::Dispatcher m_sig_leader_change;
 	Glib::Dispatcher m_sig_match_started;
+	Glib::Dispatcher m_sig_callback_closed;
 	Glib::Dispatcher m_sig_callback_error;
 
 private:

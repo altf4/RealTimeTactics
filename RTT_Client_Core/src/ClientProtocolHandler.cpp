@@ -201,6 +201,8 @@ bool RTT::ExitServer()
 		return false;
 	}
 
+	ShutdownConnection();
+
 	return true;
 }
 
@@ -889,6 +891,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 	Message *message = Message::ReadMessage(connectBackSocket);
 	if( message == NULL)
 	{
+		change.type = CALLBACK_CLOSED;
 		return change;
 	}
 	MatchLobbyMessage *match_message = (MatchLobbyMessage*)message;
@@ -1137,4 +1140,16 @@ void  RTT::SendError(int socket, enum ErrorType errorType)
 		cerr << "ERROR: Error message send returned failure.\n";
 	}
 	delete error_msg;
+}
+
+//********************************************
+//			Connection Commands
+//********************************************
+
+void RTT::ShutdownConnection()
+{
+	shutdown(connectFD, SHUT_RDWR);
+	shutdown(connectBackSocket, SHUT_RDWR);
+	connectFD = -1;
+	connectBackSocket = -1;
 }
