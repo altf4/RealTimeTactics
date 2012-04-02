@@ -450,7 +450,7 @@ void WelcomeWindow::join_match_click()
 	}
 	TreeModel::iterator iter = select->get_selected();
 	TreeModel::Row row = *( iter );
-	int matchID = row[columns.matchID];
+	int matchID = row[columns.m_matchID];
 
 	PlayerDescription playerDescriptions[MAX_PLAYERS_IN_MATCH];
 
@@ -648,22 +648,22 @@ void WelcomeWindow::list_matches()
 	for(uint i = 0; i < numMatchesThisPage; i++)
 	{
 		TreeModel::Row row = *(refListStore->append());
-		row[columns->matchID] = (int)descriptions[i].m_ID;
-		row[columns->maxPlayers] = (int)descriptions[i].m_maxPlayers;
-		row[columns->currentPlayers] = (int)descriptions[i].m_currentPlayerCount;
-		row[columns->name] = descriptions[i].m_name;
+		row[columns->m_matchID] = (int)descriptions[i].m_ID;
+		row[columns->m_maxPlayers] = (int)descriptions[i].m_maxPlayers;
+		row[columns->m_currentPlayers] = (int)descriptions[i].m_currentPlayerCount;
+		row[columns->m_name] = descriptions[i].m_name;
 
 		ptime time = epoch + boost::posix_time::seconds(descriptions[i].m_timeCreated);
 		string timeString = to_simple_string(time);
 
-		row[columns->timeCreated] = timeString;
+		row[columns->m_timeCreated] = timeString;
 	}
 
-	view->append_column("ID", columns->matchID);
-	view->append_column("Name", columns->name);
-	view->append_column("Current Players", columns->currentPlayers);
-	view->append_column("Max Players", columns->maxPlayers);
-	view->append_column("Time Created", columns->timeCreated);
+	view->append_column("ID", columns->m_matchID);
+	view->append_column("Name", columns->m_name);
+	view->append_column("Current Players", columns->m_currentPlayers);
+	view->append_column("Max Players", columns->m_maxPlayers);
+	view->append_column("Time Created", columns->m_timeCreated);
 
 	m_match_lists->show_all();
 }
