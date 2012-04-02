@@ -34,13 +34,13 @@ namespace RTT
 class Path
 {
 public:
-	vector <Tile*> tilesMovedThrough;
+	vector <Tile*> m_tilesMovedThrough;
 
 	//The total number of tiles moved through
-	uint tileDistance;
+	uint m_tileDistance;
 
 	//Total movement cost of the path
-	double movementCost;
+	double m_movementCost;
 
 	Path(Gameboard *board, Tile *fromTile, Tile *toTile, Unit *unit);
 

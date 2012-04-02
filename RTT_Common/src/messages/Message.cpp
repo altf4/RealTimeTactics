@@ -24,7 +24,7 @@ Message::Message()
 
 char *Message::Serialize(uint *length)
 {
-	switch(type)
+	switch(m_type)
 	{
 		case CLIENT_HELLO:
 		case SERVER_HELLO:
@@ -60,7 +60,7 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case SERVER_AUTH_REPLY:
 		{
 			AuthMessage *message = new AuthMessage(buffer, length);
-			if( message->serializeError == true )
+			if( message->m_serializeError == true )
 			{
 				delete message;
 				return NULL;
@@ -81,7 +81,7 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case MATCH_EXIT_SERVER_ACKNOWLEDGE:
 		{
 			LobbyMessage *message = new LobbyMessage(buffer, length);
-			if( message->serializeError == true )
+			if( message->m_serializeError == true )
 			{
 				delete message;
 				return NULL;
@@ -129,7 +129,7 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case MATCH_START_ACK:
 		{
 			MatchLobbyMessage *message = new MatchLobbyMessage(buffer, length);
-			if( message->serializeError == true )
+			if( message->m_serializeError == true )
 			{
 				delete message;
 				return NULL;
@@ -139,7 +139,7 @@ Message *Message::Deserialize(char *buffer, uint length)
 		case MESSAGE_ERROR:
 		{
 			ErrorMessage *message = new ErrorMessage(buffer, length);
-			if( message->serializeError == true )
+			if( message->m_serializeError == true )
 			{
 				delete message;
 				return NULL;

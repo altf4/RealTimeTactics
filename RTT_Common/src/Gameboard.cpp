@@ -24,16 +24,16 @@ Gameboard::Gameboard(uint x_arg, uint y_arg)
 		return;
 	}
 
-	xMax = x_arg;
-	yMax = y_arg;
+	m_xMax = x_arg;
+	m_yMax = y_arg;
 
 	//Create the gameboard tiles
-	for(uint i = 0; i < xMax; i++)
+	for(uint i = 0; i < m_xMax; i++)
 	{
-		for(uint j = 0; j < yMax; j++)
+		for(uint j = 0; j < m_yMax; j++)
 		{
-			tiles[i][j] = new Tile(i,j);
-			tiles[i][j]->ID = (j*xMax) + i;
+			m_tiles[i][j] = new Tile(i,j);
+			m_tiles[i][j]->m_ID = (j*m_xMax) + i;
 		}
 	}
 }
@@ -46,12 +46,12 @@ Tile *Gameboard::GetTile(int x, int y)
 	{
 		return NULL;
 	}
-	if( (uint)x > xMax || (uint)y > yMax )
+	if( (uint)x > m_xMax || (uint)y > m_yMax )
 	{
 		return NULL;
 	}
 
-	return tiles[x][y];
+	return m_tiles[x][y];
 
 }
 
@@ -66,14 +66,14 @@ int Gameboard::BuildGraph(Unit *unit, Edge *edge_array, double *weight_array)
 	double nextWeight;
 
 	//For every tile...
-	for(uint i = 0; i < xMax; i++)
+	for(uint i = 0; i < m_xMax; i++)
 	{
-		for(uint j = 0; j < yMax; j++)
+		for(uint j = 0; j < m_yMax; j++)
 		{
 			//For each direction
 			for( int k = 0; k < 6; k++ )
 			{
-				nextWeight = GetMovementCost(tiles[i][j], static_cast<Direction>(k), unit);
+				nextWeight = GetMovementCost(m_tiles[i][j], static_cast<Direction>(k), unit);
 				//Accumulate how many outgoing edges there are
 				if( nextWeight != -1)
 				{
@@ -103,7 +103,7 @@ int Gameboard::BuildGraph(Unit *unit, Edge *edge_array, double *weight_array)
 double Gameboard::GetMovementCost(Tile *fromTile, Direction dir, Unit *unit)
 {
 	//If this tile is impassable, then don't bother even looking
-	if( !fromTile->isPassable )
+	if( !fromTile->m_isPassable )
 	{
 		return -1;
 	}
@@ -112,7 +112,7 @@ double Gameboard::GetMovementCost(Tile *fromTile, Direction dir, Unit *unit)
 	//(Movement north and south gets weird in a hex map)
 
 	//0 when even, 1 when odd
-	uint yValEvenOdd = fromTile->y % 2;
+	uint yValEvenOdd = fromTile->m_y % 2;
 	int eastXOffset, westXOffset;
 	//Even row case
 	if( yValEvenOdd == 0)
@@ -129,131 +129,131 @@ double Gameboard::GetMovementCost(Tile *fromTile, Direction dir, Unit *unit)
 
 	if( dir == NORTHEAST )
 	{
-		Tile *toTile = GetTile(fromTile->x+eastXOffset, fromTile->y+1);
+		Tile *toTile = GetTile(fromTile->m_x+eastXOffset, fromTile->m_y+1);
 		if( toTile == NULL)
 		{
 			return -1;
 		}
-		else if( toTile->isPassable == false )
+		else if( toTile->m_isPassable == false )
 		{
 			return -1;
 		}
-		else if( unit->verticalMovement <
-				ElevationDiff( fromTile->elevation, toTile->elevation) )
+		else if( unit->m_verticalMovement <
+				ElevationDiff( fromTile->m_elevation, toTile->m_elevation) )
 		{
 			return -1;
 		}
 		else
 		{
-			return toTile->movementCost;
+			return toTile->m_movementCost;
 		}
 
 	}
 	if( dir == NORTHWEST )
 	{
-		Tile *toTile = GetTile(fromTile->x+westXOffset, fromTile->y+1);
+		Tile *toTile = GetTile(fromTile->m_x+westXOffset, fromTile->m_y+1);
 		if( toTile == NULL)
 		{
 			return -1;
 		}
-		else if( toTile->isPassable == false )
+		else if( toTile->m_isPassable == false )
 		{
 			return -1;
 		}
-		else if( unit->verticalMovement <
-				ElevationDiff( fromTile->elevation, toTile->elevation) )
+		else if( unit->m_verticalMovement <
+				ElevationDiff( fromTile->m_elevation, toTile->m_elevation) )
 		{
 			return -1;
 		}
 		else
 		{
-			return toTile->movementCost;
+			return toTile->m_movementCost;
 		}
 
 	}
 	if( dir == WEST )
 	{
-		Tile *toTile = GetTile( (int)(fromTile->x)-1, fromTile->y);
+		Tile *toTile = GetTile( (int)(fromTile->m_x)-1, fromTile->m_y);
 		if( toTile == NULL)
 		{
 			return -1;
 		}
-		else if( toTile->isPassable == false )
+		else if( toTile->m_isPassable == false )
 		{
 			return -1;
 		}
-		else if( unit->verticalMovement <
-				ElevationDiff( fromTile->elevation, toTile->elevation) )
+		else if( unit->m_verticalMovement <
+				ElevationDiff( fromTile->m_elevation, toTile->m_elevation) )
 		{
 			return -1;
 		}
 		else
 		{
-			return toTile->movementCost;
+			return toTile->m_movementCost;
 		}
 
 	}
 	if( dir == SOUTHWEST )
 	{
-		Tile *toTile = GetTile(fromTile->x+westXOffset, fromTile->y-1);
+		Tile *toTile = GetTile(fromTile->m_x+westXOffset, fromTile->m_y-1);
 		if( toTile == NULL)
 		{
 			return -1;
 		}
-		else if( toTile->isPassable == false )
+		else if( toTile->m_isPassable == false )
 		{
 			return -1;
 		}
-		else if( unit->verticalMovement <
-				ElevationDiff( fromTile->elevation, toTile->elevation) )
+		else if( unit->m_verticalMovement <
+				ElevationDiff( fromTile->m_elevation, toTile->m_elevation) )
 		{
 			return -1;
 		}
 		else
 		{
-			return toTile->movementCost;
+			return toTile->m_movementCost;
 		}
 	}
 	if( dir == SOUTHEAST )
 	{
-		Tile *toTile = GetTile(fromTile->x+eastXOffset, fromTile->y-1);
+		Tile *toTile = GetTile(fromTile->m_x+eastXOffset, fromTile->m_y-1);
 		if( toTile == NULL)
 		{
 			return -1;
 		}
-		else if( toTile->isPassable == false )
+		else if( toTile->m_isPassable == false )
 		{
 			return -1;
 		}
-		else if( unit->verticalMovement <
-				ElevationDiff( fromTile->elevation, toTile->elevation) )
+		else if( unit->m_verticalMovement <
+				ElevationDiff( fromTile->m_elevation, toTile->m_elevation) )
 		{
 			return -1;
 		}
 		else
 		{
-			return toTile->movementCost;
+			return toTile->m_movementCost;
 		}
 	}
 	if( dir == EAST )
 	{
-		Tile *toTile = GetTile(fromTile->x+1, fromTile->y);
+		Tile *toTile = GetTile(fromTile->m_x+1, fromTile->m_y);
 		if( toTile == NULL)
 		{
 			return -1;
 		}
-		else if( toTile->isPassable == false )
+		else if( toTile->m_isPassable == false )
 		{
 			return -1;
 		}
-		else if( unit->verticalMovement <
-				ElevationDiff( fromTile->elevation, toTile->elevation) )
+		else if( unit->m_verticalMovement <
+				ElevationDiff( fromTile->m_elevation, toTile->m_elevation) )
 		{
 			return -1;
 		}
 		else
 		{
-			return toTile->movementCost;
+			return toTile->m_movementCost;
 		}
 	}
 

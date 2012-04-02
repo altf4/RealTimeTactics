@@ -38,60 +38,60 @@ public:
 	WelcomeWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade);
 	~WelcomeWindow();
 
-	Glib::RefPtr<Builder> welcome_builder;
+	Glib::RefPtr<Builder> m_welcome_builder;
 
 	CallbackHandler *m_callbackHandler;
 
 	//The three Welcome Window panes
-	Box *welcome_box;
-	Box *lobby_box;
-	Box *match_lobby_box;
+	Box *m_welcome_box;
+	Box *m_lobby_box;
+	Box *m_match_lobby_box;
 
 	//First Pane Widgets
-	Button *button_custom;
-	Button *button_connect;
-	Statusbar *statusbar;
-	Box *box_custom;
-	Entry *entry_IP;
-	Entry *entry_port;
-	Entry *entry_username;
-	Entry *entry_password;
+	Button *m_button_custom;
+	Button *m_button_connect;
+	Statusbar *m_statusbar;
+	Box *m_box_custom;
+	Entry *m_entry_IP;
+	Entry *m_entry_port;
+	Entry *m_entry_username;
+	Entry *m_entry_password;
 
 	//Second Pane Widgets
-	Button *quit_server_button;
-	Button *create_match_button;
-	Button *create_match_submit;
-	Button *list_matches_button;
-	Button *join_match_button;
-	Entry *match_name_entry;
-	ComboBoxText *create_match_map_combo;
-	ComboBoxText *max_players_combo;
-	CheckButton *set_private_check;
-	Statusbar *status_lobby;
-	Box *create_match_box;
-	Notebook *match_lists;
+	Button *m_quit_server_button;
+	Button *m_create_match_button;
+	Button *m_create_match_submit;
+	Button *m_list_matches_button;
+	Button *m_join_match_button;
+	Entry *m_match_name_entry;
+	ComboBoxText *m_create_match_map_combo;
+	ComboBoxText *m_max_players_combo;
+	CheckButton *m_set_private_check;
+	Statusbar *m_status_lobby;
+	Box *m_create_match_box;
+	Notebook *m_match_lists;
 
 	//Third Pane Widgets
-	Button *leave_match_button;
-	Button *launch_match_button;
-	Statusbar *match_lobby_status;
-	TreeView *player_list_view;
-	ComboBoxText *map_name_combo;
-	ComboBoxText *speed_combo;
-	ComboBoxText *win_condition_combo;
-	Label *speed_label;
-	Label *victory_cond_label;
-	Label *map_set_label;
-	Label *map_size_label;
+	Button *m_leave_match_button;
+	Button *m_launch_match_button;
+	Statusbar *m_match_lobby_status;
+	TreeView *m_player_list_view;
+	ComboBoxText *m_map_name_combo;
+	ComboBoxText *m_speed_combo;
+	ComboBoxText *m_win_condition_combo;
+	Label *m_speed_label;
+	Label *m_victory_cond_label;
+	Label *m_map_set_label;
+	Label *m_map_size_label;
 
-	PlayerListColumns *playerColumns;
-	Glib::RefPtr<ListStore> playerListStore;
+	PlayerListColumns *m_playerColumns;
+	Glib::RefPtr<ListStore> m_playerListStore;
 
-	TeamComboColumns *teamNumberColumns;
-	Glib::RefPtr<Gtk::ListStore> teamNumberListStore;
+	TeamComboColumns *m_teamNumberColumns;
+	Glib::RefPtr<Gtk::ListStore> m_teamNumberListStore;
 
-	PlayerDescription playerDescription;
-	MatchDescription currentMatch;
+	PlayerDescription m_playerDescription;
+	MatchDescription m_currentMatch;
 
 	void on_teamNumber_combo_changed(const Glib::ustring&, const Gtk::TreeIter&);
 	void connect_click();

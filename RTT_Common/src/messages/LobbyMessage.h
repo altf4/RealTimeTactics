@@ -31,26 +31,26 @@ enum LobbyResult: char
 struct ServerStats
 {
 	//Total number of matches on server right now
-	uint32_t numMatches;
+	uint32_t m_numMatches;
 	//Total number of players on server right now
-	uint32_t numPlayers;
+	uint32_t m_numPlayers;
 };
 
 class LobbyMessage: public Message
 {
 public:
-	uint32_t requestedPage;
-	uint32_t returnedMatchesCount;
-	uint32_t returnedPlayersCount;
+	uint32_t m_requestedPage;
+	uint32_t m_returnedMatchesCount;
+	uint32_t m_returnedPlayersCount;
 	//A list of queried matches
-	struct MatchDescription *matchDescriptions;
+	struct MatchDescription *m_matchDescriptions;
 	//Newly created match
-	struct MatchDescription matchDescription;
-	struct PlayerDescription *playerDescriptions;
-	struct MatchOptions options;
+	struct MatchDescription m_matchDescription;
+	struct PlayerDescription *m_playerDescriptions;
+	struct MatchOptions m_options;
 	//ID of a match to join
-	uint32_t ID;
-	struct ServerStats serverStats;
+	uint32_t m_ID;
+	struct ServerStats m_serverStats;
 
 
 	LobbyMessage();

@@ -43,34 +43,34 @@ enum CallbackType
 struct CallbackChange
 {
 	//Type, which one of the following is used:
-	enum CallbackType type;
+	enum CallbackType m_type;
 
 	//Which of the following is used?
 
-	uint playerID; //several
+	uint m_playerID; //several
 
 	//TEAM_CHANGE
-	enum TeamNumber team;
+	enum TeamNumber m_team;
 
 	//COLOR_CHANGE
-	enum TeamColor color;
+	enum TeamColor m_color;
 
 	//MAP_CHANGE
-	struct MapDescription mapDescription;
+	struct MapDescription m_mapDescription;
 
 	//SPEED_CHANGE
-	enum GameSpeed speed;
+	enum GameSpeed m_speed;
 
 	//VICTORY_CHANGE
-	enum VictoryCondition victory;
+	enum VictoryCondition m_victory;
 
 	//PLAYER_LEFT
-	uint newLeaderID;
+	uint m_newLeaderID;
 
 	//KICKED (nothing)
 
 	//PLAYER_JOINED
-	struct PlayerDescription playerDescription;
+	struct PlayerDescription m_playerDescription;
 
 };
 

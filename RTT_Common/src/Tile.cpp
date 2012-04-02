@@ -15,9 +15,9 @@ using namespace RTT;
 
 Tile::Tile(uint x_arg, uint y_arg)
 {
-	x = x_arg;
-	y = y_arg;
-	isPassable = true;
+	m_x = x_arg;
+	m_y = y_arg;
+	m_isPassable = true;
 }
 
 //Moves the Unit (who is currently on this tile) to the specified tile
@@ -28,15 +28,15 @@ void Tile::MoveUnitTo(Unit *unit, Tile *tile)
 	{
 		//TODO: Find the shortest path
 
-		tile->unitsPresent.push_back(unit);
+		tile->m_unitsPresent.push_back(unit);
 		//Null it out first, so that erase doesn't call the destructor
-		unitsPresent[tileIndex] = NULL;
-		unitsPresent.erase( unitsPresent.begin()+tileIndex );
+		m_unitsPresent[tileIndex] = NULL;
+		m_unitsPresent.erase( m_unitsPresent.begin()+tileIndex );
 	}
 	else
 	{
-		cerr << "Error: Unit '" << unit->ID << "' not present on tile ("
-				<< x << ", " << y << ")\n";
+		cerr << "Error: Unit '" << unit->m_ID << "' not present on tile ("
+				<< m_x << ", " << m_y << ")\n";
 		throw IllegalMoveException("Unit not present on tile to be moved from.");
 	}
 
@@ -47,9 +47,9 @@ void Tile::MoveUnitTo(Unit *unit, Tile *tile)
 //Returns -1 if it's not there
 int Tile::IndexOfUnit(Unit *unit)
 {
-	for( uint i = 0; i < unitsPresent.size(); i++ )
+	for( uint i = 0; i < m_unitsPresent.size(); i++ )
 	{
-		if( unitsPresent[i]->Equals(unit) )
+		if( m_unitsPresent[i]->Equals(unit) )
 		{
 			return i;
 		}

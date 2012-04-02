@@ -56,7 +56,7 @@ struct CallbackChange CallbackHandler::PopCallbackChange()
 	{
 		cerr << "ERROR: Callback change queue underflow!" << endl;
 		struct CallbackChange temp;
-		temp.type = CALLBACK_ERROR;
+		temp.m_type = CALLBACK_ERROR;
 		return temp;
 	}
 	else
@@ -79,7 +79,7 @@ void CallbackHandler::CallbackThread()
 	{
 		struct CallbackChange change = ProcessCallbackCommand();
 		PushCallbackChange(change);
-		switch( change.type )
+		switch( change.m_type )
 		{
 			case TEAM_CHANGE:
 			{

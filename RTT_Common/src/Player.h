@@ -32,10 +32,10 @@ class Match;
 //	to other Players for display
 struct PlayerDescription
 {
-	uint32_t ID;
-	char name[PLAYER_NAME_SIZE];
-	enum TeamNumber team;
-	enum TeamColor color;
+	uint32_t m_ID;
+	char m_name[PLAYER_NAME_SIZE];
+	enum TeamNumber m_team;
+	enum TeamColor m_color;
 };
 
 class Player
@@ -64,17 +64,17 @@ public:
 	void SetCurrentMatchID(int matchID);
 
 private:
-	pthread_rwlock_t lock;
-	string name;
-	uint ID;
-	enum TeamNumber team;
-	enum TeamColor color;
+	pthread_rwlock_t m_lock;
+	string m_name;
+	uint m_ID;
+	enum TeamNumber m_team;
+	enum TeamColor m_color;
 	//Socket to receive MatchLobby messages from server on
-	int callbackSocket;
-	struct PlayerDescription description;
-	vector <Unit*> units;
+	int m_callbackSocket;
+	struct PlayerDescription m_description;
+	vector <Unit*> m_units;
 	//The match that this player is currently in
-	uint currentMatchID;
+	uint m_currentMatchID;
 };
 
 }

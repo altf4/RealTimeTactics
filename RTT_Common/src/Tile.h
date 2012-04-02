@@ -21,8 +21,8 @@ namespace RTT
 //A coordinate (x, y) position on the gameboard
 struct Coordinate
 {
-	uint32_t x;
-	uint32_t y;
+	uint32_t m_x;
+	uint32_t m_y;
 };
 
 class Tile
@@ -32,12 +32,12 @@ public:
 	//Note that for any tile (x,y), there are 6 bordering tiles:
 	//	(x-1,y),(x-1,y-1),(x,y-1),(x+1,y),(x+1,y+1),(x,y+1)
 	//	Unless, of course, this tile is on the edge of the gameboard
-	uint x, y;
-	uint elevation; //aka: z coordinate
+	uint m_x, m_y;
+	uint m_elevation; //aka: z coordinate
 
 	//A distinguishing ID from other tiles
 	//	Given consecutively. (0,0) = 0, (1,0) = 1, ... etc..
-	int ID;
+	int m_ID;
 
 	//Properties of this tile:
 
@@ -45,13 +45,13 @@ public:
 	//	Normal = 1
 	//	Easy terrain (road, etc..) = .5
 	//	Rough terrain (swamp, etc..) = 2
-	double movementCost;
+	double m_movementCost;
 
 	//List of units currently standing on this tile
-	vector <Unit*> unitsPresent;
+	vector <Unit*> m_unitsPresent;
 
 	//Whether or not a unit can stand on this tile
-	bool isPassable;
+	bool m_isPassable;
 
 
 	//Basic constructor

@@ -51,7 +51,7 @@ class ErrorMessage: public Message
 {
 public:
 
-	enum ErrorType errorType;
+	enum ErrorType m_errorType;
 
 	ErrorMessage();
 	ErrorMessage(char *buffer, uint length);

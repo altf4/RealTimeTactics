@@ -23,13 +23,13 @@ AuthMessage::AuthMessage(char *buffer, uint32_t length)
 		return;
 	}
 
-	serializeError = false;
+	m_serializeError = false;
 
 	//Copy the message type
-	memcpy(&type, buffer, MESSAGE_MIN_SIZE);
+	memcpy(&m_type, buffer, MESSAGE_MIN_SIZE);
 	buffer += MESSAGE_MIN_SIZE;
 
-	switch(type)
+	switch(m_type)
 	{
 		case CLIENT_HELLO:
 		{
@@ -39,16 +39,16 @@ AuthMessage::AuthMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE + (sizeof(uint32_t)*3);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
-			memcpy(&softwareVersion.major, buffer, sizeof(softwareVersion.major));
-			buffer += sizeof(softwareVersion.major);
-			memcpy(&softwareVersion.minor, buffer, sizeof(softwareVersion.minor));
-			buffer += sizeof(softwareVersion.minor);
-			memcpy(&softwareVersion.rev, buffer, sizeof(softwareVersion.rev));
-			buffer += sizeof(softwareVersion.rev);
+			memcpy(&m_softwareVersion.m_major, buffer, sizeof(m_softwareVersion.m_major));
+			buffer += sizeof(m_softwareVersion.m_major);
+			memcpy(&m_softwareVersion.m_minor, buffer, sizeof(m_softwareVersion.m_minor));
+			buffer += sizeof(m_softwareVersion.m_minor);
+			memcpy(&m_softwareVersion.m_rev, buffer, sizeof(m_softwareVersion.m_rev));
+			buffer += sizeof(m_softwareVersion.m_rev);
 			break;
 		}
 		case SERVER_HELLO:
@@ -58,21 +58,21 @@ AuthMessage::AuthMessage(char *buffer, uint32_t length)
 			//		3) AuthMechanism
 
 			uint32_t expectedSize = MESSAGE_MIN_SIZE + (sizeof(uint32_t)*3)
-					+ sizeof(authMechanism);
+					+ sizeof(m_authMechanism);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
-			memcpy(&softwareVersion.major, buffer, sizeof(softwareVersion.major));
-			buffer += sizeof(softwareVersion.major);
-			memcpy(&softwareVersion.minor, buffer, sizeof(softwareVersion.minor));
-			buffer += sizeof(softwareVersion.minor);
-			memcpy(&softwareVersion.rev, buffer, sizeof(softwareVersion.rev));
-			buffer += sizeof(softwareVersion.rev);
+			memcpy(&m_softwareVersion.m_major, buffer, sizeof(m_softwareVersion.m_major));
+			buffer += sizeof(m_softwareVersion.m_major);
+			memcpy(&m_softwareVersion.m_minor, buffer, sizeof(m_softwareVersion.m_minor));
+			buffer += sizeof(m_softwareVersion.m_minor);
+			memcpy(&m_softwareVersion.m_rev, buffer, sizeof(m_softwareVersion.m_rev));
+			buffer += sizeof(m_softwareVersion.m_rev);
 
-			memcpy(&authMechanism, buffer, sizeof(authMechanism));
+			memcpy(&m_authMechanism, buffer, sizeof(m_authMechanism));
 
 			break;
 		}
@@ -82,17 +82,17 @@ AuthMessage::AuthMessage(char *buffer, uint32_t length)
 			//		2) Username
 			//		3) Hashed password
 
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(username)
-					+ sizeof(hashedPassword);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_username)
+					+ sizeof(m_hashedPassword);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
-			memcpy(username, buffer, sizeof(username));
-			buffer += sizeof(username);
-			memcpy(hashedPassword, buffer, sizeof(hashedPassword));
+			memcpy(m_username, buffer, sizeof(m_username));
+			buffer += sizeof(m_username);
+			memcpy(m_hashedPassword, buffer, sizeof(m_hashedPassword));
 
 			break;
 		}
@@ -100,24 +100,24 @@ AuthMessage::AuthMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) authSuccess
 			//		2) Your new Player ID
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(authSuccess) + PLAYER_DESCR_SIZE;
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_authSuccess) + PLAYER_DESCR_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
-			memcpy(&authSuccess, buffer, sizeof(authSuccess));
-			buffer += sizeof(authSuccess);
+			memcpy(&m_authSuccess, buffer, sizeof(m_authSuccess));
+			buffer += sizeof(m_authSuccess);
 
 			//Player ID that joined
-			memcpy(&playerDescription.name, buffer, PLAYER_NAME_SIZE);
+			memcpy(&m_playerDescription.m_name, buffer, PLAYER_NAME_SIZE);
 			buffer += PLAYER_NAME_SIZE;
-			memcpy(&playerDescription.ID, buffer, sizeof(uint32_t));
+			memcpy(&m_playerDescription.m_ID, buffer, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
-			memcpy(&playerDescription.color, buffer, sizeof(enum TeamColor));
+			memcpy(&m_playerDescription.m_color, buffer, sizeof(enum TeamColor));
 			buffer += sizeof(enum TeamColor);
-			memcpy(&playerDescription.team, buffer, sizeof(enum TeamNumber));
+			memcpy(&m_playerDescription.m_team, buffer, sizeof(enum TeamNumber));
 			buffer += sizeof(enum TeamNumber);
 
 			break;
@@ -125,16 +125,16 @@ AuthMessage::AuthMessage(char *buffer, uint32_t length)
 		default:
 		{
 			//error
-			serializeError = true;
+			m_serializeError = true;
 		}
 	}
-	serializeError = false;
+	m_serializeError = false;
 }
 
 char *AuthMessage::Serialize(uint32_t *length)
 {
 	char *buffer, *originalBuffer;
-	switch(type)
+	switch(m_type)
 	{
 		case CLIENT_HELLO:
 		{
@@ -148,15 +148,15 @@ char *AuthMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Version Number
-			memcpy(buffer, &softwareVersion.major, sizeof(softwareVersion.major));
-			buffer += sizeof(softwareVersion.major);
-			memcpy(buffer, &softwareVersion.minor, sizeof(softwareVersion.minor));
-			buffer += sizeof(softwareVersion.minor);
-			memcpy(buffer, &softwareVersion.rev, sizeof(softwareVersion.rev));
-			buffer += sizeof(softwareVersion.rev);
+			memcpy(buffer, &m_softwareVersion.m_major, sizeof(m_softwareVersion.m_major));
+			buffer += sizeof(m_softwareVersion.m_major);
+			memcpy(buffer, &m_softwareVersion.m_minor, sizeof(m_softwareVersion.m_minor));
+			buffer += sizeof(m_softwareVersion.m_minor);
+			memcpy(buffer, &m_softwareVersion.m_rev, sizeof(m_softwareVersion.m_rev));
+			buffer += sizeof(m_softwareVersion.m_rev);
 
 			*length = messageSize;
 			return originalBuffer;
@@ -167,22 +167,22 @@ char *AuthMessage::Serialize(uint32_t *length)
 			//		2) Version Number
 			//		3) AuthMechanism
 
-			uint32_t messageSize = MESSAGE_MIN_SIZE + sizeof(authMechanism)
+			uint32_t messageSize = MESSAGE_MIN_SIZE + sizeof(m_authMechanism)
 							+ (sizeof(uint32_t)*3);
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
-			memcpy(buffer, &softwareVersion.major, sizeof(softwareVersion.major));
-			buffer += sizeof(softwareVersion.major);
-			memcpy(buffer, &softwareVersion.minor, sizeof(softwareVersion.minor));
-			buffer += sizeof(softwareVersion.minor);
-			memcpy(buffer, &softwareVersion.rev, sizeof(softwareVersion.rev));
-			buffer += sizeof(softwareVersion.rev);
-			memcpy(buffer, &authMechanism, sizeof(authMechanism));
+			memcpy(buffer, &m_softwareVersion.m_major, sizeof(m_softwareVersion.m_major));
+			buffer += sizeof(m_softwareVersion.m_major);
+			memcpy(buffer, &m_softwareVersion.m_minor, sizeof(m_softwareVersion.m_minor));
+			buffer += sizeof(m_softwareVersion.m_minor);
+			memcpy(buffer, &m_softwareVersion.m_rev, sizeof(m_softwareVersion.m_rev));
+			buffer += sizeof(m_softwareVersion.m_rev);
+			memcpy(buffer, &m_authMechanism, sizeof(m_authMechanism));
 			*length = messageSize;
 
 			return originalBuffer;
@@ -193,47 +193,47 @@ char *AuthMessage::Serialize(uint32_t *length)
 			//		2) Username
 			//		3) Hashed password
 
-			uint32_t messageSize = MESSAGE_MIN_SIZE + sizeof(username)
-					+ sizeof(hashedPassword);
+			uint32_t messageSize = MESSAGE_MIN_SIZE + sizeof(m_username)
+					+ sizeof(m_hashedPassword);
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Username
-			memcpy(buffer, username, sizeof(username));
-			buffer += sizeof(username);
+			memcpy(buffer, m_username, sizeof(m_username));
+			buffer += sizeof(m_username);
 			//Hashed password
-			memcpy(buffer, hashedPassword, sizeof(hashedPassword));
+			memcpy(buffer, m_hashedPassword, sizeof(m_hashedPassword));
 
 			*length = messageSize;
 			return originalBuffer;
 		}
 		case SERVER_AUTH_REPLY:
 		{
-			uint32_t messageSize = MESSAGE_MIN_SIZE + sizeof(authSuccess) + PLAYER_DESCR_SIZE;
+			uint32_t messageSize = MESSAGE_MIN_SIZE + sizeof(m_authSuccess) + PLAYER_DESCR_SIZE;
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			//Auth success
-			memcpy(buffer, &authSuccess, sizeof(authSuccess));
-			buffer += sizeof(authSuccess);
+			memcpy(buffer, &m_authSuccess, sizeof(m_authSuccess));
+			buffer += sizeof(m_authSuccess);
 
 			//Put the player description in
-			memcpy(buffer, &playerDescription.name, PLAYER_NAME_SIZE);
+			memcpy(buffer, &m_playerDescription.m_name, PLAYER_NAME_SIZE);
 			buffer += PLAYER_NAME_SIZE;
-			memcpy(buffer, &playerDescription.ID, sizeof(uint32_t));
+			memcpy(buffer, &m_playerDescription.m_ID, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
-			memcpy(buffer, &playerDescription.color, sizeof(enum TeamColor));
+			memcpy(buffer, &m_playerDescription.m_color, sizeof(enum TeamColor));
 			buffer += sizeof(enum TeamColor);
-			memcpy(buffer, &playerDescription.team, sizeof(enum TeamNumber));
+			memcpy(buffer, &m_playerDescription.m_team, sizeof(enum TeamNumber));
 			buffer += sizeof(enum TeamNumber);
 
 			*length = messageSize;
