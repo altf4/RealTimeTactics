@@ -26,6 +26,7 @@ WelcomeWindow::WelcomeWindow(BaseObjectType* cobject,
 	m_callbackHandler->m_sig_player_joined.connect(sigc::mem_fun(*this, &WelcomeWindow::PlayerJoinedEvent));
 	m_callbackHandler->m_sig_leader_change.connect(sigc::mem_fun(*this, &WelcomeWindow::LeaderChangedEvent));
 	m_callbackHandler->m_sig_match_started.connect(sigc::mem_fun(*this, &WelcomeWindow::MatchStartedEvent));
+	m_callbackHandler->m_sig_callback_closed.connect(sigc::mem_fun(*this, &WelcomeWindow::CallbackClosedEvent));
 	m_callbackHandler->m_sig_callback_error.connect(sigc::mem_fun(*this, &WelcomeWindow::CallbackErrorEvent));
 }
 
@@ -282,6 +283,16 @@ void WelcomeWindow::MatchStartedEvent()
 	//TODO: Stuff!
 }
 
+void WelcomeWindow::CallbackClosedEvent()
+{
+	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
+	if(change.type == CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+}
+
 void WelcomeWindow::CallbackErrorEvent()
 {
 	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
@@ -463,8 +474,7 @@ void WelcomeWindow::quit_server_click()
 	LaunchServerConnectPane();
 
 	//This will wait for the callback thread to finish
-	delete m_callbackHandler;
-	m_callbackHandler = NULL;
+	m_callbackHandler->Stop();
 }
 
 void WelcomeWindow::on_teamNumber_combo_changed(const Glib::ustring& path,
