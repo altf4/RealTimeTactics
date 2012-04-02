@@ -12,6 +12,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 using namespace RTT;
+using namespace std;
 
 //Constructor from XML Job file
 Job::Job(string filePath)

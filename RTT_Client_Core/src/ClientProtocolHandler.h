@@ -81,8 +81,8 @@ struct CallbackChange
 //Authenticates to the game server and sets us up into the lobby
 //	Writes out to the given PlayerDescription struct, which is your description
 //	Returns socket descriptor for the TCP connection. -1
-int AuthToServer(string IPAddress, uint port,
-		string username, unsigned char *hashedPassword, struct PlayerDescription *outDescr);
+int AuthToServer(std::string IPAddress, uint port,
+		std::string username, unsigned char *hashedPassword, struct PlayerDescription *outDescr);
 
 
 //********************************************

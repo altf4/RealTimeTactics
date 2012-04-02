@@ -14,8 +14,6 @@
 #include "stdlib.h"
 #include <openssl/sha.h>
 
-using namespace std;
-
 namespace RTT
 {
 
@@ -26,7 +24,7 @@ public:
 	//This is what is displayed to the user as the Unit's Job
 	//IE: Sniper, Lancer, Black Mage, etc...
 	//	Try to make it unique. But it's not required to be
-	string m_jobName;
+	std::string m_jobName;
 
 	//Starting stats for this Job. It can be modified by items / abilities / etc
 	uint m_maxHealth;
@@ -54,7 +52,7 @@ public:
 	unsigned char m_IDHash[SHA_DIGEST_LENGTH];
 
 	//Constructor from XML Job file
-	Job(string filePath);
+	Job(std::string filePath);
 
 	//Create a copy Job from an existing Job
 	//	May seem weird. But it's used to make a Unit object from an existing

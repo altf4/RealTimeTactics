@@ -23,12 +23,6 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include <openssl/sha.h>
 
-using namespace std;
-using namespace Gtk;
-using boost::posix_time::ptime;
-using boost::posix_time::time_duration;
-using boost::gregorian::date;
-
 namespace RTT
 {
 
@@ -38,54 +32,54 @@ public:
 	WelcomeWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade);
 	~WelcomeWindow();
 
-	Glib::RefPtr<Builder> m_welcome_builder;
+	Glib::RefPtr<Gtk::Builder> m_welcome_builder;
 
 	CallbackHandler *m_callbackHandler;
 
 	//The three Welcome Window panes
-	Box *m_welcome_box;
-	Box *m_lobby_box;
-	Box *m_match_lobby_box;
+	Gtk::Box *m_welcome_box;
+	Gtk::Box *m_lobby_box;
+	Gtk::Box *m_match_lobby_box;
 
 	//First Pane Widgets
-	Button *m_button_custom;
-	Button *m_button_connect;
-	Statusbar *m_statusbar;
-	Box *m_box_custom;
-	Entry *m_entry_IP;
-	Entry *m_entry_port;
-	Entry *m_entry_username;
-	Entry *m_entry_password;
+	Gtk::Button *m_button_custom;
+	Gtk::Button *m_button_connect;
+	Gtk::Statusbar *m_statusbar;
+	Gtk::Box *m_box_custom;
+	Gtk::Entry *m_entry_IP;
+	Gtk::Entry *m_entry_port;
+	Gtk::Entry *m_entry_username;
+	Gtk::Entry *m_entry_password;
 
 	//Second Pane Widgets
-	Button *m_quit_server_button;
-	Button *m_create_match_button;
-	Button *m_create_match_submit;
-	Button *m_list_matches_button;
-	Button *m_join_match_button;
-	Entry *m_match_name_entry;
-	ComboBoxText *m_create_match_map_combo;
-	ComboBoxText *m_max_players_combo;
-	CheckButton *m_set_private_check;
-	Statusbar *m_status_lobby;
-	Box *m_create_match_box;
-	Notebook *m_match_lists;
+	Gtk::Button *m_quit_server_button;
+	Gtk::Button *m_create_match_button;
+	Gtk::Button *m_create_match_submit;
+	Gtk::Button *m_list_matches_button;
+	Gtk::Button *m_join_match_button;
+	Gtk::Entry *m_match_name_entry;
+	Gtk::ComboBoxText *m_create_match_map_combo;
+	Gtk::ComboBoxText *m_max_players_combo;
+	Gtk::CheckButton *m_set_private_check;
+	Gtk::Statusbar *m_status_lobby;
+	Gtk::Box *m_create_match_box;
+	Gtk::Notebook *m_match_lists;
 
 	//Third Pane Widgets
-	Button *m_leave_match_button;
-	Button *m_launch_match_button;
-	Statusbar *m_match_lobby_status;
-	TreeView *m_player_list_view;
-	ComboBoxText *m_map_name_combo;
-	ComboBoxText *m_speed_combo;
-	ComboBoxText *m_win_condition_combo;
-	Label *m_speed_label;
-	Label *m_victory_cond_label;
-	Label *m_map_set_label;
-	Label *m_map_size_label;
+	Gtk::Button *m_leave_match_button;
+	Gtk::Button *m_launch_match_button;
+	Gtk::Statusbar *m_match_lobby_status;
+	Gtk::TreeView *m_player_list_view;
+	Gtk::ComboBoxText *m_map_name_combo;
+	Gtk::ComboBoxText *m_speed_combo;
+	Gtk::ComboBoxText *m_win_condition_combo;
+	Gtk::Label *m_speed_label;
+	Gtk::Label *m_victory_cond_label;
+	Gtk::Label *m_map_set_label;
+	Gtk::Label *m_map_size_label;
 
 	PlayerListColumns *m_playerColumns;
-	Glib::RefPtr<ListStore> m_playerListStore;
+	Glib::RefPtr<Gtk::ListStore> m_playerListStore;
 
 	TeamComboColumns *m_teamNumberColumns;
 	Glib::RefPtr<Gtk::ListStore> m_teamNumberListStore;
@@ -119,7 +113,7 @@ public:
 
 	Glib::RefPtr<Gtk::ListStore> PopulateTeamNumberCombo();
 
-	bool GetPasswordTerminal(string plaintext, unsigned char *hash);
+	bool GetPasswordTerminal(std::string plaintext, unsigned char *hash);
 
 protected:
 

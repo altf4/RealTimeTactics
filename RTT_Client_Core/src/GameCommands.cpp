@@ -10,6 +10,8 @@
 
 using namespace std;
 using namespace RTT;
+using google::dense_hash_map;
+using tr1::hash;
 
 //The current gameboard being used this match
 Gameboard *gameboard;

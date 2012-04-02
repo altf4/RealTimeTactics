@@ -10,6 +10,7 @@
 #include "Team.h"
 
 using namespace RTT;
+using namespace std;
 
 Team::Team(enum TeamNumber newTeam)
 {

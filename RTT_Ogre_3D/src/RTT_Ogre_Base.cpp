@@ -11,6 +11,7 @@
 //using namespace RTT;
 using namespace Ogre;
 using namespace OIS;
+using namespace std;
 
 //-------------------------------------------------------------------------------------
 RTT_Ogre_Base::RTT_Ogre_Base(void)

@@ -16,8 +16,6 @@
 #include <unistd.h>
 #include <stdint.h>
 
-using namespace std;
-
 namespace RTT
 {
 

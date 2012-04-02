@@ -8,6 +8,7 @@
 #include "Player.h"
 
 using namespace RTT;
+using namespace std;
 
 Player::Player()
 {

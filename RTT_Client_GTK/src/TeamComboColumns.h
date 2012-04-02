@@ -19,9 +19,9 @@ public:
 	{ add(m_teamString); add(m_teamNum); }
 
 	//The values from which the user may choose.
-	TreeModelColumn<int> m_teamNum;
+	Gtk::TreeModelColumn<int> m_teamNum;
 	//Extra information to help the user to choose.
-	TreeModelColumn<Glib::ustring> m_teamString;
+	Gtk::TreeModelColumn<Glib::ustring> m_teamString;
 };
 
 #endif /* TEAMCOMBOCOLUMNS_H_ */

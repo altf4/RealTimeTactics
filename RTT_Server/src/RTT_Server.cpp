@@ -162,7 +162,7 @@ int main(int argc, char **argv)
 	}
 }
 
-void *MainListen(void * param)
+void *RTT::MainListen(void * param)
 {
 	intptr_t mainSocket = (intptr_t)param;
 	//Main loop, just listens for new TCP connections and sends them off to MainClientThread
@@ -184,7 +184,7 @@ void *MainListen(void * param)
 	return 0;
 }
 
-void *CallbackListen(void * param)
+void *RTT::CallbackListen(void * param)
 {
 	intptr_t callbackSocket = (intptr_t)param;
 	//listen for new TCP connections and sends them off to CallbackClientThread
@@ -207,7 +207,7 @@ void *CallbackListen(void * param)
 	return 0;
 }
 
-void *MainClientThread(void * parm)
+void *RTT::MainClientThread(void * parm)
 {
 	intptr_t ConnectFD = (intptr_t)parm;
 
@@ -264,7 +264,7 @@ void *MainClientThread(void * parm)
 
 //Listens for a CONNECT_BACK_CLIENT_REQUEST message
 //	When we get it, save the created socket into the relevant player object
-void *CallbackClientThread(void * parm)
+void *RTT::CallbackClientThread(void * parm)
 {
 	intptr_t connectBackSocket = (intptr_t)parm;
 
@@ -339,7 +339,7 @@ void *CallbackClientThread(void * parm)
 }
 
 //Processes one round of combat. (Can consist of many actions triggered)
-void ProcessRound(Match *match)
+void RTT::ProcessRound(Match *match)
 {
 
 	//Step 1: Increment all the charges on the charging actions
@@ -385,7 +385,7 @@ void ProcessRound(Match *match)
 //	page: specifies which block of matches to get
 //	descArray: output array where matches are written to
 //	Returns: The number of matches written
-uint GetMatchDescriptions(uint page, MatchDescription *descArray)
+uint RTT::GetMatchDescriptions(uint page, MatchDescription *descArray)
 {
 	pthread_rwlock_rdlock(&matchListLock);
 	MatchList::iterator it = matchList.begin();
@@ -430,7 +430,7 @@ uint GetMatchDescriptions(uint page, MatchDescription *descArray)
 //	descArray: output array where matches are written to
 //		(Length = MAX_PLAYERS_IN_MATCH)
 //	Returns: The number of matches written
-uint GetPlayerDescriptions(uint matchID, PlayerDescription *descArray)
+uint RTT::GetPlayerDescriptions(uint matchID, PlayerDescription *descArray)
 {
 	pthread_rwlock_rdlock(&matchListLock);
 
@@ -459,7 +459,7 @@ uint GetPlayerDescriptions(uint matchID, PlayerDescription *descArray)
 //Creates a new match and places it into matchList
 //	Returns: The unique ID of the new match
 //		returns 0 on error
-uint RegisterNewMatch(Player *player, struct MatchOptions options)
+uint RTT::RegisterNewMatch(Player *player, struct MatchOptions options)
 {
 	//The player's current match must be empty to join a new one
 	if( player->GetCurrentMatchID() != 0 )
@@ -492,7 +492,7 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 //Make player join specified match
 //	Sets the variables within player and match properly
 //	Returns an enum of the success or failure condition
-enum LobbyResult JoinMatch(Player *player, uint matchID)
+enum LobbyResult RTT::JoinMatch(Player *player, uint matchID)
 {
 	if( player == NULL )
 	{
@@ -535,7 +535,7 @@ enum LobbyResult JoinMatch(Player *player, uint matchID)
 //	Sets the variables within player and match properly
 //	If no players remain in the match afterward, then the match is deleted
 //	Returns success or failure
-bool LeaveMatch(Player *player)
+bool RTT::LeaveMatch(Player *player)
 {
 	bool foundOne = false;
 	if( player->GetCurrentMatchID() == 0)
@@ -584,7 +584,7 @@ bool LeaveMatch(Player *player)
 
 //Player has quit the server, clean up any references to it
 //	Deletes the player object
-void QuitServer(Player *player)
+void RTT::QuitServer(Player *player)
 {
 	if( player == NULL )
 	{
@@ -607,7 +607,7 @@ void QuitServer(Player *player)
 }
 
 //Prints usage tips
-string Usage()
+string RTT::Usage()
 {
 	string out;
 

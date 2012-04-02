@@ -20,13 +20,11 @@
 using namespace boost;
 
 
-typedef adjacency_list < listS, vecS, directedS,
-		no_property, property < edge_weight_t, double > > graph_t;
+typedef boost::adjacency_list < boost::listS, boost::vecS, boost::directedS,
+		boost::no_property, boost::property < edge_weight_t, double > > graph_t;
 typedef graph_traits < graph_t >::vertex_descriptor vertex_descriptor;
 typedef graph_traits < graph_t >::edge_descriptor edge_descriptor;
-typedef pair<int, int> Edge;
-
-using namespace std;
+typedef std::pair<int, int> Edge;
 
 namespace RTT
 {
@@ -34,7 +32,7 @@ namespace RTT
 class Path
 {
 public:
-	vector <Tile*> m_tilesMovedThrough;
+	std::vector <Tile*> m_tilesMovedThrough;
 
 	//The total number of tiles moved through
 	uint m_tileDistance;

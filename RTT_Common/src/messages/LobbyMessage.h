@@ -10,8 +10,6 @@
 #include "Message.h"
 #include "../Match.h"
 
-using namespace std;
-
 namespace RTT
 {
 

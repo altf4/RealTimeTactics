@@ -11,8 +11,6 @@
 
 #include <gtkmm.h>
 
-using namespace Gtk;
-
 namespace RTT
 {
 
@@ -24,12 +22,12 @@ public:
 	{ add(m_isLeader); add(m_leaderSelectable); add(m_name);
 		add(m_teamName); add(m_teamChosen); add(m_ID);}
 
-	TreeModelColumn<bool> m_isLeader;
-	TreeModelColumn<bool> m_leaderSelectable;
-	TreeModelColumn<std::string> m_name;
-	TreeModelColumn<Glib::ustring> m_teamName;
-	TreeModelColumn<Glib::RefPtr<Gtk::TreeModel> > m_teamChosen;
-	TreeModelColumn<uint> m_ID;
+	Gtk::TreeModelColumn<bool> m_isLeader;
+	Gtk::TreeModelColumn<bool> m_leaderSelectable;
+	Gtk::TreeModelColumn<std::string> m_name;
+	Gtk::TreeModelColumn<Glib::ustring> m_teamName;
+	Gtk::TreeModelColumn<Glib::RefPtr<Gtk::TreeModel> > m_teamChosen;
+	Gtk::TreeModelColumn<uint> m_ID;
 
 };
 

@@ -15,7 +15,7 @@ class InvalidGameboardException : public std::runtime_error
 {
 
 public:
-	InvalidGameboardException(const string& message)
+	InvalidGameboardException(const std::string& message)
         : std::runtime_error(message) { };
 };
 
