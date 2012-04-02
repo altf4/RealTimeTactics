@@ -22,16 +22,16 @@ class MatchLobbyMessage: public Message
 {
 public:
 
-	enum TeamNumber newTeam;
-	enum TeamColor newColor;
-	enum VictoryCondition newVictCond;
-	enum GameSpeed newSpeed;
-	bool changeAccepted;
-	struct MapDescription mapDescription;
-	uint32_t playerID;
-	struct PlayerDescription playerDescription;
-	uint32_t portNum;
-	uint32_t newLeaderID;
+	enum TeamNumber m_newTeam;
+	enum TeamColor m_newColor;
+	enum VictoryCondition m_newVictCond;
+	enum GameSpeed m_newSpeed;
+	bool m_changeAccepted;
+	struct MapDescription m_mapDescription;
+	uint32_t m_playerID;
+	struct PlayerDescription m_playerDescription;
+	uint32_t m_portNum;
+	uint32_t m_newLeaderID;
 
 	MatchLobbyMessage();
 	~MatchLobbyMessage();

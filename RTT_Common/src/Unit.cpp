@@ -15,7 +15,7 @@ Unit::Unit( )
 	: Job("something")
 {
 
-	ID = lastIDGiven++;
+	m_ID = lastIDGiven++;
 }
 
 //Returns true if the given Unit is the same one as this
@@ -23,7 +23,7 @@ Unit::Unit( )
 //	Does this by comparing ID's
 bool Unit::Equals(Unit *testUnit)
 {
-	if( testUnit->ID == ID )
+	if( testUnit->m_ID == m_ID )
 	{
 		return true;
 	}

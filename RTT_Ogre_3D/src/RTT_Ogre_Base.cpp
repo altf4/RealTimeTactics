@@ -14,53 +14,53 @@ using namespace OIS;
 
 //-------------------------------------------------------------------------------------
 RTT_Ogre_Base::RTT_Ogre_Base(void)
-    : rttRoot(0),
-    rttCamera(0),
-    rttSceneManager(0),
-    rttWindow(0),
-    rttResourcesCfg(Ogre::StringUtil::BLANK),
-    rttPluginsCfg(StringUtil::BLANK),
+    : m_rttRoot(0),
+    m_rttCamera(0),
+    m_rttSceneManager(0),
+    m_rttWindow(0),
+    m_rttResourcesCfg(Ogre::StringUtil::BLANK),
+    m_rttPluginsCfg(StringUtil::BLANK),
     rttShutDown(false),
-    rttInputManager(0),
-    rttMouse(0),
-    rttKeyboard(0)
+    m_rttInputManager(0),
+    m_rttMouse(0),
+    m_rttKeyboard(0)
 {
 }
 //-------------------------------------------------------------------------------------
 RTT_Ogre_Base::~RTT_Ogre_Base(void)
 {
 	//Remove ourself as a Window listener
-	WindowEventUtilities::removeWindowEventListener(rttWindow, this);
-	windowClosed(rttWindow);
+	WindowEventUtilities::removeWindowEventListener(m_rttWindow, this);
+	windowClosed(m_rttWindow);
 	//Kill Ogre
-	delete rttRoot;
+	delete m_rttRoot;
 }
 
 //Loads our configuration files or creates a new one
 bool RTT_Ogre_Base::configure(void)
 {
     // Show the configuration dialog if no configuration found and initialize the system
-    if(!(rttRoot->restoreConfig() || rttRoot->showConfigDialog()))  // Test to see if the render window can/should be launched
+    if(!(m_rttRoot->restoreConfig() || m_rttRoot->showConfigDialog()))  // Test to see if the render window can/should be launched
     {
         return false;
     }
-    rttWindow = rttRoot->initialise(true, "Real Time Tactics Render Window");
+    m_rttWindow = m_rttRoot->initialise(true, "Real Time Tactics Render Window");
     return true;
 }
 
 //Setup our scene manager
 void RTT_Ogre_Base::chooseSceneManager(void)
 {
-	rttSceneManager = rttRoot->createSceneManager("DefaultSceneManager"); //Create a generic screen manager
+	m_rttSceneManager = m_rttRoot->createSceneManager("DefaultSceneManager"); //Create a generic screen manager
 }
 
 void RTT_Ogre_Base::createCamera(void)
 {
-    rttCamera = rttSceneManager->createCamera("PrimaryCamera"); //Create our primary camera in our screen manager
+    m_rttCamera = m_rttSceneManager->createCamera("PrimaryCamera"); //Create our primary camera in our screen manager
     //The camera needs positioning
-    rttCamera->setPosition(Ogre::Vector3(2.25,10.5,6.5)); // Center on the gameboard and position above
-    rttCamera->lookAt(Ogre::Vector3(2.25,0,-4)); // Look back along -Z slightly for an "isometric" like view
-    rttCamera->setNearClipDistance(5); // This is how close an object can be to the camera before it is "clipped", or not rendered
+    m_rttCamera->setPosition(Ogre::Vector3(2.25,10.5,6.5)); // Center on the gameboard and position above
+    m_rttCamera->lookAt(Ogre::Vector3(2.25,0,-4)); // Look back along -Z slightly for an "isometric" like view
+    m_rttCamera->setNearClipDistance(5); // This is how close an object can be to the camera before it is "clipped", or not rendered
     //rttCamera->yaw(Degree(90));
 }
 
@@ -72,21 +72,21 @@ void RTT_Ogre_Base::createFrameListener(void)
     size_t windowHnd = 0;
     std::ostringstream windowHndStr;
 
-    rttWindow->getCustomAttribute("WINDOW", &windowHnd);
+    m_rttWindow->getCustomAttribute("WINDOW", &windowHnd);
     windowHndStr << windowHnd;
     paramList.insert(make_pair(std::string("WINDOW"), windowHndStr.str()));
 
-    rttInputManager = InputManager::createInputSystem( paramList );
-    rttKeyboard = static_cast<Keyboard*>(rttInputManager->createInputObject(OISKeyboard, true ));
-    rttMouse = static_cast<Mouse*>(rttInputManager->createInputObject(OISMouse, true ));
+    m_rttInputManager = InputManager::createInputSystem( paramList );
+    m_rttKeyboard = static_cast<Keyboard*>(m_rttInputManager->createInputObject(OISKeyboard, true ));
+    m_rttMouse = static_cast<Mouse*>(m_rttInputManager->createInputObject(OISMouse, true ));
 
-    rttMouse->setEventCallback(this);
-    rttKeyboard->setEventCallback(this);
+    m_rttMouse->setEventCallback(this);
+    m_rttKeyboard->setEventCallback(this);
 
-    windowResized(rttWindow);    //Set initial mouse clipping size
-    WindowEventUtilities::addWindowEventListener(rttWindow, this);    //Register as a Window listener
+    windowResized(m_rttWindow);    //Set initial mouse clipping size
+    WindowEventUtilities::addWindowEventListener(m_rttWindow, this);    //Register as a Window listener
 
-    rttRoot->addFrameListener(this);
+    m_rttRoot->addFrameListener(this);
 }
 
 void RTT_Ogre_Base::destroyScene(void)
@@ -98,10 +98,10 @@ void RTT_Ogre_Base::destroyScene(void)
 void RTT_Ogre_Base::createViewports(void)
 {
     //Create one viewport, entire window, this is where the camera view is rendered
-    Viewport* viewPort = rttWindow->addViewport(rttCamera);
+    Viewport* viewPort = m_rttWindow->addViewport(m_rttCamera);
     viewPort->setBackgroundColour(ColourValue(0,0,0));
     //Alter the camera aspect ratio to match the viewport
-    rttCamera->setAspectRatio(Real(viewPort->getActualWidth()) / Real(viewPort->getActualHeight()));
+    m_rttCamera->setAspectRatio(Real(viewPort->getActualWidth()) / Real(viewPort->getActualHeight()));
 }
 
 //Set up our resources
@@ -109,7 +109,7 @@ void RTT_Ogre_Base::setupResources(void)
 {
     // Load resource paths from config file
     ConfigFile configFile;
-    configFile.load(rttResourcesCfg);
+    configFile.load(m_rttResourcesCfg);
     // Parse resource config file
     ConfigFile::SectionIterator seci = configFile.getSectionIterator();
 
@@ -143,15 +143,15 @@ void RTT_Ogre_Base::loadResources(void)
 void RTT_Ogre_Base::go(void)
 {
 #ifdef _DEBUG
-    rttResourcesCfg = "resources_d.cfg";
-    rttPluginsCfg = "plugins_d.cfg";
+    m_rttResourcesCfg = "resources_d.cfg";
+    m_rttPluginsCfg = "plugins_d.cfg";
 #else
 	//Prefer the global /usr/share/RTT/Ogre/resources.cfg
 	ifstream resourcesFileAbsolute("/usr/share/RTT/Ogre/resources.cfg");
 	if (resourcesFileAbsolute.good())
 	{
 		cout << "INFO: Using /usr/share/RTT/Ogre/resources.cfg\n";
-		rttResourcesCfg = "/usr/share/RTT/Ogre/resources.cfg";
+		m_rttResourcesCfg = "/usr/share/RTT/Ogre/resources.cfg";
 	}
 	else
 	{
@@ -159,7 +159,7 @@ void RTT_Ogre_Base::go(void)
 		if (resourcesFileRelative.good())
 		{
 			cout << "INFO: Using resources.cfg\n";
-			rttResourcesCfg = "resources.cfg";
+			m_rttResourcesCfg = "resources.cfg";
 		}
 		else
 		{
@@ -173,7 +173,7 @@ void RTT_Ogre_Base::go(void)
 	if (pluginsFileAbsolute.good())
 	{
 		cout << "INFO: Using /usr/share/RTT/Ogre/plugins.cfg\n";
-		rttPluginsCfg = "/usr/share/RTT/Ogre/plugins.cfg";
+		m_rttPluginsCfg = "/usr/share/RTT/Ogre/plugins.cfg";
 	}
 	else
 	{
@@ -181,7 +181,7 @@ void RTT_Ogre_Base::go(void)
 		if (pluginsFileRelative.good())
 		{
 			cout << "INFO: Using plugins.cfg\n";
-			rttPluginsCfg = "plugins.cfg";
+			m_rttPluginsCfg = "plugins.cfg";
 		}
 		else
 		{
@@ -195,7 +195,7 @@ void RTT_Ogre_Base::go(void)
 	if (ogreCfgFileAbsolute.good())
 	{
 		cout << "INFO: Using /usr/share/RTT/Ogre/ogre.cfg\n";
-		rttOgreCfg = "/usr/share/RTT/Ogre/ogre.cfg";
+		m_rttOgreCfg = "/usr/share/RTT/Ogre/ogre.cfg";
 	}
 	else
 	{
@@ -203,7 +203,7 @@ void RTT_Ogre_Base::go(void)
 		if (ogreCfgFileRelative.good())
 		{
 			cout << "INFO: Using ogre.cfg\n";
-			rttOgreCfg = "ogre.cfg";
+			m_rttOgreCfg = "ogre.cfg";
 		}
 		else
 		{
@@ -217,7 +217,7 @@ void RTT_Ogre_Base::go(void)
     if (!setup())
         return;
 
-    rttRoot->startRendering();
+    m_rttRoot->startRendering();
 
     // clean up
     destroyScene();
@@ -226,7 +226,7 @@ void RTT_Ogre_Base::go(void)
 
 bool RTT_Ogre_Base::setup(void)
 {
-    rttRoot = new Root(rttPluginsCfg, rttOgreCfg);// construct Ogre::Root root node
+    m_rttRoot = new Root(m_rttPluginsCfg, m_rttOgreCfg);// construct Ogre::Root root node
     setupResources();//Setup our game data
     //If our configuration fails then quit
     if (!configure())
@@ -254,7 +254,7 @@ void RTT_Ogre_Base::windowResized(RenderWindow* renderWindow)
     int left, top;
     renderWindow->getMetrics(width, height, depth, left, top);
 
-    const MouseState &mouseState = rttMouse->getMouseState();
+    const MouseState &mouseState = m_rttMouse->getMouseState();
     mouseState.width = width;
     mouseState.height = height;
 }
@@ -263,15 +263,15 @@ void RTT_Ogre_Base::windowResized(RenderWindow* renderWindow)
 void RTT_Ogre_Base::windowClosed(RenderWindow* renderWindow)
 {
     //Only close for window that created OIS
-    if( renderWindow == rttWindow )
+    if( renderWindow == m_rttWindow )
     {
-        if( rttInputManager )
+        if( m_rttInputManager )
         {
-            rttInputManager->destroyInputObject( rttMouse );
-            rttInputManager->destroyInputObject( rttKeyboard );
+            m_rttInputManager->destroyInputObject( m_rttMouse );
+            m_rttInputManager->destroyInputObject( m_rttKeyboard );
 
-            InputManager::destroyInputSystem(rttInputManager);
-            rttInputManager = 0;
+            InputManager::destroyInputSystem(m_rttInputManager);
+            m_rttInputManager = 0;
         }
     }
 }
@@ -300,12 +300,12 @@ bool RTT_Ogre_Base::mouseReleased( const MouseEvent &arg, MouseButtonID mouseId 
 
 bool RTT_Ogre_Base::frameRenderingQueued(const FrameEvent& evt)
 {
-    if(rttWindow->isClosed())
+    if(m_rttWindow->isClosed())
         return false;
     if(rttShutDown)
     	return false;
     //Need to capture/update each device
-    rttKeyboard->capture();
-    rttMouse->capture();
+    m_rttKeyboard->capture();
+    m_rttMouse->capture();
     return true;
 }

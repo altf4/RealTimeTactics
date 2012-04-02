@@ -30,7 +30,7 @@ class Team
 
 public:
 
-	enum TeamNumber team;
+	enum TeamNumber m_team;
 
 	Team(enum TeamNumber newTeam);
 
@@ -46,9 +46,9 @@ public:
 
 private:
 	//Lock for the players list
-	pthread_rwlock_t lock;
+	pthread_rwlock_t m_lock;
 
-	vector <Player*> players;
+	vector <Player*> m_players;
 };
 
 }

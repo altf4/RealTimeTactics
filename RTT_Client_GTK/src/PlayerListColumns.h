@@ -21,14 +21,15 @@ class PlayerListColumns : public Gtk::TreeModelColumnRecord
 public:
 
 	PlayerListColumns()
-	{ add(isLeader); add(leaderSelectable); add(name); add(teamName); add(teamChosen); add(ID);}
+	{ add(m_isLeader); add(m_leaderSelectable); add(m_name);
+		add(m_teamName); add(m_teamChosen); add(m_ID);}
 
-	TreeModelColumn<bool> isLeader;
-	TreeModelColumn<bool> leaderSelectable;
-	TreeModelColumn<std::string> name;
-	TreeModelColumn<Glib::ustring> teamName;
-	TreeModelColumn<Glib::RefPtr<Gtk::TreeModel> > teamChosen;
-	TreeModelColumn<uint> ID;
+	TreeModelColumn<bool> m_isLeader;
+	TreeModelColumn<bool> m_leaderSelectable;
+	TreeModelColumn<std::string> m_name;
+	TreeModelColumn<Glib::ustring> m_teamName;
+	TreeModelColumn<Glib::RefPtr<Gtk::TreeModel> > m_teamChosen;
+	TreeModelColumn<uint> m_ID;
 
 };
 

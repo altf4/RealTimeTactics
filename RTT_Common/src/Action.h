@@ -19,10 +19,10 @@ class Action
 
 public:
 	//How many charge points gained per round
-	uint speed;
+	uint m_speed;
 
 	//The current charge level
-	uint currentCharge;
+	uint m_currentCharge;
 
 
 	Action();

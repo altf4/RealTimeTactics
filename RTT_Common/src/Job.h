@@ -26,32 +26,32 @@ public:
 	//This is what is displayed to the user as the Unit's Job
 	//IE: Sniper, Lancer, Black Mage, etc...
 	//	Try to make it unique. But it's not required to be
-	string jobName;
+	string m_jobName;
 
 	//Starting stats for this Job. It can be modified by items / abilities / etc
-	uint maxHealth;
-	uint maxEnergy;
+	uint m_maxHealth;
+	uint m_maxEnergy;
 
-	uint verticalMovement;
-	uint horizontalMovement;
+	uint m_verticalMovement;
+	uint m_horizontalMovement;
 
-	uint baseVision;
+	uint m_baseVision;
 
-	uint basicAttackRange;
-	double basicAttackDamage;
+	uint m_basicAttackRange;
+	double m_basicAttackDamage;
 
 	//How many charge points accumulated per round
 	//	IE: How quickly this unit gets to have a turn
 	//	(Not how far it can walk)
-	uint speed;
+	uint m_speed;
 
 	//SHA1 hash of all graphics files hashed
 	//TODO: Specify the order in which these files must be tar'ed
-	unsigned char graphicsHash[SHA_DIGEST_LENGTH];
+	unsigned char m_graphicsHash[SHA_DIGEST_LENGTH];
 
 	//Globally unique identifier for this Job
 	//	Consists of the SHA1 hash of the XML Job file
-	unsigned char IDHash[SHA_DIGEST_LENGTH];
+	unsigned char m_IDHash[SHA_DIGEST_LENGTH];
 
 	//Constructor from XML Job file
 	Job(string filePath);

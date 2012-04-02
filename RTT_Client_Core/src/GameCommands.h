@@ -50,12 +50,12 @@ enum MovementSuccess: char
 
 struct MovementResult
 {
-	enum MovementSuccess result;
+	enum MovementSuccess m_result;
 
 	//Used in error conditions to help if the client is unsynced:
 
 	//This is the position that the unit SHOULD be at
-	uint32_t originalX, originalY;
+	uint32_t m_originalX, m_originalY;
 };
 
 //********************************************

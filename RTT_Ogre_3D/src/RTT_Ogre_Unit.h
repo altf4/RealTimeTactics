@@ -18,10 +18,10 @@ namespace RTT
 	public:
 		RTT_Ogre_Unit();
 		virtual ~RTT_Ogre_Unit();
-		Ogre::Entity* unitEntity;
-		Ogre::SceneNode* unitNode;
-		int locationX;
-		int locationY;
+		Ogre::Entity* m_unitEntity;
+		Ogre::SceneNode* m_unitNode;
+		int m_locationX;
+		int m_locationY;
 	private:
 	protected:
 	};

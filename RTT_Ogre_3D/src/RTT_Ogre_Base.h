@@ -67,20 +67,20 @@ using namespace OIS;
 			virtual void windowResized(RenderWindow* renderWindow);//Adjust mouse clipping area
 			virtual void windowClosed(RenderWindow* renderWindoww);//Unattach OIS before window shutdown (very important under Linux)
 
-			Root* rttRoot;
-			Camera* rttCamera;
-			SceneManager* rttSceneManager;
-			RenderWindow* rttWindow;
-			String rttResourcesCfg;
-			String rttPluginsCfg;
-			String rttOgreCfg;
+			Root* m_rttRoot;
+			Camera* m_rttCamera;
+			SceneManager* m_rttSceneManager;
+			RenderWindow* m_rttWindow;
+			String m_rttResourcesCfg;
+			String m_rttPluginsCfg;
+			String m_rttOgreCfg;
 
 			bool rttShutDown;
 
 			//OIS Input devices
-			InputManager* rttInputManager;
-			Mouse*    rttMouse;
-			Keyboard* rttKeyboard;
+			InputManager* m_rttInputManager;
+			Mouse*    m_rttMouse;
+			Keyboard* m_rttKeyboard;
 	};
 //}
 

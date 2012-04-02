@@ -40,13 +40,13 @@ class AuthMessage: public Message
 {
 
 public:
-	enum AuthMechanism authMechanism;
-	struct VersionNumber softwareVersion;
-	char username[USERNAME_MAX_LENGTH];
+	enum AuthMechanism m_authMechanism;
+	struct VersionNumber m_softwareVersion;
+	char m_username[USERNAME_MAX_LENGTH];
 	//TODO: I didn't want to import libssl just to use SHA256_DIGEST_LENGTH
-	unsigned char hashedPassword[32];
-	enum AuthResult authSuccess;
-	struct PlayerDescription playerDescription;
+	unsigned char m_hashedPassword[32];
+	enum AuthResult m_authSuccess;
+	struct PlayerDescription m_playerDescription;
 
 	AuthMessage();
 	AuthMessage(char *buffer, uint length);

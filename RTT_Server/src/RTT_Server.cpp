@@ -278,7 +278,7 @@ void *CallbackClientThread(void * parm)
 		cerr << "ERROR: Callback message came back NULL\n";
 		return NULL;
 	}
-	if( connect_back_reply->type != CALLBACK_REGISTER )
+	if( connect_back_reply->m_type != CALLBACK_REGISTER )
 	{
 		//ERROR
 		cerr << "ERROR: Callback message was wrong type\n";
@@ -288,11 +288,11 @@ void *CallbackClientThread(void * parm)
 			(MatchLobbyMessage*)connect_back_reply;
 
 	pthread_rwlock_rdlock(&playerListLock);
-	Player *player = playerList[match_callback_reply->playerID];
+	Player *player = playerList[match_callback_reply->m_playerID];
 	pthread_rwlock_unlock(&playerListLock);
 
 	//We got the correct player on the first try. Yay!
-	if( match_callback_reply->playerID == player->GetID())
+	if( match_callback_reply->m_playerID == player->GetID())
 	{
 		//The client should now be listening for a message on this socket
 		player->SetCallbackSocket(connectBackSocket);
@@ -309,7 +309,7 @@ void *CallbackClientThread(void * parm)
 		pthread_rwlock_wrlock(&waitPoolLock);
 
 		//Store player into waitPool:
-		connectBackWaitPool[match_callback_reply->playerID] = connectBackSocket;
+		connectBackWaitPool[match_callback_reply->m_playerID] = connectBackSocket;
 
 		//Try again for CALLBACK_WAIT_TIME seconds
 		for(uint i = 0; i < CALLBACK_WAIT_TIME; i++ )
@@ -343,39 +343,39 @@ void ProcessRound(Match *match)
 {
 
 	//Step 1: Increment all the charges on the charging actions
-	for(uint i = 0; i < match->chargingActions.size(); i++)
+	for(uint i = 0; i < match->m_chargingActions.size(); i++)
 	{
-		match->chargingActions[i]->currentCharge += match->chargingActions[i]->speed;
+		match->m_chargingActions[i]->m_currentCharge += match->m_chargingActions[i]->m_speed;
 	}
 
 	//Step 2: Move any finished actions over to chargedActions
-	for(uint i = 0; i < match->chargingActions.size(); i++)
+	for(uint i = 0; i < match->m_chargingActions.size(); i++)
 	{
-		if( match->chargingActions[i]->currentCharge >= CHARGE_MAX )
+		if( match->m_chargingActions[i]->m_currentCharge >= CHARGE_MAX )
 		{
 			//Move the Action over
-			match->chargedActions.push_back(match->chargingActions[i]);
+			match->m_chargedActions.push_back(match->m_chargingActions[i]);
 			//Delete it from this list
-			match->chargingActions[i] = NULL;
-			match->chargingActions.erase( match->chargingActions.begin()+i );
+			match->m_chargingActions[i] = NULL;
+			match->m_chargingActions.erase( match->m_chargingActions.begin()+i );
 			//Move the index back, since we just erased one elements
 			i--;
 		}
 	}
 
 	//Step 3: Sort the new charged list according to execution order
-	sort(match->chargedActions.front(),
-			match->chargedActions.back(), Action::CompareActions);
+	sort(match->m_chargedActions.front(),
+			match->m_chargedActions.back(), Action::CompareActions);
 
 	//Step 4: Execute each of the charged actions, one by one
-	while(match->chargedActions.size() > 0)
+	while(match->m_chargedActions.size() > 0)
 	{
-		match->chargedActions[0]->Execute();
-		match->chargingActions.erase( match->chargingActions.begin() );
+		match->m_chargedActions[0]->Execute();
+		match->m_chargingActions.erase( match->m_chargingActions.begin() );
 
 		//Re-sort the actions, since new ones might have been added
-		sort(match->chargedActions.front(),
-				match->chargedActions.back(), Action::CompareActions);
+		sort(match->m_chargedActions.front(),
+				match->m_chargedActions.back(), Action::CompareActions);
 		//TODO: This is probably inefficient. Find a better way than re-sorting every time
 	}
 
@@ -447,7 +447,7 @@ uint GetPlayerDescriptions(uint matchID, PlayerDescription *descArray)
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
 		vector<struct PlayerDescription> descriptions =
-				joinedMatch->teams[i]->GetPlayerDescriptions();
+				joinedMatch->m_teams[i]->GetPlayerDescriptions();
 		for(uint j = 0; j < descriptions.size(); j++)
 		{
 			descArray[count] = descriptions[j];
@@ -473,8 +473,8 @@ uint RegisterNewMatch(Player *player, struct MatchOptions options)
 	Match *match = new Match(player);
 	match->SetID(matchID);
 	match->SetStatus(WAITING_FOR_PLAYERS);
-	match->SetMaxPlayers(options.maxPlayers);
-	match->SetName(options.name);
+	match->SetMaxPlayers(options.m_maxPlayers);
+	match->SetName(options.m_name);
 
 	//Put the match in the global match list
 	pthread_rwlock_wrlock(&matchListLock);
@@ -574,9 +574,9 @@ bool LeaveMatch(Player *player)
 	// Send Client Notifications
 	//*******************************
 	MatchLobbyMessage *notification = new MatchLobbyMessage();
-	notification->type = PLAYER_LEFT_MATCH_NOTIFICATION;
-	notification->playerID = player->GetID();
-	notification->newLeaderID = foundMatch->GetLeaderID();
+	notification->m_type = PLAYER_LEFT_MATCH_NOTIFICATION;
+	notification->m_playerID = player->GetID();
+	notification->m_newLeaderID = foundMatch->GetLeaderID();
 	NotifyClients(foundMatch, notification);
 	delete notification;
 	return true;

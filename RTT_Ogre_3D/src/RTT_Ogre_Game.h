@@ -28,7 +28,7 @@ class RTT_Ogre_Game : public RTT_Ogre_Base
     	virtual void moveUnit(const RTT::Direction &arg, RTT_Ogre_Unit &arg2);
     	virtual bool keyPressed( const KeyEvent &arg );
     	virtual void buildUnits(void);
-    	RTT_Ogre_Unit mainPlayer;
+    	RTT_Ogre_Unit m_mainPlayer;
 };
 
 #endif /* RTT_OGRE_GAME_H_ */

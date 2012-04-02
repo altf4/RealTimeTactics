@@ -40,10 +40,10 @@ class Gameboard
 
 public:
 	//The size of the gameboard in both x and y directions
-	uint xMax, yMax;
+	uint m_xMax, m_yMax;
 
 	//The 2D vector of tiles (vector of vectors)
-	vector<vector<Tile*> > tiles;
+	vector<vector<Tile*> > m_tiles;
 
 	//Arguments:
 	//	x - Set the maximum longitude of gameboard
