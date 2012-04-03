@@ -32,23 +32,23 @@ bool GameEvents::ProcessGameEvent()
 	}
 
 	GameMessage *game_message = (GameMessage*)event_message;
-	switch(game_message->type)
+	switch(game_message->m_type)
 	{
 		case UNIT_MOVED_DIRECTION_NOTICE:
 		{
 			//TODO: Specify a separate direction to face
-			struct Coordinate source = {game_message->xOld, game_message->yOld};
+			struct Coordinate source = {game_message->m_xOld, game_message->m_yOld};
 
-			ClientGameState::Instance().MoveUnitDirection(game_message->unitID,
-					source,	game_message->direction, game_message->direction);
+			ClientGameState::Instance().MoveUnitDirection(game_message->m_unitID,
+					source,	game_message->m_direction, game_message->m_direction);
 
 			//Call the UI's movement code (IE: Move the unit on the screen)
-			UI_UnitMovedDirectionSignal(game_message->unitID,
-					source,	game_message->direction, game_message->direction);
+			UI_UnitMovedDirectionSignal(game_message->m_unitID,
+					source,	game_message->m_direction, game_message->m_direction);
 
 			//Send back an acknowledgment of the move
 			GameMessage unit_moved_reply = GameMessage();
-			unit_moved_reply.type = UNIT_MOVED_DIRECTION_ACK;
+			unit_moved_reply.m_type = UNIT_MOVED_DIRECTION_ACK;
 			Message::WriteMessage(&unit_moved_reply, callbackSocket);
 			break;
 		}

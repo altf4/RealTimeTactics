@@ -32,7 +32,7 @@ Path::Path(Gameboard *board, Tile *fromTile, Tile *toTile, Unit *unit)
 		return;
 	}
 
-	const int num_nodes = board->tiles.size();
+	const int num_nodes = board->m_tiles.size();
 	const int num_edges = res;
 
 	graph_t g(edge_array, edge_array + num_edges, weights, num_nodes);
@@ -40,7 +40,7 @@ Path::Path(Gameboard *board, Tile *fromTile, Tile *toTile, Unit *unit)
 	vector<vertex_descriptor> p(num_vertices(g));
 	vector<int> d(num_vertices(g));
 
-	vertex_descriptor s = vertex(unit->ID, g);
+	vertex_descriptor s = vertex(unit->m_ID, g);
 
 	dijkstra_shortest_paths(g, s, predecessor_map(&p[0]).distance_map(&d[0]));
 

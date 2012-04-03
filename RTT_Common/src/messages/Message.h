@@ -16,8 +16,6 @@
 #include <unistd.h>
 #include <stdint.h>
 
-using namespace std;
-
 namespace RTT
 {
 
@@ -144,9 +142,9 @@ enum MessageType: char
 
 struct VersionNumber
 {
-	uint32_t major;
-	uint32_t minor;
-	uint32_t rev;
+	uint32_t m_major;
+	uint32_t m_minor;
+	uint32_t m_rev;
 };
 
 class Message
@@ -154,9 +152,9 @@ class Message
 public:
 
 	//Not ever sent. Just used to return errors
-	bool serializeError;
+	bool m_serializeError;
 
-	enum MessageType type;
+	enum MessageType m_type;
 
 	//Plain old constructor
 	Message();

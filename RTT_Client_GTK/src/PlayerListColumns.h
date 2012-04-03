@@ -11,8 +11,6 @@
 
 #include <gtkmm.h>
 
-using namespace Gtk;
-
 namespace RTT
 {
 
@@ -21,14 +19,15 @@ class PlayerListColumns : public Gtk::TreeModelColumnRecord
 public:
 
 	PlayerListColumns()
-	{ add(isLeader); add(leaderSelectable); add(name); add(teamName); add(teamChosen); add(ID);}
+	{ add(m_isLeader); add(m_leaderSelectable); add(m_name);
+		add(m_teamName); add(m_teamChosen); add(m_ID);}
 
-	TreeModelColumn<bool> isLeader;
-	TreeModelColumn<bool> leaderSelectable;
-	TreeModelColumn<string> name;
-	TreeModelColumn<Glib::ustring> teamName;
-	TreeModelColumn<Glib::RefPtr<Gtk::TreeModel> > teamChosen;
-	TreeModelColumn<uint> ID;
+	Gtk::TreeModelColumn<bool> m_isLeader;
+	Gtk::TreeModelColumn<bool> m_leaderSelectable;
+	Gtk::TreeModelColumn<std::string> m_name;
+	Gtk::TreeModelColumn<Glib::ustring> m_teamName;
+	Gtk::TreeModelColumn<Glib::RefPtr<Gtk::TreeModel> > m_teamChosen;
+	Gtk::TreeModelColumn<uint> m_ID;
 
 };
 

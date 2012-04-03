@@ -23,13 +23,13 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 		return;
 	}
 
-	serializeError = false;
+	m_serializeError = false;
 
 	//Copy the message type
-	memcpy(&type, buffer, MESSAGE_MIN_SIZE);
+	memcpy(&m_type, buffer, MESSAGE_MIN_SIZE);
 	buffer += MESSAGE_MIN_SIZE;
 
-	switch(type)
+	switch(m_type)
 	{
 		case MOVE_UNIT_DIRECTION_REQUEST:
 		{
@@ -38,26 +38,26 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 			//		3) X coordinate, starting location
 			//		4) Y coordinate, starting location
 			//		5) Direction to move unit (one hop)
-			uint32_t expectedSize = sizeof(type) + sizeof(unitID) + sizeof(xOld) + sizeof(yOld)
-					+ sizeof(direction);
+			uint32_t expectedSize = sizeof(m_type) + sizeof(m_unitID) + sizeof(m_xOld) + sizeof(m_yOld)
+					+ sizeof(m_direction);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//Unit ID
-			memcpy(&unitID, buffer, sizeof(unitID));
-			buffer += sizeof(unitID);
+			memcpy(&m_unitID, buffer, sizeof(m_unitID));
+			buffer += sizeof(m_unitID);
 			//Starting X position
-			memcpy(&xOld, buffer, sizeof(xOld));
-			buffer += sizeof(xOld);
+			memcpy(&m_xOld, buffer, sizeof(m_xOld));
+			buffer += sizeof(m_xOld);
 			//Starting Y position
-			memcpy(&yOld, buffer, sizeof(yOld));
-			buffer += sizeof(yOld);
+			memcpy(&m_yOld, buffer, sizeof(m_yOld));
+			buffer += sizeof(m_yOld);
 			//Direction (enum) to move
-			memcpy(&direction, buffer, sizeof(direction));
-			buffer += sizeof(direction);
+			memcpy(&m_direction, buffer, sizeof(m_direction));
+			buffer += sizeof(m_direction);
 
 			break;
 		}
@@ -67,25 +67,25 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 			//		2) MoveResult enum describing success or failure
 			//		3) X coordinate, correct starting location
 			//		4) Y coordinate, correct starting location
-			uint32_t expectedSize = sizeof(type) + sizeof(moveResult) + sizeof(xOld) + sizeof(yOld);
+			uint32_t expectedSize = sizeof(m_type) + sizeof(m_moveResult) + sizeof(m_xOld) + sizeof(m_yOld);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//Unit ID
-			memcpy(&unitID, buffer, sizeof(unitID));
-			buffer += sizeof(unitID);
+			memcpy(&m_unitID, buffer, sizeof(m_unitID));
+			buffer += sizeof(m_unitID);
 			//Movement Result enumeration
-			memcpy(&moveResult, buffer, sizeof(moveResult));
-			buffer += sizeof(moveResult);
+			memcpy(&m_moveResult, buffer, sizeof(m_moveResult));
+			buffer += sizeof(m_moveResult);
 			//Starting X position
-			memcpy(&xOld, buffer, sizeof(xOld));
-			buffer += sizeof(xOld);
+			memcpy(&m_xOld, buffer, sizeof(m_xOld));
+			buffer += sizeof(m_xOld);
 			//Starting Y position
-			memcpy(&yOld, buffer, sizeof(yOld));
-			buffer += sizeof(yOld);
+			memcpy(&m_yOld, buffer, sizeof(m_yOld));
+			buffer += sizeof(m_yOld);
 			break;
 		}
 		case UNIT_MOVED_DIRECTION_NOTICE:
@@ -95,36 +95,36 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 			//		3) X coordinate, starting location
 			//		4) Y coordinate, starting location
 			//		5) Direction unit moved (one hop)
-			uint32_t expectedSize = sizeof(type) + sizeof(unitID) + sizeof(xOld) + sizeof(yOld)
-					+ sizeof(direction);
+			uint32_t expectedSize = sizeof(m_type) + sizeof(m_unitID) + sizeof(m_xOld) + sizeof(m_yOld)
+					+ sizeof(m_direction);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//Unit ID
-			memcpy(&unitID, buffer, sizeof(unitID));
-			buffer += sizeof(unitID);
+			memcpy(&m_unitID, buffer, sizeof(m_unitID));
+			buffer += sizeof(m_unitID);
 			//Starting X position
-			memcpy(&xOld, buffer, sizeof(xOld));
-			buffer += sizeof(xOld);
+			memcpy(&m_xOld, buffer, sizeof(m_xOld));
+			buffer += sizeof(m_xOld);
 			//Starting Y position
-			memcpy(&yOld, buffer, sizeof(yOld));
-			buffer += sizeof(yOld);
+			memcpy(&m_yOld, buffer, sizeof(m_yOld));
+			buffer += sizeof(m_yOld);
 			//Direction (enum) moved
-			memcpy(&direction, buffer, sizeof(direction));
-			buffer += sizeof(direction);
+			memcpy(&m_direction, buffer, sizeof(m_direction));
+			buffer += sizeof(m_direction);
 
 			break;
 		}
 		case UNIT_MOVED_DIRECTION_ACK:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = sizeof(type);
+			uint32_t expectedSize = sizeof(m_type);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -132,7 +132,7 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 		}
 		default:
 		{
-			serializeError = true;
+			m_serializeError = true;
 			break;
 		}
 	}
@@ -142,7 +142,7 @@ char *GameMessage::Serialize(uint32_t *length)
 {
 	char *buffer, *originalBuffer;
 	uint32_t messageSize;
-	switch(type)
+	switch(m_type)
 	{
 		case MOVE_UNIT_DIRECTION_REQUEST:
 		{
@@ -151,26 +151,26 @@ char *GameMessage::Serialize(uint32_t *length)
 			//		3) X coordinate, starting location
 			//		4) Y coordinate, starting location
 			//		5) Direction to move unit (one hop)
-			messageSize =  sizeof(type) + sizeof(unitID) + sizeof(xOld) + sizeof(yOld)
-					+ sizeof(direction);
+			messageSize =  sizeof(m_type) + sizeof(m_unitID) + sizeof(m_xOld) + sizeof(m_yOld)
+					+ sizeof(m_direction);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Message type
-			memcpy(buffer, &type, sizeof(type));
-			buffer += sizeof(type);
+			memcpy(buffer, &m_type, sizeof(m_type));
+			buffer += sizeof(m_type);
 			//Unit ID
-			memcpy(buffer, &unitID, sizeof(unitID));
-			buffer += sizeof(unitID);
+			memcpy(buffer, &m_unitID, sizeof(m_unitID));
+			buffer += sizeof(m_unitID);
 			//X coord
-			memcpy(buffer, &xOld, sizeof(xOld));
-			buffer += sizeof(xOld);
+			memcpy(buffer, &m_xOld, sizeof(m_xOld));
+			buffer += sizeof(m_xOld);
 			//Y coord
-			memcpy(buffer, &yOld, sizeof(yOld));
-			buffer += sizeof(yOld);
+			memcpy(buffer, &m_yOld, sizeof(m_yOld));
+			buffer += sizeof(m_yOld);
 			//Direction enum
-			memcpy(buffer, &direction, sizeof(direction));
-			buffer += sizeof(direction);
+			memcpy(buffer, &m_direction, sizeof(m_direction));
+			buffer += sizeof(m_direction);
 
 			break;
 		}
@@ -180,22 +180,22 @@ char *GameMessage::Serialize(uint32_t *length)
 			//		2) MoveResult enum describing success or failure
 			//		3) X coordinate, correct starting location
 			//		4) Y coordinate, correct starting location
-			messageSize =  sizeof(type) + sizeof(moveResult) + sizeof(xOld) + sizeof(yOld);
+			messageSize =  sizeof(m_type) + sizeof(m_moveResult) + sizeof(m_xOld) + sizeof(m_yOld);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Message type
-			memcpy(buffer, &type, sizeof(type));
-			buffer += sizeof(type);
+			memcpy(buffer, &m_type, sizeof(m_type));
+			buffer += sizeof(m_type);
 			//Unit ID
-			memcpy(buffer, &moveResult, sizeof(moveResult));
-			buffer += sizeof(moveResult);
+			memcpy(buffer, &m_moveResult, sizeof(m_moveResult));
+			buffer += sizeof(m_moveResult);
 			//X coord
-			memcpy(buffer, &xOld, sizeof(xOld));
-			buffer += sizeof(xOld);
+			memcpy(buffer, &m_xOld, sizeof(m_xOld));
+			buffer += sizeof(m_xOld);
 			//Y coord
-			memcpy(buffer, &yOld, sizeof(yOld));
-			buffer += sizeof(yOld);
+			memcpy(buffer, &m_yOld, sizeof(m_yOld));
+			buffer += sizeof(m_yOld);
 
 			break;
 		}
@@ -206,39 +206,39 @@ char *GameMessage::Serialize(uint32_t *length)
 			//		3) X coordinate, starting location
 			//		4) Y coordinate, starting location
 			//		5) Direction moved (one hop)
-			messageSize =  sizeof(type) + sizeof(unitID) + sizeof(xOld) + sizeof(yOld)
-					+ sizeof(direction);
+			messageSize =  sizeof(m_type) + sizeof(m_unitID) + sizeof(m_xOld) + sizeof(m_yOld)
+					+ sizeof(m_direction);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Message type
-			memcpy(buffer, &type, sizeof(type));
-			buffer += sizeof(type);
+			memcpy(buffer, &m_type, sizeof(m_type));
+			buffer += sizeof(m_type);
 			//Unit ID
-			memcpy(buffer, &unitID, sizeof(unitID));
-			buffer += sizeof(unitID);
+			memcpy(buffer, &m_unitID, sizeof(m_unitID));
+			buffer += sizeof(m_unitID);
 			//X coord
-			memcpy(buffer, &xOld, sizeof(xOld));
-			buffer += sizeof(xOld);
+			memcpy(buffer, &m_xOld, sizeof(m_xOld));
+			buffer += sizeof(m_xOld);
 			//Y coord
-			memcpy(buffer, &yOld, sizeof(yOld));
-			buffer += sizeof(yOld);
+			memcpy(buffer, &m_yOld, sizeof(m_yOld));
+			buffer += sizeof(m_yOld);
 			//Direction enum
-			memcpy(buffer, &direction, sizeof(direction));
-			buffer += sizeof(direction);
+			memcpy(buffer, &m_direction, sizeof(m_direction));
+			buffer += sizeof(m_direction);
 
 			break;
 		}
 		case UNIT_MOVED_DIRECTION_ACK:
 		{
 			//Uses: 1) Message Type
-			messageSize =  sizeof(type);
+			messageSize =  sizeof(m_type);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Message type
-			memcpy(buffer, &type, sizeof(type));
-			buffer += sizeof(type);
+			memcpy(buffer, &m_type, sizeof(m_type));
+			buffer += sizeof(m_type);
 			break;
 		}
 		default:

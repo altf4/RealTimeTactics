@@ -8,10 +8,10 @@
 #define GAMECOMMANDS_H_
 
 #include <stdint.h>
-#include <google/dense_hash_map>
-
 #include "Tile.h"
 #include "Unit.h"
+#include <google/dense_hash_map>
+
 #include "messages/GameMessage.h"
 
 using google::dense_hash_map;
@@ -40,14 +40,24 @@ typedef dense_hash_map<uint32_t, Unit*, hash<uint32_t>, eqint> UnitList;
 //				Result Types
 //********************************************
 
+enum MovementSuccess: char
+{
+	MOVEMENT_SUCCESS = 0,	//Total success
+	UNIT_CANT_REACH,		//Tried to move too far
+	INVALID_DESTINATION,	//Tried to move off gameboard or impassible terrain
+	UNIT_DOESNT_EXIST,
+	UNIT_CANNOT_MOVE,
+	NOT_UNITS_TURN,
+};
+
 struct MovementResult
 {
-	enum MoveResult result;
+	enum MoveResult m_result;
 
 	//Used in error conditions to help if the client is unsynced:
 
 	//This is the position that the unit SHOULD be at
-	uint32_t originalX, originalY;
+	uint32_t m_originalX, m_originalY;
 };
 
 //********************************************
@@ -59,7 +69,7 @@ struct MovementResult
 //	direction - The direction to move the unit
 //		NOTE: The unit will also by default made to face the direction moved
 //	returns - A MovementResult struct describing the success or error of the move
-struct MovementResult MoveUnit(uint32_t unitID, uint32_t oldX, uint32_t oldY, enum Direction direction);
+struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, enum Direction direction);
 
 //Move a Unit to a distant tile
 //	unitID - The ID of the unit to move.

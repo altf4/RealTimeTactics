@@ -28,13 +28,13 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		return;
 	}
 
-	serializeError = false;
+	m_serializeError = false;
 
 	//Copy the message type
-	memcpy(&type, buffer, MESSAGE_MIN_SIZE);
+	memcpy(&m_type, buffer, MESSAGE_MIN_SIZE);
 	buffer += MESSAGE_MIN_SIZE;
 
-	switch(type)
+	switch(m_type)
 	{
 		//*********************
 		//	MatchLobbyMessage
@@ -47,7 +47,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -59,7 +59,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -70,19 +70,19 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			//Uses: 1) Message Type
 			//		2) New team
 			//		3) Player ID to change
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(newTeam) + sizeof(playerID);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_newTeam) + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new team
-			memcpy(&newTeam, buffer, sizeof(newTeam));
-			buffer += sizeof(newTeam);
+			memcpy(&m_newTeam, buffer, sizeof(m_newTeam));
+			buffer += sizeof(m_newTeam);
 			//new team
-			memcpy(&playerID, buffer, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(&m_playerID, buffer, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -90,16 +90,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new team
-			memcpy(&changeAccepted, buffer, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(&m_changeAccepted, buffer, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -109,7 +109,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -119,16 +119,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new team
-			memcpy(&changeAccepted, buffer, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(&m_changeAccepted, buffer, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -138,7 +138,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -150,7 +150,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -161,19 +161,19 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			//Uses: 1) Message Type
 			//		2) New Color
 			//		3) Player ID
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(newColor) + sizeof(playerID);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_newColor) + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new team
-			memcpy(&newColor, buffer, sizeof(newColor));
-			buffer += sizeof(newColor);
+			memcpy(&m_newColor, buffer, sizeof(m_newColor));
+			buffer += sizeof(m_newColor);
 			//Player to change
-			memcpy(&playerID, buffer, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(&m_playerID, buffer, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -181,16 +181,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new team
-			memcpy(&changeAccepted, buffer, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(&m_changeAccepted, buffer, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -201,16 +201,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE + MAP_DESCR_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new map
-			memcpy(&mapDescription.name, buffer, MAP_NAME_LEN);
+			memcpy(&m_mapDescription.m_name, buffer, MAP_NAME_LEN);
 			buffer += MAP_NAME_LEN;
-			memcpy(&mapDescription.length, buffer, sizeof(uint32_t));
+			memcpy(&m_mapDescription.m_length, buffer, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
-			memcpy(&mapDescription.width, buffer, sizeof(uint32_t));
+			memcpy(&m_mapDescription.m_width, buffer, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
 			break;
 		}
@@ -218,16 +218,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new team
-			memcpy(&changeAccepted, buffer, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(&m_changeAccepted, buffer, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -235,16 +235,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) New map data
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(newVictCond);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_newVictCond);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new team
-			memcpy(&newVictCond, buffer, sizeof(newVictCond));
-			buffer += sizeof(newVictCond);
+			memcpy(&m_newVictCond, buffer, sizeof(m_newVictCond));
+			buffer += sizeof(m_newVictCond);
 
 			break;
 		}
@@ -252,16 +252,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new team
-			memcpy(&changeAccepted, buffer, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(&m_changeAccepted, buffer, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -269,16 +269,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) New map data
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(newSpeed);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_newSpeed);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new team
-			memcpy(&newSpeed, buffer, sizeof(newSpeed));
-			buffer += sizeof(newSpeed);
+			memcpy(&m_newSpeed, buffer, sizeof(m_newSpeed));
+			buffer += sizeof(m_newSpeed);
 
 			break;
 		}
@@ -286,16 +286,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new team
-			memcpy(&changeAccepted, buffer, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(&m_changeAccepted, buffer, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -303,16 +303,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) playerID
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(playerID);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//PlayerID
-			memcpy(&playerID, buffer, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(&m_playerID, buffer, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -320,16 +320,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) playerID
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(playerID);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//PlayerID
-			memcpy(&playerID, buffer, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(&m_playerID, buffer, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -337,16 +337,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Success or failure (bool)
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//PlayerID
-			memcpy(&changeAccepted, buffer, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(&m_changeAccepted, buffer, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -354,16 +354,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Player ID
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(playerID);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new team
-			memcpy(&playerID, buffer, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(&m_playerID, buffer, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -371,16 +371,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//new team
-			memcpy(&changeAccepted, buffer, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(&m_changeAccepted, buffer, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -394,19 +394,19 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			//Uses: 1) Message Type
 			//		2) New team
 			//		3) Player ID
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(newTeam) + sizeof(playerID);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_newTeam) + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//New team
-			memcpy(&newTeam, buffer, sizeof(newTeam));
-			buffer += sizeof(newTeam);
+			memcpy(&m_newTeam, buffer, sizeof(m_newTeam));
+			buffer += sizeof(m_newTeam);
 			//Player ID that changed
-			memcpy(&playerID, buffer, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(&m_playerID, buffer, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -416,7 +416,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -428,7 +428,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -440,7 +440,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -451,21 +451,21 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			//Uses: 1) Message Type
 			//		2) Player ID who left
 			//		3) Player ID of new leader
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(playerID) +
-					sizeof(newLeaderID);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_playerID) +
+					sizeof(m_newLeaderID);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//Player ID that left
-			memcpy(&playerID, buffer, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(&m_playerID, buffer, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			//Player ID of new leader
-			memcpy(&newLeaderID, buffer, sizeof(newLeaderID));
-			buffer += sizeof(newLeaderID);
+			memcpy(&m_newLeaderID, buffer, sizeof(m_newLeaderID));
+			buffer += sizeof(m_newLeaderID);
 
 			break;
 		}
@@ -475,7 +475,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -488,18 +488,18 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE + PLAYER_DESCR_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//Player ID that joined
-			memcpy(&playerDescription.name, buffer, PLAYER_NAME_SIZE);
+			memcpy(&m_playerDescription.m_name, buffer, PLAYER_NAME_SIZE);
 			buffer += PLAYER_NAME_SIZE;
-			memcpy(&playerDescription.ID, buffer, sizeof(uint32_t));
+			memcpy(&m_playerDescription.m_ID, buffer, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
-			memcpy(&playerDescription.color, buffer, sizeof(enum TeamColor));
+			memcpy(&m_playerDescription.m_color, buffer, sizeof(enum TeamColor));
 			buffer += sizeof(enum TeamColor);
-			memcpy(&playerDescription.team, buffer, sizeof(enum TeamNumber));
+			memcpy(&m_playerDescription.m_team, buffer, sizeof(enum TeamNumber));
 			buffer += sizeof(enum TeamNumber);
 
 
@@ -511,7 +511,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -522,19 +522,19 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			//Uses: 1) Message Type
 			//		2) Player ID
 			//		3) New color
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(playerID) + sizeof(newColor);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_playerID) + sizeof(m_newColor);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//Player ID
-			memcpy(&playerID, buffer, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(&m_playerID, buffer, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 			//New Color
-			memcpy(&newColor, buffer, sizeof(newColor));
-			buffer += sizeof(newColor);
+			memcpy(&m_newColor, buffer, sizeof(m_newColor));
+			buffer += sizeof(m_newColor);
 
 			break;
 		}
@@ -544,7 +544,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -557,16 +557,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE + MAP_DESCR_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//Map description
-			memcpy(&mapDescription.name, buffer, MAP_NAME_LEN);
+			memcpy(&m_mapDescription.m_name, buffer, MAP_NAME_LEN);
 			buffer += MAP_NAME_LEN;
-			memcpy(&mapDescription.length, buffer, sizeof(uint32_t));
+			memcpy(&m_mapDescription.m_length, buffer, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
-			memcpy(&mapDescription.width, buffer, sizeof(uint32_t));
+			memcpy(&m_mapDescription.m_width, buffer, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
 
 			break;
@@ -577,7 +577,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -587,16 +587,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Game speed
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(newSpeed);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_newSpeed);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//Map description
-			memcpy(&newSpeed, buffer, sizeof(newSpeed));
-			buffer += sizeof(newSpeed);
+			memcpy(&m_newSpeed, buffer, sizeof(m_newSpeed));
+			buffer += sizeof(m_newSpeed);
 
 			break;
 		}
@@ -606,7 +606,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -616,16 +616,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Victory Condition
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(newVictCond);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_newVictCond);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//Victory condition
-			memcpy(&newVictCond, buffer, sizeof(newVictCond));
-			buffer += sizeof(newVictCond);
+			memcpy(&m_newVictCond, buffer, sizeof(m_newVictCond));
+			buffer += sizeof(m_newVictCond);
 
 			break;
 		}
@@ -635,7 +635,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -645,16 +645,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) PlayerID of new leader
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(playerID);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//Victory condition
-			memcpy(&playerID, buffer, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(&m_playerID, buffer, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -664,7 +664,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -676,7 +676,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			uint32_t expectedSize = MESSAGE_MIN_SIZE;
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
@@ -686,16 +686,16 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			uint32_t expectedSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
-				serializeError = true;
+				m_serializeError = true;
 				return;
 			}
 
 			//Map description
-			memcpy(&changeAccepted, buffer, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(&m_changeAccepted, buffer, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -714,7 +714,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 {
 	char *buffer, *originalBuffer;
 	uint32_t messageSize;
-	switch(type)
+	switch(m_type)
 	{
 		//*********************
 		//	MatchLobbyMessage
@@ -728,7 +728,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -741,7 +741,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -751,19 +751,19 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			//Uses: 1) Message Type
 			//		2) New team
 			//		3) Player ID to change
-			messageSize = MESSAGE_MIN_SIZE + sizeof(newTeam) + sizeof(playerID);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_newTeam) + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Page Count
-			memcpy(buffer, &newTeam, sizeof(newTeam));
-			buffer += sizeof(newTeam);
+			memcpy(buffer, &m_newTeam, sizeof(m_newTeam));
+			buffer += sizeof(m_newTeam);
 			//PlayerID
-			memcpy(buffer, &playerID, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(buffer, &m_playerID, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -771,16 +771,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Change accepted
-			memcpy(buffer, &changeAccepted, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(buffer, &m_changeAccepted, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -792,7 +792,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -801,16 +801,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Change accepted
-			memcpy(buffer, &changeAccepted, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(buffer, &m_changeAccepted, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -822,7 +822,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -835,7 +835,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -845,19 +845,19 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			//Uses: 1) Message Type
 			//		2) new Color
 			//		3) Player ID
-			messageSize = MESSAGE_MIN_SIZE + sizeof(newColor) + sizeof(playerID);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_newColor) + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//New color
-			memcpy(buffer, &newColor, sizeof(newColor));
-			buffer += sizeof(newColor);
+			memcpy(buffer, &m_newColor, sizeof(m_newColor));
+			buffer += sizeof(m_newColor);
 			//Player ID
-			memcpy(buffer, &playerID, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(buffer, &m_playerID, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -865,16 +865,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Change accepted
-			memcpy(buffer, &changeAccepted, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(buffer, &m_changeAccepted, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -887,15 +887,15 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			//New color
-			memcpy(buffer, &mapDescription.name, MAP_NAME_LEN);
+			memcpy(buffer, &m_mapDescription.m_name, MAP_NAME_LEN);
 			buffer += MAP_NAME_LEN;
-			memcpy(buffer, &mapDescription.length, sizeof(uint32_t));
+			memcpy(buffer, &m_mapDescription.m_length, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
-			memcpy(buffer, &mapDescription.width, sizeof(uint32_t));
+			memcpy(buffer, &m_mapDescription.m_width, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
 
 			break;
@@ -904,16 +904,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Change accepted
-			memcpy(buffer, &changeAccepted, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(buffer, &m_changeAccepted, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -921,16 +921,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) New victory condition
-			messageSize = MESSAGE_MIN_SIZE + sizeof(newVictCond);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_newVictCond);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//New color
-			memcpy(buffer, &newVictCond, sizeof(newVictCond));
-			buffer += sizeof(newVictCond);
+			memcpy(buffer, &m_newVictCond, sizeof(m_newVictCond));
+			buffer += sizeof(m_newVictCond);
 
 			break;
 		}
@@ -938,16 +938,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Change accepted
-			memcpy(buffer, &changeAccepted, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(buffer, &m_changeAccepted, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -955,16 +955,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) playerID of new leader
-			messageSize = MESSAGE_MIN_SIZE + sizeof(playerID);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//New color
-			memcpy(buffer, &playerID, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(buffer, &m_playerID, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -972,16 +972,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Change accepted
-			memcpy(buffer, &changeAccepted, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(buffer, &m_changeAccepted, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -989,16 +989,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) New Game Speed
-			messageSize = MESSAGE_MIN_SIZE + sizeof(newSpeed);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_newSpeed);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//New color
-			memcpy(buffer, &newSpeed, sizeof(newSpeed));
-			buffer += sizeof(newSpeed);
+			memcpy(buffer, &m_newSpeed, sizeof(m_newSpeed));
+			buffer += sizeof(m_newSpeed);
 
 			break;
 		}
@@ -1006,16 +1006,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Change accepted
-			memcpy(buffer, &changeAccepted, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(buffer, &m_changeAccepted, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -1023,16 +1023,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) PlayerID
-			messageSize = MESSAGE_MIN_SIZE + sizeof(playerID);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//New color
-			memcpy(buffer, &playerID, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(buffer, &m_playerID, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -1040,16 +1040,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Player ID
-			messageSize = MESSAGE_MIN_SIZE + sizeof(playerID);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//New color
-			memcpy(buffer, &playerID, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(buffer, &m_playerID, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -1057,16 +1057,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Change accepted
-			memcpy(buffer, &changeAccepted, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(buffer, &m_changeAccepted, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}
@@ -1080,19 +1080,19 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			//Uses: 1) Message Type
 			//		2) New team
 			//		3) Player ID
-			messageSize = MESSAGE_MIN_SIZE + sizeof(newTeam) + sizeof(playerID);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_newTeam) + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//New Team
-			memcpy(buffer, &newTeam, sizeof(newTeam));
-			buffer += sizeof(newTeam);
+			memcpy(buffer, &m_newTeam, sizeof(m_newTeam));
+			buffer += sizeof(m_newTeam);
 			//Player ID
-			memcpy(buffer, &playerID, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(buffer, &m_playerID, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -1104,7 +1104,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -1117,7 +1117,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -1130,7 +1130,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -1140,19 +1140,19 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			//Uses: 1) Message Type
 			//		2) Player ID who left
 			//		3) Player ID of new leader
-			messageSize = MESSAGE_MIN_SIZE + sizeof(playerID) + sizeof(newLeaderID);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_playerID) + sizeof(m_newLeaderID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Player ID who left
-			memcpy(buffer, &playerID, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(buffer, &m_playerID, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 			//Player ID of new leader
-			memcpy(buffer, &newLeaderID, sizeof(newLeaderID));
-			buffer += sizeof(newLeaderID);
+			memcpy(buffer, &m_newLeaderID, sizeof(m_newLeaderID));
+			buffer += sizeof(m_newLeaderID);
 
 			break;
 		}
@@ -1164,7 +1164,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -1178,17 +1178,17 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			//Put the player description in
-			memcpy(buffer, &playerDescription.name, PLAYER_NAME_SIZE);
+			memcpy(buffer, &m_playerDescription.m_name, PLAYER_NAME_SIZE);
 			buffer += PLAYER_NAME_SIZE;
-			memcpy(buffer, &playerDescription.ID, sizeof(uint32_t));
+			memcpy(buffer, &m_playerDescription.m_ID, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
-			memcpy(buffer, &playerDescription.color, sizeof(enum TeamColor));
+			memcpy(buffer, &m_playerDescription.m_color, sizeof(enum TeamColor));
 			buffer += sizeof(enum TeamColor);
-			memcpy(buffer, &playerDescription.team, sizeof(enum TeamNumber));
+			memcpy(buffer, &m_playerDescription.m_team, sizeof(enum TeamNumber));
 			buffer += sizeof(enum TeamNumber);
 
 			break;
@@ -1201,7 +1201,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -1211,19 +1211,19 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			//Uses: 1) Message Type
 			//		2) Player ID
 			//		3) New Color
-			messageSize = MESSAGE_MIN_SIZE + sizeof(playerID) + sizeof(newColor);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_playerID) + sizeof(m_newColor);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Player ID
-			memcpy(buffer, &playerID, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(buffer, &m_playerID, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 			//Player ID
-			memcpy(buffer, &newColor, sizeof(newColor));
-			buffer += sizeof(newColor);
+			memcpy(buffer, &m_newColor, sizeof(m_newColor));
+			buffer += sizeof(m_newColor);
 
 			break;
 		}
@@ -1235,7 +1235,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -1249,15 +1249,15 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			//Put the map description in
-			memcpy(buffer, &mapDescription.name, MAP_NAME_LEN);
+			memcpy(buffer, &m_mapDescription.m_name, MAP_NAME_LEN);
 			buffer += MAP_NAME_LEN;
-			memcpy(buffer, &mapDescription.length, sizeof(uint32_t));
+			memcpy(buffer, &m_mapDescription.m_length, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
-			memcpy(buffer, &mapDescription.width, sizeof(uint32_t));
+			memcpy(buffer, &m_mapDescription.m_width, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
 			break;
 		}
@@ -1269,7 +1269,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -1278,16 +1278,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Game Speed
-			messageSize = MESSAGE_MIN_SIZE + sizeof(newSpeed);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_newSpeed);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Put the type in
-			memcpy(buffer, &newSpeed, sizeof(newSpeed));
-			buffer += sizeof(newSpeed);
+			memcpy(buffer, &m_newSpeed, sizeof(m_newSpeed));
+			buffer += sizeof(m_newSpeed);
 
 			break;
 		}
@@ -1299,7 +1299,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -1308,16 +1308,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Victory Condition
-			messageSize = MESSAGE_MIN_SIZE + sizeof(newVictCond);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_newVictCond);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//PVictory Condition
-			memcpy(buffer, &newVictCond, sizeof(newVictCond));
-			buffer += sizeof(newVictCond);
+			memcpy(buffer, &m_newVictCond, sizeof(m_newVictCond));
+			buffer += sizeof(m_newVictCond);
 
 			break;
 		}
@@ -1329,7 +1329,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -1338,16 +1338,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) PlayerID of new leader
-			messageSize = MESSAGE_MIN_SIZE + sizeof(playerID);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//PVictory Condition
-			memcpy(buffer, &playerID, sizeof(playerID));
-			buffer += sizeof(playerID);
+			memcpy(buffer, &m_playerID, sizeof(m_playerID));
+			buffer += sizeof(m_playerID);
 
 			break;
 		}
@@ -1359,7 +1359,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -1372,7 +1372,7 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 
 			break;
@@ -1381,16 +1381,16 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MESSAGE_MIN_SIZE + sizeof(changeAccepted);
+			messageSize = MESSAGE_MIN_SIZE + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
 			//Put the type in
-			memcpy(buffer, &type, MESSAGE_MIN_SIZE);
+			memcpy(buffer, &m_type, MESSAGE_MIN_SIZE);
 			buffer += MESSAGE_MIN_SIZE;
 			//Accept Changes
-			memcpy(buffer, &changeAccepted, sizeof(changeAccepted));
-			buffer += sizeof(changeAccepted);
+			memcpy(buffer, &m_changeAccepted, sizeof(m_changeAccepted));
+			buffer += sizeof(m_changeAccepted);
 
 			break;
 		}

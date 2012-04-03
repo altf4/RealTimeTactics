@@ -15,7 +15,7 @@ Unit::Unit( )
 	: Job("something")
 {
 
-	ID = lastIDGiven++;
+	m_ID = lastIDGiven++;
 	pthread_mutex_init(&m_unitLock, NULL);
 }
 
@@ -24,7 +24,7 @@ Unit::Unit( )
 //	Does this by comparing ID's
 bool Unit::Equals(Unit *testUnit)
 {
-	if( testUnit->ID == ID )
+	if( testUnit->m_ID == m_ID )
 	{
 		return true;
 	}

@@ -40,11 +40,11 @@ public:
 	char *Serialize(uint *length);
 
 
-	uint32_t unitID;
-	uint32_t xOld, yOld;
-	enum Direction direction;
+	uint32_t m_unitID;
+	uint32_t m_xOld, m_yOld;
+	enum Direction m_direction;
 
-	enum MoveResult moveResult;
+	enum MoveResult m_moveResult;
 };
 
 }

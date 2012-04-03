@@ -16,12 +16,12 @@ class TeamComboColumns : public Gtk::TreeModelColumnRecord
 public:
 
 	TeamComboColumns()
-	{ add(teamString); add(teamNum); }
+	{ add(m_teamString); add(m_teamNum); }
 
 	//The values from which the user may choose.
-	TreeModelColumn<int> teamNum;
+	Gtk::TreeModelColumn<int> m_teamNum;
 	//Extra information to help the user to choose.
-	TreeModelColumn<Glib::ustring> teamString;
+	Gtk::TreeModelColumn<Glib::ustring> m_teamString;
 };
 
 #endif /* TEAMCOMBOCOLUMNS_H_ */

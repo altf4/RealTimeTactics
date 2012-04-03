@@ -21,7 +21,6 @@
 #define MATCH_DESCR_SIZE sizeof(enum Status) + (sizeof(uint32_t)*4) + \
 		MAX_MATCHNAME_LEN + sizeof(int64_t)
 #define MATCH_OPTIONS_SIZE sizeof(uint32_t) + MAX_MATCHNAME_LEN
-using namespace std;
 
 namespace RTT
 {
@@ -39,21 +38,21 @@ enum Status: uint32_t
 //	Suitable for sending to others to give match info
 struct MatchDescription
 {
-	enum Status status;
-	uint32_t ID;
-	uint32_t maxPlayers;
-	uint32_t currentPlayerCount;
-	char name[MAX_MATCHNAME_LEN];
-	int64_t timeCreated;
-	uint32_t leaderID;
+	enum Status m_status;
+	uint32_t m_ID;
+	uint32_t m_maxPlayers;
+	uint32_t m_currentPlayerCount;
+	char m_name[MAX_MATCHNAME_LEN];
+	int64_t m_timeCreated;
+	uint32_t m_leaderID;
 };
 
 //A fixed size collection of options for match creation
 //	List of options necessary upon creation of the Match
 struct MatchOptions
 {
-	uint32_t maxPlayers;
-	char name[MAX_MATCHNAME_LEN];
+	uint32_t m_maxPlayers;
+	char m_name[MAX_MATCHNAME_LEN];
 };
 
 class Match
@@ -61,14 +60,14 @@ class Match
 
 public:
 	//The gameboard for this match
-	Gameboard *gameboard;
+	Gameboard *m_gameboard;
 
 	//Teams involved
-	Team* teams[MAX_TEAMS];
+	Team* m_teams[MAX_TEAMS];
 
 	// chargingActions is the global list of actions which have not yet been triggered
 	// chargedActions is the list of actions which are on queue to be triggered
-	vector <Action*> chargingActions, chargedActions;
+	std::vector <Action*> m_chargingActions, m_chargedActions;
 
 	Match(Player *player);
 	~Match();
@@ -76,7 +75,7 @@ public:
 	void SetID(uint newID);
 	void SetStatus(enum Status newStatus);
 	void SetMaxPlayers(uint maxPlayers);
-	void SetName(string newName);
+	void SetName(std::string newName);
 	void SetLeaderID(uint nextLeader);
 	void SetMap(struct MapDescription newMap);
 	void SetVictoryCondition(enum VictoryCondition newVict);
@@ -88,7 +87,7 @@ public:
 	uint GetID();
 	uint GetMaxPlayers();
 	uint GetCurrentPlayerCount();
-	string GetName();
+	std::string GetName();
 	time_t GetTimeCreated();
 	uint GetLeaderID();
 	struct MatchDescription GetDescription();
@@ -108,35 +107,35 @@ public:
 	bool RegisterPlayer(uint playerID);
 
 	//TODO: Evaluate if this is the best place for these functions.
-	static string GameSpeedToString(enum GameSpeed speed);
+	static std::string GameSpeedToString(enum GameSpeed speed);
 	//Converts a GameSpeed enum into the number of microseconds between game ticks
 	static uint GameSpeedTouSeconds(enum GameSpeed speed);
-	static string VictoryConditionToString(enum VictoryCondition victory);
+	static std::string VictoryConditionToString(enum VictoryCondition victory);
 
 private:
 	//Lock for this match
-	pthread_rwlock_t lock;
+	pthread_rwlock_t m_lock;
 
 	//The current status of the match
-	enum Status status;
+	enum Status m_status;
 	//Globally unique identifier for the match on this server
-	uint32_t ID;
+	uint32_t m_ID;
 	//Maximum number of players allowed for this match
-	uint32_t maxPlayers;
-	uint32_t currentPlayerCount;
+	uint32_t m_maxPlayers;
+	uint32_t m_currentPlayerCount;
 	//Truncated at MAX_MATCHNAME_LEN chars
-	string name;
-	int64_t timeCreated;
-	vector<uint32_t> registeredPlayers;
+	std::string m_name;
+	int64_t m_timeCreated;
+	vector<uint32_t> m_registeredPlayers;
 
 	//The "Leader" player who can make changes to match settings
-	uint leaderID;
-	struct MatchDescription description;
+	uint m_leaderID;
+	struct MatchDescription m_description;
 	//Map to be used in the match
 	//TODO: Make this a full map object
-	struct MapDescription map;
-	enum VictoryCondition victoryCondition;
-	enum GameSpeed gameSpeed;
+	struct MapDescription m_map;
+	enum VictoryCondition m_victoryCondition;
+	enum GameSpeed m_gameSpeed;
 
 	uint GetFirstPlayerID();
 

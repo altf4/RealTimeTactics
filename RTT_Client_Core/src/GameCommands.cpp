@@ -11,6 +11,8 @@
 
 using namespace std;
 using namespace RTT;
+using google::dense_hash_map;
+using tr1::hash;
 
 extern int callbackSocket;
 
@@ -36,19 +38,19 @@ struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, en
 	//	that this is invalid.
 	if( units.count(unitID) == 0)
 	{
-		result.result = MOVE_NO_SUCH_UNIT;
+		result.m_result = MOVE_NO_SUCH_UNIT;
 		return result;
 	}
 
 	GameMessage moveRequest;
-	moveRequest.type = MOVE_UNIT_DIRECTION_REQUEST;
-	moveRequest.unitID = unitID;
-	moveRequest.xOld = xOld;
-	moveRequest.yOld = xOld;
-	moveRequest.direction = direction;
+	moveRequest.m_type = MOVE_UNIT_DIRECTION_REQUEST;
+	moveRequest.m_unitID = unitID;
+	moveRequest.m_xOld = xOld;
+	moveRequest.m_yOld = xOld;
+	moveRequest.m_direction = direction;
 	if(!Message::WriteMessage(&moveRequest, callbackSocket))
 	{
-		result.result = MOVE_MESSAGE_SEND_ERROR;
+		result.m_result = MOVE_MESSAGE_SEND_ERROR;
 		return result;
 	}
 
@@ -56,21 +58,21 @@ struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, en
 	if( reply == NULL)
 	{
 		SendError(callbackSocket, PROTOCOL_ERROR);
-		result.result = MOVE_MESSAGE_SEND_ERROR;
+		result.m_result = MOVE_MESSAGE_SEND_ERROR;
 		delete reply;
 		return result;
 	}
-	if( reply->type != MOVE_UNIT_DIRECTION_REPLY)
+	if( reply->m_type != MOVE_UNIT_DIRECTION_REPLY)
 	{
 		SendError(callbackSocket, PROTOCOL_ERROR);
-		result.result = MOVE_MESSAGE_SEND_ERROR;
+		result.m_result = MOVE_MESSAGE_SEND_ERROR;
 		delete reply;
 		return result;
 	}
 	GameMessage *moveReply = (GameMessage*)reply;
-	result.result = moveReply->moveResult;
-	result.originalX = moveReply->xOld;
-	result.originalY = moveReply->yOld;
+	result.m_result = moveReply->m_moveResult;
+	result.m_originalX = moveReply->m_xOld;
+	result.m_originalY = moveReply->m_yOld;
 
 	delete moveReply;
 	return result;

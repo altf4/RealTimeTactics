@@ -10,23 +10,18 @@
 
 #include <gtkmm.h>
 #include <stdint.h>
-#include "ClientProtocolHandler.h"
 #include "RTT_Client_GTK.h"
 #include "MatchListColumns.h"
 #include "PlayerListColumns.h"
 #include "TeamComboColumns.h"
+#include "CallbackHandler.h"
+#include "Player.h"
+
 #include <iostream>
 #include <arpa/inet.h>
 #include <vector>
-#include <pthread.h>
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include <openssl/sha.h>
-
-using namespace std;
-using namespace Gtk;
-using boost::posix_time::ptime;
-using boost::posix_time::time_duration;
-using boost::gregorian::date;
 
 namespace RTT
 {
@@ -37,61 +32,60 @@ public:
 	WelcomeWindow(BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& refGlade);
 	~WelcomeWindow();
 
-	pthread_rwlock_t globalLock;
-	Glib::RefPtr<Builder> welcome_builder;
+	Glib::RefPtr<Gtk::Builder> m_welcome_builder;
+
+	CallbackHandler *m_callbackHandler;
 
 	//The three Welcome Window panes
-	Box *welcome_box;
-	Box *lobby_box;
-	Box *match_lobby_box;
+	Gtk::Box *m_welcome_box;
+	Gtk::Box *m_lobby_box;
+	Gtk::Box *m_match_lobby_box;
 
 	//First Pane Widgets
-	Button *button_custom;
-	Button *button_connect;
-	Statusbar *statusbar;
-	Box *box_custom;
-	Entry *entry_IP;
-	Entry *entry_port;
-	Entry *entry_username;
-	Entry *entry_password;
+	Gtk::Button *m_button_custom;
+	Gtk::Button *m_button_connect;
+	Gtk::Statusbar *m_statusbar;
+	Gtk::Box *m_box_custom;
+	Gtk::Entry *m_entry_IP;
+	Gtk::Entry *m_entry_port;
+	Gtk::Entry *m_entry_username;
+	Gtk::Entry *m_entry_password;
 
 	//Second Pane Widgets
-	Button *quit_server_button;
-	Button *create_match_button;
-	Button *create_match_submit;
-	Button *list_matches_button;
-	Button *join_match_button;
-	Entry *match_name_entry;
-	ComboBoxText *create_match_map_combo;
-	ComboBoxText *max_players_combo;
-	CheckButton *set_private_check;
-	Statusbar *status_lobby;
-	Box *create_match_box;
-	Notebook *match_lists;
+	Gtk::Button *m_quit_server_button;
+	Gtk::Button *m_create_match_button;
+	Gtk::Button *m_create_match_submit;
+	Gtk::Button *m_list_matches_button;
+	Gtk::Button *m_join_match_button;
+	Gtk::Entry *m_match_name_entry;
+	Gtk::ComboBoxText *m_create_match_map_combo;
+	Gtk::ComboBoxText *m_max_players_combo;
+	Gtk::CheckButton *m_set_private_check;
+	Gtk::Statusbar *m_status_lobby;
+	Gtk::Box *m_create_match_box;
+	Gtk::Notebook *m_match_lists;
 
 	//Third Pane Widgets
-	Button *leave_match_button;
-	Button *launch_match_button;
-	Statusbar *match_lobby_status;
-	TreeView *player_list_view;
-	ComboBoxText *map_name_combo;
-	ComboBoxText *speed_combo;
-	ComboBoxText *win_condition_combo;
-	Label *speed_label;
-	Label *victory_cond_label;
-	Label *map_set_label;
-	Label *map_size_label;
+	Gtk::Button *m_leave_match_button;
+	Gtk::Button *m_launch_match_button;
+	Gtk::Statusbar *m_match_lobby_status;
+	Gtk::TreeView *m_player_list_view;
+	Gtk::ComboBoxText *m_map_name_combo;
+	Gtk::ComboBoxText *m_speed_combo;
+	Gtk::ComboBoxText *m_win_condition_combo;
+	Gtk::Label *m_speed_label;
+	Gtk::Label *m_victory_cond_label;
+	Gtk::Label *m_map_set_label;
+	Gtk::Label *m_map_size_label;
 
-	PlayerListColumns *playerColumns;
-	Glib::RefPtr<ListStore> playerListStore;
+	PlayerListColumns *m_playerColumns;
+	Glib::RefPtr<Gtk::ListStore> m_playerListStore;
 
-	TeamComboColumns *teamNumberColumns;
-	Glib::RefPtr<Gtk::ListStore> teamNumberListStore;
+	TeamComboColumns *m_teamNumberColumns;
+	Glib::RefPtr<Gtk::ListStore> m_teamNumberListStore;
 
-	pthread_t threadID;
-
-	PlayerDescription playerDescription;
-	MatchDescription currentMatch;
+	PlayerDescription m_playerDescription;
+	MatchDescription m_currentMatch;
 
 	void on_teamNumber_combo_changed(const Glib::ustring&, const Gtk::TreeIter&);
 	void connect_click();
@@ -119,7 +113,23 @@ public:
 
 	Glib::RefPtr<Gtk::ListStore> PopulateTeamNumberCombo();
 
-	bool GetPasswordTerminal(string plaintext, unsigned char *hash);
+	bool GetPasswordTerminal(std::string plaintext, unsigned char *hash);
+
+protected:
+
+	void TeamChangedEvent();
+	void TeamColorChangedEvent();
+	void MapChangedEvent();
+	void GamespeedChangedEvent();
+	void VictoryConditionChangedEvent();
+	void PlayerLeftEvent();
+	void KickedFromMatchEvent();
+	void PlayerJoinedEvent();
+	void LeaderChangedEvent();
+	void MatchStartedEvent();
+	void CallbackClosedEvent();
+	void CallbackErrorEvent();
+
 };
 
 }
