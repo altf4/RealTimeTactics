@@ -36,6 +36,8 @@ namespace RTT
 
 class GameEvents
 {
+
+public:
 	//You probably don't need to manually override this
 	//	Destructors are implicitly defined. Unless you create some objects in your sub class
 	//	which need cleaning when the GameEvents object is destroyed

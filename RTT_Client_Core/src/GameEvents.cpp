@@ -17,6 +17,11 @@ using namespace RTT;
 
 extern int callbackSocket;
 
+GameEvents::~GameEvents()
+{
+
+}
+
 //Parent function of all Game Events
 //	This function listens on the callback socket for Game Events
 //	When an event is read, it is processed by calling the sub-functions below
