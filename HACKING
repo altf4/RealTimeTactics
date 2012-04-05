@@ -6,14 +6,19 @@ Building from source:
 Dependencies:
 #############
 
-RTT depends on a few packages that are easily available through the Ubuntu repositories:
+RTT depends on a few packages that are easily available through the Ubuntu/Fedora/openSUSE repositories:
 
+***Instructions for Ubuntu 11.10/12.04***
 sudo apt-get install libsparsehash-dev libgtkmm-3.0-dev libois-dev libssl-dev
+
+***Instructions for Fedora 16/17 and openSUSE 12.1***
+sudo yum install sparsehash-devel gtkmm30-devel openssl-devel boost-devel boost-date-time
 
 ########################
 OGRE 3D
 ########################
 
+***Instructions for Ubuntu 11.10/12.04***
 The version of OGRE in the default Ubuntu repositories is old / incomplete. So
 instead, we use the offical OGRE PPA, avaialble form here:
 
@@ -22,6 +27,17 @@ https://launchpad.net/~ogre-team/+archive/ogre
 Also, we require (for now) the OGRE sample media packs:
 
 sudo apt-get install ogre-samples-media ogre-samples-source
+
+***Instructions for Fedora 16/17 and openSUSE 12.1***
+The current version in the F16/17 repository is 1.7.3(the Ogre Ubuntu PPA is 1.7.4).
+1.7.4 is available only in Rawhide or via the openSUSE build service: https://build.opensuse.org/
+In most cases 1.7.3 will work just fine.
+
+sudo yum install ogre-devel ois-devel
+
+Also, we require (for now) the OGRE sample media packs:
+
+sudo yum install ogre-samples
 
 ###########################
 Building Using Eclipse:
