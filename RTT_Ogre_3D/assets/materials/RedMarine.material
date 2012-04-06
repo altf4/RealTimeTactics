@@ -5,6 +5,7 @@ material RedMarine
     receive_shadows on
     technique b2ogre_1325310285.808012
     {
+
         pass b2ogre_1325310285.808089
         {
             ambient 0.8688712120056152 0.022455917671322823 0.055653806775808334 1.0

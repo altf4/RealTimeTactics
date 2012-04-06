@@ -18,7 +18,8 @@ using namespace RTT;
 
 //-------------------------------------------------------------------------------------
 RTT_Ogre_Game::RTT_Ogre_Game(void):
-		m_mainPlayer()
+		m_mainPlayer(),
+		m_playerCursor()
 {
 }
 //-------------------------------------------------------------------------------------
@@ -27,55 +28,131 @@ RTT_Ogre_Game::~RTT_Ogre_Game(void)
 }
 
 //-------------------------------------------------------------------------------------
-void RTT_Ogre_Game::moveUnit(const RTT::Direction& moveDirection, RTT_Ogre_Unit& toMove)
+void RTT_Ogre_Game::moveUnit(RTT_Ogre_Unit& toMove)
 {
-	Ogre::Vector3 playerLocChange = toMove.m_unitNode->getPosition();
+	if(!m_isMoving)
+	{
+		m_isMoving = true;
+		m_playerCursor.m_unitNode->setPosition(toMove.m_unitNode->getPosition());
+		m_playerCursor.m_locationX = toMove.m_locationX;
+		m_playerCursor.m_locationY = toMove.m_locationY;
+		showRange(toMove, m_isMoving);
+		m_playerCursor.m_unitNode->setVisible(m_isMoving);
+	}
+}
+
+void RTT_Ogre_Game::makeMove(RTT_Ogre_Unit& toMove)
+{
+	if(m_isMoving)
+	{
+		m_isMoving = false;
+		showRange(toMove, m_isMoving);
+		m_playerCursor.m_unitNode->setVisible(m_isMoving);
+		toMove.m_unitNode->setPosition(m_playerCursor.m_unitNode->getPosition());
+		toMove.m_locationX = m_playerCursor.m_locationX;
+		toMove.m_locationY = m_playerCursor.m_locationY;
+	}
+}
+
+void RTT_Ogre_Game::showRange(RTT_Ogre_Unit& toShow, bool& value)
+{
+	int minX = toShow.m_locationX - toShow.m_moveRange;
+	int maxX = toShow.m_locationX + toShow.m_moveRange;
+	for(int i = minX; i <= maxX; i++)
+	{
+		if(i != toShow.m_locationX)
+		{
+			if(i>=0)
+			{
+				LogManager::getSingletonPtr()->logMessage("Range: " +
+						Ogre::StringConverter::toString(i) + "," +
+						Ogre::StringConverter::toString(toShow.m_locationY));
+				m_mainPlayer.rangeNode[i][toShow.m_locationY]->setVisible(value);
+			}
+		}
+	}
+	for(int yOff = 0; yOff <= toShow.m_moveRange; yOff++)
+	{
+		if(toShow.m_locationY+yOff % 2 == 1)
+			maxX--;
+		else
+			minX++;
+		for(int i = minX; i<=maxX; i++)
+		{
+			if(i>=0)
+			{
+				if(toShow.m_locationY+yOff>=0)
+				{
+					LogManager::getSingletonPtr()->logMessage("Range: " +
+							Ogre::StringConverter::toString(i) +"," +
+							Ogre::StringConverter::toString(toShow.m_locationY+yOff));
+					m_mainPlayer.rangeNode[i][toShow.m_locationY+yOff]->setVisible(value);
+				}
+				if(toShow.m_locationY-yOff>=0)
+				{
+					LogManager::getSingletonPtr()->logMessage("Range: " +
+							Ogre::StringConverter::toString(i) +"," +
+							Ogre::StringConverter::toString(toShow.m_locationY-yOff));
+					m_mainPlayer.rangeNode[i][toShow.m_locationY-yOff]->setVisible(value);
+				}
+			}
+		}
+	}
+}
+
+void RTT_Ogre_Game::faceUnit(RTT_Ogre_Unit& toFace)
+{
+	/*
+	Ogre::Vector3 playerDirChange = toFace.m_unitNode->getPosition();
 	int facingDirection = 0;
+
 	switch(moveDirection)
 	{
 	case EAST:
 		LogManager::getSingletonPtr()->logMessage("Moving: East");
-		toMove.m_locationX++;
+		//toMove.m_locationX++;
 		facingDirection = 90;
 		break;
 	case NORTHWEST:
 		LogManager::getSingletonPtr()->logMessage("Moving: North West");
-		if(toMove.m_locationY%2 != 0)
-			toMove.m_locationX--;
-		toMove.m_locationY++;
+		//if(toMove.m_locationY%2 != 0)
+		//	toMove.m_locationX--;
+		//toMove.m_locationY++;
 		facingDirection = -150;
 		break;
 	case NORTHEAST:
 		LogManager::getSingletonPtr()->logMessage("Moving: North East");
-		if(toMove.m_locationY%2 == 0)
-			toMove.m_locationX++;
-		toMove.m_locationY++;
+		//if(toMove.m_locationY%2 == 0)
+		//	toMove.m_locationX++;
+		//toMove.m_locationY++;
 		facingDirection = 150;
 		break;
 	case WEST:
 		LogManager::getSingletonPtr()->logMessage("Moving: West");
-		toMove.m_locationX--;
+		//toMove.m_locationX--;
 		facingDirection = -90;
 		break;
 	case SOUTHWEST:
 		LogManager::getSingletonPtr()->logMessage("Moving: South West");
-		if(toMove.m_locationY%2 != 0)
-			toMove.m_locationX--;
-		toMove.m_locationY--;
+		//if(toMove.m_locationY%2 != 0)
+		//	toMove.m_locationX--;
+		//toMove.m_locationY--;
 		facingDirection = -30;
 		break;
 	case SOUTHEAST:
 		LogManager::getSingletonPtr()->logMessage("Moving: South East");
-		if(toMove.m_locationY%2 == 0)
-			toMove.m_locationX++;
-		toMove.m_locationY--;
+		//if(toMove.m_locationY%2 == 0)
+		//	toMove.m_locationX++;
+		//toMove.m_locationY--;
 		facingDirection = 30;
 		break;
 	default:
 		break;
 	}
 
-	LogManager::getSingletonPtr()->logMessage("Location: " + Ogre::StringConverter::toString(toMove.m_locationX) +"," + Ogre::StringConverter::toString(toMove.m_locationY));
+	LogManager::getSingletonPtr()->logMessage("Location: " +
+			Ogre::StringConverter::toString(toMove.m_locationX) +"," +
+			Ogre::StringConverter::toString(toMove.m_locationY));
 	if(toMove.m_locationY%2 != 0)
 	{
 		//LogManager::getSingletonPtr()->logMessage("Real Location: " + Ogre::StringConverter::toString(unitX*1.732-.866) +"," + Ogre::StringConverter::toString(-unitY*1.5));
@@ -88,7 +165,75 @@ void RTT_Ogre_Game::moveUnit(const RTT::Direction& moveDirection, RTT_Ogre_Unit&
 	}
 	toMove.m_unitNode->resetOrientation();
 	toMove.m_unitNode->yaw(Degree(facingDirection));//Make sure we are facing the right way
+	*/
+}
 
+void RTT_Ogre_Game::moveCursor(const RTT::Direction& moveDirection)
+{
+	if(m_isMoving)
+	{
+		Ogre::Vector3 playerDirChange = m_playerCursor.m_unitNode->getPosition();
+		int facingDirection = 0;
+		switch(moveDirection)
+		{
+			case EAST:
+				LogManager::getSingletonPtr()->logMessage("Moving: East");
+				m_playerCursor.m_locationX++;
+				facingDirection = 90;
+				break;
+			case NORTHWEST:
+				LogManager::getSingletonPtr()->logMessage("Moving: North West");
+				if(m_playerCursor.m_locationY%2 != 0)
+					m_playerCursor.m_locationX--;
+				m_playerCursor.m_locationY++;
+				facingDirection = -150;
+				break;
+			case NORTHEAST:
+				LogManager::getSingletonPtr()->logMessage("Moving: North East");
+				if(m_playerCursor.m_locationY%2 == 0)
+					m_playerCursor.m_locationX++;
+				m_playerCursor.m_locationY++;
+				facingDirection = 150;
+				break;
+			case WEST:
+				LogManager::getSingletonPtr()->logMessage("Moving: West");
+				m_playerCursor.m_locationX--;
+				facingDirection = -90;
+				break;
+			case SOUTHWEST:
+				LogManager::getSingletonPtr()->logMessage("Moving: South West");
+				if(m_playerCursor.m_locationY%2 != 0)
+					m_playerCursor.m_locationX--;
+				m_playerCursor.m_locationY--;
+				facingDirection = -30;
+				break;
+			case SOUTHEAST:
+				LogManager::getSingletonPtr()->logMessage("Moving: South East");
+				if(m_playerCursor.m_locationY%2 == 0)
+					m_playerCursor.m_locationX++;
+				m_playerCursor.m_locationY--;
+				facingDirection = 30;
+				break;
+			default:
+				break;
+		}
+
+		LogManager::getSingletonPtr()->logMessage("Location: " +
+				Ogre::StringConverter::toString(m_playerCursor.m_locationX) +"," +
+				Ogre::StringConverter::toString(m_playerCursor.m_locationY));
+		if(m_playerCursor.m_locationY%2 != 0)
+		{
+			//LogManager::getSingletonPtr()->logMessage("Real Location: " + Ogre::StringConverter::toString(unitX*1.732-.866) +"," + Ogre::StringConverter::toString(-unitY*1.5));
+			m_playerCursor.m_unitNode->setPosition(Ogre::Vector3(m_playerCursor.m_locationX*1.732-.866,0,-m_playerCursor.m_locationY*1.5));
+		}
+		else
+		{
+			//LogManager::getSingletonPtr()->logMessage("Real Location: " + Ogre::StringConverter::toString(unitX*1.732) +"," + Ogre::StringConverter::toString(-unitY*1.5));
+			m_playerCursor.m_unitNode->setPosition(Ogre::Vector3(m_playerCursor.m_locationX*1.732,0,-m_playerCursor.m_locationY*1.5));
+		}
+		m_playerCursor.m_unitNode->resetOrientation();
+		m_playerCursor.m_unitNode->yaw(Degree(facingDirection));//Make sure we are facing the right way
+	}
 }
 
 //Buffered keyboard input and game keybindings
@@ -101,22 +246,35 @@ bool RTT_Ogre_Game::keyPressed( const KeyEvent& evt )
 	    rttShutDown = true;
 	    break;
 	case KC_NUMPAD7://Move North West
-		moveUnit(NORTHWEST, m_mainPlayer);
+		moveCursor(NORTHWEST);
 		break;
 	case KC_NUMPAD4://Move North EDIT::::::::WEST!
-		moveUnit(WEST, m_mainPlayer);
+		moveCursor(WEST);
 		break;
 	case KC_NUMPAD9://Move North East
-		moveUnit(NORTHEAST, m_mainPlayer);
+		moveCursor(NORTHEAST);
 		break;
 	case KC_NUMPAD1://Move South West
-		moveUnit(SOUTHWEST, m_mainPlayer);
+		moveCursor(SOUTHWEST);
 		break;
 	case KC_NUMPAD6://Move South  EDIT:::::::::EAST!
-		moveUnit(EAST, m_mainPlayer);
+		moveCursor(EAST);
 		break;
 	case KC_NUMPAD3://Move South East
-		moveUnit(SOUTHEAST, m_mainPlayer);
+		moveCursor(SOUTHEAST);
+		break;
+	case KC_M: //Move 'dialog'
+		if(!m_isMoving)
+		{
+			moveUnit(m_mainPlayer.ogreUnits);
+			break;
+		}
+		else
+			makeMove(m_mainPlayer.ogreUnits);
+		break;
+	case KC_F: //Facing 'dialog'
+		m_isMoving = false;
+		showRange(m_mainPlayer.ogreUnits, m_isMoving);
 		break;
 	default:
 	    break;
@@ -126,13 +284,27 @@ bool RTT_Ogre_Game::keyPressed( const KeyEvent& evt )
 
 void RTT_Ogre_Game::buildUnits(void)
 {
-    m_mainPlayer.m_unitEntity = m_rttSceneManager->createEntity("BlueMarine", "BlueMarine.mesh");
-    m_mainPlayer.m_unitEntity->setCastShadows(true);
-    m_mainPlayer.m_unitNode = m_rttSceneManager->getRootSceneNode()->createChildSceneNode("BlueMarine");
-    m_mainPlayer.m_unitNode->attachObject(m_mainPlayer.m_unitEntity);
-    m_mainPlayer.m_unitNode->yaw(Degree(150));
-    m_mainPlayer.m_locationX = 0;
-    m_mainPlayer.m_locationY = 0;
+
+	//mainPlayer.ogreUnits[0] = new RTT_Ogre_Unit();
+
+	m_mainPlayer.ogreUnits.m_unitEntity = m_rttSceneManager->createEntity("BlueMarine", "ColorMarine.mesh");
+
+	m_mainPlayer.ogreUnits.m_unitEntity->setCastShadows(true);
+	m_mainPlayer.ogreUnits.m_unitEntity->setMaterialName("BlueMarine");
+	m_mainPlayer.ogreUnits.m_unitNode = m_rttSceneManager->getRootSceneNode()->createChildSceneNode("BlueMarine");
+	m_mainPlayer.ogreUnits.m_unitNode->attachObject(m_mainPlayer.ogreUnits.m_unitEntity);
+	m_mainPlayer.ogreUnits.m_unitNode->yaw(Degree(150));
+	m_mainPlayer.ogreUnits.m_locationX = 0;
+	m_mainPlayer.ogreUnits.m_locationY = 0;
+	m_mainPlayer.ogreUnits.m_moveRange = 3;
+
+	m_playerCursor.m_unitEntity = m_rttSceneManager->createEntity("Cursor", "Marker.mesh");
+	m_playerCursor.m_unitEntity->setMaterialName("Marker");
+	m_playerCursor.m_unitNode = m_rttSceneManager->getRootSceneNode()->createChildSceneNode("Cursor");
+	m_playerCursor.m_unitNode->attachObject(m_playerCursor.m_unitEntity);
+	m_playerCursor.m_locationX = 0;
+	m_playerCursor.m_locationY = 0;
+	m_playerCursor.m_unitNode->setVisible(false);
 }
 
 void RTT_Ogre_Game::createScene(void)
@@ -147,7 +319,7 @@ void RTT_Ogre_Game::createScene(void)
     m_rttSceneManager->setShadowTextureCasterMaterial("Ogre/DepthShadowmap/Caster/Float");
     //rttSceneManager->setShadowTextureReceiverMaterial("Ogre/DepthShadowmap/BasicTemplateMaterial");
     m_rttSceneManager->setShadowTextureSize(1024);
-
+    m_isMoving = false;
     buildUnits();
 
     //HACKED  Proof of concept/scratchboard
@@ -156,36 +328,81 @@ void RTT_Ogre_Game::createScene(void)
     float posX = 0;
     float posY = 0;
     float posZ = 0;
-    Entity* tileVector[4][4];
+    Entity* tileVector[8][8];
     string tileType = "DirtTile";
-    SceneNode* nodeVector[4][4];
+    SceneNode* nodeVector[8][8];
+
+    Entity* rangeMarker[8][8];
+    m_mainPlayer.rangeNode[8][8];
+    string rangeType = "Range";
+
     //Entity* blueMarine = rttSceneManager->createEntity("BlueMarine", "BlueMarine.mesh");
     //blueMarine->setCastShadows(true);
     //SceneNode* blueMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("BlueMarine");
     //blueMarineNode->attachObject(blueMarine);
     //blueMarineNode->yaw(Degree(90));
-    Entity* redMarine = m_rttSceneManager->createEntity("RedMarine", "RedMarine.mesh");
+    Entity* redMarine = m_rttSceneManager->createEntity("RedMarine", "ColorMarine.mesh");
     redMarine->setCastShadows(true);
-    SceneNode* redMarineNode = m_rttSceneManager->getRootSceneNode()->createChildSceneNode("RedMarine", Ogre::Vector3(3*1.732 -.866,0,-3*1.5));
+    redMarine->setMaterialName("RedMarine");
+    SceneNode* redMarineNode = m_rttSceneManager->getRootSceneNode()->createChildSceneNode("RedMarine", Ogre::Vector3(7*1.732 -.866,0,-7*1.5));
     redMarineNode->attachObject(redMarine);
     redMarineNode->yaw(Degree(-30));
 
-    for(int x=0;x < 4*tileSize; x+=tileSize)//build our columns
+    for(int x=0;x < 8*tileSize; x+=tileSize)//build our columns
     {
-    	for(int y=0; y<4*tileSize;y+=tileSize)//build our rows
+    	for(int y=0; y<8*tileSize;y+=tileSize)//build our rows
     	{
     		posX = x *1.732;
     		if(y%2 != 0)//test for odd
     		{
-    			posX -= .866; //steps over
+    			posX -= .866;  //steps over
     		}
     		tileVector[x][y] = m_rttSceneManager->createEntity(tileType + Ogre::StringConverter::toString(x) + Ogre::StringConverter::toString(y), "DirtTile.mesh", "RTT");
     		tileVector[x][y]->setCastShadows(true);
     		nodeVector[x][y] = m_rttSceneManager->getRootSceneNode()->createChildSceneNode(tileType + Ogre::StringConverter::toString(x) + Ogre::StringConverter::toString(y), Ogre::Vector3(posX, posY, -y*1.5));
     		nodeVector[x][y]->attachObject(tileVector[x][y]);
+
+    		rangeMarker[x][y] = m_rttSceneManager->createEntity(rangeType + Ogre::StringConverter::toString(x) + Ogre::StringConverter::toString(y), "Range.mesh", "RTT");
+    		rangeMarker[x][y]->setMaterialName("Range");
+    		m_mainPlayer.rangeNode[x][y] = m_rttSceneManager->getRootSceneNode()->createChildSceneNode(rangeType + Ogre::StringConverter::toString(x) + Ogre::StringConverter::toString(y), Ogre::Vector3(posX, posY, -y*1.5));
+    		m_mainPlayer.rangeNode[x][y]->attachObject(rangeMarker[x][y]);
+    		m_mainPlayer.rangeNode[x][y]->yaw(Degree(90));
+    		m_mainPlayer.rangeNode[x][y]->setVisible(false);
     	}
     }
+/*
+	Entity* hescoTest = rttSceneManager->createEntity("Hesco", "Hesco.mesh");
+	hescoTest->setCastShadows(true);
+	SceneNode* hescoNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Hesco", Ogre::Vector3(2*1.732 -.866,0,-1*1.5));
+	hescoNode->attachObject(hescoTest);
+	hescoNode->yaw(Degree(90));
+	hescoTest = rttSceneManager->createEntity("Hesco2", "Hesco.mesh");
+	hescoTest->setCastShadows(true);
+	hescoNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Hesco2", Ogre::Vector3(3*1.732 -.866,0,-1*1.5));
+	hescoNode->attachObject(hescoTest);
+	hescoNode->yaw(Degree(90));
+	hescoTest = rttSceneManager->createEntity("Hesco3", "Hesco.mesh");
+	hescoTest->setCastShadows(true);
+	hescoNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Hesco3", Ogre::Vector3(4*1.732 -.866,0,-1*1.5));
+	hescoNode->attachObject(hescoTest);
+	hescoNode->yaw(Degree(90));
 
+	hescoTest = rttSceneManager->createEntity("Hesco4", "Hesco.mesh");
+	hescoTest->setCastShadows(true);
+	hescoNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Hesco4", Ogre::Vector3(5*1.732 ,0,-6*1.5));
+	hescoNode->attachObject(hescoTest);
+	hescoNode->yaw(Degree(30));
+	hescoTest = rttSceneManager->createEntity("Hesco5", "Hesco.mesh");
+	hescoTest->setCastShadows(true);
+	hescoNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Hesco5", Ogre::Vector3(6*1.732 -.866,0,-5*1.5));
+	hescoNode->attachObject(hescoTest);
+	hescoNode->yaw(Degree(30));
+	hescoTest = rttSceneManager->createEntity("Hesco6", "Hesco.mesh");
+	hescoTest->setCastShadows(true);
+	hescoNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("Hesco6", Ogre::Vector3(6*1.732 ,0,-4*1.5));
+	hescoNode->attachObject(hescoTest);
+	hescoNode->yaw(Degree(30));
+*/
     //end HACK
     Entity* groundPlane = m_rttSceneManager->createEntity("Ground", "Plane.mesh");
     groundPlane->setMaterialName("Claygreen");
