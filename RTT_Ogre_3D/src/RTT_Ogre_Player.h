@@ -24,7 +24,7 @@ namespace RTT
 		virtual ~RTT_Ogre_Player();
 		RTT_Ogre_Unit ogreUnits;
 		uint currentUnit;
-		SceneNode* rangeNode[6][6];
+		SceneNode* rangeNode[8][8];
 		RTT::TeamNumber Team;
 	};
 

@@ -54,50 +54,67 @@ void RTT_Ogre_Game::makeMove(RTT_Ogre_Unit& toMove)
 	}
 }
 
+//Algorithm: Iterate over each row in two phases (top and bottom)
+//	The "pivot point" is the leftmost valid point in each row
+//	Each row has exactly "radius" points in it minus one for each row away from zero
+//	We reposition the pivot point at the end of each row
 void RTT_Ogre_Game::showRange(RTT_Ogre_Unit& toShow, bool& value)
 {
-	int minX = toShow.m_locationX - toShow.m_moveRange;
-	int maxX = toShow.m_locationX + toShow.m_moveRange;
-	for(int i = minX; i <= maxX; i++)
+	int radius = toShow.m_moveRange;
+	cout << "Currently at: " << toShow.m_locationX << ", " << toShow.m_locationY << endl;
+	cout << "Radius: " << radius << endl;
+
+	int pivotX = toShow.m_locationX - radius;
+	int pivotY = toShow.m_locationY;
+
+	for(int i = 0; i <= radius; i++ )
 	{
-		if(i != toShow.m_locationX)
+		for(int j = 0; j < (radius*2)+1-i; j++)
 		{
-			if(i>=0)
+			//cout << "j = " << j << endl;
+			if((pivotX + j >= 0) && (pivotX + j <= 7) &&
+					(pivotY >= 0) && (pivotY <= 7))
 			{
 				LogManager::getSingletonPtr()->logMessage("Range: " +
-						Ogre::StringConverter::toString(i) + "," +
-						Ogre::StringConverter::toString(toShow.m_locationY));
-				m_mainPlayer.rangeNode[i][toShow.m_locationY]->setVisible(value);
+						Ogre::StringConverter::toString(pivotX + j) + "," +
+						Ogre::StringConverter::toString(pivotY));
+				m_mainPlayer.rangeNode[pivotX + j][pivotY]->setVisible(value);
 			}
 		}
-	}
-	for(int yOff = 0; yOff <= toShow.m_moveRange; yOff++)
-	{
-		if(toShow.m_locationY+yOff % 2 == 1)
-			maxX--;
-		else
-			minX++;
-		for(int i = minX; i<=maxX; i++)
+
+		if((pivotY % 2) == 0 )
 		{
-			if(i>=0)
+			pivotX++;
+		}
+		pivotY++;
+	}
+
+	//Reset the pivot point
+	pivotX = toShow.m_locationX - radius;
+	pivotY = toShow.m_locationY;
+
+	for(int i = 0; i <= radius; i++ )
+	{
+		for(int j = 0; j < (radius*2)+1-i; j++)
+		{
+			//cout << "j = " << j << endl;
+			if((pivotX + j >= 0) && (pivotX + j <= 7) &&
+					(pivotY >= 0) && (pivotY <= 7))
 			{
-				if(toShow.m_locationY+yOff>=0)
-				{
-					LogManager::getSingletonPtr()->logMessage("Range: " +
-							Ogre::StringConverter::toString(i) +"," +
-							Ogre::StringConverter::toString(toShow.m_locationY+yOff));
-					m_mainPlayer.rangeNode[i][toShow.m_locationY+yOff]->setVisible(value);
-				}
-				if(toShow.m_locationY-yOff>=0)
-				{
-					LogManager::getSingletonPtr()->logMessage("Range: " +
-							Ogre::StringConverter::toString(i) +"," +
-							Ogre::StringConverter::toString(toShow.m_locationY-yOff));
-					m_mainPlayer.rangeNode[i][toShow.m_locationY-yOff]->setVisible(value);
-				}
+				LogManager::getSingletonPtr()->logMessage("Range: " +
+						Ogre::StringConverter::toString(pivotX + j) + "," +
+						Ogre::StringConverter::toString(pivotY));
+				m_mainPlayer.rangeNode[pivotX + j][pivotY]->setVisible(value);
 			}
 		}
+
+		if((pivotY % 2) == 0 )
+		{
+			pivotX++;
+		}
+		pivotY--;
 	}
+
 }
 
 void RTT_Ogre_Game::faceUnit(RTT_Ogre_Unit& toFace)
