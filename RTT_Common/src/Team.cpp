@@ -10,84 +10,85 @@
 #include "Team.h"
 
 using namespace RTT;
+using namespace std;
 
 Team::Team(enum TeamNumber newTeam)
 {
-	team = newTeam;
-	pthread_rwlock_init(&lock, NULL);
+	m_team = newTeam;
+	pthread_rwlock_init(&m_lock, NULL);
 }
 
 Player *Team::GetPlayer(uint playerID)
 {
-	pthread_rwlock_rdlock(&lock);
-	for(uint i = 0; i < players.size(); i++)
+	pthread_rwlock_rdlock(&m_lock);
+	for(uint i = 0; i < m_players.size(); i++)
 	{
-		if( players[i]->GetID() == playerID )
+		if( m_players[i]->GetID() == playerID )
 		{
-			pthread_rwlock_unlock(&lock);
-			return players[i];
+			pthread_rwlock_unlock(&m_lock);
+			return m_players[i];
 		}
 	}
-	pthread_rwlock_unlock(&lock);
+	pthread_rwlock_unlock(&m_lock);
 	return NULL;
 }
 
 bool Team::RemovePlayer(uint playerID)
 {
-	pthread_rwlock_wrlock(&lock);
+	pthread_rwlock_wrlock(&m_lock);
 
-	vector<Player*>::iterator it = players.begin();
-	for( ; it != players.end(); it++ )
+	vector<Player*>::iterator it = m_players.begin();
+	for( ; it != m_players.end(); it++ )
 	{
 		if( (*it)->GetID() == playerID)
 		{
-			players.erase(it);
-			pthread_rwlock_unlock(&lock);
+			m_players.erase(it);
+			pthread_rwlock_unlock(&m_lock);
 			return true;
 		}
 	}
-	pthread_rwlock_unlock(&lock);
+	pthread_rwlock_unlock(&m_lock);
 	return false;
 }
 
 void Team::AddPlayer(Player *newPlayer)
 {
-	pthread_rwlock_wrlock(&lock);
-	players.push_back(newPlayer);
-	pthread_rwlock_unlock(&lock);
+	pthread_rwlock_wrlock(&m_lock);
+	m_players.push_back(newPlayer);
+	pthread_rwlock_unlock(&m_lock);
 }
 
 uint Team::GetFirstPlayerID()
 {
-	pthread_rwlock_rdlock(&lock);
-	if(players.size() > 0)
+	pthread_rwlock_rdlock(&m_lock);
+	if(m_players.size() > 0)
 	{
-		Player *temp = players[0];
-		pthread_rwlock_unlock(&lock);
+		Player *temp = m_players[0];
+		pthread_rwlock_unlock(&m_lock);
 		return temp->GetID();
 	}
-	pthread_rwlock_unlock(&lock);
+	pthread_rwlock_unlock(&m_lock);
 	return 0;
 }
 
 vector<struct PlayerDescription> Team::GetPlayerDescriptions()
 {
-	pthread_rwlock_rdlock(&lock);
+	pthread_rwlock_rdlock(&m_lock);
 	vector<struct PlayerDescription> retVector;
-	for( uint i = 0; i < players.size(); i++ )
+	for( uint i = 0; i < m_players.size(); i++ )
 	{
-		retVector.push_back( players[i]->GetDescription() );
+		retVector.push_back( m_players[i]->GetDescription() );
 	}
-	pthread_rwlock_unlock(&lock);
+	pthread_rwlock_unlock(&m_lock);
 
 	return retVector;
 }
 
 vector <Player*> Team::GetPlayers()
 {
-	pthread_rwlock_rdlock(&lock);
-	vector <Player*> temp = players;
-	pthread_rwlock_unlock(&lock);
+	pthread_rwlock_rdlock(&m_lock);
+	vector <Player*> temp = m_players;
+	pthread_rwlock_unlock(&m_lock);
 	return temp;
 }
 

@@ -12,6 +12,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 using namespace RTT;
+using namespace std;
 
 //Constructor from XML Job file
 Job::Job(string filePath)
@@ -70,19 +71,19 @@ Job::Job(string filePath)
 		// (cannot open file, parse error), an exception is thrown.
 		read_xml(filePath, pt);
 
-		jobName = pt.get<std::string>("job.jobName");
+		m_jobName = pt.get<std::string>("job.jobName");
 
-		maxHealth = pt.get<uint>("job.maxHealth");
-		maxEnergy = pt.get<uint>("job.maxEnergy");
+		m_maxHealth = pt.get<uint>("job.maxHealth");
+		m_maxEnergy = pt.get<uint>("job.maxEnergy");
 
-		verticalMovement = pt.get<uint>("job.verticalMovement");
-		horizontalMovement = pt.get<uint>("job.horizontalMovement");
-		speed = pt.get<uint>("job.speed");
+		m_verticalMovement = pt.get<uint>("job.verticalMovement");
+		m_horizontalMovement = pt.get<uint>("job.horizontalMovement");
+		m_speed = pt.get<uint>("job.speed");
 
-		baseVision = pt.get<uint>("job.baseVision");
-		basicAttackRange = pt.get<uint>("job.basicAttackRange");
+		m_baseVision = pt.get<uint>("job.baseVision");
+		m_basicAttackRange = pt.get<uint>("job.basicAttackRange");
 
-		basicAttackDamage = pt.get<double>("job.basicAttackDamage");
+		m_basicAttackDamage = pt.get<double>("job.basicAttackDamage");
 
 		string gHashString = pt.get<string>("job.graphicsHash");
 
@@ -100,16 +101,16 @@ Job::Job(string filePath)
 		{
 			hashByte = gHashString.substr(i, 2);
 			hashByte.append('\0');
-			graphicsHash[i] = (unsigned char)strtol(hashByte.c_str(), NULL, 16);
+			m_graphicsHash[i] = (unsigned char)strtol(hashByte.c_str(), NULL, 16);
 
 			hashByte = fileName.substr(i, 2);
 			hashByte.append('\0');
-			IDHash[i] = (unsigned char)strtol(hashByte.c_str(), NULL, 16);
+			m_IDHash[i] = (unsigned char)strtol(hashByte.c_str(), NULL, 16);
 		}
 
 		for( uint i = 0; i < SHA_DIGEST_LENGTH; i++ )
 		{
-			if( IDHash[i] != fileHash[i])
+			if( m_IDHash[i] != fileHash[i])
 			{
 				cerr << "ERROR: ID hash doesn't match file's computer hash\n";
 				return;

@@ -14,18 +14,16 @@
 #include "stdlib.h"
 #include <stdint.h>
 
-using namespace std;
-
 namespace RTT
 {
 
 struct MapDescription
 {
-	char name[MAP_NAME_LEN];
+	char m_name[MAP_NAME_LEN];
 	//X direction
-	uint32_t width;
+	uint32_t m_width;
 	//Y direction
-	uint32_t length;
+	uint32_t m_length;
 };
 
 class Map

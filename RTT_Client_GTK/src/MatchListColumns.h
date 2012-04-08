@@ -10,8 +10,6 @@
 
 #include <gtkmm.h>
 
-using namespace Gtk;
-
 namespace RTT
 {
 
@@ -20,13 +18,13 @@ class MatchListColumns : public Gtk::TreeModelColumnRecord
 public:
 
 	MatchListColumns()
-	{ add(matchID); add(maxPlayers); add(currentPlayers); add(name); add(timeCreated);}
+	{ add(m_matchID); add(m_maxPlayers); add(m_currentPlayers); add(m_name); add(m_timeCreated);}
 
-	TreeModelColumn<int> matchID;
-	TreeModelColumn<int> maxPlayers;
-	TreeModelColumn<int> currentPlayers;
-	TreeModelColumn<string> name;
-	TreeModelColumn<string> timeCreated;
+	Gtk::TreeModelColumn<int> m_matchID;
+	Gtk::TreeModelColumn<int> m_maxPlayers;
+	Gtk::TreeModelColumn<int> m_currentPlayers;
+	Gtk::TreeModelColumn<std::string> m_name;
+	Gtk::TreeModelColumn<std::string> m_timeCreated;
 };
 
 }

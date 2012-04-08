@@ -13,7 +13,6 @@
 
 #include <gtkmm.h>
 
-void *CallbackThread(void * parm);
 void InitWidgets();
 
 #endif /* RTT_CLIENT_GTK_H_ */

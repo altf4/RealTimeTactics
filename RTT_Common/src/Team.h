@@ -16,9 +16,6 @@
 #include "Player.h"
 #include "Enums.h"
 
-using namespace std;
-using namespace RTT;
-
 namespace RTT
 {
 
@@ -30,7 +27,7 @@ class Team
 
 public:
 
-	enum TeamNumber team;
+	enum TeamNumber m_team;
 
 	Team(enum TeamNumber newTeam);
 
@@ -38,17 +35,17 @@ public:
 	bool RemovePlayer(uint playerID);
 	void AddPlayer(Player *newPlayer);
 	uint GetFirstPlayerID();
-	vector <Player*> GetPlayers();
+	std::vector <Player*> GetPlayers();
 
-	vector<struct PlayerDescription> GetPlayerDescriptions();
+	std::vector<struct PlayerDescription> GetPlayerDescriptions();
 
-	static string TeamNumberToString(enum TeamNumber teamNum);
+	static std::string TeamNumberToString(enum TeamNumber teamNum);
 
 private:
 	//Lock for the players list
-	pthread_rwlock_t lock;
+	pthread_rwlock_t m_lock;
 
-	vector <Player*> players;
+	std::vector <Player*> m_players;
 };
 
 }

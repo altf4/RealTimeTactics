@@ -12,9 +12,6 @@
 #include "Unit.h"
 #include <google/dense_hash_map>
 
-using google::dense_hash_map;
-using tr1::hash;
-
 namespace RTT
 {
 
@@ -31,7 +28,7 @@ struct eqint
 
 //Define types, so it's easier to refer to later
 //Key : Player ID
-typedef dense_hash_map<uint32_t, Unit*, hash<uint32_t>, eqint> UnitList;
+typedef google::dense_hash_map<uint32_t, Unit*, std::tr1::hash<uint32_t>, eqint> UnitList;
 
 
 //********************************************
@@ -50,12 +47,12 @@ enum MovementSuccess: char
 
 struct MovementResult
 {
-	enum MovementSuccess result;
+	enum MovementSuccess m_result;
 
 	//Used in error conditions to help if the client is unsynced:
 
 	//This is the position that the unit SHOULD be at
-	uint32_t originalX, originalY;
+	uint32_t m_originalX, m_originalY;
 };
 
 //********************************************

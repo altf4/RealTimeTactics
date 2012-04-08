@@ -10,6 +10,8 @@
 
 using namespace std;
 using namespace RTT;
+using google::dense_hash_map;
+using tr1::hash;
 
 //The current gameboard being used this match
 Gameboard *gameboard;
@@ -33,7 +35,7 @@ struct MovementResult RTT::MoveUnit(uint32_t unitID, enum Direction direction)
 	//	that this is invalid.
 	if( units.count(unitID) == 0)
 	{
-		result.result = UNIT_DOESNT_EXIST;
+		result.m_result = UNIT_DOESNT_EXIST;
 		return result;
 	}
 

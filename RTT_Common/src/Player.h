@@ -20,8 +20,6 @@
 #include <stdint.h>
 #include <pthread.h>
 
-using namespace std;
-
 namespace RTT
 {
 
@@ -32,10 +30,10 @@ class Match;
 //	to other Players for display
 struct PlayerDescription
 {
-	uint32_t ID;
-	char name[PLAYER_NAME_SIZE];
-	enum TeamNumber team;
-	enum TeamColor color;
+	uint32_t m_ID;
+	char m_name[PLAYER_NAME_SIZE];
+	enum TeamNumber m_team;
+	enum TeamColor m_color;
 };
 
 class Player
@@ -46,9 +44,9 @@ public:
 
 	//For when c strings are easier, or std::strings are
 	Player(char *username, uint newID);
-	Player(string username, uint newID);
+	Player(std::string username, uint newID);
 
-	string GetName();
+	std::string GetName();
 	uint GetID();
 	enum TeamNumber GetTeam();
 	enum TeamColor GetColor();
@@ -56,7 +54,7 @@ public:
 	uint GetCurrentMatchID();
 	struct PlayerDescription GetDescription();
 
-	void SetName(string newName);
+	void SetName(std::string newName);
 	void SetID(uint newID);
 	void SetTeam(enum TeamNumber newTeam);
 	void SetColor(enum TeamColor newColor);
@@ -64,17 +62,17 @@ public:
 	void SetCurrentMatchID(int matchID);
 
 private:
-	pthread_rwlock_t lock;
-	string name;
-	uint ID;
-	enum TeamNumber team;
-	enum TeamColor color;
+	pthread_rwlock_t m_lock;
+	std::string m_name;
+	uint m_ID;
+	enum TeamNumber m_team;
+	enum TeamColor m_color;
 	//Socket to receive MatchLobby messages from server on
-	int callbackSocket;
-	struct PlayerDescription description;
-	vector <Unit*> units;
+	int m_callbackSocket;
+	struct PlayerDescription m_description;
+	std::vector <Unit*> m_units;
 	//The match that this player is currently in
-	uint currentMatchID;
+	uint m_currentMatchID;
 };
 
 }

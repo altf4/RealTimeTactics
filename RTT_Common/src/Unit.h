@@ -13,8 +13,6 @@
 #include <string>
 #include "Job.h"
 
-using namespace std;
-
 namespace RTT
 {
 
@@ -34,25 +32,25 @@ class Unit : public Job
 
 public:
 
-	uint currentHealth;
-	uint currentEnergy;
+	uint m_currentHealth;
+	uint m_currentEnergy;
 
 	//Charge for this player's turn
-	uint currentCharge;
+	uint m_currentCharge;
 
 	//How many movement points the unit has
 	//	Each tile takes up a certain number of movement points
-	double currentMovement;
+	double m_currentMovement;
 
-	Direction directionFacing;
+	Direction m_directionFacing;
 
 	//Unique identifier for this unit.
 	//	NOT an index into any list
-	uint ID;
+	uint m_ID;
 
 	//The name of this Unit. Given by the client
 	// The client can choose to name his Units unique things to distinguish them
-	string unitName;
+	std::string m_unitName;
 
 
 	Unit( );
