@@ -205,6 +205,14 @@ void SendError(int socket, enum ErrorType errorType);
 //Kills the connection to the server uncleanly
 void ShutdownConnection();
 
+//Called from the matchmaking client (Gtk) to give control to the game (Ogre)
+//	Passes network sockets and then blocks
+int PassControlToGame();
+
+//Called from the game (Ogre) to receive control from matchmaking (Gtk)
+//	Receives network sockets
+bool ReceiveControlFromSetup();
+
 }
 
 #endif /* PROTOCOLHANDLER_H_ */

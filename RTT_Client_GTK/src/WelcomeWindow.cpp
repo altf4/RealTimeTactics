@@ -676,7 +676,6 @@ void WelcomeWindow::launch_match_click()
 {
 	if(StartMatch())
 	{
-		system("RTT_Ogre_3D");
 		m_match_lobby_status->push("Was that fun, or WHAT?!");
 	}
 	else
