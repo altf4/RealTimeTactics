@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : Unit.h
+// Name        : LobbyMessage.h
 // Author      : AltF4
 // Copyright   : 2011, GNU GPLv3
 // Description : Message class sent while player is in the server lobby
@@ -12,6 +12,26 @@
 
 namespace RTT
 {
+
+enum LobbyType: char
+{
+	MATCH_LIST_REQUEST = 0,
+	MATCH_LIST_REPLY,
+	//Creating a new match
+	MATCH_CREATE_REQUEST,
+	MATCH_CREATE_OPTIONS_AVAILABLE,
+	MATCH_CREATE_OPTIONS_CHOSEN,
+	MATCH_CREATE_REPLY,
+	//Joining a match already created
+	MATCH_JOIN_REQUEST,
+	MATCH_JOIN_REPLY,
+	//Ask server for stats
+	SERVER_STATS_REQUEST,
+	SERVER_STATS_REPLY,
+	//Exit the server
+	MATCH_EXIT_SERVER_NOTIFICATION,
+	MATCH_EXIT_SERVER_ACKNOWLEDGE,
+};
 
 enum LobbyResult: char
 {
@@ -50,8 +70,9 @@ public:
 	uint32_t m_ID;
 	struct ServerStats m_serverStats;
 
+	enum LobbyType m_lobbyType;
 
-	LobbyMessage();
+	LobbyMessage(enum LobbyType type);
 	~LobbyMessage();
 	LobbyMessage(char *buffer, uint length);
 	char *Serialize(uint *length);

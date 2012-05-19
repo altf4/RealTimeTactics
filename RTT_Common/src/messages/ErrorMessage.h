@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : Unit.h
+// Name        : ErrorMessage.h
 // Author      : AltF4
 // Copyright   : 2011, GNU GPLv3
 // Description : Message class pertaining to sending and receiving error conditions
@@ -51,7 +51,7 @@ public:
 
 	enum ErrorType m_errorType;
 
-	ErrorMessage();
+	ErrorMessage(enum ErrorType type);
 	ErrorMessage(char *buffer, uint length);
 	char *Serialize(uint *length);
 

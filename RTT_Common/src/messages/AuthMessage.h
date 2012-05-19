@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : Unit.h
+// Name        : AuthMesssage.h
 // Author      : AltF4
 // Copyright   : 2011, GNU GPLv3
 // Description : Message class pertaining to client authentication
@@ -14,7 +14,7 @@
 namespace RTT
 {
 
-enum AuthMechanism: uint32_t
+enum AuthMechanism: char
 {
 	HASHED_SALTED_PASS = 0,
 	SSH_KEY,
@@ -34,6 +34,14 @@ enum AuthResult: char
 
 };
 
+enum AuthType: char
+{
+	CLIENT_HELLO = 0,
+	SERVER_HELLO,
+	CLIENT_AUTH,
+	SERVER_AUTH_REPLY,
+};
+
 class AuthMessage: public Message
 {
 
@@ -41,19 +49,21 @@ public:
 	enum AuthMechanism m_authMechanism;
 	struct VersionNumber m_softwareVersion;
 	char m_username[USERNAME_MAX_LENGTH];
-	//TODO: I didn't want to import libssl just to use SHA256_DIGEST_LENGTH
+
+	//I didn't want to import libssl just to use SHA256_DIGEST_LENGTH
 	unsigned char m_hashedPassword[32];
+
 	enum AuthResult m_authSuccess;
 	struct PlayerDescription m_playerDescription;
 
-	AuthMessage();
+	enum AuthType m_authType;
+
+	AuthMessage(enum AuthType type);
 	AuthMessage(char *buffer, uint length);
 	char *Serialize(uint *length);
 
 };
 
 }
-
-
 
 #endif /* AUTHMESSAGE_H_ */
