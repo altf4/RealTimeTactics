@@ -278,7 +278,7 @@ void *RTT::CallbackClientThread(void * parm)
 		cerr << "ERROR: Callback message came back NULL\n";
 		return NULL;
 	}
-	if( connect_back_reply->m_type != CALLBACK_REGISTER )
+	if( connect_back_reply->m_messageType != MESSAGE_MATCH_LOBBY )
 	{
 		//ERROR
 		cerr << "ERROR: Callback message was wrong type\n";
@@ -286,6 +286,12 @@ void *RTT::CallbackClientThread(void * parm)
 	}
 	MatchLobbyMessage *match_callback_reply =
 			(MatchLobbyMessage*)connect_back_reply;
+	if(match_callback_reply->m_matchLobbyType != CALLBACK_REGISTER)
+	{
+		//ERROR
+		cerr << "ERROR: Callback message was wrong type\n";
+		return NULL;
+	}
 
 	pthread_rwlock_rdlock(&playerListLock);
 	Player *player = playerList[match_callback_reply->m_playerID];
@@ -573,8 +579,7 @@ bool RTT::LeaveMatch(Player *player)
 	//*******************************
 	// Send Client Notifications
 	//*******************************
-	MatchLobbyMessage *notification = new MatchLobbyMessage();
-	notification->m_type = PLAYER_LEFT_MATCH_NOTIFICATION;
+	MatchLobbyMessage *notification = new MatchLobbyMessage(PLAYER_LEFT_MATCH_NOTIFICATION);
 	notification->m_playerID = player->GetID();
 	notification->m_newLeaderID = foundMatch->GetLeaderID();
 	NotifyClients(foundMatch, notification);
