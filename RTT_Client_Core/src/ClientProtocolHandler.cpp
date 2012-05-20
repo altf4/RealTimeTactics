@@ -73,18 +73,16 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	//***************************
 	// Send client Hello
 	//***************************
-	AuthMessage *client_hello = new AuthMessage(CLIENT_HELLO);
-	client_hello->m_softwareVersion.m_major = CLIENT_VERSION_MAJOR;
-	client_hello->m_softwareVersion.m_minor = CLIENT_VERSION_MINOR;
-	client_hello->m_softwareVersion.m_rev = CLIENT_VERSION_REV;
+	AuthMessage client_hello(CLIENT_HELLO);
+	client_hello.m_softwareVersion.m_major = CLIENT_VERSION_MAJOR;
+	client_hello.m_softwareVersion.m_minor = CLIENT_VERSION_MINOR;
+	client_hello.m_softwareVersion.m_rev = CLIENT_VERSION_REV;
 
-	if( Message::WriteMessage(client_hello, connectFD) == false)
+	if( Message::WriteMessage(&client_hello, connectFD) == false)
 	{
 		//Error in write
-		delete client_hello;
 		return -1;
 	}
-	delete client_hello;
 
 	//***************************
 	// Receive Server Hello
@@ -126,17 +124,15 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	//***************************
 	// Send Client Auth
 	//***************************
-	AuthMessage *client_auth = new AuthMessage(CLIENT_AUTH);
-	strncpy( client_auth->m_username, username.data(), USERNAME_MAX_LENGTH);
-	memcpy(client_auth->m_hashedPassword, hashedPassword, SHA256_DIGEST_LENGTH);
+	AuthMessage client_auth(CLIENT_AUTH);
+	strncpy( client_auth.m_username, username.data(), USERNAME_MAX_LENGTH);
+	memcpy(client_auth.m_hashedPassword, hashedPassword, SHA256_DIGEST_LENGTH);
 
-	if( Message::WriteMessage(client_auth, connectFD) == false)
+	if( Message::WriteMessage(&client_auth, connectFD) == false)
 	{
 		//Error in write
-		delete client_auth;
 		return -1;
 	}
-	delete client_auth;
 
 	//***************************
 	// Receive Server Auth Reply
@@ -182,14 +178,12 @@ bool RTT::ExitServer()
 	//********************************
 	// Send Exit Server Notification
 	//********************************
-	LobbyMessage *exit_server_notice = new LobbyMessage(MATCH_EXIT_SERVER_NOTIFICATION);
-	if( Message::WriteMessage(exit_server_notice, connectFD) == false)
+	LobbyMessage exit_server_notice(MATCH_EXIT_SERVER_NOTIFICATION);
+	if( Message::WriteMessage(&exit_server_notice, connectFD) == false)
 	{
 		//Error in write
-		delete exit_server_notice;
 		return false;
 	}
-	delete exit_server_notice;
 
 	//**********************************
 	// Receive Exit Server Acknowledge
@@ -232,15 +226,13 @@ uint RTT::ListMatches(uint page, MatchDescription *matchArray)
 	//********************************
 	// Send Match List Request
 	//********************************
-	LobbyMessage *list_request = new LobbyMessage(MATCH_LIST_REQUEST);
-	list_request->m_requestedPage = page;
-	if( Message::WriteMessage(list_request, connectFD) == false)
+	LobbyMessage list_request(MATCH_LIST_REQUEST);
+	list_request.m_requestedPage = page;
+	if( Message::WriteMessage(&list_request, connectFD) == false)
 	{
 		//Error in write
-		delete list_request;
 		return 0;
 	}
-	delete list_request;
 
 	//**********************************
 	// Receive Match List Reply
@@ -285,14 +277,12 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 	//********************************
 	// Send Match Create Request
 	//********************************
-	LobbyMessage *create_request = new LobbyMessage(MATCH_CREATE_REQUEST);
-	if( Message::WriteMessage(create_request, connectFD) == false)
+	LobbyMessage create_request(MATCH_CREATE_REQUEST);
+	if( Message::WriteMessage(&create_request, connectFD) == false)
 	{
 		//Error in write
-		delete create_request;
 		return false;
 	}
-	delete create_request;
 
 	//**********************************
 	// Receive Match Options Available
@@ -323,15 +313,13 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 	//********************************
 	// Send Match Create Request
 	//********************************
-	LobbyMessage *ops_chosen = new LobbyMessage(MATCH_CREATE_OPTIONS_CHOSEN);
-	ops_chosen->m_options = options;
-	if( Message::WriteMessage(ops_chosen, connectFD) == false)
+	LobbyMessage ops_chosen(MATCH_CREATE_OPTIONS_CHOSEN);
+	ops_chosen.m_options = options;
+	if( Message::WriteMessage(&ops_chosen, connectFD) == false)
 	{
 		//Error in write
-		delete ops_chosen;
 		return false;
 	}
-	delete ops_chosen;
 
 	//**********************************
 	// Receive Match Create Reply
@@ -370,15 +358,13 @@ uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr,
 	//********************************
 	// Send Match Join Request
 	//********************************
-	LobbyMessage *join_request = new LobbyMessage(MATCH_JOIN_REQUEST);
-	join_request->m_ID = matchID;
-	if( Message::WriteMessage(join_request, connectFD) == false)
+	LobbyMessage join_request(MATCH_JOIN_REQUEST);
+	join_request.m_ID = matchID;
+	if( Message::WriteMessage(&join_request, connectFD) == false)
 	{
 		//Error in write
-		delete join_request;
 		return 0;
 	}
-	delete join_request;
 
 	//**********************************
 	// Receive Match Join Reply
@@ -427,14 +413,12 @@ bool RTT::LeaveMatch()
 	//********************************
 	// Send Match Leave Notification
 	//********************************
-	MatchLobbyMessage *leave_note = new MatchLobbyMessage(MATCH_LEAVE_NOTIFICATION);
-	if( Message::WriteMessage(leave_note, connectFD) == false)
+	MatchLobbyMessage leave_note(MATCH_LEAVE_NOTIFICATION);
+	if( Message::WriteMessage(&leave_note, connectFD) == false)
 	{
 		//Error in write
-		delete leave_note;
 		return false;
 	}
-	delete leave_note;
 
 	//**********************************
 	// Receive Match Leave Acknowledge
@@ -471,14 +455,12 @@ struct ServerStats RTT::GetServerStats()
 	//********************************
 	// Send Server Stats Request
 	//********************************
-	LobbyMessage *server_stats_req = new LobbyMessage(SERVER_STATS_REQUEST);
-	if( Message::WriteMessage(server_stats_req, connectFD) == false)
+	LobbyMessage server_stats_req(SERVER_STATS_REQUEST);
+	if( Message::WriteMessage(&server_stats_req, connectFD) == false)
 	{
 		//Error in write
-		delete server_stats_req;
 		return stats;
 	}
-	delete server_stats_req;
 
 	//**********************************
 	// Receive Server Stats Reply
@@ -513,16 +495,14 @@ bool RTT::ChangeTeam(uint playerID, enum TeamNumber team)
 	//********************************
 	// Send Change Team Request
 	//********************************
-	MatchLobbyMessage *change_team_req = new MatchLobbyMessage(CHANGE_TEAM_REQUEST);
-	change_team_req->m_playerID = playerID;
-	change_team_req->m_newTeam = team;
-	if( Message::WriteMessage(change_team_req, connectFD) == false)
+	MatchLobbyMessage change_team_req(CHANGE_TEAM_REQUEST);
+	change_team_req.m_playerID = playerID;
+	change_team_req.m_newTeam = team;
+	if( Message::WriteMessage(&change_team_req, connectFD) == false)
 	{
 		//Error in write
-		delete change_team_req;
 		return false;
 	}
-	delete change_team_req;
 
 	//**********************************
 	// Receive Change Team Reply
@@ -561,16 +541,14 @@ bool RTT::ChangeColor(uint playerID, enum TeamColor color)
 	//********************************
 	// Send Change Color Request
 	//********************************
-	MatchLobbyMessage *change_color_req = new MatchLobbyMessage(CHANGE_COLOR_REQUEST);
-	change_color_req->m_playerID = playerID;
-	change_color_req->m_newColor = color;
-	if( Message::WriteMessage(change_color_req, connectFD) == false)
+	MatchLobbyMessage change_color_req(CHANGE_COLOR_REQUEST);
+	change_color_req.m_playerID = playerID;
+	change_color_req.m_newColor = color;
+	if( Message::WriteMessage(&change_color_req, connectFD) == false)
 	{
 		//Error in write
-		delete change_color_req;
 		return false;
 	}
-	delete change_color_req;
 
 	//**********************************
 	// Receive Change Color Reply
@@ -609,15 +587,13 @@ bool RTT::ChangeMap(struct MapDescription map)
 	//********************************
 	// Send Change Map Request
 	//********************************
-	MatchLobbyMessage *change_map_req = new MatchLobbyMessage(CHANGE_MAP_REQUEST);
-	change_map_req->m_mapDescription = map;
-	if( Message::WriteMessage(change_map_req, connectFD) == false)
+	MatchLobbyMessage change_map_req(CHANGE_MAP_REQUEST);
+	change_map_req.m_mapDescription = map;
+	if( Message::WriteMessage(&change_map_req, connectFD) == false)
 	{
 		//Error in write
-		delete change_map_req;
 		return false;
 	}
-	delete change_map_req;
 
 	//**********************************
 	// Receive Change Map Reply
@@ -656,15 +632,13 @@ bool RTT::ChangeSpeed(enum GameSpeed speed)
 	//********************************
 	// Send Change Speed Request
 	//********************************
-	MatchLobbyMessage *change_speed_req = new MatchLobbyMessage(CHANGE_GAME_SPEED_REQUEST);
-	change_speed_req->m_newSpeed = speed;
-	if( Message::WriteMessage(change_speed_req, connectFD) == false)
+	MatchLobbyMessage change_speed_req(CHANGE_GAME_SPEED_REQUEST);
+	change_speed_req.m_newSpeed = speed;
+	if( Message::WriteMessage(&change_speed_req, connectFD) == false)
 	{
 		//Error in write
-		delete change_speed_req;
 		return false;
 	}
-	delete change_speed_req;
 
 	//**********************************
 	// Receive Change Speed Reply
@@ -703,15 +677,13 @@ bool RTT::ChangeVictoryCondition(enum VictoryCondition victory)
 	//********************************
 	// Send Change Victory Request
 	//********************************
-	MatchLobbyMessage *change_victory_req = new MatchLobbyMessage(CHANGE_VICTORY_COND_REQUEST);
-	change_victory_req->m_newVictCond = victory;
-	if( Message::WriteMessage(change_victory_req, connectFD) == false)
+	MatchLobbyMessage change_victory_req(CHANGE_VICTORY_COND_REQUEST);
+	change_victory_req.m_newVictCond = victory;
+	if( Message::WriteMessage(&change_victory_req, connectFD) == false)
 	{
 		//Error in write
-		delete change_victory_req;
 		return false;
 	}
-	delete change_victory_req;
 
 	//**********************************
 	// Receive Change Victory Reply
@@ -750,15 +722,13 @@ bool RTT::ChangeLeader(uint newLeaderID)
 	//********************************
 	// Send Change Leader Request
 	//********************************
-	MatchLobbyMessage *change_leader_req = new MatchLobbyMessage(CHANGE_LEADER_REQUEST);
-	change_leader_req->m_playerID = newLeaderID;
-	if( Message::WriteMessage(change_leader_req, connectFD) == false)
+	MatchLobbyMessage change_leader_req(CHANGE_LEADER_REQUEST);
+	change_leader_req.m_playerID = newLeaderID;
+	if( Message::WriteMessage(&change_leader_req, connectFD) == false)
 	{
 		//Error in write
-		delete change_leader_req;
 		return false;
 	}
-	delete change_leader_req;
 
 	//**********************************
 	// Receive Change Leader Reply
@@ -797,15 +767,13 @@ bool RTT::KickPlayer(uint PlayerID)
 	//********************************
 	// Send Kick Player Request
 	//********************************
-	MatchLobbyMessage *kick_player_req = new MatchLobbyMessage(KICK_PLAYER_REQUEST);
-	kick_player_req->m_playerID = PlayerID;
-	if( Message::WriteMessage(kick_player_req, connectFD) == false)
+	MatchLobbyMessage kick_player_req(KICK_PLAYER_REQUEST);
+	kick_player_req.m_playerID = PlayerID;
+	if( Message::WriteMessage(&kick_player_req, connectFD) == false)
 	{
 		//Error in write
-		delete kick_player_req;
 		return false;
 	}
-	delete kick_player_req;
 
 	//**********************************
 	// Receive Kick Player Reply
@@ -844,14 +812,12 @@ bool RTT::StartMatch()
 	//********************************
 	// Send Start Match Request
 	//********************************
-	MatchLobbyMessage *start_match_req = new MatchLobbyMessage(START_MATCH_REQUEST);
-	if( Message::WriteMessage(start_match_req, connectFD) == false)
+	MatchLobbyMessage start_match_req(START_MATCH_REQUEST);
+	if( Message::WriteMessage(&start_match_req, connectFD) == false)
 	{
 		//Error in write
-		delete start_match_req;
 		return false;
 	}
-	delete start_match_req;
 
 	//**********************************
 	// Receive Start Match Reply
@@ -932,15 +898,13 @@ bool RTT::InitializeCallback()
 	//***********************************
 	// Send Callback Register
 	//***********************************
-	MatchLobbyMessage *callback_register = new MatchLobbyMessage(CALLBACK_REGISTER);
-	callback_register->m_playerID = myPlayerDescription.m_ID;
-	if( Message::WriteMessage(callback_register, connectBackSocket) == false)
+	MatchLobbyMessage callback_register(CALLBACK_REGISTER);
+	callback_register.m_playerID = myPlayerDescription.m_ID;
+	if( Message::WriteMessage(&callback_register, connectBackSocket) == false)
 	{
 		//Error in write
-		delete callback_register;
 		return false;
 	}
-	delete callback_register;
 
 	return true;
 }
@@ -976,15 +940,13 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Team Changed Ack
 			//***********************************
-			MatchLobbyMessage *team_change_ack = new MatchLobbyMessage(TEAM_CHANGED_ACK);
-			if( Message::WriteMessage(team_change_ack, connectBackSocket) == false)
+			MatchLobbyMessage team_change_ack(TEAM_CHANGED_ACK);
+			if( Message::WriteMessage(&team_change_ack, connectBackSocket) == false)
 			{
 				//Error in write
-				delete team_change_ack;
 				delete match_message;
 				return change;
 			}
-			delete team_change_ack;
 			break;
 		}
 		case KICKED_FROM_MATCH_NOTIFICATION:
@@ -995,16 +957,14 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Kicked From Match Ack
 			//***********************************
-			MatchLobbyMessage *kicked_ack = new MatchLobbyMessage(KICKED_FROM_MATCH_ACK);
-			if( Message::WriteMessage(kicked_ack, connectBackSocket) == false)
+			MatchLobbyMessage kicked_ack(KICKED_FROM_MATCH_ACK);
+			if( Message::WriteMessage(&kicked_ack, connectBackSocket) == false)
 			{
 				//Error in write
-				delete kicked_ack;
 				delete match_message;
 				return change;
 			}
 
-			delete kicked_ack;
 			break;
 		}
 		case PLAYER_LEFT_MATCH_NOTIFICATION:
@@ -1017,15 +977,13 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Player Left Ack
 			//***********************************
-			MatchLobbyMessage *player_left_ack = new MatchLobbyMessage(PLAYER_LEFT_MATCH_ACK);
-			if( Message::WriteMessage(player_left_ack, connectBackSocket) == false)
+			MatchLobbyMessage player_left_ack(PLAYER_LEFT_MATCH_ACK);
+			if( Message::WriteMessage(&player_left_ack, connectBackSocket) == false)
 			{
 				//Error in write
-				delete player_left_ack;
 				delete match_message;
 				return change;
 			}
-			delete player_left_ack;
 			break;
 		}
 		case PLAYER_JOINED_MATCH_NOTIFICATION:
@@ -1037,15 +995,13 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Player Joined Ack
 			//***********************************
-			MatchLobbyMessage *player_joined_ack = new MatchLobbyMessage(PLAYER_JOINED_MATCH_ACK);
-			if( Message::WriteMessage(player_joined_ack, connectBackSocket) == false)
+			MatchLobbyMessage player_joined_ack(PLAYER_JOINED_MATCH_ACK);
+			if( Message::WriteMessage(&player_joined_ack, connectBackSocket) == false)
 			{
 				//Error in write
-				delete player_joined_ack;
 				delete match_message;
 				return change;
 			}
-			delete player_joined_ack;
 			break;
 		}
 		case COLOR_CHANGED_NOTIFICATION:
@@ -1058,15 +1014,13 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Color Changed Ack
 			//***********************************
-			MatchLobbyMessage *color_change_ack = new MatchLobbyMessage(COLOR_CHANGED_ACK);
-			if( Message::WriteMessage(color_change_ack, connectBackSocket) == false)
+			MatchLobbyMessage color_change_ack(COLOR_CHANGED_ACK);
+			if( Message::WriteMessage(&color_change_ack, connectBackSocket) == false)
 			{
 				//Error in write
-				delete color_change_ack;
 				delete match_message;
 				return change;
 			}
-			delete color_change_ack;
 			break;
 		}
 		case MAP_CHANGED_NOTIFICATION:
@@ -1078,15 +1032,13 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Map Changed Ack
 			//***********************************
-			MatchLobbyMessage *map_changed_ack = new MatchLobbyMessage(MAP_CHANGED_ACK);
-			if( Message::WriteMessage(map_changed_ack, connectBackSocket) == false)
+			MatchLobbyMessage map_changed_ack(MAP_CHANGED_ACK);
+			if( Message::WriteMessage(&map_changed_ack, connectBackSocket) == false)
 			{
 				//Error in write
-				delete map_changed_ack;
 				delete match_message;
 				return change;
 			}
-			delete map_changed_ack;
 			break;
 		}
 		case GAME_SPEED_CHANGED_NOTIFICATION:
@@ -1098,15 +1050,13 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Game Speed Changed Ack
 			//***********************************
-			MatchLobbyMessage *speed_changed_ack = new MatchLobbyMessage(GAME_SPEED_CHANGED_ACK);
-			if( Message::WriteMessage(speed_changed_ack, connectBackSocket) == false)
+			MatchLobbyMessage speed_changed_ack(GAME_SPEED_CHANGED_ACK);
+			if( Message::WriteMessage(&speed_changed_ack, connectBackSocket) == false)
 			{
 				//Error in write
-				delete speed_changed_ack;
 				delete match_message;
 				return change;
 			}
-			delete speed_changed_ack;
 			break;
 		}
 		case VICTORY_COND_CHANGED_NOTIFICATION:
@@ -1118,16 +1068,13 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Victory Condition Changed Ack
 			//***********************************
-			MatchLobbyMessage *victory_changed_ack =
-					new MatchLobbyMessage(VICTORY_COND_CHANGED_ACK);
-			if( Message::WriteMessage(victory_changed_ack, connectBackSocket) == false)
+			MatchLobbyMessage victory_changed_ack(VICTORY_COND_CHANGED_ACK);
+			if( Message::WriteMessage(&victory_changed_ack, connectBackSocket) == false)
 			{
 				//Error in write
-				delete victory_changed_ack;
 				delete match_message;
 				return change;
 			}
-			delete victory_changed_ack;
 			break;
 		}
 		case CHANGE_LEADER_NOTIFICATION:
@@ -1139,15 +1086,13 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Victory Condition Changed Ack
 			//***********************************
-			MatchLobbyMessage *leader_changed_ack = new MatchLobbyMessage(CHANGE_LEADER_ACK);
-			if( Message::WriteMessage(leader_changed_ack, connectBackSocket) == false)
+			MatchLobbyMessage leader_changed_ack(CHANGE_LEADER_ACK);
+			if( Message::WriteMessage(&leader_changed_ack, connectBackSocket) == false)
 			{
 				//Error in write
-				delete leader_changed_ack;
 				delete match_message;
 				return change;
 			}
-			delete leader_changed_ack;
 			break;
 		}
 		case MATCH_START_NOTIFICATION:
@@ -1160,16 +1105,14 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Match Started Ack
 			//***********************************
-			MatchLobbyMessage *match_started_ack = new MatchLobbyMessage(MATCH_START_ACK);
-			match_started_ack->m_changeAccepted = true;
-			if( Message::WriteMessage(match_started_ack, connectBackSocket) == false)
+			MatchLobbyMessage match_started_ack(MATCH_START_ACK);
+			match_started_ack.m_changeAccepted = true;
+			if( Message::WriteMessage(&match_started_ack, connectBackSocket) == false)
 			{
 				//Error in write
-				delete match_started_ack;
 				delete match_message;
 				return change;
 			}
-			delete match_started_ack;
 			break;
 		}
 		default:
@@ -1191,12 +1134,11 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 //Send a message of type Error to the client
 void  RTT::SendError(int socket, enum ErrorType errorType)
 {
-	ErrorMessage *error_msg = new ErrorMessage(errorType);
-	if( Message::WriteMessage(error_msg, socket) == false)
+	ErrorMessage error_msg(errorType);
+	if( Message::WriteMessage(&error_msg, socket) == false)
 	{
 		cerr << "ERROR: Error message send returned failure.\n";
 	}
-	delete error_msg;
 }
 
 //********************************************
