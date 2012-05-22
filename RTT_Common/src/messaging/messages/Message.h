@@ -8,7 +8,7 @@
 #ifndef MESSAGE_H_
 #define MESSAGE_H_
 
-#define MSG_HEADER_SIZE sizeof(enum MessageType) + sizeof(char)
+#define MSG_HEADER_SIZE sizeof(enum MessageType) + sizeof(enum ProtocolDirection) + sizeof(uint32_t)
 #define USERNAME_MAX_LENGTH	 20
 #define MESSAGE_TIMEOUT 3
 
