@@ -19,8 +19,8 @@
 
 #include "Match.h"
 #include "Map.h"
-#include "messages/LobbyMessage.h"
-#include "messages/ErrorMessage.h"
+#include "messaging/messages/LobbyMessage.h"
+#include "messaging/messages/ErrorMessage.h"
 
 namespace RTT
 {
@@ -177,11 +177,6 @@ bool StartMatch();
 //			MatchLobby Callback
 //********************************************
 
-//Connect back to the server for Callback commands
-//	Sets up the Callback socket, ready for commands
-//	Returns if connected back successfully
-bool InitializeCallback();
-
 //Process a Callback command from the server
 //	These are notifications sent by the server that an event has occurred
 //	We listen for these messages on a different socket than
@@ -193,14 +188,11 @@ struct CallbackChange ProcessCallbackCommand();
 //********************************************
 
 //Send a message of type Error to the client
-void SendError(int socket, enum ErrorType errorType);
+void SendError(int socket, enum ErrorType errorType, enum ProtocolDirection direction);
 
 //********************************************
 //			Connection Commands
 //********************************************
-
-//Kills the connection to the server uncleanly
-void ShutdownConnection();
 
 }
 

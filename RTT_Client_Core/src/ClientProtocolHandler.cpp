@@ -6,8 +6,10 @@
 //============================================================================
 
 #include "ClientProtocolHandler.h"
-#include "messages/AuthMessage.h"
-#include "messages/MatchLobbyMessage.h"
+#include "messaging/messages/AuthMessage.h"
+#include "messaging/messages/MatchLobbyMessage.h"
+#include "messaging/MessageManager.h"
+
 #include <unistd.h>
 #include <stdio.h>
 #include <sys/types.h>
@@ -22,21 +24,22 @@
 using namespace std;
 using namespace RTT;
 
-int connectFD, connectBackSocket;
+int socketFD;
 string serverIP;
 struct PlayerDescription myPlayerDescription;
-uint callbackPort = 0;
 
 int RTT::AuthToServer(string IPAddress, uint port,
 		string username, unsigned char *hashedPassword, struct PlayerDescription *outDescr)
 {
-	callbackPort = port + 1;
+
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	struct sockaddr_in stSockAddr;
 	serverIP = IPAddress;
 
 	//Make a socket
-	connectFD = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (-1 == connectFD)
+	socketFD = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+	if (-1 == socketFD)
 	{
 		perror("cannot create socket");
 		return -1;
@@ -62,10 +65,10 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		return -1;
 	}
 
-	if (-1 == connect(connectFD, (struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
+	if (-1 == connect(socketFD, (struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
 	{
 		perror("connect failed");
-		close(connectFD);
+		close(socketFD);
 		return -1;
 	}
 
@@ -73,12 +76,12 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	//***************************
 	// Send client Hello
 	//***************************
-	AuthMessage client_hello(CLIENT_HELLO);
+	AuthMessage client_hello(CLIENT_HELLO, DIRECTION_TO_SERVER);
 	client_hello.m_softwareVersion.m_major = CLIENT_VERSION_MAJOR;
 	client_hello.m_softwareVersion.m_minor = CLIENT_VERSION_MINOR;
 	client_hello.m_softwareVersion.m_rev = CLIENT_VERSION_REV;
 
-	if( Message::WriteMessage(&client_hello, connectFD) == false)
+	if( Message::WriteMessage(&client_hello, socketFD) == false)
 	{
 		//Error in write
 		return -1;
@@ -87,22 +90,22 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	//***************************
 	// Receive Server Hello
 	//***************************
-	Message *server_hello_init = Message::ReadMessage(connectFD);
+	Message *server_hello_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( server_hello_init == NULL)
 	{
-		SendError(connectFD, PROTOCOL_ERROR);
+		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		return -1;
 	}
 	if( server_hello_init->m_messageType != MESSAGE_AUTH)
 	{
-		SendError(connectFD, PROTOCOL_ERROR);
+		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		delete server_hello_init;
 		return -1;
 	}
 	AuthMessage *server_hello = (AuthMessage*)server_hello_init;
 	if(server_hello->m_authType != SERVER_HELLO)
 	{
-		SendError(connectFD, PROTOCOL_ERROR);
+		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		delete server_hello;
 		return -1;
 	}
@@ -115,7 +118,7 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		//Incompatible software versions.
 		//The server should have caught this, though.
 
-		SendError(connectFD, AUTHENTICATION_ERROR);
+		SendError(socketFD, AUTHENTICATION_ERROR, DIRECTION_TO_SERVER);
 		delete server_hello_init;
 		return -1;
 	}
@@ -124,11 +127,11 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	//***************************
 	// Send Client Auth
 	//***************************
-	AuthMessage client_auth(CLIENT_AUTH);
+	AuthMessage client_auth(CLIENT_AUTH, DIRECTION_TO_SERVER);
 	strncpy( client_auth.m_username, username.data(), USERNAME_MAX_LENGTH);
 	memcpy(client_auth.m_hashedPassword, hashedPassword, SHA256_DIGEST_LENGTH);
 
-	if( Message::WriteMessage(&client_auth, connectFD) == false)
+	if( Message::WriteMessage(&client_auth, socketFD) == false)
 	{
 		//Error in write
 		return -1;
@@ -137,7 +140,7 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	//***************************
 	// Receive Server Auth Reply
 	//***************************
-	Message *server_auth_reply_init = Message::ReadMessage(connectFD);
+	Message *server_auth_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( server_auth_reply_init == NULL)
 	{
 		return -1;
@@ -161,13 +164,7 @@ int RTT::AuthToServer(string IPAddress, uint port,
 
 	delete server_auth_reply;
 
-	if( !InitializeCallback() )
-	{
-		cerr << "ERROR: Failed to initialize Callback\n";
-		return -1;
-	}
-
-	return connectFD;
+	return socketFD;
 }
 
 //Informs the server that we want to exit
@@ -178,8 +175,8 @@ bool RTT::ExitServer()
 	//********************************
 	// Send Exit Server Notification
 	//********************************
-	LobbyMessage exit_server_notice(MATCH_EXIT_SERVER_NOTIFICATION);
-	if( Message::WriteMessage(&exit_server_notice, connectFD) == false)
+	LobbyMessage exit_server_notice(MATCH_EXIT_SERVER_NOTIFICATION, DIRECTION_TO_SERVER);
+	if( Message::WriteMessage(&exit_server_notice, socketFD) == false)
 	{
 		//Error in write
 		return false;
@@ -188,7 +185,7 @@ bool RTT::ExitServer()
 	//**********************************
 	// Receive Exit Server Acknowledge
 	//**********************************
-	Message *exit_server_ack = Message::ReadMessage(connectFD);
+	Message *exit_server_ack = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( exit_server_ack == NULL)
 	{
 		return false;
@@ -205,7 +202,7 @@ bool RTT::ExitServer()
 		return false;
 	}
 
-	ShutdownConnection();
+	MessageManager::Instance().CloseSocket(socketFD);
 
 	return true;
 }
@@ -226,9 +223,9 @@ uint RTT::ListMatches(uint page, MatchDescription *matchArray)
 	//********************************
 	// Send Match List Request
 	//********************************
-	LobbyMessage list_request(MATCH_LIST_REQUEST);
+	LobbyMessage list_request(MATCH_LIST_REQUEST, DIRECTION_TO_SERVER);
 	list_request.m_requestedPage = page;
-	if( Message::WriteMessage(&list_request, connectFD) == false)
+	if( Message::WriteMessage(&list_request, socketFD) == false)
 	{
 		//Error in write
 		return 0;
@@ -237,7 +234,7 @@ uint RTT::ListMatches(uint page, MatchDescription *matchArray)
 	//**********************************
 	// Receive Match List Reply
 	//**********************************
-	Message *list_reply_init = Message::ReadMessage(connectFD);
+	Message *list_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( list_reply_init == NULL)
 	{
 		return 0;
@@ -277,8 +274,8 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 	//********************************
 	// Send Match Create Request
 	//********************************
-	LobbyMessage create_request(MATCH_CREATE_REQUEST);
-	if( Message::WriteMessage(&create_request, connectFD) == false)
+	LobbyMessage create_request(MATCH_CREATE_REQUEST, DIRECTION_TO_SERVER);
+	if( Message::WriteMessage(&create_request, socketFD) == false)
 	{
 		//Error in write
 		return false;
@@ -287,7 +284,7 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 	//**********************************
 	// Receive Match Options Available
 	//**********************************
-	Message *ops_available_init = Message::ReadMessage(connectFD);
+	Message *ops_available_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( ops_available_init == NULL)
 	{
 		return false;
@@ -313,9 +310,9 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 	//********************************
 	// Send Match Create Request
 	//********************************
-	LobbyMessage ops_chosen(MATCH_CREATE_OPTIONS_CHOSEN);
+	LobbyMessage ops_chosen(MATCH_CREATE_OPTIONS_CHOSEN, DIRECTION_TO_SERVER);
 	ops_chosen.m_options = options;
-	if( Message::WriteMessage(&ops_chosen, connectFD) == false)
+	if( Message::WriteMessage(&ops_chosen, socketFD) == false)
 	{
 		//Error in write
 		return false;
@@ -324,7 +321,7 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 	//**********************************
 	// Receive Match Create Reply
 	//**********************************
-	Message *create_reply_init = Message::ReadMessage(connectFD);
+	Message *create_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( create_reply_init == NULL)
 	{
 		return false;
@@ -358,9 +355,9 @@ uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr,
 	//********************************
 	// Send Match Join Request
 	//********************************
-	LobbyMessage join_request(MATCH_JOIN_REQUEST);
+	LobbyMessage join_request(MATCH_JOIN_REQUEST, DIRECTION_TO_SERVER);
 	join_request.m_ID = matchID;
-	if( Message::WriteMessage(&join_request, connectFD) == false)
+	if( Message::WriteMessage(&join_request, socketFD) == false)
 	{
 		//Error in write
 		return 0;
@@ -369,7 +366,7 @@ uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr,
 	//**********************************
 	// Receive Match Join Reply
 	//**********************************
-	Message *join_reply_init = Message::ReadMessage(connectFD);
+	Message *join_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( join_reply_init == NULL)
 	{
 		return 0;
@@ -413,8 +410,8 @@ bool RTT::LeaveMatch()
 	//********************************
 	// Send Match Leave Notification
 	//********************************
-	MatchLobbyMessage leave_note(MATCH_LEAVE_NOTIFICATION);
-	if( Message::WriteMessage(&leave_note, connectFD) == false)
+	MatchLobbyMessage leave_note(MATCH_LEAVE_NOTIFICATION, DIRECTION_TO_SERVER);
+	if( Message::WriteMessage(&leave_note, socketFD) == false)
 	{
 		//Error in write
 		return false;
@@ -423,7 +420,7 @@ bool RTT::LeaveMatch()
 	//**********************************
 	// Receive Match Leave Acknowledge
 	//**********************************
-	Message *leave_ack = Message::ReadMessage(connectFD);
+	Message *leave_ack = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( leave_ack == NULL)
 	{
 		return false;
@@ -455,8 +452,8 @@ struct ServerStats RTT::GetServerStats()
 	//********************************
 	// Send Server Stats Request
 	//********************************
-	LobbyMessage server_stats_req(SERVER_STATS_REQUEST);
-	if( Message::WriteMessage(&server_stats_req, connectFD) == false)
+	LobbyMessage server_stats_req(SERVER_STATS_REQUEST, DIRECTION_TO_SERVER);
+	if( Message::WriteMessage(&server_stats_req, socketFD) == false)
 	{
 		//Error in write
 		return stats;
@@ -465,7 +462,7 @@ struct ServerStats RTT::GetServerStats()
 	//**********************************
 	// Receive Server Stats Reply
 	//**********************************
-	Message *msg_init = Message::ReadMessage(connectFD);
+	Message *msg_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( msg_init == NULL)
 	{
 		return stats;
@@ -495,10 +492,10 @@ bool RTT::ChangeTeam(uint playerID, enum TeamNumber team)
 	//********************************
 	// Send Change Team Request
 	//********************************
-	MatchLobbyMessage change_team_req(CHANGE_TEAM_REQUEST);
+	MatchLobbyMessage change_team_req(CHANGE_TEAM_REQUEST, DIRECTION_TO_SERVER);
 	change_team_req.m_playerID = playerID;
 	change_team_req.m_newTeam = team;
-	if( Message::WriteMessage(&change_team_req, connectFD) == false)
+	if( Message::WriteMessage(&change_team_req, socketFD) == false)
 	{
 		//Error in write
 		return false;
@@ -507,7 +504,7 @@ bool RTT::ChangeTeam(uint playerID, enum TeamNumber team)
 	//**********************************
 	// Receive Change Team Reply
 	//**********************************
-	Message *message = Message::ReadMessage(connectFD);
+	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( message == NULL)
 	{
 		return false;
@@ -541,10 +538,10 @@ bool RTT::ChangeColor(uint playerID, enum TeamColor color)
 	//********************************
 	// Send Change Color Request
 	//********************************
-	MatchLobbyMessage change_color_req(CHANGE_COLOR_REQUEST);
+	MatchLobbyMessage change_color_req(CHANGE_COLOR_REQUEST, DIRECTION_TO_SERVER);
 	change_color_req.m_playerID = playerID;
 	change_color_req.m_newColor = color;
-	if( Message::WriteMessage(&change_color_req, connectFD) == false)
+	if( Message::WriteMessage(&change_color_req, socketFD) == false)
 	{
 		//Error in write
 		return false;
@@ -553,7 +550,7 @@ bool RTT::ChangeColor(uint playerID, enum TeamColor color)
 	//**********************************
 	// Receive Change Color Reply
 	//**********************************
-	Message *message = Message::ReadMessage(connectFD);
+	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( message == NULL)
 	{
 		return false;
@@ -587,9 +584,9 @@ bool RTT::ChangeMap(struct MapDescription map)
 	//********************************
 	// Send Change Map Request
 	//********************************
-	MatchLobbyMessage change_map_req(CHANGE_MAP_REQUEST);
+	MatchLobbyMessage change_map_req(CHANGE_MAP_REQUEST, DIRECTION_TO_SERVER);
 	change_map_req.m_mapDescription = map;
-	if( Message::WriteMessage(&change_map_req, connectFD) == false)
+	if( Message::WriteMessage(&change_map_req, socketFD) == false)
 	{
 		//Error in write
 		return false;
@@ -598,7 +595,7 @@ bool RTT::ChangeMap(struct MapDescription map)
 	//**********************************
 	// Receive Change Map Reply
 	//**********************************
-	Message *message = Message::ReadMessage(connectFD);
+	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( message == NULL)
 	{
 		return false;
@@ -632,9 +629,9 @@ bool RTT::ChangeSpeed(enum GameSpeed speed)
 	//********************************
 	// Send Change Speed Request
 	//********************************
-	MatchLobbyMessage change_speed_req(CHANGE_GAME_SPEED_REQUEST);
+	MatchLobbyMessage change_speed_req(CHANGE_GAME_SPEED_REQUEST, DIRECTION_TO_SERVER);
 	change_speed_req.m_newSpeed = speed;
-	if( Message::WriteMessage(&change_speed_req, connectFD) == false)
+	if( Message::WriteMessage(&change_speed_req, socketFD) == false)
 	{
 		//Error in write
 		return false;
@@ -643,7 +640,7 @@ bool RTT::ChangeSpeed(enum GameSpeed speed)
 	//**********************************
 	// Receive Change Speed Reply
 	//**********************************
-	Message *message = Message::ReadMessage(connectFD);
+	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( message == NULL)
 	{
 		return false;
@@ -677,9 +674,9 @@ bool RTT::ChangeVictoryCondition(enum VictoryCondition victory)
 	//********************************
 	// Send Change Victory Request
 	//********************************
-	MatchLobbyMessage change_victory_req(CHANGE_VICTORY_COND_REQUEST);
+	MatchLobbyMessage change_victory_req(CHANGE_VICTORY_COND_REQUEST, DIRECTION_TO_SERVER);
 	change_victory_req.m_newVictCond = victory;
-	if( Message::WriteMessage(&change_victory_req, connectFD) == false)
+	if( Message::WriteMessage(&change_victory_req, socketFD) == false)
 	{
 		//Error in write
 		return false;
@@ -688,7 +685,7 @@ bool RTT::ChangeVictoryCondition(enum VictoryCondition victory)
 	//**********************************
 	// Receive Change Victory Reply
 	//**********************************
-	Message *message = Message::ReadMessage(connectFD);
+	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( message == NULL)
 	{
 		return false;
@@ -722,9 +719,9 @@ bool RTT::ChangeLeader(uint newLeaderID)
 	//********************************
 	// Send Change Leader Request
 	//********************************
-	MatchLobbyMessage change_leader_req(CHANGE_LEADER_REQUEST);
+	MatchLobbyMessage change_leader_req(CHANGE_LEADER_REQUEST, DIRECTION_TO_SERVER);
 	change_leader_req.m_playerID = newLeaderID;
-	if( Message::WriteMessage(&change_leader_req, connectFD) == false)
+	if( Message::WriteMessage(&change_leader_req, socketFD) == false)
 	{
 		//Error in write
 		return false;
@@ -733,7 +730,7 @@ bool RTT::ChangeLeader(uint newLeaderID)
 	//**********************************
 	// Receive Change Leader Reply
 	//**********************************
-	Message *message = Message::ReadMessage(connectFD);
+	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( message == NULL)
 	{
 		return false;
@@ -767,9 +764,9 @@ bool RTT::KickPlayer(uint PlayerID)
 	//********************************
 	// Send Kick Player Request
 	//********************************
-	MatchLobbyMessage kick_player_req(KICK_PLAYER_REQUEST);
+	MatchLobbyMessage kick_player_req(KICK_PLAYER_REQUEST, DIRECTION_TO_SERVER);
 	kick_player_req.m_playerID = PlayerID;
-	if( Message::WriteMessage(&kick_player_req, connectFD) == false)
+	if( Message::WriteMessage(&kick_player_req, socketFD) == false)
 	{
 		//Error in write
 		return false;
@@ -778,7 +775,7 @@ bool RTT::KickPlayer(uint PlayerID)
 	//**********************************
 	// Receive Kick Player Reply
 	//**********************************
-	Message *message = Message::ReadMessage(connectFD);
+	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( message == NULL)
 	{
 		return false;
@@ -812,8 +809,8 @@ bool RTT::StartMatch()
 	//********************************
 	// Send Start Match Request
 	//********************************
-	MatchLobbyMessage start_match_req(START_MATCH_REQUEST);
-	if( Message::WriteMessage(&start_match_req, connectFD) == false)
+	MatchLobbyMessage start_match_req(START_MATCH_REQUEST, DIRECTION_TO_SERVER);
+	if( Message::WriteMessage(&start_match_req, socketFD) == false)
 	{
 		//Error in write
 		return false;
@@ -822,7 +819,7 @@ bool RTT::StartMatch()
 	//**********************************
 	// Receive Start Match Reply
 	//**********************************
-	Message *message = Message::ReadMessage(connectFD);
+	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( message == NULL)
 	{
 		return false;
@@ -853,62 +850,6 @@ bool RTT::StartMatch()
 //			MatchLobby Callback
 //********************************************
 
-//Connect back to the server for Callback commands
-//	Sets up the Callback socket, ready for commands
-//	Returns if connected back successfully
-//	Immediately follow with ProcessCallbackCommand()
-bool RTT::InitializeCallback()
-{
-	//Make a new connection to the given port
-	struct sockaddr_in stSockAddr;
-	connectBackSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (-1 == connectBackSocket)
-	{
-		perror("cannot create socket");
-		return false;
-	}
-
-	//Zero out the socket struct
-	memset(&stSockAddr, 0, sizeof(stSockAddr));
-
-	//Set sock type and port
-	stSockAddr.sin_family = AF_INET;
-	stSockAddr.sin_port = htons(callbackPort);
-
-	//Set the IP address of the socket struct
-	int Res = inet_pton(AF_INET, serverIP.c_str(), &stSockAddr.sin_addr);
-	if (0 > Res)
-	{
-		perror("error: first parameter is not a valid address family");
-		return false;
-	}
-	else if (0 == Res)
-	{
-		perror("char string (second parameter does not contain valid ipaddress)");
-		return false;
-	}
-
-	if (-1 == connect(connectBackSocket, (struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
-	{
-		perror("connect failed");
-		close(connectBackSocket);
-		return false;
-	}
-
-	//***********************************
-	// Send Callback Register
-	//***********************************
-	MatchLobbyMessage callback_register(CALLBACK_REGISTER);
-	callback_register.m_playerID = myPlayerDescription.m_ID;
-	if( Message::WriteMessage(&callback_register, connectBackSocket) == false)
-	{
-		//Error in write
-		return false;
-	}
-
-	return true;
-}
-
 //Process a Callback command from the server
 //	These are notifications sent by the server that an event has occurred
 //	We listen for these messages on a different socket than
@@ -920,7 +861,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 	//**********************************
 	// Receive Connect Back Ready
 	//**********************************
-	Message *message = Message::ReadMessage(connectBackSocket);
+	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_CLIENT);
 	if( message == NULL)
 	{
 		change.m_type = CALLBACK_CLOSED;
@@ -940,8 +881,8 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Team Changed Ack
 			//***********************************
-			MatchLobbyMessage team_change_ack(TEAM_CHANGED_ACK);
-			if( Message::WriteMessage(&team_change_ack, connectBackSocket) == false)
+			MatchLobbyMessage team_change_ack(TEAM_CHANGED_ACK, DIRECTION_TO_CLIENT);
+			if( Message::WriteMessage(&team_change_ack, socketFD) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -957,8 +898,8 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Kicked From Match Ack
 			//***********************************
-			MatchLobbyMessage kicked_ack(KICKED_FROM_MATCH_ACK);
-			if( Message::WriteMessage(&kicked_ack, connectBackSocket) == false)
+			MatchLobbyMessage kicked_ack(KICKED_FROM_MATCH_ACK, DIRECTION_TO_CLIENT);
+			if( Message::WriteMessage(&kicked_ack, socketFD) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -977,8 +918,8 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Player Left Ack
 			//***********************************
-			MatchLobbyMessage player_left_ack(PLAYER_LEFT_MATCH_ACK);
-			if( Message::WriteMessage(&player_left_ack, connectBackSocket) == false)
+			MatchLobbyMessage player_left_ack(PLAYER_LEFT_MATCH_ACK, DIRECTION_TO_CLIENT);
+			if( Message::WriteMessage(&player_left_ack, socketFD) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -995,8 +936,8 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Player Joined Ack
 			//***********************************
-			MatchLobbyMessage player_joined_ack(PLAYER_JOINED_MATCH_ACK);
-			if( Message::WriteMessage(&player_joined_ack, connectBackSocket) == false)
+			MatchLobbyMessage player_joined_ack(PLAYER_JOINED_MATCH_ACK, DIRECTION_TO_CLIENT);
+			if( Message::WriteMessage(&player_joined_ack, socketFD) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -1014,8 +955,8 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Color Changed Ack
 			//***********************************
-			MatchLobbyMessage color_change_ack(COLOR_CHANGED_ACK);
-			if( Message::WriteMessage(&color_change_ack, connectBackSocket) == false)
+			MatchLobbyMessage color_change_ack(COLOR_CHANGED_ACK, DIRECTION_TO_CLIENT);
+			if( Message::WriteMessage(&color_change_ack, socketFD) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -1032,8 +973,8 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Map Changed Ack
 			//***********************************
-			MatchLobbyMessage map_changed_ack(MAP_CHANGED_ACK);
-			if( Message::WriteMessage(&map_changed_ack, connectBackSocket) == false)
+			MatchLobbyMessage map_changed_ack(MAP_CHANGED_ACK, DIRECTION_TO_CLIENT);
+			if( Message::WriteMessage(&map_changed_ack, socketFD) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -1050,8 +991,8 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Game Speed Changed Ack
 			//***********************************
-			MatchLobbyMessage speed_changed_ack(GAME_SPEED_CHANGED_ACK);
-			if( Message::WriteMessage(&speed_changed_ack, connectBackSocket) == false)
+			MatchLobbyMessage speed_changed_ack(GAME_SPEED_CHANGED_ACK, DIRECTION_TO_CLIENT);
+			if( Message::WriteMessage(&speed_changed_ack, socketFD) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -1068,8 +1009,8 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Victory Condition Changed Ack
 			//***********************************
-			MatchLobbyMessage victory_changed_ack(VICTORY_COND_CHANGED_ACK);
-			if( Message::WriteMessage(&victory_changed_ack, connectBackSocket) == false)
+			MatchLobbyMessage victory_changed_ack(VICTORY_COND_CHANGED_ACK, DIRECTION_TO_CLIENT);
+			if( Message::WriteMessage(&victory_changed_ack, socketFD) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -1086,8 +1027,8 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Victory Condition Changed Ack
 			//***********************************
-			MatchLobbyMessage leader_changed_ack(CHANGE_LEADER_ACK);
-			if( Message::WriteMessage(&leader_changed_ack, connectBackSocket) == false)
+			MatchLobbyMessage leader_changed_ack(CHANGE_LEADER_ACK, DIRECTION_TO_CLIENT);
+			if( Message::WriteMessage(&leader_changed_ack, socketFD) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -1105,9 +1046,9 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Match Started Ack
 			//***********************************
-			MatchLobbyMessage match_started_ack(MATCH_START_ACK);
+			MatchLobbyMessage match_started_ack(MATCH_START_ACK, DIRECTION_TO_CLIENT);
 			match_started_ack.m_changeAccepted = true;
-			if( Message::WriteMessage(&match_started_ack, connectBackSocket) == false)
+			if( Message::WriteMessage(&match_started_ack, socketFD) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -1118,7 +1059,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 		default:
 		{
 			cerr << "ERROR: Received a bad message on the callback socket\n";
-			SendError(connectBackSocket, AUTHENTICATION_ERROR);
+			SendError(socketFD, AUTHENTICATION_ERROR, DIRECTION_TO_CLIENT);
 			break;
 		}
 	}
@@ -1132,23 +1073,11 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 //********************************************
 
 //Send a message of type Error to the client
-void  RTT::SendError(int socket, enum ErrorType errorType)
+void  RTT::SendError(int socket, enum ErrorType errorType, enum ProtocolDirection direction)
 {
-	ErrorMessage error_msg(errorType);
+	ErrorMessage error_msg(errorType, direction);
 	if( Message::WriteMessage(&error_msg, socket) == false)
 	{
 		cerr << "ERROR: Error message send returned failure.\n";
 	}
-}
-
-//********************************************
-//			Connection Commands
-//********************************************
-
-void RTT::ShutdownConnection()
-{
-	shutdown(connectFD, SHUT_RDWR);
-	shutdown(connectBackSocket, SHUT_RDWR);
-	connectFD = -1;
-	connectBackSocket = -1;
 }

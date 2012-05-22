@@ -13,7 +13,7 @@ using namespace std;
 Player::Player()
 {
 	m_currentMatchID = 0;
-	m_callbackSocket = -1;
+	m_socketFD = -1;
 	pthread_rwlock_init(&m_lock, NULL);
 }
 
@@ -24,7 +24,7 @@ Player::Player(char *username, uint newID)
 	m_currentMatchID = 0;
 	m_ID = newID;
 	m_description.m_ID = newID;
-	m_callbackSocket = -1;
+	m_socketFD = -1;
 	pthread_rwlock_init(&m_lock, NULL);
 }
 
@@ -35,7 +35,7 @@ Player::Player(string username, uint newID)
 	m_currentMatchID = 0;
 	m_ID = newID;
 	m_description.m_ID = newID;
-	m_callbackSocket = -1;
+	m_socketFD = -1;
 	pthread_rwlock_init(&m_lock, NULL);
 }
 
@@ -74,7 +74,7 @@ enum TeamColor Player::GetColor()
 int Player::GetCallbackSocket()
 {
 	pthread_rwlock_rdlock(&m_lock);
-	int socketCopy = m_callbackSocket;
+	int socketCopy = m_socketFD;
 	pthread_rwlock_unlock(&m_lock);
 	return socketCopy;
 }
@@ -130,7 +130,7 @@ void Player::SetColor(enum TeamColor newColor)
 void Player::SetCallbackSocket(int socket)
 {
 	pthread_rwlock_wrlock(&m_lock);
-	m_callbackSocket = socket;
+	m_socketFD = socket;
 	pthread_rwlock_unlock(&m_lock);
 }
 

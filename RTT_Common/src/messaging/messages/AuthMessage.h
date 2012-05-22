@@ -9,7 +9,7 @@
 #define AUTHMESSAGE_H_
 
 #include "Message.h"
-#include "../Player.h"
+#include "../../Player.h"
 
 namespace RTT
 {
@@ -58,7 +58,7 @@ public:
 
 	enum AuthType m_authType;
 
-	AuthMessage(enum AuthType type);
+	AuthMessage(enum AuthType type, enum ProtocolDirection direction);
 	AuthMessage(char *buffer, uint length);
 	char *Serialize(uint *length);
 

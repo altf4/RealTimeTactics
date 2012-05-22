@@ -6,6 +6,8 @@
 //============================================================================
 
 #include "WelcomeWindow.h"
+#include "messaging/MessageManager.h"
+
 #include "gtkmm.h"
 
 using namespace Gtk;
@@ -17,6 +19,8 @@ WelcomeWindow *window;
 
 int main( int argc, char **argv)
 {
+	MessageManager::Initialize(DIRECTION_TO_SERVER);
+
 	Main kit(argc, argv);
 
 	refBuilder = Gtk::Builder::create();

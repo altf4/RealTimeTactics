@@ -68,7 +68,7 @@ private:
 	enum TeamNumber m_team;
 	enum TeamColor m_color;
 	//Socket to receive MatchLobby messages from server on
-	int m_callbackSocket;
+	int m_socketFD;
 	struct PlayerDescription m_description;
 	std::vector <Unit*> m_units;
 	//The match that this player is currently in

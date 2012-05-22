@@ -16,10 +16,11 @@ MatchLobbyMessage::~MatchLobbyMessage()
 
 }
 
-MatchLobbyMessage::MatchLobbyMessage(enum MatchLobbyType type)
+MatchLobbyMessage::MatchLobbyMessage(enum MatchLobbyType type, enum ProtocolDirection direction)
 {
 	m_messageType = MESSAGE_MATCH_LOBBY;
 	m_matchLobbyType = type;
+	m_direction = direction;
 }
 
 MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)

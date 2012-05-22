@@ -8,7 +8,7 @@
 #define SERVER_STATS_SIZE sizeof(uint32_t) + sizeof(uint32_t)
 
 #include "Message.h"
-#include "../Match.h"
+#include "../../Match.h"
 
 namespace RTT
 {
@@ -72,7 +72,7 @@ public:
 
 	enum LobbyType m_lobbyType;
 
-	LobbyMessage(enum LobbyType type);
+	LobbyMessage(enum LobbyType type, enum ProtocolDirection direction);
 	~LobbyMessage();
 	LobbyMessage(char *buffer, uint length);
 	char *Serialize(uint *length);

@@ -11,10 +11,11 @@
 using namespace std;
 using namespace RTT;
 
-ErrorMessage::ErrorMessage(enum ErrorType type)
+ErrorMessage::ErrorMessage(enum ErrorType type, enum ProtocolDirection direction)
 {
 	m_messageType = MESSAGE_ERROR;
 	m_errorType = type;
+	m_direction = direction;
 }
 
 ErrorMessage::ErrorMessage(char *buffer, uint32_t length)

@@ -11,10 +11,11 @@
 using namespace std;
 using namespace RTT;
 
-AuthMessage::AuthMessage(enum AuthType type)
+AuthMessage::AuthMessage(enum AuthType type, enum ProtocolDirection direction)
 {
 	m_messageType = MESSAGE_AUTH;
 	m_authType = type;
+	m_direction = direction;
 }
 
 AuthMessage::AuthMessage(char *buffer, uint32_t length)
