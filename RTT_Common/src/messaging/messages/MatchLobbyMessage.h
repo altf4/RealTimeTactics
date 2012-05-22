@@ -9,9 +9,9 @@
 #define MATCHLOBBYMESSAGE_H_
 
 #include "Message.h"
-#include "../Map.h"
-#include "../Player.h"
-#include "../Enums.h"
+#include "../../Map.h"
+#include "../../Player.h"
+#include "../../Enums.h"
 
 namespace RTT
 {
@@ -99,7 +99,7 @@ public:
 
 	enum MatchLobbyType m_matchLobbyType;
 
-	MatchLobbyMessage(enum MatchLobbyType type);
+	MatchLobbyMessage(enum MatchLobbyType type, enum ProtocolDirection direction);
 	~MatchLobbyMessage();
 	MatchLobbyMessage(char *buffer, uint length);
 	char *Serialize(uint *length);

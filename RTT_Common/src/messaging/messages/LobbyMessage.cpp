@@ -11,12 +11,13 @@
 using namespace std;
 using namespace RTT;
 
-LobbyMessage::LobbyMessage(enum LobbyType type)
+LobbyMessage::LobbyMessage(enum LobbyType type, enum ProtocolDirection direction)
 {
 	m_matchDescriptions = NULL;
 	m_playerDescriptions = NULL;
 	m_messageType = MESSAGE_LOBBY;
 	m_lobbyType = type;
+	m_direction = direction;
 }
 
 LobbyMessage::~LobbyMessage()

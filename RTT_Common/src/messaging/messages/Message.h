@@ -9,7 +9,8 @@
 #define MESSAGE_H_
 
 #define MSG_HEADER_SIZE sizeof(enum MessageType) + sizeof(char)
-#define USERNAME_MAX_LENGTH	20
+#define USERNAME_MAX_LENGTH	 20
+#define MESSAGE_TIMEOUT 3
 
 #include <stdlib.h>
 #include <vector>
@@ -18,6 +19,16 @@
 
 namespace RTT
 {
+
+//The direction that this message's PROTOCOL (not individual message) is going.
+//	Who initiated the first message in the protocol
+//Value is used by MessageQueue to allow for dumb queueing of messages
+//	Otherwise the queue would have to be aware of the protocol used to know the direction
+enum ProtocolDirection: char
+{
+	DIRECTION_TO_CLIENT = 0,
+	DIRECTION_TO_SERVER = 1
+};
 
 enum MessageType: char
 {
@@ -43,13 +54,18 @@ public:
 
 	enum MessageType m_messageType;
 
+	enum ProtocolDirection m_direction;
+
+	uint32_t m_serialNumber;
+
 	//Plain old constructor
 	Message();
 
 	virtual char *Serialize(uint *length);
-	static Message *Deserialize(char *buffer, uint length);
+	static Message *Deserialize(char *buffer, uint length, enum ProtocolDirection direction);
 
-	static Message *ReadMessage(int connectFD);
+	static Message *ReadMessage(int connectFD,
+			enum ProtocolDirection direction, int timeout = MESSAGE_TIMEOUT);
 	static bool WriteMessage(Message *message, int connectFD);
 
 protected:
