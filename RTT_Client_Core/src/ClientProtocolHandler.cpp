@@ -24,16 +24,13 @@
 using namespace std;
 using namespace RTT;
 
-int socketFD;
+int socketFD = -1;
 string serverIP;
 struct PlayerDescription myPlayerDescription;
 
 int RTT::AuthToServer(string IPAddress, uint port,
 		string username, unsigned char *hashedPassword, struct PlayerDescription *outDescr)
 {
-
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
-
 	struct sockaddr_in stSockAddr;
 	serverIP = IPAddress;
 
@@ -44,6 +41,8 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		perror("cannot create socket");
 		return -1;
 	}
+
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
 
 	//Zero out the socket struct
 	memset(&stSockAddr, 0, sizeof(stSockAddr));
@@ -172,6 +171,8 @@ int RTT::AuthToServer(string IPAddress, uint port,
 //	Returns true if we get a successful acknowledgment back
 bool RTT::ExitServer()
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//********************************
 	// Send Exit Server Notification
 	//********************************
@@ -219,6 +220,8 @@ uint RTT::ListMatches(uint page, MatchDescription *matchArray)
 	{
 		return 0;
 	}
+
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
 
 	//********************************
 	// Send Match List Request
@@ -271,6 +274,8 @@ uint RTT::ListMatches(uint page, MatchDescription *matchArray)
 //	Returns: true if the match is created successfully
 bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outMatchDesc)
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//********************************
 	// Send Match Create Request
 	//********************************
@@ -352,6 +357,8 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr,
 		struct MatchDescription *outMatchDesc)
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//********************************
 	// Send Match Join Request
 	//********************************
@@ -407,6 +414,8 @@ uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr,
 //	Returns: true if the match is left cleanly
 bool RTT::LeaveMatch()
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//********************************
 	// Send Match Leave Notification
 	//********************************
@@ -445,6 +454,8 @@ bool RTT::LeaveMatch()
 //	Returns: A ServerStats struct containing
 struct ServerStats RTT::GetServerStats()
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	struct ServerStats stats;
 	stats.m_numPlayers = 0;
 	stats.m_numMatches = 0;
@@ -489,6 +500,8 @@ struct ServerStats RTT::GetServerStats()
 //	Returns true if successfully changed
 bool RTT::ChangeTeam(uint playerID, enum TeamNumber team)
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//********************************
 	// Send Change Team Request
 	//********************************
@@ -535,6 +548,8 @@ bool RTT::ChangeTeam(uint playerID, enum TeamNumber team)
 //	Returns true if successfully changed
 bool RTT::ChangeColor(uint playerID, enum TeamColor color)
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//********************************
 	// Send Change Color Request
 	//********************************
@@ -581,6 +596,8 @@ bool RTT::ChangeColor(uint playerID, enum TeamColor color)
 //	Returns true if successfully changed
 bool RTT::ChangeMap(struct MapDescription map)
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//********************************
 	// Send Change Map Request
 	//********************************
@@ -626,6 +643,8 @@ bool RTT::ChangeMap(struct MapDescription map)
 //	Returns true if successfully changed
 bool RTT::ChangeSpeed(enum GameSpeed speed)
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//********************************
 	// Send Change Speed Request
 	//********************************
@@ -671,6 +690,8 @@ bool RTT::ChangeSpeed(enum GameSpeed speed)
 //	Returns true if successfully changed
 bool RTT::ChangeVictoryCondition(enum VictoryCondition victory)
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//********************************
 	// Send Change Victory Request
 	//********************************
@@ -716,6 +737,8 @@ bool RTT::ChangeVictoryCondition(enum VictoryCondition victory)
 //	Returns true if the leader status successfully given
 bool RTT::ChangeLeader(uint newLeaderID)
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//********************************
 	// Send Change Leader Request
 	//********************************
@@ -761,6 +784,8 @@ bool RTT::ChangeLeader(uint newLeaderID)
 //	Returns true if successfully kicked
 bool RTT::KickPlayer(uint PlayerID)
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//********************************
 	// Send Kick Player Request
 	//********************************
@@ -806,6 +831,8 @@ bool RTT::KickPlayer(uint PlayerID)
 //	Returns true if the match successfully started
 bool RTT::StartMatch()
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//********************************
 	// Send Start Match Request
 	//********************************
@@ -855,6 +882,8 @@ bool RTT::StartMatch()
 //	We listen for these messages on a different socket than
 struct CallbackChange RTT::ProcessCallbackCommand()
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	struct CallbackChange change;
 	change.m_type = CALLBACK_ERROR;
 

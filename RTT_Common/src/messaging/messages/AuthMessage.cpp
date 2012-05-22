@@ -137,6 +137,7 @@ AuthMessage::AuthMessage(char *buffer, uint32_t length)
 		{
 			//error
 			m_serializeError = true;
+			break;
 		}
 	}
 	m_serializeError = false;
