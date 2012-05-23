@@ -42,9 +42,6 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		return -1;
 	}
 
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
-	cout << "xxxDEBUGxxx " << "Using socket..." << endl;
-
 	//Zero out the socket struct
 	memset(&stSockAddr, 0, sizeof(stSockAddr));
 
@@ -71,6 +68,8 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		close(socketFD);
 		return -1;
 	}
+	cout << "xxxDEBUGxxx " << "Using socket..." << endl;
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
 	cout << "xxxDEBUGxxx " << "connect()'ed" << endl;
 
 

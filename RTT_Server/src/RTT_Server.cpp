@@ -173,8 +173,7 @@ void *RTT::MainClientThread(void * parm)
 	if( player == NULL )
 	{
 		cout << "ERROR: Authentication Failure\n";
-		shutdown(ConnectFD, SHUT_RDWR);
-		close(ConnectFD);
+		MessageManager::Instance().CloseSocket(ConnectFD);
 		return NULL;
 	}
 
@@ -187,6 +186,7 @@ void *RTT::MainClientThread(void * parm)
 	while(true)
 	{
 		enum LobbyReturn lobbyReturn;
+		cout << "xxxDEBUGxxx " << "Process Lobby Command: " << ConnectFD << endl;
 		lobbyReturn = ProcessLobbyCommand(ConnectFD, player);
 
 		if(lobbyReturn == EXITING_SERVER)
