@@ -45,7 +45,7 @@ AuthMessage::AuthMessage(char *buffer, uint32_t length)
 			//Uses: 1) Message Type
 			//		2) Version Number
 
-			uint32_t expectedSize = MSG_HEADER_SIZE + (sizeof(uint32_t)*3);
+			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_authType) + (sizeof(uint32_t)*3);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -66,7 +66,7 @@ AuthMessage::AuthMessage(char *buffer, uint32_t length)
 			//		2) Version Number
 			//		3) AuthMechanism
 
-			uint32_t expectedSize = MSG_HEADER_SIZE + (sizeof(uint32_t)*3)
+			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_authType) + (sizeof(uint32_t)*3)
 					+ sizeof(m_authMechanism);
 			if( length != expectedSize)
 			{
@@ -92,7 +92,7 @@ AuthMessage::AuthMessage(char *buffer, uint32_t length)
 			//		2) Username
 			//		3) Hashed password
 
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_username)
+			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_authType) + sizeof(m_username)
 					+ sizeof(m_hashedPassword);
 			if( length != expectedSize)
 			{
@@ -111,7 +111,7 @@ AuthMessage::AuthMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) authSuccess
 			//		2) Your new Player ID
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_authSuccess) + PLAYER_DESCR_SIZE;
+			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_authType) + sizeof(m_authSuccess) + PLAYER_DESCR_SIZE;
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -155,7 +155,7 @@ char *AuthMessage::Serialize(uint32_t *length)
 			//		2) Version Number
 
 			//Allocate the memory and assign it to *buffer
-			uint32_t messageSize = MSG_HEADER_SIZE	+ (sizeof(uint32_t)*3);
+			uint32_t messageSize = MSG_HEADER_SIZE + sizeof(m_authType)	+ (sizeof(uint32_t)*3);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
@@ -182,7 +182,7 @@ char *AuthMessage::Serialize(uint32_t *length)
 			//		2) Version Number
 			//		3) AuthMechanism
 
-			uint32_t messageSize = MSG_HEADER_SIZE + sizeof(m_authMechanism)
+			uint32_t messageSize = MSG_HEADER_SIZE + sizeof(m_authType) + sizeof(m_authMechanism)
 							+ (sizeof(uint32_t)*3);
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
@@ -214,7 +214,7 @@ char *AuthMessage::Serialize(uint32_t *length)
 			//		2) Username
 			//		3) Hashed password
 
-			uint32_t messageSize = MSG_HEADER_SIZE + sizeof(m_username)
+			uint32_t messageSize = MSG_HEADER_SIZE + sizeof(m_authType) + sizeof(m_username)
 					+ sizeof(m_hashedPassword);
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
@@ -236,7 +236,7 @@ char *AuthMessage::Serialize(uint32_t *length)
 		}
 		case SERVER_AUTH_REPLY:
 		{
-			uint32_t messageSize = MSG_HEADER_SIZE + sizeof(m_authSuccess) + PLAYER_DESCR_SIZE;
+			uint32_t messageSize = MSG_HEADER_SIZE + sizeof(m_authType) + sizeof(m_authSuccess) + PLAYER_DESCR_SIZE;
 			//Allocate the memory and assign it to *buffer
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;

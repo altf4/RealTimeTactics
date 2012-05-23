@@ -46,63 +46,49 @@ char *Message::Serialize(uint *length)
 
 Message *Message::Deserialize(char *buffer, uint length, enum ProtocolDirection direction )
 {
-	if( length <  MSG_HEADER_SIZE )
+	if(length < MSG_HEADER_SIZE)
 	{
-		return NULL;
+		return new ErrorMessage(ERROR_MALFORMED_MESSAGE, direction);
 	}
-	//Copy the message type
+
 	enum MessageType thisType;
 	memcpy(&thisType, buffer, sizeof(thisType));
 
+	Message *message;
 	switch(thisType)
 	{
 		case MESSAGE_AUTH:
 		{
-			AuthMessage *message = new AuthMessage(buffer, length);
-			if( message->m_serializeError == true )
-			{
-				delete message;
-				return NULL;
-			}
-			return message;
+			message = new AuthMessage(buffer, length);
+			break;
 		}
 		case MESSAGE_LOBBY:
 		{
-			LobbyMessage *message = new LobbyMessage(buffer, length);
-			if( message->m_serializeError == true )
-			{
-				delete message;
-				return NULL;
-			}
-			return message;
+			message = new LobbyMessage(buffer, length);
+			break;
 		}
 		case MESSAGE_MATCH_LOBBY:
 		{
-			MatchLobbyMessage *message = new MatchLobbyMessage(buffer, length);
-			if( message->m_serializeError == true )
-			{
-				delete message;
-				return NULL;
-			}
-			return message;
+			message = new MatchLobbyMessage(buffer, length);
+			break;
 		}
 		case MESSAGE_ERROR:
 		{
-			ErrorMessage *message = new ErrorMessage(buffer, length);
-			if( message->m_serializeError == true )
-			{
-				delete message;
-				return NULL;
-			}
-			return message;
+			message = new ErrorMessage(buffer, length);
+			break;
 		}
 		default:
 		{
-			//error
-			cerr << "ERROR: Unrecognized message type\n.";
-			return NULL;
+			return new ErrorMessage(ERROR_UNKNOWN_MESSAGE_TYPE, direction);
 		}
 	}
+
+	if(message->m_serializeError)
+	{
+		delete message;
+		return new ErrorMessage(ERROR_MALFORMED_MESSAGE, direction);
+	}
+	return message;
 }
 
 

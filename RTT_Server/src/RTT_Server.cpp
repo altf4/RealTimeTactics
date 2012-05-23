@@ -166,6 +166,7 @@ void *RTT::MainClientThread(void * parm)
 	intptr_t ConnectFD = (intptr_t)parm;
 
 	MessageManager::Instance().StartSocket(ConnectFD);
+	cout << "xxxDEBUGxxx " << "Socket: " << ConnectFD << "started" << endl;
 
 	//First, authenticate the client
 	Player *player = GetNewClient(ConnectFD);

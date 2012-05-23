@@ -43,6 +43,7 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	}
 
 	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	cout << "xxxDEBUGxxx " << "Using socket..." << endl;
 
 	//Zero out the socket struct
 	memset(&stSockAddr, 0, sizeof(stSockAddr));
@@ -70,6 +71,7 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		close(socketFD);
 		return -1;
 	}
+	cout << "xxxDEBUGxxx " << "connect()'ed" << endl;
 
 
 	//***************************
@@ -80,30 +82,32 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	client_hello.m_softwareVersion.m_minor = CLIENT_VERSION_MINOR;
 	client_hello.m_softwareVersion.m_rev = CLIENT_VERSION_REV;
 
+	cout << "xxxDEBUGxxx " << "Writing Client Hello" << endl;
 	if( Message::WriteMessage(&client_hello, socketFD) == false)
 	{
+		cout << "xxxDEBUGxxx " << "Error Writing Client Hello" << endl;
 		//Error in write
 		return -1;
 	}
+	cout << "xxxDEBUGxxx " << "Write Client Hello" << endl;
 
 	//***************************
 	// Receive Server Hello
 	//***************************
+	cout << "xxxDEBUGxxx " << "Reading Server Hello" << endl;
 	Message *server_hello_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( server_hello_init == NULL)
-	{
-		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
-		return -1;
-	}
 	if( server_hello_init->m_messageType != MESSAGE_AUTH)
 	{
+		cout << "xxxDEBUGxxx " << "Error reading server hello" << endl;
 		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		delete server_hello_init;
 		return -1;
 	}
+	cout << "xxxDEBUGxxx " << "Read Server Hello" << endl;
 	AuthMessage *server_hello = (AuthMessage*)server_hello_init;
 	if(server_hello->m_authType != SERVER_HELLO)
 	{
+		cout << "xxxDEBUGxxx " << "Wrong auth type!" << endl;
 		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		delete server_hello;
 		return -1;
@@ -117,6 +121,7 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		//Incompatible software versions.
 		//The server should have caught this, though.
 
+		cout << "xxxDEBUGxxx " << "Incompatible software version" << endl;
 		SendError(socketFD, AUTHENTICATION_ERROR, DIRECTION_TO_SERVER);
 		delete server_hello_init;
 		return -1;
@@ -130,22 +135,23 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	strncpy( client_auth.m_username, username.data(), USERNAME_MAX_LENGTH);
 	memcpy(client_auth.m_hashedPassword, hashedPassword, SHA256_DIGEST_LENGTH);
 
+	cout << "xxxDEBUGxxx " << "Writing Client Auth" << endl;
 	if( Message::WriteMessage(&client_auth, socketFD) == false)
 	{
+		cout << "xxxDEBUGxxx " << "Error writing client auth" << endl;
 		//Error in write
 		return -1;
 	}
+	cout << "xxxDEBUGxxx " << "Wrote client auth" << endl;
 
 	//***************************
 	// Receive Server Auth Reply
 	//***************************
+	cout << "xxxDEBUGxxx " << "Reading server auth reply" << endl;
 	Message *server_auth_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( server_auth_reply_init == NULL)
-	{
-		return -1;
-	}
 	if( server_auth_reply_init->m_messageType != MESSAGE_AUTH)
 	{
+		cout << "xxxDEBUGxxx " << "Error reading server auth reply" << endl;
 		delete server_auth_reply_init;
 		return -1;
 	}
@@ -154,9 +160,11 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	if( (server_auth_reply->m_authType != SERVER_AUTH_REPLY)
 			|| (server_auth_reply->m_authSuccess != AUTH_SUCCESS))
 	{
+		cout << "xxxDEBUGxxx " << "wrong auth type!" << endl;
 		delete server_auth_reply;
 		return -1;
 	}
+	cout << "xxxDEBUGxxx " << "Read server auth reply" << endl;
 
 	myPlayerDescription = server_auth_reply->m_playerDescription;
 	*outDescr = server_auth_reply->m_playerDescription;
@@ -187,10 +195,6 @@ bool RTT::ExitServer()
 	// Receive Exit Server Acknowledge
 	//**********************************
 	Message *exit_server_ack = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( exit_server_ack == NULL)
-	{
-		return false;
-	}
 	if( exit_server_ack->m_messageType != MESSAGE_LOBBY)
 	{
 		delete exit_server_ack;
@@ -238,10 +242,6 @@ uint RTT::ListMatches(uint page, MatchDescription *matchArray)
 	// Receive Match List Reply
 	//**********************************
 	Message *list_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( list_reply_init == NULL)
-	{
-		return 0;
-	}
 	if( list_reply_init->m_messageType != MESSAGE_LOBBY)
 	{
 		delete list_reply_init;
@@ -290,10 +290,6 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 	// Receive Match Options Available
 	//**********************************
 	Message *ops_available_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( ops_available_init == NULL)
-	{
-		return false;
-	}
 	if( ops_available_init->m_messageType != MESSAGE_LOBBY)
 	{
 		delete ops_available_init;
@@ -327,10 +323,6 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 	// Receive Match Create Reply
 	//**********************************
 	Message *create_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( create_reply_init == NULL)
-	{
-		return false;
-	}
 	if( create_reply_init->m_messageType != MESSAGE_LOBBY)
 	{
 		delete create_reply_init;
@@ -374,10 +366,6 @@ uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr,
 	// Receive Match Join Reply
 	//**********************************
 	Message *join_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( join_reply_init == NULL)
-	{
-		return 0;
-	}
 	if( join_reply_init->m_messageType != MESSAGE_LOBBY)
 	{
 		delete join_reply_init;
@@ -430,10 +418,6 @@ bool RTT::LeaveMatch()
 	// Receive Match Leave Acknowledge
 	//**********************************
 	Message *leave_ack = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( leave_ack == NULL)
-	{
-		return false;
-	}
 	if( leave_ack->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete leave_ack;
@@ -474,10 +458,6 @@ struct ServerStats RTT::GetServerStats()
 	// Receive Server Stats Reply
 	//**********************************
 	Message *msg_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( msg_init == NULL)
-	{
-		return stats;
-	}
 	if( msg_init->m_messageType != MESSAGE_LOBBY)
 	{
 		delete msg_init;
@@ -518,10 +498,6 @@ bool RTT::ChangeTeam(uint playerID, enum TeamNumber team)
 	// Receive Change Team Reply
 	//**********************************
 	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( message == NULL)
-	{
-		return false;
-	}
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -566,10 +542,6 @@ bool RTT::ChangeColor(uint playerID, enum TeamColor color)
 	// Receive Change Color Reply
 	//**********************************
 	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( message == NULL)
-	{
-		return false;
-	}
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -613,10 +585,6 @@ bool RTT::ChangeMap(struct MapDescription map)
 	// Receive Change Map Reply
 	//**********************************
 	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( message == NULL)
-	{
-		return false;
-	}
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -660,10 +628,6 @@ bool RTT::ChangeSpeed(enum GameSpeed speed)
 	// Receive Change Speed Reply
 	//**********************************
 	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( message == NULL)
-	{
-		return false;
-	}
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -707,10 +671,6 @@ bool RTT::ChangeVictoryCondition(enum VictoryCondition victory)
 	// Receive Change Victory Reply
 	//**********************************
 	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( message == NULL)
-	{
-		return false;
-	}
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -754,10 +714,6 @@ bool RTT::ChangeLeader(uint newLeaderID)
 	// Receive Change Leader Reply
 	//**********************************
 	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( message == NULL)
-	{
-		return false;
-	}
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -801,10 +757,6 @@ bool RTT::KickPlayer(uint PlayerID)
 	// Receive Kick Player Reply
 	//**********************************
 	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( message == NULL)
-	{
-		return false;
-	}
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -847,10 +799,6 @@ bool RTT::StartMatch()
 	// Receive Start Match Reply
 	//**********************************
 	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( message == NULL)
-	{
-		return false;
-	}
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -882,18 +830,21 @@ bool RTT::StartMatch()
 //	We listen for these messages on a different socket than
 struct CallbackChange RTT::ProcessCallbackCommand()
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
 
 	struct CallbackChange change;
 	change.m_type = CALLBACK_ERROR;
 
-	//**********************************
-	// Receive Connect Back Ready
-	//**********************************
-	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_CLIENT);
-	if( message == NULL)
+	if(!MessageManager::Instance().RegisterCallback(socketFD))
 	{
 		change.m_type = CALLBACK_CLOSED;
+		return change;
+	}
+
+	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_CLIENT);
+	//TODO: Accept more than just MatchLobby callbacks!!!
+	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
+	{
+		delete message;
 		return change;
 	}
 	MatchLobbyMessage *match_message = (MatchLobbyMessage*)message;
