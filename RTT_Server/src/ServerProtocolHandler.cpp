@@ -174,21 +174,26 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 
 	uint playerMatchID = player->GetCurrentMatchID();
 
+	cout << "xxxDEBUGxxx " << "Register Callback: " << socketFD << "started" << endl;
 	if(!MessageManager::Instance().RegisterCallback(socketFD))
 	{
 		return EXITING_SERVER;
 	}
+	cout << "xxxDEBUGxxx " << "Registered: " << socketFD << "started" << endl;
 
 	//********************************
 	// Receive Initial Lobby Message
 	//********************************
+	cout << "xxxDEBUGxxx " << "Read Initial Lobby Message: " << socketFD << "started" << endl;
 	Message *lobby_message_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( lobby_message_init->m_messageType != MESSAGE_LOBBY )
 	{
 		//ERROR
+		cout << "xxxDEBUGxxx " << "Failed Init Lobby Read: " << socketFD << "started" << endl;
 		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		return EXITING_SERVER;
 	}
+	cout << "xxxDEBUGxxx " << "Read Init Lobby Message: " << socketFD << "started" << endl;
 
 	LobbyMessage *lobby_message = (LobbyMessage*)lobby_message_init;
 	switch (lobby_message->m_lobbyType)
