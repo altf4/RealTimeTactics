@@ -71,7 +71,7 @@ enum TeamColor Player::GetColor()
 	return colorCopy;
 }
 
-int Player::GetCallbackSocket()
+int Player::GetSocket()
 {
 	pthread_rwlock_rdlock(&m_lock);
 	int socketCopy = m_socketFD;
@@ -127,7 +127,7 @@ void Player::SetColor(enum TeamColor newColor)
 	pthread_rwlock_unlock(&m_lock);
 }
 
-void Player::SetCallbackSocket(int socket)
+void Player::SetSocket(int socket)
 {
 	pthread_rwlock_wrlock(&m_lock);
 	m_socketFD = socket;
