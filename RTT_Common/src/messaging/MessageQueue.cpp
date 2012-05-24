@@ -336,9 +336,6 @@ void *MessageQueue::ProducerThread()
 					//Mark the queue as closed, put an error message on the queue, and quit reading
 					m_isShutDown = true;
 				}
-
-				perror("READ: OMGZZZ");
-
 				//Push an ERROR_SOCKET_CLOSED message into both queues. So that everyone knows we're closed
 				PushMessage(new ErrorMessage(ERROR_SOCKET_CLOSED, DIRECTION_TO_CLIENT));
 				PushMessage(new ErrorMessage(ERROR_SOCKET_CLOSED, DIRECTION_TO_SERVER));
