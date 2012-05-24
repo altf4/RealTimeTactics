@@ -166,7 +166,6 @@ void *RTT::MainClientThread(void * parm)
 	intptr_t ConnectFD = (intptr_t)parm;
 
 	MessageManager::Instance().StartSocket(ConnectFD);
-	cout << "xxxDEBUGxxx " << "Socket: " << ConnectFD << "started" << endl;
 
 	//First, authenticate the client
 	Player *player = GetNewClient(ConnectFD);
@@ -186,7 +185,6 @@ void *RTT::MainClientThread(void * parm)
 	while(true)
 	{
 		enum LobbyReturn lobbyReturn;
-		cout << "xxxDEBUGxxx " << "Process Lobby Command: " << ConnectFD << endl;
 		lobbyReturn = ProcessLobbyCommand(ConnectFD, player);
 
 		if(lobbyReturn == EXITING_SERVER)

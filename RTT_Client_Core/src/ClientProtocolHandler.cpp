@@ -68,10 +68,7 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		close(socketFD);
 		return -1;
 	}
-	cout << "xxxDEBUGxxx " << "Using socket..." << endl;
 	Lock lock = MessageManager::Instance().UseSocket(socketFD);
-	cout << "xxxDEBUGxxx " << "connect()'ed" << endl;
-
 
 	//***************************
 	// Send client Hello
@@ -81,32 +78,25 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	client_hello.m_softwareVersion.m_minor = CLIENT_VERSION_MINOR;
 	client_hello.m_softwareVersion.m_rev = CLIENT_VERSION_REV;
 
-	cout << "xxxDEBUGxxx " << "Writing Client Hello" << endl;
 	if( Message::WriteMessage(&client_hello, socketFD) == false)
 	{
-		cout << "xxxDEBUGxxx " << "Error Writing Client Hello" << endl;
 		//Error in write
 		return -1;
 	}
-	cout << "xxxDEBUGxxx " << "Write Client Hello" << endl;
 
 	//***************************
 	// Receive Server Hello
 	//***************************
-	cout << "xxxDEBUGxxx " << "Reading Server Hello" << endl;
 	Message *server_hello_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( server_hello_init->m_messageType != MESSAGE_AUTH)
 	{
-		cout << "xxxDEBUGxxx " << "Error reading server hello" << endl;
 		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		delete server_hello_init;
 		return -1;
 	}
-	cout << "xxxDEBUGxxx " << "Read Server Hello" << endl;
 	AuthMessage *server_hello = (AuthMessage*)server_hello_init;
 	if(server_hello->m_authType != SERVER_HELLO)
 	{
-		cout << "xxxDEBUGxxx " << "Wrong auth type!" << endl;
 		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		delete server_hello;
 		return -1;
@@ -120,7 +110,6 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		//Incompatible software versions.
 		//The server should have caught this, though.
 
-		cout << "xxxDEBUGxxx " << "Incompatible software version" << endl;
 		SendError(socketFD, AUTHENTICATION_ERROR, DIRECTION_TO_SERVER);
 		delete server_hello_init;
 		return -1;
@@ -134,23 +123,18 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	strncpy( client_auth.m_username, username.data(), USERNAME_MAX_LENGTH);
 	memcpy(client_auth.m_hashedPassword, hashedPassword, SHA256_DIGEST_LENGTH);
 
-	cout << "xxxDEBUGxxx " << "Writing Client Auth" << endl;
 	if( Message::WriteMessage(&client_auth, socketFD) == false)
 	{
-		cout << "xxxDEBUGxxx " << "Error writing client auth" << endl;
 		//Error in write
 		return -1;
 	}
-	cout << "xxxDEBUGxxx " << "Wrote client auth" << endl;
 
 	//***************************
 	// Receive Server Auth Reply
 	//***************************
-	cout << "xxxDEBUGxxx " << "Reading server auth reply" << endl;
 	Message *server_auth_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( server_auth_reply_init->m_messageType != MESSAGE_AUTH)
 	{
-		cout << "xxxDEBUGxxx " << "Error reading server auth reply" << endl;
 		delete server_auth_reply_init;
 		return -1;
 	}
@@ -159,11 +143,9 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	if( (server_auth_reply->m_authType != SERVER_AUTH_REPLY)
 			|| (server_auth_reply->m_authSuccess != AUTH_SUCCESS))
 	{
-		cout << "xxxDEBUGxxx " << "wrong auth type!" << endl;
 		delete server_auth_reply;
 		return -1;
 	}
-	cout << "xxxDEBUGxxx " << "Read server auth reply" << endl;
 
 	myPlayerDescription = server_auth_reply->m_playerDescription;
 	*outDescr = server_auth_reply->m_playerDescription;
