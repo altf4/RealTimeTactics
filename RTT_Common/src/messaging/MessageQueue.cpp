@@ -28,9 +28,6 @@
 #include <sys/time.h>
 #include "errno.h"
 
-//TODO: Debug remove this
-#include <iostream>
-
 namespace RTT
 {
 
@@ -48,7 +45,6 @@ MessageQueue::MessageQueue(int socketFD, enum ProtocolDirection forwardDirection
 	m_forwardSerialNumber = 0;
 
 	m_isShutDown = false;
-	m_callbackDoWakeup = false;
 	m_forwardDirection = forwardDirection;
 	m_socketFD = socketFD;
 
@@ -189,13 +185,10 @@ Message *MessageQueue::PopMessage(enum ProtocolDirection direction, int timeout)
 				m_forwardQueue.pop();
 				if(retMessage->m_serialNumber == m_forwardSerialNumber)
 				{
-					std::cout << "xxxDEBUGxxx " << "Got correct serial!" << std::endl;
 					gotCorrectSerial = true;
 				}
 				else
 				{
-					std::cout << "xxxDEBUGxxx " << "Got wrong serial: " << retMessage->m_serialNumber
-							<< " expected: "  << m_forwardSerialNumber << " socket: " << m_socketFD << std::endl;					//Discard this message and get a new one
 					//TODO: Must clear this message's internals or it will leak!
 					delete retMessage;
 				}
@@ -223,13 +216,10 @@ Message *MessageQueue::PopMessage(enum ProtocolDirection direction, int timeout)
 				m_callbackQueue.pop();
 				if(retMessage->m_serialNumber == m_expectedcallbackSerial)
 				{
-					std::cout << "xxxDEBUGxxx " << "Got correct serial! " << m_socketFD << std::endl;
 					gotCorrectSerial = true;
 				}
 				else
 				{
-					std::cout << "xxxDEBUGxxx " << "Got wrong serial: " << retMessage->m_serialNumber
-							<< " expected: "  << m_expectedcallbackSerial << " socket: " << m_socketFD << std::endl;
 					//Discard this message and get a new one
 					//TODO: Must clear this message's internals or it will leak!
 					delete retMessage;
@@ -248,7 +238,6 @@ void *MessageQueue::StaticThreadHelper(void *ptr)
 
 void MessageQueue::PushMessage(Message *message)
 {
-	std::cout << "xxxDEBUGxxx " << "Message got pushed onto: " << message->m_direction << " socket: "<< m_socketFD << std::endl;
 
 	//If this is a callback message (not the forward direction)
 	if(message->m_direction != m_forwardDirection)
@@ -262,7 +251,6 @@ void MessageQueue::PushMessage(Message *message)
 		//Protection for the m_callbackDoWakeup bool
 		//Wake up anyone sleeping for a callback message!
 		Lock condLock(&m_callbackCondMutex);
-		m_callbackDoWakeup = true;
 		pthread_cond_signal(&m_callbackWakeupCondition);
 		pthread_cond_signal(&m_readWakeupCondition);
 	}
@@ -286,13 +274,11 @@ bool MessageQueue::RegisterCallback()
 
 	{
 		//Protection for the m_callbackDoWakeup bool
-		Lock condLock(&m_callbackCondMutex);
-		while(!m_callbackDoWakeup)
+		Lock condLock(&m_callbackQueueMutex);
+		while(m_callbackQueue.empty())
 		{
-			pthread_cond_wait(&m_callbackWakeupCondition, &m_callbackCondMutex);
+			pthread_cond_wait(&m_callbackWakeupCondition, &m_callbackQueueMutex);
 		}
-
-		m_callbackDoWakeup = false;
 	}
 
 	//This is the first message of the protocol. This message contains the serial number we will be expecting later
@@ -303,12 +289,6 @@ bool MessageQueue::RegisterCallback()
 		{
 			Message *nextMessage = m_callbackQueue.front();
 			m_expectedcallbackSerial = nextMessage->m_serialNumber;
-			std::cout << "xxxDEBUGxxx " << "The next callback serial is...: "
-					<< m_expectedcallbackSerial << std::endl;
-		}
-		else
-		{
-			std::cout << "xxxDEBUGxxx " << "WTF why are we here?!?!" << std::endl;
 		}
 	}
 
@@ -424,7 +404,6 @@ void *MessageQueue::ProducerThread()
 			continue;
 		}
 
-		std::cout << "xxxDEBUGxxx " << "Read a new message from socket! " << m_socketFD << std::endl;
 		PushMessage(Message::Deserialize(buffer, length, m_forwardDirection));
 		free(buffer);
 		continue;

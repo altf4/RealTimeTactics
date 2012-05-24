@@ -33,23 +33,17 @@ extern uint lastPlayerID;
 //	Returns a new Player object, NULL on error
 Player *RTT::GetNewClient(int socketFD)
 {
-	cout << "xxxDEBUGxxx " << "Registering Callback to get new client" << endl;
 	if(!MessageManager::Instance().RegisterCallback(socketFD))
 	{
-		cout << "xxxDEBUGxxx " << "Register callback failed!" << endl;
 		return NULL;
 	}
 
 	//***************************
 	// Read client Hello
 	//***************************
-	cout << "xxxDEBUGxxx " << "Reading Client Hello" << endl;
 	Message *client_hello_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	cout << "xxxDEBUGxxx " << "Read Client Hello" << endl;
 	if( client_hello_init->m_messageType != MESSAGE_AUTH)
 	{
-		cerr << "ERROR: Expected CLIENT_HELLO message, received: "
-				<< client_hello_init->m_messageType << "\n";
 		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		delete client_hello_init;
 		return NULL;
@@ -88,34 +82,27 @@ Player *RTT::GetNewClient(int socketFD)
 	server_hello.m_softwareVersion.m_rev = SERVER_VERSION_REV;
 	server_hello.m_authMechanism = HASHED_SALTED_PASS;
 
-	cout << "xxxDEBUGxxx " << "Writing Server Hello" << endl;
 	if(  Message::WriteMessage(&server_hello, socketFD) == false)
 	{
-		cout << "xxxDEBUGxxx " << "Error writing server hello" << endl;
 		//Error in write
 		return NULL;
 	}
-	cout << "xxxDEBUGxxx " << "Wrote Server Hello" << endl;
 
 	//***************************
 	// Receive Client Auth
 	//***************************
-	cout << "xxxDEBUGxxx " << "Reading Client Auth" << endl;
 	Message *client_auth_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( client_auth_init->m_messageType != MESSAGE_AUTH)
 	{
 		//Error
-		cout << "xxxDEBUGxxx " << "Did not get a client auth" << endl;
 		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		delete client_auth_init;
 		return NULL;
 	}
-	cout << "xxxDEBUGxxx " << "Read Client Auth" << endl;
 	AuthMessage *client_auth = (AuthMessage*)client_auth_init;
 	if(client_auth->m_authType != CLIENT_AUTH)
 	{
 		//Error
-		cout << "xxxDEBUGxxx " << "Wrong auth type!" << endl;
 		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		delete client_auth;
 		return NULL;
@@ -149,14 +136,11 @@ Player *RTT::GetNewClient(int socketFD)
 	{
 		server_auth_reply.m_playerDescription = player->GetDescription();
 	}
-	cout << "xxxDEBUGxxx " << "Writing Auth Reply" << endl;
 	if( Message::WriteMessage(&server_auth_reply, socketFD) == false)
 	{
-		cout << "xxxDEBUGxxx " << "Error writing auth reply" << endl;
 		//Error in write
 		return NULL;
 	}
-	cout << "xxxDEBUGxxx " << "Wrote Auth Reply" << endl;
 
 	return player;
 }
@@ -174,26 +158,21 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 
 	uint playerMatchID = player->GetCurrentMatchID();
 
-	cout << "xxxDEBUGxxx " << "Register Callback: " << socketFD << "started" << endl;
 	if(!MessageManager::Instance().RegisterCallback(socketFD))
 	{
 		return EXITING_SERVER;
 	}
-	cout << "xxxDEBUGxxx " << "Registered: " << socketFD << "started" << endl;
 
 	//********************************
 	// Receive Initial Lobby Message
 	//********************************
-	cout << "xxxDEBUGxxx " << "Read Initial Lobby Message: " << socketFD << "started" << endl;
 	Message *lobby_message_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
 	if( lobby_message_init->m_messageType != MESSAGE_LOBBY )
 	{
 		//ERROR
-		cout << "xxxDEBUGxxx " << "Failed Init Lobby Read: " << socketFD << "started" << endl;
 		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		return EXITING_SERVER;
 	}
-	cout << "xxxDEBUGxxx " << "Read Init Lobby Message: " << socketFD << "started" << endl;
 
 	LobbyMessage *lobby_message = (LobbyMessage*)lobby_message_init;
 	switch (lobby_message->m_lobbyType)

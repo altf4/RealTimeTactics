@@ -103,7 +103,6 @@ private:
 
 	pthread_cond_t m_readWakeupCondition;
 	pthread_cond_t m_callbackWakeupCondition;	//Condition for sleeping for a callback
-	bool m_callbackDoWakeup;					//Bool also necessary for waking up callback thread
 	pthread_t m_producerThread;					//Thread looping read calls on the underlying socket
 
 	pthread_mutex_t m_forwardQueueMutex;		//Protects access to the forward message queue
