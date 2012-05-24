@@ -321,12 +321,10 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 					//*******************************
 					// Send Client Notifications
 					//*******************************
-					MatchLobbyMessage *notification =
-							new MatchLobbyMessage(PLAYER_JOINED_MATCH_NOTIFICATION, DIRECTION_TO_SERVER);
-					notification->m_playerDescription = player->GetDescription();
+					MatchLobbyMessage notification(PLAYER_JOINED_MATCH_NOTIFICATION, DIRECTION_TO_SERVER);
+					notification.m_playerDescription = player->GetDescription();
 
-					NotifyClients(joinedMatch,	notification);
-					delete notification;
+					NotifyClients(joinedMatch, &notification);
 					delete lobby_message;
 					return IN_MATCH_LOBBY;
 				}
@@ -972,7 +970,7 @@ bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
 		vector<Player*>::iterator it = players.begin();
 		for( ; it != players.end(); it++ )
 		{
-			int recvSocket = (*it)->GetCallbackSocket();
+			int recvSocket = (*it)->GetSocket();
 			if( recvSocket >= 0 )
 			{
 				if( Message::WriteMessage(message, recvSocket) == false )

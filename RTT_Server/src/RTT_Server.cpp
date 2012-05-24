@@ -163,20 +163,21 @@ void *RTT::MainListen(void * param)
 
 void *RTT::MainClientThread(void * parm)
 {
-	intptr_t ConnectFD = (intptr_t)parm;
+	intptr_t socketFD = (intptr_t)parm;
 
-	MessageManager::Instance().StartSocket(ConnectFD);
+	MessageManager::Instance().StartSocket(socketFD);
 
 	//First, authenticate the client
-	Player *player = GetNewClient(ConnectFD);
+	Player *player = GetNewClient(socketFD);
 	if( player == NULL )
 	{
 		cout << "ERROR: Authentication Failure\n";
-		MessageManager::Instance().CloseSocket(ConnectFD);
+		MessageManager::Instance().CloseSocket(socketFD);
 		return NULL;
 	}
 
 	cout << "Client: " << player->GetName() << " Authenticated!\n";
+	player->SetSocket(socketFD);
 
 	//*************************************
 	// In the main lobby
@@ -185,7 +186,7 @@ void *RTT::MainClientThread(void * parm)
 	while(true)
 	{
 		enum LobbyReturn lobbyReturn;
-		lobbyReturn = ProcessLobbyCommand(ConnectFD, player);
+		lobbyReturn = ProcessLobbyCommand(socketFD, player);
 
 		if(lobbyReturn == EXITING_SERVER)
 		{
@@ -199,7 +200,7 @@ void *RTT::MainClientThread(void * parm)
 		{
 			while( lobbyReturn == IN_MATCH_LOBBY)
 			{
-				lobbyReturn = ProcessMatchLobbyCommand(ConnectFD, player);
+				lobbyReturn = ProcessMatchLobbyCommand(socketFD, player);
 			}
 			if( lobbyReturn == EXITING_SERVER )
 			{
