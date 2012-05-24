@@ -956,7 +956,6 @@ void  RTT::SendError(int connectFD, enum ErrorType errorType, enum ProtocolDirec
 	}
 }
 
-//	NOTE: Does not synchronize. You must have the lock from UseSocket() before calling this
 bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
 {
 	bool fullSuccess = true;
@@ -973,6 +972,8 @@ bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
 			int recvSocket = (*it)->GetSocket();
 			if( recvSocket >= 0 )
 			{
+				Lock lock = MessageManager::Instance().UseSocket(recvSocket);
+
 				if( Message::WriteMessage(message, recvSocket) == false )
 				{
 					cerr << "ERROR: Message send returned failure.\n";
