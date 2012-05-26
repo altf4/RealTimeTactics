@@ -321,7 +321,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 					//*******************************
 					// Send Client Notifications
 					//*******************************
-					MatchLobbyMessage notification(PLAYER_JOINED_MATCH_NOTIFICATION, DIRECTION_TO_SERVER);
+					MatchLobbyMessage notification(PLAYER_JOINED_MATCH_NOTIFICATION, DIRECTION_TO_CLIENT);
 					notification.m_playerDescription = player->GetDescription();
 
 					NotifyClients(joinedMatch, &notification);
@@ -571,12 +571,10 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				//*******************************
 				// Send Client Notifications
 				//*******************************
-				MatchLobbyMessage *notification =
-						new MatchLobbyMessage(TEAM_CHANGED_NOTIFICATION, DIRECTION_TO_SERVER);
-				notification->m_newTeam = match_lobby_message->m_newTeam;
-				notification->m_playerID = match_lobby_message->m_playerID;
-				NotifyClients(playersMatch, notification);
-				delete notification;
+				MatchLobbyMessage notification(TEAM_CHANGED_NOTIFICATION, DIRECTION_TO_CLIENT);
+				notification.m_newTeam = match_lobby_message->m_newTeam;
+				notification.m_playerID = match_lobby_message->m_playerID;
+				NotifyClients(playersMatch, &notification);
 			}
 
 			break;
@@ -690,7 +688,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send Client Notifications
 			//*******************************
-			MatchLobbyMessage notification(COLOR_CHANGED_NOTIFICATION, DIRECTION_TO_SERVER);
+			MatchLobbyMessage notification(COLOR_CHANGED_NOTIFICATION, DIRECTION_TO_CLIENT);
 			notification.m_newColor = match_lobby_message->m_newColor;
 			NotifyClients(playersMatch, &notification);
 
