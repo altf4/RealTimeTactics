@@ -113,7 +113,7 @@ int main(int argc, char **argv)
 	stSockAddr.sin_port = htons(serverPortNumber);
 	stSockAddr.sin_addr.s_addr = INADDR_ANY;
 
-	if(-1 == bind(mainSocket,(struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
+	if(-1 == ::bind(mainSocket,(struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
 	{
 		perror("error bind failed");
 		close(mainSocket);
@@ -129,8 +129,10 @@ int main(int argc, char **argv)
 
 	pthread_t mainThreadID;
 
+	//Guaranteed to be the right size for your system, for converting void* and int
+	intptr_t sizedInteger = mainSocket;
 	//Send the new connection off to another thread for handling
-	pthread_create(&mainThreadID, NULL, MainListen, (void *) mainSocket );
+	pthread_create(&mainThreadID, NULL, MainListen, (void *) sizedInteger );
 
 	//TODO: stupid hack to keep the threads alive. replace later
 	while(true)

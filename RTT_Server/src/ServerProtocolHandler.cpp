@@ -156,7 +156,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 		return EXITING_SERVER;
 	}
 
-	uint playerMatchID = player->GetCurrentMatchID();
+	//uint playerMatchID = player->GetCurrentMatchID();
 
 	if(!MessageManager::Instance().RegisterCallback(socketFD))
 	{
@@ -405,6 +405,8 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 		}
 	}
 	delete lobby_message;
+	cerr << "ERROR: Should probably not get here... Exiting client handler" << endl;
+	return EXITING_SERVER;
 }
 
 //Authenticates the given username/password with the server

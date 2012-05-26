@@ -582,7 +582,7 @@ void WelcomeWindow::victory_combo_changed()
 
 void WelcomeWindow::map_combo_changed()
 {
-	char rowID = m_win_condition_combo->get_active_row_number();
+	//char rowID = m_win_condition_combo->get_active_row_number();
 	struct MapDescription map;
 	map.m_length = 12;
 	map.m_width = 8;
