@@ -16,14 +16,12 @@ OBJS :=
 C++_DEPS := 
 C_DEPS := 
 CC_DEPS := 
-ARCHIVES := 
+LIBRARIES := 
 CPP_DEPS := 
 CXX_DEPS := 
 C_UPPER_DEPS := 
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
-src/messaging/messages \
-src/messaging \
 src \
 

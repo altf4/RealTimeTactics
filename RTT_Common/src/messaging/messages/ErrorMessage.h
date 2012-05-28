@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : Unit.h
+// Name        : ErrorMessage.h
 // Author      : AltF4
 // Copyright   : 2011, GNU GPLv3
 // Description : Message class pertaining to sending and receiving error conditions
@@ -16,7 +16,13 @@ namespace RTT
 
 enum ErrorType: char
 {
-	PROTOCOL_ERROR = 0,
+	//Errors which are never sent remotely
+	ERROR_SOCKET_CLOSED = 0,
+	ERROR_TIMEOUT,
+	ERROR_MALFORMED_MESSAGE,
+	ERROR_UNKNOWN_MESSAGE_TYPE,
+
+	PROTOCOL_ERROR,
 	SERVER_FAULT,
 
 	//Authentication Errors
@@ -51,7 +57,7 @@ public:
 
 	enum ErrorType m_errorType;
 
-	ErrorMessage();
+	ErrorMessage(enum ErrorType type, enum ProtocolDirection direction);
 	ErrorMessage(char *buffer, uint length);
 	char *Serialize(uint *length);
 

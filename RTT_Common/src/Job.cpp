@@ -118,12 +118,12 @@ Job::Job(string filePath)
 		}
 
     }
-    catch(boost::property_tree::ptree_bad_data error)
+    catch(boost::property_tree::ptree_bad_data &error)
     {
     	cerr << "ERROR: Parsing Job XML returned error.\n";
 		return;
     }
-    catch(boost::property_tree::ptree_bad_path error)
+    catch(boost::property_tree::ptree_bad_path &error)
     {
     	cerr << "ERROR: Could not find Job XML file.\n";
 		return;

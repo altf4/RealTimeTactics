@@ -8,6 +8,10 @@
 #include <iostream>
 #include "Unit.h"
 #include "RTT_Server.h"
+#include "messaging/MessageManager.h"
+#include "ServerProtocolHandler.h"
+#include "Player.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -17,18 +21,14 @@
 #include <netinet/in.h>
 #include <algorithm>
 #include <pthread.h>
-#include "ServerProtocolHandler.h"
 #include <iterator>
 #include <signal.h>
-
-#include "Player.h"
 
 using namespace std;
 using namespace RTT;
 
 PlayerList playerList;
 MatchList matchList;
-ConnectBackWaitPool connectBackWaitPool;
 
 //The mast match ID given out
 uint lastMatchID;
@@ -38,7 +38,6 @@ pthread_rwlock_t playerListLock;
 pthread_rwlock_t matchListLock;
 pthread_rwlock_t matchIDLock;
 pthread_rwlock_t playerIDLock;
-pthread_rwlock_t waitPoolLock;
 
 uint serverPortNumber;
 
@@ -48,14 +47,13 @@ int main(int argc, char **argv)
 	matchList.set_deleted_key(-2);
 	playerList.set_empty_key(-1);
 	playerList.set_deleted_key(-2);
-	connectBackWaitPool.set_empty_key(-1);
-	connectBackWaitPool.set_deleted_key(-2);
 
 	pthread_rwlock_init(&playerListLock, NULL);
 	pthread_rwlock_init(&matchListLock, NULL);
 	pthread_rwlock_init(&matchIDLock, NULL);
 	pthread_rwlock_init(&playerIDLock, NULL);
-	pthread_rwlock_init(&waitPoolLock, NULL);
+
+	MessageManager::Initialize(DIRECTION_TO_CLIENT);
 
 	// We expect write failures to occur but we want to handle them where
 	// the error occurs rather than in a SIGPIPE handler.
@@ -99,40 +97,26 @@ int main(int argc, char **argv)
 	}
 
 	//Set up the TCP sockets
-	struct sockaddr_in stSockAddr, stCallbackSockAddr;
+	struct sockaddr_in stSockAddr;
 	int mainSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
-	int callbackSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 
-	if(-1 == mainSocket || -1 == callbackSocket)
+	if(-1 == mainSocket)
 	{
 		perror("can not create socket");
 		exit(EXIT_FAILURE);
 	}
 	int optval = 1;
 	setsockopt(mainSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
-	setsockopt(callbackSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
 
 	memset(&stSockAddr, 0, sizeof(stSockAddr));
 	stSockAddr.sin_family = AF_INET;
 	stSockAddr.sin_port = htons(serverPortNumber);
 	stSockAddr.sin_addr.s_addr = INADDR_ANY;
 
-	memset(&stCallbackSockAddr, 0, sizeof(stSockAddr));
-	stCallbackSockAddr.sin_family = AF_INET;
-	stCallbackSockAddr.sin_port = htons(serverPortNumber+1);
-	stCallbackSockAddr.sin_addr.s_addr = INADDR_ANY;
-
-	if(-1 == bind(mainSocket,(struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
+	if(-1 == ::bind(mainSocket,(struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
 	{
 		perror("error bind failed");
 		close(mainSocket);
-		exit(EXIT_FAILURE);
-	}
-	if(-1 == bind(callbackSocket,(struct sockaddr *)&stCallbackSockAddr,
-			sizeof(stCallbackSockAddr)))
-	{
-		perror("error bind failed");
-		close(callbackSocket);
 		exit(EXIT_FAILURE);
 	}
 
@@ -142,18 +126,13 @@ int main(int argc, char **argv)
 		close(mainSocket);
 		exit(EXIT_FAILURE);
 	}
-	if(-1 == listen(callbackSocket, 10))
-	{
-		perror("error listen failed");
-		close(callbackSocket);
-		exit(EXIT_FAILURE);
-	}
 
-	pthread_t mainThreadID, callbackThreadID;
+	pthread_t mainThreadID;
 
+	//Guaranteed to be the right size for your system, for converting void* and int
+	intptr_t sizedInteger = mainSocket;
 	//Send the new connection off to another thread for handling
-	pthread_create(&mainThreadID, NULL, MainListen, (void *) mainSocket );
-	pthread_create(&callbackThreadID, NULL, CallbackListen, (void *) callbackSocket );
+	pthread_create(&mainThreadID, NULL, MainListen, (void *) sizedInteger );
 
 	//TODO: stupid hack to keep the threads alive. replace later
 	while(true)
@@ -184,44 +163,23 @@ void *RTT::MainListen(void * param)
 	return 0;
 }
 
-void *RTT::CallbackListen(void * param)
-{
-	intptr_t callbackSocket = (intptr_t)param;
-	//listen for new TCP connections and sends them off to CallbackClientThread
-	for(;;)
-	{
-		intptr_t ConnectFD = accept(callbackSocket, NULL, NULL);
-
-		if(0 > ConnectFD)
-		{
-			perror("error accept failed");
-			close(callbackSocket);
-			exit(EXIT_FAILURE);
-		}
-
-		pthread_t threadID;
-		//Send the new connection off to another thread for handling
-		pthread_create(&threadID, NULL, CallbackClientThread, (void *) ConnectFD );
-	}
-
-	return 0;
-}
-
 void *RTT::MainClientThread(void * parm)
 {
-	intptr_t ConnectFD = (intptr_t)parm;
+	intptr_t socketFD = (intptr_t)parm;
+
+	MessageManager::Instance().StartSocket(socketFD);
 
 	//First, authenticate the client
-	Player *player = GetNewClient(ConnectFD);
+	Player *player = GetNewClient(socketFD);
 	if( player == NULL )
 	{
 		cout << "ERROR: Authentication Failure\n";
-		shutdown(ConnectFD, SHUT_RDWR);
-		close(ConnectFD);
+		MessageManager::Instance().CloseSocket(socketFD);
 		return NULL;
 	}
 
 	cout << "Client: " << player->GetName() << " Authenticated!\n";
+	player->SetSocket(socketFD);
 
 	//*************************************
 	// In the main lobby
@@ -230,7 +188,7 @@ void *RTT::MainClientThread(void * parm)
 	while(true)
 	{
 		enum LobbyReturn lobbyReturn;
-		lobbyReturn = ProcessLobbyCommand(ConnectFD, player);
+		lobbyReturn = ProcessLobbyCommand(socketFD, player);
 
 		if(lobbyReturn == EXITING_SERVER)
 		{
@@ -244,7 +202,7 @@ void *RTT::MainClientThread(void * parm)
 		{
 			while( lobbyReturn == IN_MATCH_LOBBY)
 			{
-				lobbyReturn = ProcessMatchLobbyCommand(ConnectFD, player);
+				lobbyReturn = ProcessMatchLobbyCommand(socketFD, player);
 			}
 			if( lobbyReturn == EXITING_SERVER )
 			{
@@ -260,82 +218,6 @@ void *RTT::MainClientThread(void * parm)
 	}
 
 	return NULL;
-}
-
-//Listens for a CONNECT_BACK_CLIENT_REQUEST message
-//	When we get it, save the created socket into the relevant player object
-void *RTT::CallbackClientThread(void * parm)
-{
-	intptr_t connectBackSocket = (intptr_t)parm;
-
-	//*******************************
-	// Receive Callback Register
-	//*******************************
-	Message *connect_back_reply = Message::ReadMessage(connectBackSocket);
-	if( connect_back_reply == NULL )
-	{
-		//ERROR
-		cerr << "ERROR: Callback message came back NULL\n";
-		return NULL;
-	}
-	if( connect_back_reply->m_type != CALLBACK_REGISTER )
-	{
-		//ERROR
-		cerr << "ERROR: Callback message was wrong type\n";
-		return NULL;
-	}
-	MatchLobbyMessage *match_callback_reply =
-			(MatchLobbyMessage*)connect_back_reply;
-
-	pthread_rwlock_rdlock(&playerListLock);
-	Player *player = playerList[match_callback_reply->m_playerID];
-	pthread_rwlock_unlock(&playerListLock);
-
-	//We got the correct player on the first try. Yay!
-	if( match_callback_reply->m_playerID == player->GetID())
-	{
-		//The client should now be listening for a message on this socket
-		player->SetCallbackSocket(connectBackSocket);
-
-		return NULL;
-	}
-	//This was the wrong player!
-	//	Store this into the ConnectBack player pool then
-	//	Wait for our player to appear in the pool
-	else
-	{
-		int returnSocket;
-
-		pthread_rwlock_wrlock(&waitPoolLock);
-
-		//Store player into waitPool:
-		connectBackWaitPool[match_callback_reply->m_playerID] = connectBackSocket;
-
-		//Try again for CALLBACK_WAIT_TIME seconds
-		for(uint i = 0; i < CALLBACK_WAIT_TIME; i++ )
-		{
-			if( connectBackWaitPool.count( player->GetID() ) == 0 )
-			{
-				//Player not in the pool. Wait and try again
-				pthread_rwlock_unlock(&waitPoolLock);
-				sleep(1); //Unlock for the sleep
-				pthread_rwlock_wrlock(&waitPoolLock);
-			}
-			else
-			{
-				//Found our player in the pool!
-				//Get the socket value and erase the record
-				returnSocket = connectBackWaitPool[player->GetID()];
-				connectBackWaitPool.erase(player->GetID());
-				pthread_rwlock_unlock(&waitPoolLock);
-				player->SetCallbackSocket(returnSocket);
-				return NULL;
-			}
-		}
-		pthread_rwlock_unlock(&waitPoolLock);
-		cerr << "ERROR: Player never called back\n";
-		return NULL;
-	}
 }
 
 //Processes one round of combat. (Can consist of many actions triggered)
@@ -573,12 +455,10 @@ bool RTT::LeaveMatch(Player *player)
 	//*******************************
 	// Send Client Notifications
 	//*******************************
-	MatchLobbyMessage *notification = new MatchLobbyMessage();
-	notification->m_type = PLAYER_LEFT_MATCH_NOTIFICATION;
-	notification->m_playerID = player->GetID();
-	notification->m_newLeaderID = foundMatch->GetLeaderID();
-	NotifyClients(foundMatch, notification);
-	delete notification;
+	MatchLobbyMessage notification(PLAYER_LEFT_MATCH_NOTIFICATION, DIRECTION_TO_CLIENT);
+	notification.m_playerID = player->GetID();
+	notification.m_newLeaderID = foundMatch->GetLeaderID();
+	NotifyClients(foundMatch, &notification);
 	return true;
 }
 

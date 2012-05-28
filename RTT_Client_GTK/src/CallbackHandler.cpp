@@ -6,6 +6,7 @@
 //============================================================================
 
 #include "CallbackHandler.h"
+#include "messaging/MessageManager.h"
 
 #include <iostream>
 
@@ -42,7 +43,6 @@ bool CallbackHandler::Start()
 
 void CallbackHandler::Stop()
 {
-	ShutdownConnection();
 	if(m_thread != NULL)
 	{
 		m_thread->join();

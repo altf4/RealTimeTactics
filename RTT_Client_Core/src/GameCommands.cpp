@@ -39,6 +39,7 @@ struct MovementResult RTT::MoveUnit(uint32_t unitID, enum Direction direction)
 		return result;
 	}
 
+	return result;
 }
 
 //Move a Unit to a distant tile
@@ -48,7 +49,10 @@ struct MovementResult RTT::MoveUnit(uint32_t unitID, enum Direction direction)
 //	returns - A MovementResult struct describing the success or error of the move
 struct MovementResult RTT::MoveUnit(uint32_t unitID, struct Coordinate destination)
 {
+	struct MovementResult result;
+	result.m_result = UNIT_DOESNT_EXIST;
 
+	return result;
 }
 
 //Make a unit change the direction it is facing
@@ -57,5 +61,5 @@ struct MovementResult RTT::MoveUnit(uint32_t unitID, struct Coordinate destinati
 //	returns - simple boolean result of whether the move succeeded
 bool RTT::ChangeUnitFacing(uint32_t unitID, enum Direction direction)
 {
-
+	return false;
 }

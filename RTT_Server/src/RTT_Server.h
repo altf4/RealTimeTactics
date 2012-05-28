@@ -11,9 +11,9 @@
 #include <vector>
 #include "Action.h"
 #include "Match.h"
-#include "messages/LobbyMessage.h"
-#include "messages/AuthMessage.h"
-#include "messages/MatchLobbyMessage.h"
+#include "messaging/messages/LobbyMessage.h"
+#include "messaging/messages/AuthMessage.h"
+#include "messaging/messages/MatchLobbyMessage.h"
 #include <google/dense_hash_map>
 
 #define CHARGE_MAX 100
@@ -44,18 +44,13 @@ struct eqint
 typedef google::dense_hash_map<int, Player*, std::tr1::hash<int>, eqint> PlayerList;
 //Key : Match unique ID
 typedef google::dense_hash_map<int, Match*, std::tr1::hash<int>, eqint> MatchList;
-//Key: Player's unique ID
-typedef google::dense_hash_map<int, int, std::tr1::hash<int>, eqint> ConnectBackWaitPool;
 
 std::string Usage();
 void ProcessRound(Match *match);
 
 void *MainListen(void * param);
-void *CallbackListen(void * param);
 
 void *MainClientThread(void * parm);
-void *CallbackClientThread(void * parm);
-
 
 //Gets match descriptions from the matchlist
 //	page: specifies which block of matches to get

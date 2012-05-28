@@ -9,9 +9,9 @@
 #define PROTOCOLHANDLER_H_
 
 #include <vector>
-#include "messages/AuthMessage.h"
-#include "messages/ErrorMessage.h"
-#include "messages/MatchLobbyMessage.h"
+#include "messaging/messages/AuthMessage.h"
+#include "messaging/messages/ErrorMessage.h"
+#include "messaging/messages/MatchLobbyMessage.h"
 
 #define CALLBACK_WAIT_TIME 10
 
@@ -58,10 +58,12 @@ enum LobbyReturn ProcessMatchLobbyCommand(int connectFD, Player *player);
 int MatchLobbyConnectBack(int connectFD, uint portNum, Player *player);
 
 //Sends out the given MatchLobbyMessage to all clients in the given match
+//	NOTE: Does not synchronize. You must have the lock from UseSocket() before calling this
 bool NotifyClients(Match *match, MatchLobbyMessage *message);
 
 //Send a message of type Error to the client
-void SendError(int connectFD, enum ErrorType errorType);
+//	NOTE: Does not synchronize. You must have the lock from UseSocket() before calling this
+void SendError(int connectFD, enum ErrorType errorType, enum ProtocolDirection direction);
 
 }
 #endif /* PROTOCOLHANDLER_H_ */

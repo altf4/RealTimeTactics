@@ -50,7 +50,7 @@ public:
 	uint GetID();
 	enum TeamNumber GetTeam();
 	enum TeamColor GetColor();
-	int GetCallbackSocket();
+	int GetSocket();
 	uint GetCurrentMatchID();
 	struct PlayerDescription GetDescription();
 
@@ -58,7 +58,7 @@ public:
 	void SetID(uint newID);
 	void SetTeam(enum TeamNumber newTeam);
 	void SetColor(enum TeamColor newColor);
-	void SetCallbackSocket(int socket);
+	void SetSocket(int socket);
 	void SetCurrentMatchID(int matchID);
 
 private:
@@ -68,7 +68,7 @@ private:
 	enum TeamNumber m_team;
 	enum TeamColor m_color;
 	//Socket to receive MatchLobby messages from server on
-	int m_callbackSocket;
+	int m_socketFD;
 	struct PlayerDescription m_description;
 	std::vector <Unit*> m_units;
 	//The match that this player is currently in

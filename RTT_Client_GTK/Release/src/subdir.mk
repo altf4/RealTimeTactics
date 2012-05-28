@@ -4,26 +4,23 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/ClientProtocolHandler.cpp \
-../src/GameCommands.cpp \
-../src/GameEvents.cpp 
+../src/RTT_Client_GTK.cpp \
+../src/WelcomeWindow.cpp 
 
 OBJS += \
-./src/ClientProtocolHandler.o \
-./src/GameCommands.o \
-./src/GameEvents.o 
+./src/RTT_Client_GTK.o \
+./src/WelcomeWindow.o 
 
 CPP_DEPS += \
-./src/ClientProtocolHandler.d \
-./src/GameCommands.d \
-./src/GameEvents.d 
+./src/RTT_Client_GTK.d \
+./src/WelcomeWindow.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I../../RTT_Common/src -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -std=c++0x -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -O3 -Wall -c -fmessage-length=0 `pkg-config --cflags glib-2.0 gtkmm-3.0` -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
