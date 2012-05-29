@@ -8,17 +8,10 @@ Dependencies:
 
 RTT depends on a few packages that are easily available through the Ubuntu/Fedora/openSUSE repositories:
 
-<<<<<<< HEAD
-<<<<<<< HEAD
+
 ***Instructions for Ubuntu 11.10/12.04***
-sudo apt-get install libsparsehash-dev libgtkmm-3.0-dev libois-dev libssl-dev
-=======
 sudo apt-get install libsparsehash-dev libgtkmm-3.0-dev libois-dev libssl-dev libboost-dev libboost-date-time1.48-dev
->>>>>>> upstream/master
-=======
-***Instructions for Ubuntu 11.10/12.04***
-sudo apt-get install libsparsehash-dev libgtkmm-3.0-dev libois-dev libssl-dev
->>>>>>> upstream/master
+
 
 ***Instructions for Fedora 16/17 and openSUSE 12.1***
 sudo yum install sparsehash-devel gtkmm30-devel openssl-devel boost-devel boost-date-time
@@ -28,8 +21,7 @@ OGRE 3D
 ########################
 
 ***Instructions for Ubuntu 11.10/12.04***
-The version of OGRE in the default Ubuntu repositories is old / incomplete. So
-instead, we use the offical OGRE PPA, avaialble form here:
+The version of OGRE in the default Ubuntu repositories is old / incomplete. So instead, we use the offical OGRE PPA, avaialble form here:
 
 https://launchpad.net/~ogre-team/+archive/ogre
 
@@ -47,6 +39,19 @@ sudo yum install ogre-devel ois-devel
 Also, we require (for now) the OGRE sample media packs:
 
 sudo yum install ogre-samples
+
+***Instructions for building OGRE from source***
+This should be compatable with all versions of OGRE starting at 1.7.3, tested up to 1.8.0 on Fedora 17. 
+
+OGRE Source can be downloaded here: http://www.ogre3d.org/download/source
+
+You need CMake (http://www.cmake.org). In a console, type:
+> cd /path/to/ogredeps
+> mkdir build
+> cd build
+> cmake ..
+> make
+> make install
 
 ###########################
 Building Using Eclipse:
