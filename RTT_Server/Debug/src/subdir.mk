@@ -4,14 +4,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/MatchLoop.cpp \
 ../src/RTT_Server.cpp \
 ../src/ServerProtocolHandler.cpp 
 
 OBJS += \
+./src/MatchLoop.o \
 ./src/RTT_Server.o \
 ./src/ServerProtocolHandler.o 
 
 CPP_DEPS += \
+./src/MatchLoop.d \
 ./src/RTT_Server.d \
 ./src/ServerProtocolHandler.d 
 

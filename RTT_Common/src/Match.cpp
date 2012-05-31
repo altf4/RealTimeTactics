@@ -325,6 +325,34 @@ string Match::GameSpeedToString(enum GameSpeed speed)
 	}
 }
 
+//Converts a GameSpeed enum into the number of microseconds between game ticks
+uint Match::GameSpeedTouSeconds(enum GameSpeed speed)
+{
+	switch(speed)
+	{
+		case SPEED_SLOW:
+		{
+			return 1000000;
+		}
+		case SPEED_NORMAL:
+		{
+			return 844000;
+		}
+		case SPEED_FAST:
+		{
+			return 666000;
+		}
+		case SPEED_FASTEST:
+		{
+			return 500000;
+		}
+		default:
+		{
+			return 844000;
+		}
+	}
+}
+
 string Match::VictoryConditionToString(enum VictoryCondition victory)
 {
 	switch(victory)
@@ -346,4 +374,26 @@ string Match::VictoryConditionToString(enum VictoryCondition victory)
 			return "WTF, this is not a victory condition";
 		}
 	}
+}
+
+//Register that the given player is ready to start the match
+//	returns - true if the player is the last one in
+//		IE: This fact is important for the server to spawn a match loop thread
+bool Match::RegisterPlayer(uint playerID)
+{
+	pthread_rwlock_wrlock(&m_lock);
+
+	m_registeredPlayers.push_back(playerID);
+
+	//If now full:
+	if(m_registeredPlayers.size() == m_currentPlayerCount)
+	{
+		pthread_rwlock_unlock(&m_lock);
+		return true;
+	}
+
+	pthread_rwlock_unlock(&m_lock);
+	return false;
+
+
 }

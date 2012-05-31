@@ -7,6 +7,8 @@
 
 #include "GameCommands.h"
 #include "Gameboard.h"
+#include "ClientProtocolHandler.h"
+#include "messaging/MessageManager.h"
 
 using namespace std;
 using namespace RTT;
@@ -18,6 +20,8 @@ Gameboard *gameboard;
 
 UnitList units;
 
+extern int socketFD;
+
 //********************************************
 //				Movement Commands
 //********************************************
@@ -27,18 +31,52 @@ UnitList units;
 //	direction - The direction to move the unit
 //		NOTE: The unit will also by default made to face the direction moved
 //	returns - A MovementResult struct describing the success or error of the move
-struct MovementResult RTT::MoveUnit(uint32_t unitID, enum Direction direction)
+struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, enum Direction direction)
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	struct MovementResult result;
 
 	//First, do a quick legality check. So we don't bother the server if we know
 	//	that this is invalid.
 	if( units.count(unitID) == 0)
 	{
-		result.m_result = UNIT_DOESNT_EXIST;
+		result.m_result = MOVE_NO_SUCH_UNIT;
 		return result;
 	}
 
+	GameMessage moveRequest(MOVE_UNIT_DIRECTION_REQUEST, DIRECTION_TO_SERVER);
+	moveRequest.m_unitID = unitID;
+	moveRequest.m_xOld = xOld;
+	moveRequest.m_yOld = xOld;
+	moveRequest.m_unitDirection = direction;
+	if(!Message::WriteMessage(&moveRequest, socketFD))
+	{
+		result.m_result = MOVE_MESSAGE_SEND_ERROR;
+		return result;
+	}
+
+	Message *reply = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	if( reply->m_messageType != MESSAGE_GAME)
+	{
+		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+		result.m_result = MOVE_MESSAGE_SEND_ERROR;
+		delete reply;
+		return result;
+	}
+	GameMessage *moveReply = (GameMessage*)reply;
+	if( moveReply->m_gameMessageType != MOVE_UNIT_DIRECTION_REPLY)
+	{
+		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+		result.m_result = MOVE_MESSAGE_SEND_ERROR;
+		delete moveReply;
+		return result;
+	}
+	result.m_result = moveReply->m_moveResult;
+	result.m_originalX = moveReply->m_xOld;
+	result.m_originalY = moveReply->m_yOld;
+
+	delete moveReply;
 	return result;
 }
 
@@ -49,8 +87,10 @@ struct MovementResult RTT::MoveUnit(uint32_t unitID, enum Direction direction)
 //	returns - A MovementResult struct describing the success or error of the move
 struct MovementResult RTT::MoveUnit(uint32_t unitID, struct Coordinate destination)
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	struct MovementResult result;
-	result.m_result = UNIT_DOESNT_EXIST;
+	result.m_result = MOVE_NO_SUCH_UNIT;
 
 	return result;
 }
@@ -61,5 +101,7 @@ struct MovementResult RTT::MoveUnit(uint32_t unitID, struct Coordinate destinati
 //	returns - simple boolean result of whether the move succeeded
 bool RTT::ChangeUnitFacing(uint32_t unitID, enum Direction direction)
 {
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	return false;
 }

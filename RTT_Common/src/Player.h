@@ -20,6 +20,8 @@
 #include <stdint.h>
 #include <pthread.h>
 
+using namespace std;
+
 namespace RTT
 {
 
@@ -70,7 +72,6 @@ private:
 	//Socket to receive MatchLobby messages from server on
 	int m_socketFD;
 	struct PlayerDescription m_description;
-	std::vector <Unit*> m_units;
 	//The match that this player is currently in
 	uint m_currentMatchID;
 };

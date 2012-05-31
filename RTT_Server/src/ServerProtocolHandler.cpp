@@ -945,6 +945,72 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 	return IN_MATCH_LOBBY;
 }
 
+//Processes one game command
+//	Starts out by listening on the given socket for a GameMessage
+//	Executes the game protocol
+//	Returns a enum LobbyReturn to describe the end state
+enum LobbyReturn RTT::ProcessGameCommand(int socketFD, Player *player)
+{
+	if(player == NULL)
+	{
+		cerr << "ERROR: Player in game does not exist\n";
+		return EXITING_SERVER;
+	}
+
+	uint matchID = player->GetCurrentMatchID();
+
+	pthread_rwlock_rdlock(&matchListLock);
+	Match *playersMatch = NULL;
+	if( matchList.count(matchID) != 0)
+	{
+		playersMatch = matchList[matchID];
+	}
+	pthread_rwlock_unlock(&matchListLock);
+
+	if(!MessageManager::Instance().RegisterCallback(socketFD))
+	{
+		return EXITING_SERVER;
+	}
+
+	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	if(message == NULL)
+	{
+		//ERROR
+		cerr << "WARNING: Game message read failed\n";
+		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+		return EXITING_SERVER;
+	}
+	GameMessage *game_message = (GameMessage*)message;
+	switch(game_message->m_gameMessageType)
+	{
+		case MOVE_UNIT_DIRECTION_REQUEST:
+		{
+			//TODO: Check to see if the move is legal
+			//TODO: Move the unit around in the gameboard
+
+			GameMessage move_reply(MOVE_UNIT_DIRECTION_REPLY, DIRECTION_TO_SERVER);
+			move_reply.m_moveResult = MOVE_SUCCESS;
+			GameMessage::WriteMessage(&move_reply, socketFD);
+
+			GameMessage move_notice(UNIT_MOVED_DIRECTION_NOTICE, DIRECTION_TO_CLIENT);
+			move_notice.m_unitID = game_message->m_unitID;
+			move_notice.m_xOld = game_message->m_xOld;
+			move_notice.m_yOld = game_message->m_yOld;
+			move_notice.m_direction = game_message->m_direction;
+
+			NotifyClients(playersMatch, &move_notice);
+
+			return IN_GAME;
+		}
+		default:
+		{
+			return IN_GAME;
+		}
+	}
+
+	return IN_GAME;
+}
+
 //Send a message of type Error to the client
 //	NOTE: Does not synchronize. You must have the lock from UseSocket() before calling this
 void  RTT::SendError(int connectFD, enum ErrorType errorType, enum ProtocolDirection direction)
@@ -956,7 +1022,7 @@ void  RTT::SendError(int connectFD, enum ErrorType errorType, enum ProtocolDirec
 	}
 }
 
-bool RTT::NotifyClients(Match *match, MatchLobbyMessage *message)
+bool RTT::NotifyClients(Match *match, Message *message)
 {
 	bool fullSuccess = true;
 	if( match == NULL)

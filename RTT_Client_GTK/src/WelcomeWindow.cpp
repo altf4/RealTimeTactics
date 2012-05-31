@@ -310,8 +310,6 @@ void WelcomeWindow::CallbackErrorEvent()
 	cerr << "ERROR: Callback receive failed\n";
 }
 
-
-
 void WelcomeWindow::custom_server_click()
 {
 	m_statusbar->push("Set server settings, then hit Connect");
@@ -678,7 +676,6 @@ void WelcomeWindow::launch_match_click()
 {
 	if(StartMatch())
 	{
-		system("RTT_Ogre_3D");
 		m_match_lobby_status->push("Was that fun, or WHAT?!");
 	}
 	else

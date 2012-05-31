@@ -12,6 +12,10 @@
 #include "Unit.h"
 #include <google/dense_hash_map>
 
+#include "messaging/messages/GameMessage.h"
+
+using google::dense_hash_map;
+
 namespace RTT
 {
 
@@ -28,7 +32,7 @@ struct eqint
 
 //Define types, so it's easier to refer to later
 //Key : Player ID
-typedef google::dense_hash_map<uint32_t, Unit*, std::tr1::hash<uint32_t>, eqint> UnitList;
+typedef dense_hash_map<uint32_t, Unit*, std::tr1::hash<uint32_t>, eqint> UnitList;
 
 
 //********************************************
@@ -47,7 +51,7 @@ enum MovementSuccess: char
 
 struct MovementResult
 {
-	enum MovementSuccess m_result;
+	enum MoveResult m_result;
 
 	//Used in error conditions to help if the client is unsynced:
 
@@ -64,7 +68,7 @@ struct MovementResult
 //	direction - The direction to move the unit
 //		NOTE: The unit will also by default made to face the direction moved
 //	returns - A MovementResult struct describing the success or error of the move
-struct MovementResult MoveUnit(uint32_t unitID, enum Direction direction);
+struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, enum Direction direction);
 
 //Move a Unit to a distant tile
 //	unitID - The ID of the unit to move.

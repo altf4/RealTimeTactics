@@ -35,6 +35,7 @@ ehthumbs.db
 Icon?
 Thumbs.db
 *~
+*.orig
 
 # RTT Specific Files #
 ######################

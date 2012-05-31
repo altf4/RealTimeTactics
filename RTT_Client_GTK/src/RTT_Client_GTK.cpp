@@ -111,3 +111,4 @@ void InitWidgets()
 	refBuilder->get_widget("map_size_label", window->m_map_size_label);
 	refBuilder->get_widget("launch_match_button", window->m_launch_match_button);
 }
+
