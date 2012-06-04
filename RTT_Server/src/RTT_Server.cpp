@@ -136,12 +136,7 @@ int main(int argc, char **argv)
 	intptr_t sizedInteger = mainSocket;
 	//Send the new connection off to another thread for handling
 	pthread_create(&mainThreadID, NULL, MainListen, (void *) sizedInteger );
-
-	//TODO: stupid hack to keep the threads alive. replace later
-	while(true)
-	{
-		sleep(1000);
-	}
+	pthread_join(mainThreadID, NULL);
 }
 
 void *RTT::MainListen(void * param)

@@ -9,9 +9,7 @@
 #define MATCHLOOP_H_
 
 #include "Enums.h"
-
-using namespace std;
-using namespace RTT;
+#include "Match.h"
 
 enum MatchLoopResult: char
 {
@@ -28,9 +26,11 @@ enum MatchLoopResult: char
 };
 
 //The main loop for a single RTT match
-// The "realtime" thread that signals
+// The "realtime" thread that signals the timer ticks
+void MatchLoop(RTT::Match *match);
+
 // ptr - Void pointer to the match to start
-void *MatchLoop(void *ptr);
+void *MatchLoopHelper(void *ptr);
 
 //Thread that gets launched every timer tick in order to handle
 void *TimerTick(void *param);

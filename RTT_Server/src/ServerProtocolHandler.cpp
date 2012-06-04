@@ -6,6 +6,7 @@
 //============================================================================
 
 #include "RTT_Server.h"
+#include "MatchLoop.h"
 #include "ServerProtocolHandler.h"
 #include "messaging/MessageManager.h"
 #include "Lock.h"
@@ -475,6 +476,8 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 		return EXITING_SERVER;
 	}
 
+	enum LobbyReturn ret = IN_MAIN_LOBBY;
+
 	MatchLobbyMessage *match_lobby_message = (MatchLobbyMessage*)match_lobby_message_init;
 	switch (match_lobby_message->m_matchLobbyType)
 	{
@@ -483,8 +486,8 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( matchID == 0 )
 			{
 				SendError(socketFD, NOT_IN_THAT_MATCH, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 			if( LeaveMatch(player) )
 			{
@@ -497,8 +500,8 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 					//Error in write, do something?
 					cerr << "ERROR: Message send returned failure.\n";
 				}
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 			else
 			{
@@ -506,9 +509,11 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				delete match_lobby_message;
 				if( matchID == 0)
 				{
-					return IN_MAIN_LOBBY;
+					ret = IN_MAIN_LOBBY;
+					break;
 				}
-				return IN_MATCH_LOBBY;
+				ret = IN_MATCH_LOBBY;
+				break;
 			}
 		}
 		case CHANGE_TEAM_REQUEST:
@@ -516,16 +521,16 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( matchID == 0 )
 			{
 				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 
 			//Is this not a self change?
@@ -536,8 +541,8 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				{
 					//Error, there is no such Match
 					SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
-					delete match_lobby_message;
-					return IN_MATCH_LOBBY;
+					ret = IN_MATCH_LOBBY;
+					break;
 				}
 			}
 
@@ -586,24 +591,24 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( matchID == 0 )
 			{
 				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 
 			if(playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 			//Is this this not the leader?
 			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, there is no such Match
 				SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MATCH_LOBBY;
+				ret = IN_MATCH_LOBBY;
+				break;
 			}
 
 			bool started = playersMatch->StartMatch();
@@ -619,7 +624,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				cerr << "ERROR: Message send returned failure.\n";
 			}
 
-			if( started )
+			if(started)
 			{
 				//*******************************
 				// Send Client Notifications
@@ -627,25 +632,32 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				//TODO: Make sure each client is ready. IE: Listed for replies
 				MatchLobbyMessage notification(MATCH_START_NOTIFICATION, DIRECTION_TO_CLIENT);
 				NotifyClients(playersMatch, &notification);
+
+				MatchLoop(playersMatch);
+			}
+			else
+			{
+
 			}
 
+			ret = IN_GAME;
 			break;
-		}
+			}
 		case CHANGE_COLOR_REQUEST:
 		{
 			if( matchID == 0 )
 			{
 				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 			//Is this not a self change?
 			if( playerID != match_lobby_message->m_playerID )
@@ -655,8 +667,8 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				{
 					//Error, not allowed
 					SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
-					delete match_lobby_message;
-					return IN_MATCH_LOBBY;
+					ret = IN_MATCH_LOBBY;
+					break;
 				}
 			}
 
@@ -671,8 +683,8 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				//Error, there is no such player
 				pthread_rwlock_unlock(&playerListLock);
 				SendError(socketFD, NO_SUCH_PLAYER, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MATCH_LOBBY;
+				ret = IN_MATCH_LOBBY;
+				break;
 			}
 			pthread_rwlock_unlock(&playerListLock);
 
@@ -694,6 +706,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			notification.m_newColor = match_lobby_message->m_newColor;
 			NotifyClients(playersMatch, &notification);
 
+			ret = IN_MATCH_LOBBY;
 			break;
 		}
 		case CHANGE_MAP_REQUEST:
@@ -701,24 +714,24 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( matchID == 0 )
 			{
 				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 			//Is this this not the leader?
 			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, not allowed
 				SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MATCH_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 
 			playersMatch->SetMap(match_lobby_message->m_mapDescription);
@@ -740,6 +753,8 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			MatchLobbyMessage notification(MAP_CHANGED_NOTIFICATION, DIRECTION_TO_CLIENT);
 			notification.m_mapDescription = match_lobby_message->m_mapDescription;
 			NotifyClients(playersMatch, &notification);
+
+			ret = IN_MATCH_LOBBY;
 			break;
 		}
 		case CHANGE_VICTORY_COND_REQUEST:
@@ -747,24 +762,24 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( matchID == 0 )
 			{
 				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 			//Is this this not the leader?
 			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, not allowed
 				SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MATCH_LOBBY;
+				ret = IN_MATCH_LOBBY;
+				break;
 			}
 
 			playersMatch->SetVictoryCondition(match_lobby_message->m_newVictCond);
@@ -787,6 +802,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			notification.m_newVictCond = match_lobby_message->m_newVictCond;
 			NotifyClients(playersMatch, &notification);
 
+			ret = IN_MATCH_LOBBY;
 			break;
 		}
 		case CHANGE_GAME_SPEED_REQUEST:
@@ -794,24 +810,24 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( matchID == 0 )
 			{
 				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 			//Is this this not the leader?
 			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, not allowed
 				SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MATCH_LOBBY;
+				ret = IN_MATCH_LOBBY;
+				break;
 			}
 
 			playersMatch->SetGamespeed(match_lobby_message->m_newSpeed);
@@ -833,6 +849,8 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			MatchLobbyMessage notification(GAME_SPEED_CHANGED_NOTIFICATION, DIRECTION_TO_CLIENT);
 			notification.m_newSpeed = match_lobby_message->m_newSpeed;
 			NotifyClients(playersMatch, &notification);
+
+			ret = IN_MATCH_LOBBY;
 			break;
 		}
 		case CHANGE_LEADER_REQUEST:
@@ -840,16 +858,16 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( matchID == 0 )
 			{
 				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 
 			bool changed = false;
@@ -880,31 +898,32 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				NotifyClients(playersMatch, &notification);
 			}
 
-			return IN_MATCH_LOBBY;
+			ret = IN_MATCH_LOBBY;
+			break;
 		}
 		case KICK_PLAYER_REQUEST:
 		{
 			if( matchID == 0 )
 			{
 				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
 				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MAIN_LOBBY;
+				ret = IN_MAIN_LOBBY;
+				break;
 			}
 			//Is this this not the leader?
 			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, not allowed
 				SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
-				delete match_lobby_message;
-				return IN_MATCH_LOBBY;
+				ret = IN_MATCH_LOBBY;
+				break;
 			}
 
 			bool removed = playersMatch->RemovePlayer(match_lobby_message->m_playerID);
@@ -931,18 +950,18 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				NotifyClients(playersMatch, &notification);
 			}
 
+			ret = IN_MATCH_LOBBY;
 			break;
 		}
 		default:
 		{
 			SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
-			delete match_lobby_message_init;
-			match_lobby_message_init = NULL;
-			return IN_MATCH_LOBBY;
+			ret = IN_MATCH_LOBBY;
+			break;
 		}
 	}
 	delete match_lobby_message;
-	return IN_MATCH_LOBBY;
+	return ret;
 }
 
 //Processes one game command
@@ -973,13 +992,16 @@ enum LobbyReturn RTT::ProcessGameCommand(int socketFD, Player *player)
 	}
 
 	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if(message == NULL)
+	if(message->m_messageType != MESSAGE_GAME)
 	{
 		//ERROR
 		cerr << "WARNING: Game message read failed\n";
 		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
 		return EXITING_SERVER;
 	}
+
+	enum LobbyReturn ret = IN_MATCH_LOBBY;
+
 	GameMessage *game_message = (GameMessage*)message;
 	switch(game_message->m_gameMessageType)
 	{
@@ -1000,15 +1022,17 @@ enum LobbyReturn RTT::ProcessGameCommand(int socketFD, Player *player)
 
 			NotifyClients(playersMatch, &move_notice);
 
-			return IN_GAME;
+			ret = IN_GAME;
+			break;
 		}
 		default:
 		{
-			return IN_GAME;
+			ret = IN_GAME;
+			break;
 		}
 	}
 
-	return IN_GAME;
+	return ret;
 }
 
 //Send a message of type Error to the client

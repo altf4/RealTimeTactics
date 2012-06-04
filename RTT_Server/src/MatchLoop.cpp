@@ -11,12 +11,20 @@
 #include <iostream>
 
 using namespace std;
+using namespace RTT;
+
+void MatchLoop(Match *match)
+{
+	pthread_t matchThread;
+	pthread_create(&matchThread, NULL, MatchLoopHelper, (void*)match);
+	pthread_detach(matchThread);
+}
 
 //The main loop for a single RTT match
 // The "realtime" thread that signals
 // speed - The speed at which this match should run
 // Returns: an enumeration describing the match's result status
-void *MatchLoop(void *ptr)
+void *MatchLoopHelper(void *ptr)
 {
 	Match *match = (Match*)ptr;
 
@@ -24,12 +32,13 @@ void *MatchLoop(void *ptr)
 	uint tickDelta = Match::GameSpeedTouSeconds(speed);
 
 	//Lock to ensure that only one timer tick thread can happen at once
-	pthread_mutex_t tickLock;
-	pthread_mutex_init(&tickLock, NULL);
+	pthread_mutex_t *tickLock = new pthread_mutex_t;
+	pthread_mutex_init(tickLock, NULL);
 
 	uint count = 0;
 
-	while(true)
+	bool keepLooping  = true;
+	while(keepLooping)
 	{
 		usleep(tickDelta);
 
@@ -37,14 +46,20 @@ void *MatchLoop(void *ptr)
 		//TODO: If the match has ended, somehow
 		if(count == 12)
 		{
-			return NULL;
+			keepLooping = false;
 		}
 
 		//Thread that gets called when the timer tick hits
 		pthread_t timerTickThreadID;
-		pthread_create(&timerTickThreadID, NULL, TimerTick, (void*)&tickLock);
+		pthread_create(&timerTickThreadID, NULL, TimerTick, (void*)tickLock);
+		pthread_detach(timerTickThreadID);
 	}
 
+	//TODO: Properly cleanup this mutex. Not a trivial thing.
+	//	There's N theads all potentially trying to use it right now. Have to wait for them
+	//	with pthread_join
+	//pthread_mutex_destroy(&tickLock);
+	//delete tickLock;
 	return NULL;
 }
 
