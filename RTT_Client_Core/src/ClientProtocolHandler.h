@@ -167,7 +167,7 @@ bool ChangeLeader(uint newLeaderID);
 //	Returns true if successfully kicked
 bool KickPlayer(uint PlayerID);
 
-//Start the match that we're currently in!
+//tell the server we wish to start the math we're currently in
 //	Must be the leader
 //	Returns true if the match successfully started
 bool StartMatch();

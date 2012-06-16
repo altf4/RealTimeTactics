@@ -21,8 +21,11 @@
 #include <netinet/in.h>
 #include <algorithm>
 #include <pthread.h>
+#include "ServerProtocolHandler.h"
 #include <iterator>
 #include <signal.h>
+
+#include "Player.h"
 
 using namespace std;
 using namespace RTT;
@@ -133,12 +136,7 @@ int main(int argc, char **argv)
 	intptr_t sizedInteger = mainSocket;
 	//Send the new connection off to another thread for handling
 	pthread_create(&mainThreadID, NULL, MainListen, (void *) sizedInteger );
-
-	//TODO: stupid hack to keep the threads alive. replace later
-	while(true)
-	{
-		sleep(1000);
-	}
+	pthread_join(mainThreadID, NULL);
 }
 
 void *RTT::MainListen(void * param)
@@ -190,29 +188,46 @@ void *RTT::MainClientThread(void * parm)
 		enum LobbyReturn lobbyReturn;
 		lobbyReturn = ProcessLobbyCommand(socketFD, player);
 
-		if(lobbyReturn == EXITING_SERVER)
+		switch(lobbyReturn)
 		{
-			cout << "Player: " << player->GetName() << " has left.\n";
-			QuitServer(player);
-			return NULL;
-		}
-
-		//In the a Match Lobby
-		if(lobbyReturn == IN_MATCH_LOBBY)
-		{
-			while( lobbyReturn == IN_MATCH_LOBBY)
+			case IN_MATCH_LOBBY:
 			{
-				lobbyReturn = ProcessMatchLobbyCommand(socketFD, player);
+				while( lobbyReturn == IN_MATCH_LOBBY)
+				{
+					lobbyReturn = ProcessMatchLobbyCommand(socketFD, player);
+					if(lobbyReturn == EXITING_SERVER)
+					{
+						cout << "Player: " << player->GetName() << " has left.\n";
+						QuitServer(player);
+						return NULL;
+					}
+				}
+				break;
 			}
-			if( lobbyReturn == EXITING_SERVER )
+			case IN_GAME:
+			{
+				while( lobbyReturn == IN_GAME)
+				{
+					lobbyReturn = ProcessGameCommand(socketFD, player);
+				}
+				if(lobbyReturn == EXITING_SERVER)
+				{
+					cout << "Player: " << player->GetName() << " has left.\n";
+					QuitServer(player);
+					return NULL;
+				}
+				break;
+			}
+			case EXITING_SERVER:
 			{
 				cout << "Player: " << player->GetName() << " has left.\n";
 				QuitServer(player);
 				return NULL;
 			}
-			if( lobbyReturn == IN_GAME )
+			case IN_MAIN_LOBBY:
 			{
-				//TODO: Start the match!!!
+				//Just loop back and get another LobbyMessage
+				break;
 			}
 		}
 	}

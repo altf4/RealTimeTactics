@@ -6,6 +6,7 @@
 CPP_SRCS += \
 ../src/messaging/messages/AuthMessage.cpp \
 ../src/messaging/messages/ErrorMessage.cpp \
+../src/messaging/messages/GameMessage.cpp \
 ../src/messaging/messages/LobbyMessage.cpp \
 ../src/messaging/messages/MatchLobbyMessage.cpp \
 ../src/messaging/messages/Message.cpp 
@@ -13,6 +14,7 @@ CPP_SRCS += \
 OBJS += \
 ./src/messaging/messages/AuthMessage.o \
 ./src/messaging/messages/ErrorMessage.o \
+./src/messaging/messages/GameMessage.o \
 ./src/messaging/messages/LobbyMessage.o \
 ./src/messaging/messages/MatchLobbyMessage.o \
 ./src/messaging/messages/Message.o 
@@ -20,6 +22,7 @@ OBJS += \
 CPP_DEPS += \
 ./src/messaging/messages/AuthMessage.d \
 ./src/messaging/messages/ErrorMessage.d \
+./src/messaging/messages/GameMessage.d \
 ./src/messaging/messages/LobbyMessage.d \
 ./src/messaging/messages/MatchLobbyMessage.d \
 ./src/messaging/messages/Message.d 

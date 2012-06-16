@@ -261,7 +261,7 @@ double Gameboard::GetMovementCost(Tile *fromTile, Direction dir, Unit *unit)
 
 }
 
-uint ElevationDiff(uint elevation1, uint elevation2)
+uint Gameboard::ElevationDiff(uint elevation1, uint elevation2)
 {
 	if( elevation1 > elevation2)
 	{

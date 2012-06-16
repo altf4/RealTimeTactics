@@ -14,6 +14,7 @@
 #include "LobbyMessage.h"
 #include "ErrorMessage.h"
 #include "MatchLobbyMessage.h"
+#include "GameMessage.h"
 #include "../MessageManager.h"
 
 using namespace std;
@@ -70,6 +71,11 @@ Message *Message::Deserialize(char *buffer, uint length, enum ProtocolDirection 
 		case MESSAGE_MATCH_LOBBY:
 		{
 			message = new MatchLobbyMessage(buffer, length);
+			break;
+		}
+		case MESSAGE_GAME:
+		{
+			message = new GameMessage(buffer, length);
 			break;
 		}
 		case MESSAGE_ERROR:

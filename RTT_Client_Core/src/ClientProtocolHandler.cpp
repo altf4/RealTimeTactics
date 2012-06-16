@@ -1042,3 +1042,7 @@ void  RTT::SendError(int socket, enum ErrorType errorType, enum ProtocolDirectio
 		cerr << "ERROR: Error message send returned failure.\n";
 	}
 }
+
+//********************************************
+//			Connection Commands
+//********************************************

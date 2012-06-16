@@ -12,6 +12,7 @@
 #include "messaging/messages/AuthMessage.h"
 #include "messaging/messages/ErrorMessage.h"
 #include "messaging/messages/MatchLobbyMessage.h"
+#include "messaging/messages/GameMessage.h"
 
 #define CALLBACK_WAIT_TIME 10
 
@@ -51,15 +52,21 @@ enum LobbyReturn ProcessLobbyCommand(int connectFD, Player *player);
 //	Returns a enum LobbyReturn to describe the end state
 enum LobbyReturn ProcessMatchLobbyCommand(int connectFD, Player *player);
 
+//Processes one game command
+//	Starts out by listening on the given socket for a GameMessage
+//	Executes the game protocol
+//	Returns a enum LobbyReturn to describe the end state
+enum LobbyReturn ProcessGameCommand(int connectFD, Player *player);
+
 //Establishes the player's receive socket
 //	Sets the player's receiveSocket
 //	connectFD: The old socket, used to tell the client we're ready
 //	returns the created socket
 int MatchLobbyConnectBack(int connectFD, uint portNum, Player *player);
 
-//Sends out the given MatchLobbyMessage to all clients in the given match
+//Sends out the given Message to all clients in the given match
 //	NOTE: Does not synchronize. You must have the lock from UseSocket() before calling this
-bool NotifyClients(Match *match, MatchLobbyMessage *message);
+bool NotifyClients(Match *match, Message *message);
 
 //Send a message of type Error to the client
 //	NOTE: Does not synchronize. You must have the lock from UseSocket() before calling this
