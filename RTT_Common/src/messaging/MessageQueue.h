@@ -20,6 +20,8 @@
 #ifndef MESSAGEQUEUE_H_
 #define MESSAGEQUEUE_H_
 
+#define MAX_CONSECUTIVE_MSG_TIMEOUTS 3
+
 #include "messages/Message.h"
 
 #include "pthread.h"
@@ -98,6 +100,8 @@ private:
 	pthread_mutex_t m_isShutdownMutex;			//Mutex for threadsafe access to the variable
 
 	enum ProtocolDirection m_forwardDirection;
+
+	uint8_t m_consecutiveTimeouts;
 
 	int m_socketFD;
 

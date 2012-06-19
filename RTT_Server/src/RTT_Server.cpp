@@ -137,6 +137,8 @@ int main(int argc, char **argv)
 	//Send the new connection off to another thread for handling
 	pthread_create(&mainThreadID, NULL, MainListen, (void *) sizedInteger );
 	pthread_join(mainThreadID, NULL);
+
+	return 0;
 }
 
 void *RTT::MainListen(void * param)
@@ -156,15 +158,17 @@ void *RTT::MainListen(void * param)
 		pthread_t threadID;
 		//Send the new connection off to another thread for handling
 		pthread_create(&threadID, NULL, MainClientThread, (void *) ConnectFD );
+		pthread_detach(threadID);
 	}
 
 	return 0;
 }
 
-void *RTT::MainClientThread(void * parm)
+void *RTT::MainClientThread(void *parm)
 {
 	intptr_t socketFD = (intptr_t)parm;
 
+	MessageManager::Instance().DeleteQueue(socketFD);
 	MessageManager::Instance().StartSocket(socketFD);
 
 	//First, authenticate the client

@@ -60,13 +60,20 @@ public:
 	//	Failing to call StartSocket prior to use will cause you to get get ErrorMessges (but not crash)
 	//TODO: Maybe make the other functions automatically check and call this function for us. So we can make this private
 	//	socketFD - The socket file descriptor for which to make the initialization
+	//	returns - A reference to the newly created MessageQueue.
+	//NOTE: In order to use the returned MessageQueue safely, you must have a lock on it before calling this
 	//NOTE: Safely does nothing if socketFD already exists in the manager
-	void StartSocket(int socketFD);
+	MessageQueue &StartSocket(int socketFD);
 
 	//Informs the message manager that you would like to use the specified socket. Locks everyone else out from the socket.
 	//	socketFD - The socket file descriptor to use
 	//NOTE: Blocking function
 	Lock UseSocket(int socketFD);
+
+	//Deletes the MessageQueue object to which socketFD belongs
+	//	NOTE: Does not close the underlying socket. Use CloseSocket to do that.
+	//	NOTE: Only called by callback thread
+	void DeleteQueue(int socketFD);
 
 	//Closes the socket at the given file descriptor
 	//	socketFD - The file descriptor of the socket to close
@@ -101,9 +108,14 @@ private:
 
 	//Constructor for MessageManager
 	// direction: Tells the manager which protocol direction if "forward" to us.
-	//	IE: DIRECTION_TO_CLIENT: We are server
-	//		DIRECTION_TO_SERVER: We are a client
+	//	IE: DIRECTION_TO_UI: We are Novad
+	//		DIRECTION_TO_NOVAD: We are a Nova UI
 	MessageManager(enum ProtocolDirection direction);
+
+	//Safely (with locking) returns a pointer to a MessageQueue
+	//	socketFD - The file descriptor of the MessageQueue in question
+	//	returns - The MessageQueue with the given FD, NULL otherwise
+	MessageQueue *GetQueue(int socketFD);
 
 	//Mutexes for the lock maps;
 	pthread_mutex_t m_queuesLock;		//protects m_queueLocks
