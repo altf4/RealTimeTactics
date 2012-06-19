@@ -18,6 +18,7 @@
 //============================================================================
 
 #include "MessageQueue.h"
+#include "MessageManager.h"
 #include "../Lock.h"
 #include "messages/ErrorMessage.h"
 
@@ -44,12 +45,14 @@ MessageQueue::MessageQueue(int socketFD, enum ProtocolDirection forwardDirection
 	m_expectedcallbackSerial = 0;
 	m_forwardSerialNumber = 0;
 
+	m_consecutiveTimeouts = 0;
+
 	m_isShutDown = false;
 	m_forwardDirection = forwardDirection;
 	m_socketFD = socketFD;
 
+	//We will later do a pthread_join, so don't detach here
 	pthread_create(&m_producerThread, NULL, StaticThreadHelper, this);
-	pthread_detach(m_producerThread);
 }
 
 //Destructor should only be called by the callback thread, and also only while
@@ -57,11 +60,6 @@ MessageQueue::MessageQueue(int socketFD, enum ProtocolDirection forwardDirection
 //	race conditions in deleting the object.
 MessageQueue::~MessageQueue()
 {
-	//Shutdown will cause the producer thread to make an ErrorMessage then quit
-	//This is probably redundant, but we do it again just to make sure
-	shutdown(m_socketFD, SHUT_RDWR);
-	close(m_socketFD);
-
 	//Wait for the producer thread to finish,
 	// We can't have his object destroyed out from underneath him
 	pthread_join(m_producerThread, NULL);
@@ -90,6 +88,14 @@ MessageQueue::~MessageQueue()
 //blocking call
 Message *MessageQueue::PopMessage(enum ProtocolDirection direction, int timeout)
 {
+	{
+		Lock lock(&m_isShutdownMutex);
+		if(m_isShutDown)
+		{
+			return new ErrorMessage(ERROR_SOCKET_CLOSED, DIRECTION_TO_CLIENT);
+		}
+	}
+
 	Message* retMessage;
 
 	//If indefinite read:
@@ -174,9 +180,20 @@ Message *MessageQueue::PopMessage(enum ProtocolDirection direction, int timeout)
 				//While loop to protect against spurious wakeups
 				while(m_forwardQueue.empty())
 				{
+					{
+						Lock lock(&m_isShutdownMutex);
+						if(m_isShutDown)
+						{
+							return new ErrorMessage(ERROR_SOCKET_CLOSED, DIRECTION_TO_CLIENT);
+						}
+					}
 					int errCondition = 	pthread_cond_timedwait(&m_readWakeupCondition, &m_forwardQueueMutex, &timespec);
 					if (errCondition == ETIMEDOUT)
 					{
+						if(++m_consecutiveTimeouts >= MAX_CONSECUTIVE_MSG_TIMEOUTS)
+						{
+							MessageManager::Instance().CloseSocket(m_socketFD);
+						}
 						return new ErrorMessage(ERROR_TIMEOUT, m_forwardDirection);
 					}
 				}
@@ -189,6 +206,7 @@ Message *MessageQueue::PopMessage(enum ProtocolDirection direction, int timeout)
 				}
 				else
 				{
+					//Discard this message and get a new one
 					//TODO: Must clear this message's internals or it will leak!
 					delete retMessage;
 				}
@@ -205,9 +223,21 @@ Message *MessageQueue::PopMessage(enum ProtocolDirection direction, int timeout)
 				//While loop to protect against spurious wakeups
 				while(m_callbackQueue.empty())
 				{
+					{
+						Lock lock(&m_isShutdownMutex);
+						if(m_isShutDown)
+						{
+							return new ErrorMessage(ERROR_SOCKET_CLOSED, DIRECTION_TO_CLIENT);
+						}
+					}
 					int errCondition = 	pthread_cond_timedwait(&m_readWakeupCondition, &m_callbackQueueMutex, &timespec);
 					if (errCondition == ETIMEDOUT)
 					{
+						//If we have had too many timeouts in a row, then close down the socket
+						if(++m_consecutiveTimeouts >= MAX_CONSECUTIVE_MSG_TIMEOUTS)
+						{
+							MessageManager::Instance().CloseSocket(m_socketFD);
+						}
 						return new ErrorMessage(ERROR_TIMEOUT, m_forwardDirection);
 					}
 				}
@@ -228,6 +258,7 @@ Message *MessageQueue::PopMessage(enum ProtocolDirection direction, int timeout)
 		}
 	}
 
+	m_consecutiveTimeouts = 0;
 	return retMessage;
 }
 
@@ -238,7 +269,6 @@ void *MessageQueue::StaticThreadHelper(void *ptr)
 
 void MessageQueue::PushMessage(Message *message)
 {
-
 	//If this is a callback message (not the forward direction)
 	if(message->m_direction != m_forwardDirection)
 	{
@@ -279,17 +309,10 @@ bool MessageQueue::RegisterCallback()
 		{
 			pthread_cond_wait(&m_callbackWakeupCondition, &m_callbackQueueMutex);
 		}
-	}
 
-	//This is the first message of the protocol. This message contains the serial number we will be expecting later
-	{
-		//Protection for the queue structure
-		Lock lockQueue(&m_callbackQueueMutex);
-		if(!m_callbackQueue.empty())
-		{
-			Message *nextMessage = m_callbackQueue.front();
-			m_expectedcallbackSerial = nextMessage->m_serialNumber;
-		}
+		//This is the first message of the protocol. This message contains the serial number we will be expecting later
+		Message *nextMessage = m_callbackQueue.front();
+		m_expectedcallbackSerial = nextMessage->m_serialNumber;
 	}
 
 	Lock shutdownLock(&m_isShutdownMutex);
@@ -327,7 +350,6 @@ void *MessageQueue::ProducerThread()
 		while( totalBytesRead < sizeof(length))
 		{
 			bytesRead = read(m_socketFD, buff + totalBytesRead, sizeof(length) - totalBytesRead);
-
 			if(bytesRead <= 0)
 			{
 				//The socket died on us!
