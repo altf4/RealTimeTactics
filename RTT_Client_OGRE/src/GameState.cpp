@@ -82,8 +82,8 @@ void GameState::enter()
     m_pRSQ->setQueryMask(OGRE_HEAD_MASK);
 
     m_pCamera = m_pSceneMgr->createCamera("GameCamera");
-    m_pCamera->setPosition(Ogre::Vector3(2.25,10.5,6.5));
-    m_pCamera->lookAt(Ogre::Vector3(2.25,0,-4));
+    m_pCamera->setPosition(Ogre::Vector3(5.5,10.5,6.5));
+    m_pCamera->lookAt(Ogre::Vector3(5.5,0,-4));
     m_pCamera->setNearClipDistance(5);
 
     m_pCamera->setAspectRatio(Real(OgreFramework::getSingletonPtr()->m_pViewport->getActualWidth()) /
@@ -584,6 +584,7 @@ void GameState::update(double timeSinceLastFrame)
 
     if(!OgreFramework::getSingletonPtr()->m_pTrayMgr->isDialogVisible())
     {
+    	/*
         if(m_pDetailsPanel->isVisible())
         {
             m_pDetailsPanel->setParamValue(0, Ogre::StringConverter::toString(m_pCamera->getDerivedPosition().x));
@@ -598,6 +599,7 @@ void GameState::update(double timeSinceLastFrame)
             else
                 m_pDetailsPanel->setParamValue(7, "Un-Buffered Input");
         }
+        */
     }
 
     m_MoveScale = m_MoveSpeed   * timeSinceLastFrame;
@@ -612,8 +614,8 @@ void GameState::update(double timeSinceLastFrame)
 void GameState::buildGUI()
 {
     OgreFramework::getSingletonPtr()->m_pTrayMgr->showFrameStats(OgreBites::TL_BOTTOMLEFT);
-    OgreFramework::getSingletonPtr()->m_pTrayMgr->showLogo(OgreBites::TL_BOTTOMRIGHT);
-    OgreFramework::getSingletonPtr()->m_pTrayMgr->createLabel(OgreBites::TL_TOP, "GameLbl", "Game mode", 250);
+//   OgreFramework::getSingletonPtr()->m_pTrayMgr->showLogo(OgreBites::TL_BOTTOMRIGHT);
+//   OgreFramework::getSingletonPtr()->m_pTrayMgr->createLabel(OgreBites::TL_TOP, "GameLbl", "Game mode", 250);
     OgreFramework::getSingletonPtr()->m_pTrayMgr->showCursor();
 
     Ogre::StringVector items;
@@ -626,19 +628,20 @@ void GameState::buildGUI()
     items.push_back("cam.oZ");
     items.push_back("Mode");
 
-    m_pDetailsPanel = OgreFramework::getSingletonPtr()->m_pTrayMgr->createParamsPanel(OgreBites::TL_TOPLEFT, "DetailsPanel", 200, items);
-    m_pDetailsPanel->show();
+    //m_pDetailsPanel = OgreFramework::getSingletonPtr()->m_pTrayMgr->createParamsPanel(OgreBites::TL_TOPLEFT, "DetailsPanel", 200, items);
+    //m_pDetailsPanel->hide();
 
     Ogre::String infoText = "[TAB] - Switch input mode\n\n[W] - Forward / Mode up\n[S] - Backwards/ Mode down\n[A] - Left\n";
     infoText.append("[D] - Right\n\nPress [SHIFT] to move faster\n\n[O] - Toggle FPS / logo\n");
     infoText.append("[Print] - Take screenshot\n\n[ESC] - Exit");
-    OgreFramework::getSingletonPtr()->m_pTrayMgr->createTextBox(OgreBites::TL_RIGHT, "InfoPanel", infoText, 300, 220);
+    //OgreFramework::getSingletonPtr()->m_pTrayMgr->createTextBox(OgreBites::TL_RIGHT, "InfoPanel", infoText, 300, 220);
 
     Ogre::StringVector chatModes;
     chatModes.push_back("Solid mode");
     chatModes.push_back("Wireframe mode");
     chatModes.push_back("Point mode");
-    OgreFramework::getSingletonPtr()->m_pTrayMgr->createLongSelectMenu(OgreBites::TL_TOPRIGHT, "ChatModeSelMenu", "ChatMode", 200, 3, chatModes);
+    //OgreFramework::getSingletonPtr()->m_pTrayMgr->createLongSelectMenu(OgreBites::TL_TOPRIGHT, "ChatModeSelMenu", "ChatMode", 200, 3, chatModes);
+
 }
 
 void GameState::itemSelected(OgreBites::SelectMenu* menu)

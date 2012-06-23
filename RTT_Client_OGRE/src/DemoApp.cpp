@@ -36,10 +36,10 @@ DemoApp::~DemoApp()
 void DemoApp::startDemo()
 {
 	new OgreFramework();
-	if(!OgreFramework::getSingletonPtr()->initOgre("AdvancedOgreFramework", 0, 0))
+	if(!OgreFramework::getSingletonPtr()->initOgre("Real Time Tactics Render Window!", 0, 0))
 		return;
 
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Demo initialized!");
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("RTT Client OGRE initialized!");
 
 	m_pAppStateManager = new AppStateManager();
 
