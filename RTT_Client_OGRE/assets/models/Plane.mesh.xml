@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mesh>
+    <sharedgeometry vertexcount="4">
+        <vertexbuffer texture_coords="0" positions="true" colours_diffuse="False" normals="true">
+            <vertex>
+                <position y="0.122564" x="21.600002" z="-21.599998"/>
+                <normal y="1.000000" x="0.000000" z="0.000000"/>
+            </vertex>
+            <vertex>
+                <position y="0.122564" x="-21.599995" z="-21.600008"/>
+                <normal y="1.000000" x="0.000000" z="0.000000"/>
+            </vertex>
+            <vertex>
+                <position y="0.122564" x="-21.600004" z="21.599997"/>
+                <normal y="1.000000" x="0.000000" z="0.000000"/>
+            </vertex>
+            <vertex>
+                <position y="0.122564" x="21.599998" z="21.599998"/>
+                <normal y="1.000000" x="0.000000" z="0.000000"/>
+            </vertex>
+        </vertexbuffer>
+    </sharedgeometry>
+    <submeshes>
+        <submesh usesharedvertices="true" material="_missing_material_" use32bitindexes="False">
+            <faces count="2">
+                <face v1="0" v2="1" v3="2"/>
+                <face v1="0" v2="2" v3="3"/>
+            </faces>
+        </submesh>
+    </submeshes>
+</mesh>
