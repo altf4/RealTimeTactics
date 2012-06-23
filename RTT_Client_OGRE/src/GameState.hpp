@@ -63,6 +63,11 @@ public:
 
 	void update(double timeSinceLastFrame);
 
+	void moveUnit(RTT::RTT_Ogre_Unit &arg);
+	void moveCursor(const RTT::Direction &arg);
+	void showRange(RTT::RTT_Ogre_Unit &arg, bool &arg2);
+	void makeMove(RTT::RTT_Ogre_Unit &arg);
+
 	void buildUnits();
 
 private:

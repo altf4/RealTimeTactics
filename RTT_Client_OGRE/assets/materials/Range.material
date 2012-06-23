@@ -7,23 +7,23 @@ material Range
     {
         pass b2ogre_1329792282.323798
         {
-            ambient 0.0 0.800000011920929 0.12385864555835724 0.10000000149011612
-            diffuse 0.0 0.6400000190734865 0.0990869179231959 0.10000000149011612
+            ambient 0.0 0.800000011920929 0.12385864555835724 0.2
+            diffuse 0.0 0.6400000190734865 0.0990869179231959 0.2
             specular 0.5 0.5 0.5 0.10000000149011612 12.5
-            emissive 0.0 0.0 0.0 0.10000000149011612
-            alpha_to_coverage off
+            emissive 0.0 0.0 0.0 0.2
+            alpha_to_coverage on
             colour_write on
             cull_hardware clockwise
             depth_check on
             depth_func less_equal
-            depth_write on
+            depth_write off
             illumination_stage 
             light_clip_planes off
             light_scissor off
             lighting on
             normalise_normals off
             polygon_mode solid
-            scene_blend one zero
+            scene_blend alpha_blend
             scene_blend_op add
             shading gouraud
             transparent_sorting on
