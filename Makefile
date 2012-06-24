@@ -6,7 +6,9 @@ debug:
 	cd RTT_Client_Core/Debug; $(MAKE)
 	cd RTT_Client_GTK/Debug; $(MAKE)
 	cd RTT_Client_OGRE/Debug; $(MAKE)
-	cp RTT_Client_OGRE/Debug/resources.cfg RTT_Client_OGRE/resources_install.cfg
+	cp RTT_Client_OGRE/Debug/plugins.cfg RTT_Client_OGRE/plugins.cfg
+	cp RTT_Client_OGRE/Debug/resources.cfg RTT_Client_OGRE/resources.cfg
+	cp RTT_Client_OGRE/Debug/ogre.cfg RTT_Client_OGRE/ogre.cfg
 
 clean:
 	cd RTT_Common/Debug; $(MAKE) clean
@@ -26,6 +28,7 @@ install:
 	cp -r RTT_Client_OGRE/assets/ $(DESTDIR)/usr/share/RTT/Ogre/
 	install RTT_Client_OGRE/resources_install.cfg $(DESTDIR)/usr/share/RTT/Ogre/ --mode=644
 	mv $(DESTDIR)/usr/share/RTT/Ogre/resources_install.cfg $(DESTDIR)/usr/share/RTT/Ogre/resources.cfg
+	mkdir -p $(DESTDIR)/var/log/RTT/ --mode=666
 	install RTT_Client_OGRE/plugins.cfg $(DESTDIR)/usr/share/RTT/Ogre/ --mode=644
 	install RTT_Client_OGRE/ogre.cfg $(DESTDIR)/usr/share/RTT/Ogre/ --mode=644
 	install RTT_Client_OGRE/Debug/RTT_Client_OGRE $(DESTDIR)/usr/bin/

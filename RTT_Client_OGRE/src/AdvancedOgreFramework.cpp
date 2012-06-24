@@ -10,6 +10,7 @@
 //|||||||||||||||||||||||||||||||||||||||||||||||
 
 #include "AdvancedOgreFramework.hpp"
+#include <fstream>
 
 //|||||||||||||||||||||||||||||||||||||||||||||||
 
@@ -47,12 +48,98 @@ OgreFramework::~OgreFramework()
 
 bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListener, OIS::MouseListener *pMouseListener)
 {
+	bool useRelativePaths = true;
+
+    //Try to find <things>.cfg in a relative path. (current directory)
+    //	This is useful for debugging. If not found, then try the system
+    //	install path of /usr/share/RTT/Ogre/. If not found there, then
+    //	something is wrong and quit.
+    std::string resourcesFilePath = RESOURCES_CFG_FILENAME;
+    {
+		std::ifstream relativeFile(resourcesFilePath.c_str());
+		if(!relativeFile.good())
+		{
+			useRelativePaths = false;
+			resourcesFilePath = SYSTEM_INSTALL_PATH;
+			resourcesFilePath += RESOURCES_CFG_FILENAME;
+			std::ifstream installPathFile(resourcesFilePath.c_str());
+			if(installPathFile.bad())
+			{
+				std::cerr << "ERROR: resouces.cfg not found in either current directory nor system"
+						" install path. (/usr/share/RTT/Ogre/)";
+				exit(EXIT_FAILURE);
+			}
+			std::cout << "Using /usr/share/RTT/Ogre/resources.cfg\n";
+		}
+		else
+		{
+			std::cout << "Using relative resources.cfg\n";
+		}
+    }
+
+    std::string pluginsFilePath = PLUGINS_CFG_FILENAME;
+    {
+		std::ifstream relativeFile(pluginsFilePath.c_str());
+		if(!relativeFile.good())
+		{
+			useRelativePaths = false;
+			pluginsFilePath = SYSTEM_INSTALL_PATH;
+			pluginsFilePath += PLUGINS_CFG_FILENAME;
+			std::ifstream installPathFile(pluginsFilePath.c_str());
+			if(installPathFile.bad())
+			{
+				std::cerr << "ERROR: plugins.cfg not found in either current directory nor system"
+						" install path. (/usr/share/RTT/Ogre/)";
+				exit(EXIT_FAILURE);
+			}
+			std::cout << "Using /usr/share/RTT/Ogre/plugins.cfg\n";
+		}
+		else
+		{
+			std::cout << "Using relative plugins.cfg\n";
+		}
+    }
+
+    std::string ogrecfgFilePath = OGRE_CFG_FILENAME;
+    {
+		std::ifstream relativeFile(ogrecfgFilePath.c_str());
+		if(!relativeFile.good())
+		{
+			useRelativePaths = false;
+			ogrecfgFilePath = SYSTEM_INSTALL_PATH;
+			ogrecfgFilePath += OGRE_CFG_FILENAME;
+			std::ifstream installPathFile(ogrecfgFilePath.c_str());
+			if(installPathFile.bad())
+			{
+				std::cerr << "ERROR: plugins.cfg not found in either current directory nor system"
+						" install path. (/usr/share/RTT/Ogre/)";
+				exit(EXIT_FAILURE);
+			}
+			std::cout << "Using /usr/share/RTT/Ogre/ogre.cfg\n";
+		}
+		else
+		{
+			std::cout << "Using relative ogre.cfg\n";
+		}
+    }
+
+    std::string ogreLogFilePath;
+	if(useRelativePaths)
+	{
+		ogreLogFilePath = OGRE_LOG_FILENAME;
+	}
+	else
+	{
+		ogreLogFilePath = SYSTEM_LOG_PATH;
+		ogreLogFilePath += OGRE_LOG_FILENAME;
+	}
+
     Ogre::LogManager* logMgr = new Ogre::LogManager();
 
-    m_pLog = Ogre::LogManager::getSingleton().createLog("OgreLogfile.log", true, true, false);
+    m_pLog = Ogre::LogManager::getSingleton().createLog(ogreLogFilePath, true, true, false);
     m_pLog->setDebugOutputEnabled(true);
 
-    m_pRoot = new Ogre::Root();
+    m_pRoot = new Ogre::Root(pluginsFilePath, ogrecfgFilePath, ogreLogFilePath);
 
     if(!(m_pRoot->restoreConfig() || m_pRoot->showConfigDialog()))
         return false;
@@ -90,7 +177,7 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 
     Ogre::String secName, typeName, archName;
     Ogre::ConfigFile cf;
-    cf.load("resources.cfg");
+    cf.load(resourcesFilePath);
 
     Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
     while (seci.hasMoreElements())

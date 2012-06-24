@@ -33,6 +33,13 @@
 
 #include <SdkTrays.h>
 
+#define RESOURCES_CFG_FILENAME "resources.cfg"
+#define PLUGINS_CFG_FILENAME "plugins.cfg"
+#define OGRE_CFG_FILENAME "ogre.cfg"
+#define OGRE_LOG_FILENAME "OgreLogfile.log"
+#define SYSTEM_INSTALL_PATH "/usr/share/RTT/Ogre/"
+#define SYSTEM_LOG_PATH	 "/var/log/RTT/"
+
 //|||||||||||||||||||||||||||||||||||||||||||||||
 
 class OgreFramework : public Ogre::Singleton<OgreFramework>, OIS::KeyListener, OIS::MouseListener

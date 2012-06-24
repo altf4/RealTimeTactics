@@ -47,5 +47,7 @@ RTT_Server/Debug/RTT_Server
 RTT_Client_GTK/Debug/RTT_Client_GTK
 RTT_Ogre_3D/Debug/RTT_Ogre_3D
 RTT_Client_OGRE/Debug/RTT_Client_OGRE
-RTT_Client_OGRE/resources_install.cfg
+RTT_Client_OGRE/resources.cfg
+RTT_Client_OGRE/plugins.cfg
+RTT_Client_OGRE/ogre.cfg
 RemoteSystemsTempFiles
