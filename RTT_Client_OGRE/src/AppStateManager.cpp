@@ -1,33 +1,25 @@
-/*
- * AppStateManager.cpp
- *
- *  Created on: Jun 22, 2012
- *      Author: mark
- */
-
-
-
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
+//============================================================================
+// Name        : AppStateManager.cpp
+// Author      : Mark Petro
+// Copyright   : 2011, GNU GPLv3
+// Description : Built from the Advanced OGRE Framework tutorial found here:
+//	http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Advanced+Ogre+Framework&structure=Tutorials
+//============================================================================
 
 #include "AppStateManager.hpp"
 
 #include <OgreWindowEventUtilities.h>
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
 
 AppStateManager::AppStateManager()
 {
 	m_bShutdown = false;
 }
 
-//|||||||||||||||||||||||||||||||||||||||||||||||
-
 AppStateManager::~AppStateManager()
 {
 	state_info si;
 
-        while(!m_ActiveStateStack.empty())
+	while(!m_ActiveStateStack.empty())
 	{
 		m_ActiveStateStack.back()->exit();
 		m_ActiveStateStack.pop_back();
@@ -36,24 +28,26 @@ AppStateManager::~AppStateManager()
 	while(!m_States.empty())
 	{
 		si = m_States.back();
-                si.state->destroy();
-                m_States.pop_back();
+		si.m_state->destroy();
+		m_States.pop_back();
 	}
 }
 
-void AppStateManager::manageAppState(Ogre::String stateName, AppState* state)
+void AppStateManager::manageAppState(Ogre::String stateName, AppState *state)
 {
 	try
 	{
 		state_info new_state_info;
-		new_state_info.name = stateName;
-		new_state_info.state = state;
+		new_state_info.m_name = stateName;
+		new_state_info.m_state = state;
 		m_States.push_back(new_state_info);
 	}
 	catch(std::exception& e)
 	{
 		delete state;
-		throw Ogre::Exception(Ogre::Exception::ERR_INTERNAL_ERROR, "Error while trying to manage a new AppState\n" + Ogre::String(e.what()), "AppStateManager.cpp (39)");
+		throw Ogre::Exception(Ogre::Exception::ERR_INTERNAL_ERROR,
+				"Error while trying to manage a new AppState\n" + Ogre::String(e.what()),
+				"AppStateManager.cpp (39)");
 	}
 }
 
@@ -61,16 +55,16 @@ AppState* AppStateManager::findByName(Ogre::String stateName)
 {
 	std::vector<state_info>::iterator itr;
 
-	for(itr=m_States.begin();itr!=m_States.end();itr++)
+	for(itr=m_States.begin(); itr!=m_States.end(); itr++)
 	{
-		if(itr->name==stateName)
-			return itr->state;
+		if(itr->m_name == stateName)
+			return itr->m_state;
 	}
 
 	return 0;
 }
 
-void AppStateManager::start(AppState* state)
+void AppStateManager::start(AppState *state)
 {
 	changeAppState(state);
 
@@ -187,9 +181,9 @@ void AppStateManager::shutdown()
 
 void AppStateManager::init(AppState* state)
 {
-    OgreFramework::getSingletonPtr()->m_pKeyboard->setEventCallback(state);
+	OgreFramework::getSingletonPtr()->m_pKeyboard->setEventCallback(state);
 	OgreFramework::getSingletonPtr()->m_pMouse->setEventCallback(state);
-    OgreFramework::getSingletonPtr()->m_pTrayMgr->setListener(state);
+	OgreFramework::getSingletonPtr()->m_pTrayMgr->setListener(state);
 
 	OgreFramework::getSingletonPtr()->m_pRenderWnd->resetStatistics();
 }

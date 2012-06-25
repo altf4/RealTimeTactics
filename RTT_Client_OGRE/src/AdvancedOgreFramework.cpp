@@ -1,61 +1,60 @@
-/*
- * AdvancedOgreFramework.cpp
- *
- *  Created on: Jun 22, 2012
- *      Author: Mark Petro
- *      Built from the Advanced OGRE Framework tutorial found here:
- *      http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Advanced+Ogre+Framework&structure=Tutorials
- */
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
+//============================================================================
+// Name        : AdvancedOgreFramework.cpp
+// Author      : Mark Petro
+// Copyright   : 2011, GNU GPLv3
+// Description : Built from the Advanced OGRE Framework tutorial found here:
+//	http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Advanced+Ogre+Framework&structure=Tutorials
+//============================================================================
 
 #include "AdvancedOgreFramework.hpp"
 #include <fstream>
 
-//|||||||||||||||||||||||||||||||||||||||||||||||
-
 using namespace Ogre;
 
-//|||||||||||||||||||||||||||||||||||||||||||||||
-
-template<> OgreFramework* Ogre::Singleton<OgreFramework>::msSingleton = 0;
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
+template<> OgreFramework *Ogre::Singleton<OgreFramework>::msSingleton = NULL;
 
 OgreFramework::OgreFramework()
 {
-    m_pRoot			= 0;
-    m_pRenderWnd		= 0;
-    m_pViewport			= 0;
-    m_pLog			= 0;
-    m_pTimer			= 0;
+	m_pRoot = NULL;
+	m_pRenderWnd = NULL;
+	m_pViewport = NULL;
+	m_pLog = NULL;
+	m_pTimer = NULL;
 
-    m_pInputMgr			= 0;
-    m_pKeyboard			= 0;
-    m_pMouse			= 0;
-    m_pTrayMgr			= 0;
+	m_pInputMgr = NULL;
+	m_pKeyboard = NULL;
+	m_pMouse = NULL;
+	m_pTrayMgr = NULL;
 }
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
 
 OgreFramework::~OgreFramework()
 {
-    OgreFramework::getSingletonPtr()->m_pLog->logMessage("Shutdown OGRE...");
-    if(m_pTrayMgr)              delete m_pTrayMgr;
-    if(m_pInputMgr)		OIS::InputManager::destroyInputSystem(m_pInputMgr);
-    if(m_pRoot)			delete m_pRoot;
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Shutdown OGRE...");
+	if(m_pTrayMgr)
+	{
+		delete m_pTrayMgr;
+	}
+	if(m_pInputMgr)
+	{
+		OIS::InputManager::destroyInputSystem(m_pInputMgr);
+	}
+	if(m_pRoot)
+	{
+		delete m_pRoot;
+	}
 }
 
-bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListener, OIS::MouseListener *pMouseListener)
+bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListener,
+		OIS::MouseListener *pMouseListener)
 {
 	bool useRelativePaths = true;
 
-    //Try to find <things>.cfg in a relative path. (current directory)
-    //	This is useful for debugging. If not found, then try the system
-    //	install path of /usr/share/RTT/Ogre/. If not found there, then
-    //	something is wrong and quit.
-    std::string resourcesFilePath = RESOURCES_CFG_FILENAME;
-    {
+	//Try to find <things>.cfg in a relative path. (current directory)
+	//	This is useful for debugging. If not found, then try the system
+	//	install path of /usr/share/RTT/Ogre/. If not found there, then
+	//	something is wrong and quit.
+	std::string resourcesFilePath = RESOURCES_CFG_FILENAME;
+	{
 		std::ifstream relativeFile(resourcesFilePath.c_str());
 		if(!relativeFile.good())
 		{
@@ -75,10 +74,10 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 		{
 			std::cout << "Using relative resources.cfg\n";
 		}
-    }
+	}
 
-    std::string pluginsFilePath = PLUGINS_CFG_FILENAME;
-    {
+	std::string pluginsFilePath = PLUGINS_CFG_FILENAME;
+	{
 		std::ifstream relativeFile(pluginsFilePath.c_str());
 		if(!relativeFile.good())
 		{
@@ -98,10 +97,10 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 		{
 			std::cout << "Using relative plugins.cfg\n";
 		}
-    }
+	}
 
-    std::string ogrecfgFilePath = OGRE_CFG_FILENAME;
-    {
+	std::string ogrecfgFilePath = OGRE_CFG_FILENAME;
+	{
 		std::ifstream relativeFile(ogrecfgFilePath.c_str());
 		if(!relativeFile.good())
 		{
@@ -121,9 +120,9 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 		{
 			std::cout << "Using relative ogre.cfg\n";
 		}
-    }
+	}
 
-    std::string ogreLogFilePath;
+	std::string ogreLogFilePath;
 	if(useRelativePaths)
 	{
 		ogreLogFilePath = OGRE_LOG_FILENAME;
@@ -134,128 +133,129 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 		ogreLogFilePath += OGRE_LOG_FILENAME;
 	}
 
-    Ogre::LogManager* logMgr = new Ogre::LogManager();
+	Ogre::LogManager* logMgr = new Ogre::LogManager();
 
-    m_pLog = Ogre::LogManager::getSingleton().createLog(ogreLogFilePath, true, true, false);
-    m_pLog->setDebugOutputEnabled(true);
+	m_pLog = Ogre::LogManager::getSingleton().createLog(ogreLogFilePath, true, true, false);
+	m_pLog->setDebugOutputEnabled(true);
 
-    m_pRoot = new Ogre::Root(pluginsFilePath, ogrecfgFilePath, ogreLogFilePath);
+	m_pRoot = new Ogre::Root(pluginsFilePath, ogrecfgFilePath, ogreLogFilePath);
 
-    if(!(m_pRoot->restoreConfig() || m_pRoot->showConfigDialog()))
-        return false;
+	if(!(m_pRoot->restoreConfig() || m_pRoot->showConfigDialog()))
+		return false;
 
-    m_pRenderWnd = m_pRoot->initialise(true, wndTitle);
+	m_pRenderWnd = m_pRoot->initialise(true, wndTitle);
 
-    m_pViewport = m_pRenderWnd->addViewport(0);
-    m_pViewport->setBackgroundColour(ColourValue(0.5f, 0.5f, 0.5f, 1.0f));
+	m_pViewport = m_pRenderWnd->addViewport(NULL);
+	m_pViewport->setBackgroundColour(ColourValue(0.5f, 0.5f, 0.5f, 1.0f));
 
-    m_pViewport->setCamera(0);
+	m_pViewport->setCamera(NULL);
 
-    size_t hWnd = 0;
-    OIS::ParamList paramList;
-    m_pRenderWnd->getCustomAttribute("WINDOW", &hWnd);
+	size_t hWnd = 0;
+	OIS::ParamList paramList;
+	m_pRenderWnd->getCustomAttribute("WINDOW", &hWnd);
 
-    paramList.insert(OIS::ParamList::value_type("WINDOW", Ogre::StringConverter::toString(hWnd)));
+	paramList.insert(OIS::ParamList::value_type("WINDOW", Ogre::StringConverter::toString(hWnd)));
 
-    m_pInputMgr = OIS::InputManager::createInputSystem(paramList);
+	m_pInputMgr = OIS::InputManager::createInputSystem(paramList);
 
-    m_pKeyboard = static_cast<OIS::Keyboard*>(m_pInputMgr->createInputObject(OIS::OISKeyboard, true));
-    m_pMouse = static_cast<OIS::Mouse*>(m_pInputMgr->createInputObject(OIS::OISMouse, true));
+	m_pKeyboard = static_cast<OIS::Keyboard*>(m_pInputMgr->createInputObject(OIS::OISKeyboard, true));
+	m_pMouse = static_cast<OIS::Mouse*>(m_pInputMgr->createInputObject(OIS::OISMouse, true));
 
-    m_pMouse->getMouseState().height = m_pRenderWnd->getHeight();
-    m_pMouse->getMouseState().width  = m_pRenderWnd->getWidth();
+	m_pMouse->getMouseState().height = m_pRenderWnd->getHeight();
+	m_pMouse->getMouseState().width  = m_pRenderWnd->getWidth();
 
-    if(pKeyListener == 0)
-        m_pKeyboard->setEventCallback(this);
-    else
-        m_pKeyboard->setEventCallback(pKeyListener);
+	if(pKeyListener == NULL)
+	{
+		m_pKeyboard->setEventCallback(this);
+	}
+	else
+	{
+		m_pKeyboard->setEventCallback(pKeyListener);
+	}
 
-    if(pMouseListener == 0)
-        m_pMouse->setEventCallback(this);
-    else
-        m_pMouse->setEventCallback(pMouseListener);
+	if(pMouseListener == NULL)
+	{
+		m_pMouse->setEventCallback(this);
+	}
+	else
+	{
+		m_pMouse->setEventCallback(pMouseListener);
+	}
 
-    Ogre::String secName, typeName, archName;
-    Ogre::ConfigFile cf;
-    cf.load(resourcesFilePath);
+	Ogre::String secName, typeName, archName;
+	Ogre::ConfigFile cf;
+	cf.load(resourcesFilePath);
 
-    Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
-    while (seci.hasMoreElements())
-    {
-        secName = seci.peekNextKey();
-        Ogre::ConfigFile::SettingsMultiMap *settings = seci.getNext();
-        Ogre::ConfigFile::SettingsMultiMap::iterator i;
-        for (i = settings->begin(); i != settings->end(); ++i)
-        {
-            typeName = i->first;
-            archName = i->second;
-            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(archName, typeName, secName);
-        }
-    }
-    Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(5);
-    Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+	Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
+	while (seci.hasMoreElements())
+	{
+		secName = seci.peekNextKey();
+		Ogre::ConfigFile::SettingsMultiMap *settings = seci.getNext();
+		Ogre::ConfigFile::SettingsMultiMap::iterator i;
+		for (i = settings->begin(); i != settings->end(); ++i)
+		{
+			typeName = i->first;
+			archName = i->second;
+			Ogre::ResourceGroupManager::getSingleton().addResourceLocation(archName,
+					typeName, secName);
+		}
+	}
+	Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(5);
+	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
-    m_pTrayMgr = new OgreBites::SdkTrayManager("AOFTrayMgr", m_pRenderWnd, m_pMouse, 0);
+	m_pTrayMgr = new OgreBites::SdkTrayManager("AOFTrayMgr", m_pRenderWnd, m_pMouse, NULL);
 
-    m_pTimer = new Ogre::Timer();
-    m_pTimer->reset();
+	m_pTimer = new Ogre::Timer();
+	m_pTimer->reset();
 
-    m_pRenderWnd->setActive(true);
+	m_pRenderWnd->setActive(true);
 
-    return true;
+	return true;
 }
 
 bool OgreFramework::keyPressed(const OIS::KeyEvent &keyEventRef)
 {
-    if(m_pKeyboard->isKeyDown(OIS::KC_SYSRQ))
-    {
-        m_pRenderWnd->writeContentsToTimestampedFile("AOF_Screenshot_", ".jpg");
-        return true;
-    }
+	if(m_pKeyboard->isKeyDown(OIS::KC_SYSRQ))
+	{
+		m_pRenderWnd->writeContentsToTimestampedFile("AOF_Screenshot_", ".jpg");
+		return true;
+	}
 
-    if(m_pKeyboard->isKeyDown(OIS::KC_O))
-    {
-        if(m_pTrayMgr->isLogoVisible())
-        {
-            m_pTrayMgr->hideFrameStats();
-            m_pTrayMgr->hideLogo();
-        }
-        else
-        {
-            m_pTrayMgr->showFrameStats(OgreBites::TL_BOTTOMLEFT);
-            m_pTrayMgr->showLogo(OgreBites::TL_BOTTOMRIGHT);
-        }
-    }
+	if(m_pKeyboard->isKeyDown(OIS::KC_O))
+	{
+		if(m_pTrayMgr->isLogoVisible())
+		{
+			m_pTrayMgr->hideFrameStats();
+			m_pTrayMgr->hideLogo();
+		}
+		else
+		{
+			m_pTrayMgr->showFrameStats(OgreBites::TL_BOTTOMLEFT);
+			m_pTrayMgr->showLogo(OgreBites::TL_BOTTOMRIGHT);
+		}
+	}
 
-    return true;
+	return true;
 }
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
 
 bool OgreFramework::keyReleased(const OIS::KeyEvent &keyEventRef)
 {
-    return true;
+	return true;
 }
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
 
 bool OgreFramework::mouseMoved(const OIS::MouseEvent &evt)
 {
-    return true;
+	return true;
 }
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
 
 bool OgreFramework::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
-    return true;
+	return true;
 }
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
 
 bool OgreFramework::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
-    return true;
+	return true;
 }
 
 void OgreFramework::updateOgre(double timeSinceLastFrame)

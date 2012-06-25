@@ -28,8 +28,8 @@ namespace RTT
 		int moveRange;
 		Direction facingDir;
 */
-		Ogre::Entity* m_unitEntity;
-		Ogre::SceneNode* m_unitNode;
+		Ogre::Entity *m_unitEntity;
+		Ogre::SceneNode *m_unitNode;
 		int m_locationX;
 		int m_locationY;
 

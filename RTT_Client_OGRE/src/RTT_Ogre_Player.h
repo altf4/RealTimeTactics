@@ -1,9 +1,9 @@
-/*
- * RTT_Ogre_Player.h
- *
- *  Created on: Feb 10, 2012
- *      Author: mark
- */
+//============================================================================
+// Name        : RTT_Ogre_Player.h
+// Author      : Nysomin
+// Copyright   : 2012, GNU GPLv3
+// Description : Loads RTT map data into Ogre
+//============================================================================
 
 #ifndef RTT_OGRE_PLAYER_H_
 #define RTT_OGRE_PLAYER_H_
