@@ -12,9 +12,9 @@ using namespace Ogre;
 
 PauseState::PauseState()
 {
-    m_bQuit             = false;
-    m_bQuestionActive   = false;
-    m_FrameEvent        = Ogre::FrameEvent();
+    m_bQuit = false;
+    m_bQuestionActive = false;
+    m_FrameEvent = Ogre::FrameEvent();
 }
 
 void PauseState::enter()
@@ -56,8 +56,6 @@ void PauseState::createScene()
 {
 }
 
-//|||||||||||||||||||||||||||||||||||||||||||||||
-
 void PauseState::exit()
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leaving PauseState...");
@@ -86,15 +84,11 @@ bool PauseState::keyPressed(const OIS::KeyEvent &keyEventRef)
 	return true;
 }
 
-//|||||||||||||||||||||||||||||||||||||||||||||||
-
 bool PauseState::keyReleased(const OIS::KeyEvent &keyEventRef)
 {
 	OgreFramework::getSingletonPtr()->keyReleased(keyEventRef);
 	return true;
 }
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
 
 bool PauseState::mouseMoved(const OIS::MouseEvent &evt)
 {
@@ -105,8 +99,6 @@ bool PauseState::mouseMoved(const OIS::MouseEvent &evt)
 	return true;
 }
 
-//|||||||||||||||||||||||||||||||||||||||||||||||
-
 bool PauseState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
     if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseDown(evt, id))
@@ -115,8 +107,6 @@ bool PauseState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 	}
     return true;
 }
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
 
 bool PauseState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
@@ -139,8 +129,6 @@ void PauseState::update(double timeSinceLastFrame)
 	}
 }
 
-//|||||||||||||||||||||||||||||||||||||||||||||||
-
 void PauseState::buttonHit(OgreBites::Button *button)
 {
 	if(button->getName() == "ExitBtn")
@@ -158,8 +146,6 @@ void PauseState::buttonHit(OgreBites::Button *button)
 		popAllAndPushAppState(findByName("MenuState"));
 	}
 }
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
 
 void PauseState::yesNoDialogClosed(const Ogre::DisplayString& question, bool yesHit)
 {

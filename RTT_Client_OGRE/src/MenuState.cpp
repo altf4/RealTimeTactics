@@ -13,8 +13,8 @@ using namespace Ogre;
 
 MenuState::MenuState()
 {
-    m_bQuit         = false;
-    m_FrameEvent    = Ogre::FrameEvent();
+    m_bQuit = false;
+    m_FrameEvent = Ogre::FrameEvent();
 }
 
 void MenuState::enter()
@@ -40,9 +40,12 @@ void MenuState::enter()
 	OgreFramework::getSingletonPtr()->m_pTrayMgr->showFrameStats(OgreBites::TL_BOTTOMLEFT);
 	OgreFramework::getSingletonPtr()->m_pTrayMgr->showLogo(OgreBites::TL_BOTTOMRIGHT);
 	OgreFramework::getSingletonPtr()->m_pTrayMgr->showCursor();
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->createButton(OgreBites::TL_CENTER, "EnterBtn", "Enter Match", 250);
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->createButton(OgreBites::TL_CENTER, "ExitBtn", "Exit Real Time Tactics", 250);
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->createLabel(OgreBites::TL_TOP, "MenuLbl", "Menu mode", 250);
+	OgreFramework::getSingletonPtr()->m_pTrayMgr->createButton(
+			OgreBites::TL_CENTER, "EnterBtn", "Enter Match", 250);
+	OgreFramework::getSingletonPtr()->m_pTrayMgr->createButton(
+			OgreBites::TL_CENTER, "ExitBtn", "Exit Real Time Tactics", 250);
+	OgreFramework::getSingletonPtr()->m_pTrayMgr->createLabel(
+			OgreBites::TL_TOP, "MenuLbl", "Menu mode", 250);
 
 	createScene();
 }
@@ -78,15 +81,11 @@ bool MenuState::keyPressed(const OIS::KeyEvent &keyEventRef)
 	return true;
 }
 
-//|||||||||||||||||||||||||||||||||||||||||||||||
-
 bool MenuState::keyReleased(const OIS::KeyEvent &keyEventRef)
 {
 	OgreFramework::getSingletonPtr()->keyReleased(keyEventRef);
 	return true;
 }
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
 
 bool MenuState::mouseMoved(const OIS::MouseEvent &evt)
 {
@@ -97,8 +96,6 @@ bool MenuState::mouseMoved(const OIS::MouseEvent &evt)
 	return true;
 }
 
-//|||||||||||||||||||||||||||||||||||||||||||||||
-
 bool MenuState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
 	if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseDown(evt, id))
@@ -107,8 +104,6 @@ bool MenuState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 	}
 	return true;
 }
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
 
 bool MenuState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
