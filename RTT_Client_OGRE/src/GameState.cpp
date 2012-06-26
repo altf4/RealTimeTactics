@@ -97,8 +97,6 @@ bool GameState::pause()
 	return true;
 }
 
-//|||||||||||||||||||||||||||||||||||||||||||||||
-
 void GameState::resume()
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Resuming GameState...");
@@ -505,8 +503,6 @@ bool GameState::mouseMoved(const OIS::MouseEvent &evt)
 	return true;
 }
 
-//|||||||||||||||||||||||||||||||||||||||||||||||
-
 bool GameState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
 	if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseDown(evt, id)) return true;
@@ -523,8 +519,6 @@ bool GameState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 
 	return true;
 }
-
-//|||||||||||||||||||||||||||||||||||||||||||||||
 
 bool GameState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
