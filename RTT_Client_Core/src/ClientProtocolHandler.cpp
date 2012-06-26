@@ -42,6 +42,9 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		return -1;
 	}
 
+	MessageManager::Instance().DeleteQueue(socketFD);
+	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+
 	//Zero out the socket struct
 	memset(&stSockAddr, 0, sizeof(stSockAddr));
 
@@ -68,7 +71,6 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		close(socketFD);
 		return -1;
 	}
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
 
 	//***************************
 	// Send client Hello
