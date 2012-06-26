@@ -9,8 +9,8 @@
 #ifndef OGRE_DEMO_HPP
 #define OGRE_DEMO_HPP
 
-#include "AdvancedOgreFramework.hpp"
-#include "AppStateManager.hpp"
+#include "AdvancedOgreFramework.h"
+#include "AppStateManager.h"
 
 class DemoApp
 {

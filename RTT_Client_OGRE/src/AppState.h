@@ -9,7 +9,7 @@
 #ifndef APP_STATE_HPP
 #define APP_STATE_HPP
 
-#include "AdvancedOgreFramework.hpp"
+#include "AdvancedOgreFramework.h"
 
 class AppState;
 

@@ -9,7 +9,7 @@
 #ifndef PAUSE_STATE_HPP
 #define PAUSE_STATE_HPP
 
-#include "AppState.hpp"
+#include "AppState.h"
 
 class PauseState : public AppState
 {

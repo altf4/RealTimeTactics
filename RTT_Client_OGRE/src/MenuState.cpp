@@ -7,7 +7,7 @@
 //	http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Advanced+Ogre+Framework&structure=Tutorials
 //============================================================================
 
-#include "MenuState.hpp"
+#include "MenuState.h"
 
 using namespace Ogre;
 

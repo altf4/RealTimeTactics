@@ -8,7 +8,7 @@
 #ifndef RTT_OGRE_MAP_H_
 #define RTT_OGRE_MAP_H_
 
-#include "GameState.hpp"
+#include "GameState.h"
 
 namespace RTT
 {

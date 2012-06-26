@@ -6,7 +6,7 @@
 //	http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Advanced+Ogre+Framework&structure=Tutorials
 //============================================================================
 
-#include "PauseState.hpp"
+#include "PauseState.h"
 
 using namespace Ogre;
 

@@ -6,10 +6,10 @@
 //	http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Advanced+Ogre+Framework&structure=Tutorials
 //============================================================================
 
-#include "DemoApp.hpp"
-#include "MenuState.hpp"
-#include "GameState.hpp"
-#include "PauseState.hpp"
+#include "DemoApp.h"
+#include "MenuState.h"
+#include "GameState.h"
+#include "PauseState.h"
 
 DemoApp::DemoApp()
 {

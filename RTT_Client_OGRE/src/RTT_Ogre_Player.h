@@ -10,7 +10,7 @@
 
 
 #include "RTT_Ogre_Unit.h"
-#include "AdvancedOgreFramework.hpp"
+#include "AdvancedOgreFramework.h"
 #include "Enums.h"
 
 #include <vector>

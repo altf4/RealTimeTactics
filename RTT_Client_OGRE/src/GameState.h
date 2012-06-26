@@ -9,7 +9,7 @@
 #ifndef GAME_STATE_HPP
 #define GAME_STATE_HPP
 
-#include "AppState.hpp"
+#include "AppState.h"
 #include "RTT_Ogre_Unit.h"
 #include "RTT_Ogre_Player.h"
 

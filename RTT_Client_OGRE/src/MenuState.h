@@ -9,7 +9,7 @@
 #ifndef MENU_STATE_HPP
 #define MENU_STATE_HPP
 
-#include "AppState.hpp"
+#include "AppState.h"
 
 class MenuState : public AppState
 {
