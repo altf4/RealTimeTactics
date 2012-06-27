@@ -55,6 +55,9 @@
 									<listOptionValue builtIn="false" value="crypto"/>
 								</option>
 								<option id="gnu.cpp.link.option.shared.531223114" name="Shared (-shared)" superClass="gnu.cpp.link.option.shared" value="false" valueType="boolean"/>
+								<option id="gnu.cpp.link.option.paths.2094733441" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="../../RTT_Client_Core/Debug/"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1081074414" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -103,15 +106,17 @@
 								<option id="gnu.cpp.compiler.exe.release.option.debugging.level.11963" name="Debug Level" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1844977306" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/usr/local/lib"/>
-									<listOptionValue builtIn="false" value="&quot;${OGRE_LOC}/Samples/Common/include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OGRE_LOC}/include&quot;"/>
-									<listOptionValue builtIn="false" value="&quot;${OGRE_LOC}/OgreMain/include&quot;"/>
+									<listOptionValue builtIn="false" value="../../RTT_Client_Core/src"/>
+									<listOptionValue builtIn="false" value="../../RTT_Common/src"/>
+									<listOptionValue builtIn="false" value="/usr/local/include/OGRE/Terrain"/>
 									<listOptionValue builtIn="false" value="/usr/local/include/CEGUI"/>
 									<listOptionValue builtIn="false" value="/usr/include/OIS"/>
 									<listOptionValue builtIn="false" value="/usr/local/lib/OGRE"/>
 									<listOptionValue builtIn="false" value="/usr/local/include/OGRE"/>
 									<listOptionValue builtIn="false" value="/usr/local/include"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.other.pic.182688306" name="Position Independent Code (-fPIC)" superClass="gnu.cpp.compiler.option.other.pic" value="true" valueType="boolean"/>
+								<option id="gnu.cpp.compiler.option.other.other.837236241" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1075112727" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1750973959" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release">
@@ -121,8 +126,15 @@
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.1265067185" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.2077343474" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
-								<option id="gnu.cpp.link.option.other.731987557" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" valueType="stringList">
+								<option id="gnu.cpp.link.option.other.731987557" name="Other options (-Xlinker [option])" superClass="gnu.cpp.link.option.other" valueType="stringList"/>
+								<option id="gnu.cpp.link.option.libs.9573581" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="OgreMain"/>
+									<listOptionValue builtIn="false" value="RTT_Client_Core"/>
+									<listOptionValue builtIn="false" value="OIS"/>
+									<listOptionValue builtIn="false" value="crypto"/>
+								</option>
+								<option id="gnu.cpp.link.option.paths.1750960526" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="../../RTT_Client_Core/Release/"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.607590003" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -141,6 +153,7 @@
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="packages"/>
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">

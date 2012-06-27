@@ -44,7 +44,7 @@ all: RTT_Client_GTK
 RTT_Client_GTK: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++  -o "RTT_Client_GTK" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L../../RTT_Common/Release -L../../RTT_Client_Core/Release -o "RTT_Client_GTK" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 

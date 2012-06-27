@@ -8,6 +8,8 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
+-include src/messaging/messages/subdir.mk
+-include src/messaging/subdir.mk
 -include src/subdir.mk
 -include subdir.mk
 -include objects.mk
@@ -38,19 +40,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: libRTT_Client_Core.so
+all: libRTT_Common.a
 
 # Tool invocations
-libRTT_Client_Core.so: $(OBJS) $(USER_OBJS)
+libRTT_Common.a: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
-	@echo 'Invoking: GCC C++ Linker'
-	g++ -L../../RTT_Common/Release -shared -o "libRTT_Client_Core.so" $(OBJS) $(USER_OBJS) $(LIBS)
+	@echo 'Invoking: GCC Archiver'
+	ar -r  "libRTT_Common.a" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(LIBRARIES)$(CPP_DEPS)$(CXX_DEPS)$(C_UPPER_DEPS) libRTT_Client_Core.so
+	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(ARCHIVES)$(CPP_DEPS)$(CXX_DEPS)$(C_UPPER_DEPS) libRTT_Common.a
 	-@echo ' '
 
 .PHONY: all clean dependents

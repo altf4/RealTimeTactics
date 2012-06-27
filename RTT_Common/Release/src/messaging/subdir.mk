@@ -4,26 +4,23 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
-../src/CallbackHandler.cpp \
-../src/RTT_Client_GTK.cpp \
-../src/WelcomeWindow.cpp 
+../src/messaging/MessageManager.cpp \
+../src/messaging/MessageQueue.cpp 
 
 OBJS += \
-./src/CallbackHandler.o \
-./src/RTT_Client_GTK.o \
-./src/WelcomeWindow.o 
+./src/messaging/MessageManager.o \
+./src/messaging/MessageQueue.o 
 
 CPP_DEPS += \
-./src/CallbackHandler.d \
-./src/RTT_Client_GTK.d \
-./src/WelcomeWindow.d 
+./src/messaging/MessageManager.d \
+./src/messaging/MessageQueue.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes
-src/%.o: ../src/%.cpp
+src/messaging/%.o: ../src/messaging/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I../../RTT_Client_Core/src -I../../RTT_Common/src -O3 -Wall -c -fmessage-length=0 -pthread -DGSEAL_ENABLE -fPIC `pkg-config --cflags glib-2.0 gtkmm-3.0` -std=c++0x -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -O3 -Wall -c -fmessage-length=0  -std=c++0x -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 

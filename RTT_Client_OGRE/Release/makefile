@@ -38,19 +38,19 @@ endif
 # Add inputs and outputs from these tool invocations to the build variables 
 
 # All Target
-all: libRTT_Client_Core.so
+all: RTT_Client_OGRE
 
 # Tool invocations
-libRTT_Client_Core.so: $(OBJS) $(USER_OBJS)
+RTT_Client_OGRE: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L../../RTT_Common/Release -shared -o "libRTT_Client_Core.so" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L../../RTT_Client_Core/Release/ -o "RTT_Client_OGRE" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(LIBRARIES)$(CPP_DEPS)$(CXX_DEPS)$(C_UPPER_DEPS) libRTT_Client_Core.so
+	-$(RM) $(OBJS)$(C++_DEPS)$(C_DEPS)$(CC_DEPS)$(CPP_DEPS)$(EXECUTABLES)$(CXX_DEPS)$(C_UPPER_DEPS) RTT_Client_OGRE
 	-@echo ' '
 
 .PHONY: all clean dependents

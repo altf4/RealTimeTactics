@@ -30,6 +30,7 @@
 									<listOptionValue builtIn="false" value="../../RTT_Client_Core/src"/>
 									<listOptionValue builtIn="false" value="../../RTT_Common/src"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.other.pic.913931821" name="Position Independent Code (-fPIC)" superClass="gnu.cpp.compiler.option.other.pic" value="false" valueType="boolean"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1010458151" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.1549540931" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
@@ -92,7 +93,11 @@
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
-				<externalSettings containerId="org.eclipse.cdt.managedbuilder.pkgconfig.extSettings" factoryId="org.eclipse.cdt.core.extension.container.factory"/>
+				<externalSettings containerId="org.eclipse.cdt.managedbuilder.pkgconfig.extSettings" factoryId="org.eclipse.cdt.core.extension.container.factory">
+					<externalSetting contentTypes="org.eclipse.cdt.managedbuilder.core.compiledObjectFile"/>
+					<externalSetting contentTypes="org.eclipse.cdt.core.cxxSource"/>
+					<externalSetting contentTypes="org.eclipse.cdt.core.cSource"/>
+				</externalSettings>
 			</storageModule>
 			<storageModule moduleId="packages"/>
 		</cconfiguration>
@@ -118,16 +123,52 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release.1158374081" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.release">
 								<option id="gnu.cpp.compiler.exe.release.option.optimization.level.443061392" name="Optimization Level" superClass="gnu.cpp.compiler.exe.release.option.optimization.level" value="gnu.cpp.compiler.optimization.level.most" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.exe.release.option.debugging.level.2059663148" name="Debug Level" superClass="gnu.cpp.compiler.exe.release.option.debugging.level" value="gnu.cpp.compiler.debugging.level.none" valueType="enumerated"/>
-								<option id="gnu.cpp.compiler.option.other.other.727048464" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 `pkg-config --cflags glib-2.0 gtkmm-3.0`" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.727048464" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -pthread -DGSEAL_ENABLE -fPIC `pkg-config --cflags glib-2.0 gtkmm-3.0` -std=c++0x" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.include.paths.281989182" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
+									<listOptionValue builtIn="false" value="../../RTT_Client_Core/src"/>
+									<listOptionValue builtIn="false" value="../../RTT_Common/src"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.979084456" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1297671937" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release">
 								<option defaultValue="gnu.c.optimization.level.most" id="gnu.c.compiler.exe.release.option.optimization.level.1485402208" name="Optimization Level" superClass="gnu.c.compiler.exe.release.option.optimization.level" valueType="enumerated"/>
 								<option id="gnu.c.compiler.exe.release.option.debugging.level.1636736288" name="Debug Level" superClass="gnu.c.compiler.exe.release.option.debugging.level" value="gnu.c.debugging.level.none" valueType="enumerated"/>
+								<option id="gnu.c.compiler.option.include.paths.1268536389" name="Include paths (-I)" superClass="gnu.c.compiler.option.include.paths" valueType="includePath"/>
 								<inputType id="cdt.managedbuild.tool.gnu.c.compiler.input.1603490447" superClass="cdt.managedbuild.tool.gnu.c.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.release.1453345098" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.release"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.127138959" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
+								<option id="gnu.cpp.link.option.paths.132660666" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="../../RTT_Common/Release"/>
+									<listOptionValue builtIn="false" value="../../RTT_Client_Core/Release"/>
+								</option>
+								<option id="gnu.cpp.link.option.flags.1135252894" name="Linker flags" superClass="gnu.cpp.link.option.flags" value="" valueType="string"/>
+								<option id="gnu.cpp.link.option.libs.2126857333" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="glib-2.0"/>
+									<listOptionValue builtIn="false" value="boost_date_time"/>
+									<listOptionValue builtIn="false" value="pthread"/>
+									<listOptionValue builtIn="false" value="gtkmm-3.0"/>
+									<listOptionValue builtIn="false" value="atkmm-1.6"/>
+									<listOptionValue builtIn="false" value="gdkmm-3.0"/>
+									<listOptionValue builtIn="false" value="giomm-2.4"/>
+									<listOptionValue builtIn="false" value="pangomm-1.4"/>
+									<listOptionValue builtIn="false" value="gtk-3"/>
+									<listOptionValue builtIn="false" value="glibmm-2.4"/>
+									<listOptionValue builtIn="false" value="cairomm-1.0"/>
+									<listOptionValue builtIn="false" value="gdk-3"/>
+									<listOptionValue builtIn="false" value="atk-1.0"/>
+									<listOptionValue builtIn="false" value="gio-2.0"/>
+									<listOptionValue builtIn="false" value="pangocairo-1.0"/>
+									<listOptionValue builtIn="false" value="gdk_pixbuf-2.0"/>
+									<listOptionValue builtIn="false" value="cairo-gobject"/>
+									<listOptionValue builtIn="false" value="pango-1.0"/>
+									<listOptionValue builtIn="false" value="cairo"/>
+									<listOptionValue builtIn="false" value="sigc-2.0"/>
+									<listOptionValue builtIn="false" value="gobject-2.0"/>
+									<listOptionValue builtIn="false" value="RTT_Common"/>
+									<listOptionValue builtIn="false" value="RTT_Client_Core"/>
+									<listOptionValue builtIn="false" value="crypto"/>
+								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1454747231" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>
@@ -144,7 +185,14 @@
 					</sourceEntries>
 				</configuration>
 			</storageModule>
-			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
+			<storageModule moduleId="org.eclipse.cdt.core.externalSettings">
+				<externalSettings containerId="org.eclipse.cdt.managedbuilder.pkgconfig.extSettings" factoryId="org.eclipse.cdt.core.extension.container.factory">
+					<externalSetting contentTypes="org.eclipse.cdt.managedbuilder.core.compiledObjectFile"/>
+					<externalSetting contentTypes="org.eclipse.cdt.core.cxxSource"/>
+					<externalSetting contentTypes="org.eclipse.cdt.core.cSource"/>
+				</externalSettings>
+			</storageModule>
+			<storageModule CEGUI="false" CEGUI-OGRE="false" CEGUI-OPENGL="false" OGRE="false" OGRE-PCZ="false" OGRE-Paging="false" OGRE-Property="false" OGRE-RTShaderSystem="false" OGRE-Terrain="false" OIS="false" Qt3Support="false" QtCLucene="false" QtCore="false" QtDBus="false" QtDeclarative="false" QtDesigner="false" QtDesignerComponents="false" QtGui="false" QtHelp="false" QtNetwork="false" QtOpenGL="false" QtScript="false" QtScriptTools="false" QtSql="false" QtSvg="false" QtTest="false" QtUiTools="false" QtWebKit="false" QtXml="false" QtXmlPatterns="false" apr-1="false" apr-util-1="false" atk="false" atkmm-1.6="false" cairo="false" cairo-fc="false" cairo-ft="false" cairo-gobject="false" cairo-pdf="false" cairo-png="false" cairo-ps="false" cairo-svg="false" cairo-xcb="false" cairo-xcb-shm="false" cairo-xlib="false" cairo-xlib-xrender="false" cairomm-1.0="false" cairomm-ft-1.0="false" cairomm-pdf-1.0="false" cairomm-png-1.0="false" cairomm-ps-1.0="false" cairomm-svg-1.0="false" cairomm-xlib-1.0="false" cairomm-xlib-xrender-1.0="false" com_err="false" compositeproto="false" cppunit="false" damageproto="false" dbus-python="false" dri="false" fixesproto="false" fontconfig="false" fontutil="false" form="false" freetype2="false" gdk-3.0="false" gdk-pixbuf-2.0="false" gdk-pixbuf-xlib-2.0="false" gdk-x11-3.0="false" gdkmm-3.0="false" ginn="false" gio-2.0="false" gio-unix-2.0="false" giomm-2.4="false" gl="false" glib-2.0="false" glibmm-2.4="false" glu="false" gmodule-2.0="false" gmodule-export-2.0="false" gmodule-no-export-2.0="false" gnome-icon-theme="false" gnutls="false" gnutls-extra="false" gobject-2.0="false" gthread-2.0="false" gtkmm-3.0="false" gtkplus-3.0="false" gtkplus-unix-print-3.0="false" gtkplus-x11-3.0="false" ibus-table="false" ibus-table-extraphrase="false" ice="false" inputproto="false" iso-codes="false" kbproto="false" libbsd="false" libbsd-overlay="false" libcrypto="false" libcryptoplusplus="false" libcurl="false" libdrm="false" libdrm_intel="false" libdrm_nouveau="false" libdrm_radeon="false" libedit="false" libevent="false" libevent_openssl="false" libevent_pthreads="false" libffi="false" libidn="false" libkms="false" libnotify="false" libpcre="false" libpcrecpp="false" libpcreposix="false" libpng="false" libpng12="false" libquvi-scripts="false" librtmp="false" libssl="false" libtasn1="false" m17n-db="false" menu="false" mobile-broadband-provider-info="false" moduleId="packages" nautilus-sendto="false" ncurses="false" ncursesplusplus="false" notify-python="false" openal="false" openssl="false" p11-kit-1="false" panel="false" pango="false" pangocairo="false" pangoft2="false" pangomm-1.4="false" pangox="false" pangoxft="false" pixman-1="false" pm-utils="false" pthread-stubs="false" pygoocanvas="false" pygtksourceview-2.0="false" randrproto="false" renderproto="false" scrnsaverproto="false" shared-mime-info="false" sigcplusplus-2.0="false" sm="false" sqlite3="false" tic="false" tinfo="false" udev="false" udisks="false" usbutils="false" uuid="false" x11="false" xau="false" xaw7="false" xbitmaps="false" xcb="false" xcb-render="false" xcb-shm="false" xcomposite="false" xcursor="false" xdamage="false" xdmcp="false" xext="false" xextproto="false" xf86vidmodeproto="false" xfixes="false" xft="false" xi="false" xinerama="false" xineramaproto="false" xkeyboard-config="false" xmu="false" xorg-sgml-doctools="false" xorg-wacom="false" xpm="false" xproto="false" xrandr="false" xrender="false" xscrnsaver="false" xt="false" xtrans="false" xxf86vm="false" yelp-xsl="false" zlib="false" zzip-zlib-config="false" zzipfseeko="false" zziplib="false" zzipmmapped="false" zzipwrap="false"/>
 		</cconfiguration>
 	</storageModule>
 	<storageModule moduleId="cdtBuildSystem" version="4.0.0">

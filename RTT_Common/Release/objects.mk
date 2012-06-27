@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lRTT_Common
+LIBS :=
 

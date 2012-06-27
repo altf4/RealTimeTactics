@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lRTT_Common
+LIBS := -lOgreMain -lRTT_Client_Core -lOIS -lcrypto
 
