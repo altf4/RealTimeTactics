@@ -133,7 +133,7 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 		ogreLogFilePath += OGRE_LOG_FILENAME;
 	}
 
-	Ogre::LogManager* logMgr = new Ogre::LogManager();
+	new Ogre::LogManager();
 
 	m_pLog = Ogre::LogManager::getSingleton().createLog(ogreLogFilePath, true, true, false);
 	m_pLog->setDebugOutputEnabled(true);

@@ -132,7 +132,10 @@ void CallbackHandler::CallbackThread()
 				m_sig_match_started();
 
 				//The actual game!!!!
-				system("RTT_Ogre_3D");
+				if(system("RTT_Ogre_3D") < 0)
+				{
+					//Failure
+				}
 
 				break;
 			}
