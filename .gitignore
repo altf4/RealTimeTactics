@@ -57,3 +57,6 @@ RTT_Client_OGRE/resources.cfg
 RTT_Client_OGRE/plugins.cfg
 RTT_Client_OGRE/ogre.cfg
 RemoteSystemsTempFiles
+
+#OGRE Screenshots
+AOF_Screenshot_*
