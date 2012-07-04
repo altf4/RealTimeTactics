@@ -1,0 +1,29 @@
+<?xml version="1.0" ?>
+<GUILayout>
+	<Window Type="DefaultWindow" Name="DemoLayout">
+		<Window Type="TaharezLook/FrameWindow" Name="Main">
+	            <Property Name="RelativeMinSize" Value="w:0.2 h:0.2" />
+        	    <Property Name="RelativeMaxSize" Value="w:1.0 h:1.0" />
+	            <Property Name="Position" Value="x:0.0 y:0.0" />
+	            <Property Name="Size" Value="w:1.0 h:1.0" />
+	            <Property Name="Text" Value="MyProject" />
+	            <Property Name="CloseButtonEnabled" Value="False" />
+
+			<Window Type="TaharezLook/Button" Name="cmdQuit">
+				<Property Name="Text" Value="Quit" />
+	        		<Property Name="Position" Value="x:0.4 y:0.7" />
+			        <Property Name="Size" Value="w:0.2 h:0.07" />
+			</Window>
+			<Window Type="TaharezLook/Button" Name="cmdOptions">
+	        		<Property Name="Position" Value="x:0.4 y:0.6" />
+			        <Property Name="Size" Value="w:0.2 h:0.07" />
+				<Property Name="Text" Value="Options" />
+			</Window>
+			<Window Type="TaharezLook/Button" Name="cmdInstantAction">
+	        		<Property Name="Position" Value="x:0.4 y:0.5" />
+			        <Property Name="Size" Value="w:0.2 h:0.07" />
+				<Property Name="Text" Value="InstantAction" />
+			</Window>
+			</Window>
+		</Window>
+</GUILayout>
