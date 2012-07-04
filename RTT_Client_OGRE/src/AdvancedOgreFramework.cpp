@@ -24,16 +24,22 @@ OgreFramework::OgreFramework()
 	m_pInputMgr = NULL;
 	m_pKeyboard = NULL;
 	m_pMouse = NULL;
-	m_pTrayMgr = NULL;
+	//m_pTrayMgr = NULL;
+
+	//m_pDebugOverlay = NULL;
+	//m_pInfoOverlay = NULL;
+	m_iNumScreenShots = 0;
 }
 
 OgreFramework::~OgreFramework()
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Shutdown OGRE...");
+	/*
 	if(m_pTrayMgr)
 	{
 		delete m_pTrayMgr;
 	}
+	*/
 	if(m_pInputMgr)
 	{
 		OIS::InputManager::destroyInputSystem(m_pInputMgr);
@@ -203,10 +209,23 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 	Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(5);
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
-	m_pTrayMgr = new OgreBites::SdkTrayManager("AOFTrayMgr", m_pRenderWnd, m_pMouse, NULL);
+	//m_pTrayMgr = new OgreBites::SdkTrayManager("AOFTrayMgr", m_pRenderWnd, m_pMouse, NULL);
 
 	m_pTimer = new Ogre::Timer();
 	m_pTimer->reset();
+
+	m_pGUIRenderer = &CEGUI::OgreRenderer::bootstrapSystem(*m_pRenderWnd);
+	m_pGUISystem = CEGUI::System::getSingletonPtr();
+
+	CEGUI::SchemeManager::getSingleton().create((CEGUI::utf8*)"TaharezLookSkin.scheme");
+	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"AdvancedOgreFramework.layout");
+	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"AdvancedOgreFramework_Game.layout");
+
+	m_pDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
+
+	//#############################################
+	//m_pDebugOverlay->show();  //WARNING!  WILL LOCK OUT INPUT!!!
+	//#############################################
 
 	m_pRenderWnd->setActive(true);
 
@@ -223,15 +242,12 @@ bool OgreFramework::keyPressed(const OIS::KeyEvent &keyEventRef)
 
 	if(m_pKeyboard->isKeyDown(OIS::KC_O))
 	{
-		if(m_pTrayMgr->isLogoVisible())
+		if(m_pDebugOverlay)
 		{
-			m_pTrayMgr->hideFrameStats();
-			m_pTrayMgr->hideLogo();
-		}
-		else
-		{
-			m_pTrayMgr->showFrameStats(OgreBites::TL_BOTTOMLEFT);
-			m_pTrayMgr->showLogo(OgreBites::TL_BOTTOMRIGHT);
+			if(!m_pDebugOverlay->isVisible())
+				m_pDebugOverlay->show();
+			else
+				m_pDebugOverlay->hide();
 		}
 	}
 

@@ -52,7 +52,11 @@ public:
 	bool mouseReleased(const OIS::MouseEvent &arg, OIS::MouseButtonID id);
 
 	void onLeftPressed(const OIS::MouseEvent &evt);
-	void itemSelected(OgreBites::SelectMenu* menu);
+	//void itemSelected(OgreBites::SelectMenu* menu);
+	bool onExitButtonGame(const CEGUI::EventArgs &args);
+
+	void setBufferedMode();
+	void setUnbufferedMode();
 
 	void update(double timeSinceLastFrame);
 
@@ -69,7 +73,7 @@ public:
 	Ogre::MaterialPtr m_pOgreHeadMat;
 	Ogre::MaterialPtr m_pOgreHeadMatHigh;
 
-	OgreBites::ParamsPanel *m_pDetailsPanel;
+	//OgreBites::ParamsPanel *m_pDetailsPanel;
 	bool m_bQuit;
 
 	Ogre::Vector3 m_TranslateVector;
@@ -82,10 +86,16 @@ public:
 	Ogre::SceneNode *m_pCurrentObject;
 	Ogre::Entity *m_pCurrentEntity;
 	bool m_bLMouseDown, m_bRMouseDown;
+
+	//TODO: these two may be the same
 	bool m_bSettingsMode;
+	bool m_bChatMode;
+
 	bool m_isMoving;
 	RTT::RTT_Ogre_Player m_mainPlayer;
 	RTT::RTT_Ogre_Unit m_playerCursor;
+	CEGUI::Window *m_pMainWnd;
+	CEGUI::Window *m_pChatWnd;
 };
 
 #endif

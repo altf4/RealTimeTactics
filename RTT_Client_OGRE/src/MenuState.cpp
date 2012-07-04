@@ -36,6 +36,7 @@ void MenuState::enter()
 
 	OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
 
+/*
 	OgreFramework::getSingletonPtr()->m_pTrayMgr->destroyAllWidgets();
 	OgreFramework::getSingletonPtr()->m_pTrayMgr->showFrameStats(OgreBites::TL_BOTTOMLEFT);
 	OgreFramework::getSingletonPtr()->m_pTrayMgr->showLogo(OgreBites::TL_BOTTOMRIGHT);
@@ -46,6 +47,28 @@ void MenuState::enter()
 			OgreBites::TL_CENTER, "ExitBtn", "Exit Real Time Tactics", 250);
 	OgreFramework::getSingletonPtr()->m_pTrayMgr->createLabel(
 			OgreBites::TL_TOP, "MenuLbl", "Menu mode", 250);
+*/
+
+	OgreFramework::getSingletonPtr()->m_pKeyboard->setEventCallback(this);
+	OgreFramework::getSingletonPtr()->m_pMouse->setEventCallback(this);
+
+	//OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(m_pSceneMgr);
+
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setDefaultMouseCursor((CEGUI::utf8*)"TaharezLook", (CEGUI::utf8*)"MouseArrow");
+	CEGUI::MouseCursor::getSingleton().setImage("TaharezLook", "MouseArrow");
+	const OIS::MouseState state = OgreFramework::getSingletonPtr()->m_pMouse->getMouseState();
+	CEGUI::Point mousePos = CEGUI::MouseCursor::getSingleton().getPosition();
+	CEGUI::System::getSingleton().injectMouseMove(state.X.abs-mousePos.d_x,state.Y.abs-mousePos.d_y);
+
+	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("AOF_GUI");
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
+
+	CEGUI::PushButton *button = (CEGUI::PushButton*)pMainWnd->getChild("ExitButton");
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&MenuState::onExitButton, this));
+	button = (CEGUI::PushButton*)pMainWnd->getChild("EnterButton");
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&MenuState::onEnterButton, this));
+
+	m_bQuit = false;
 
 	createScene();
 }
@@ -54,19 +77,42 @@ void MenuState::createScene()
 {
 }
 
+bool MenuState::pause()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Pausing MenuState...");
+
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(0);
+	//OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(0);
+
+	return true;
+}
+
+void MenuState::resume()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Resuming MenuState...");
+
+	OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
+	//OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(m_pSceneMgr);
+
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(CEGUI::WindowManager::getSingleton().getWindow("AOF_GUI"));
+
+	m_bQuit = false;
+}
+
 void MenuState::exit()
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leaving MenuState...");
 
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(0);
 	m_pSceneMgr->destroyCamera(m_pCamera);
 	if(m_pSceneMgr)
 	{
 		OgreFramework::getSingletonPtr()->m_pRoot->destroySceneManager(m_pSceneMgr);
 	}
 
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->clearAllTrays();
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->destroyAllWidgets();
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->setListener(0);
+	//OgreFramework::getSingletonPtr()->m_pTrayMgr->clearAllTrays();
+	//OgreFramework::getSingletonPtr()->m_pTrayMgr->destroyAllWidgets();
+	//OgreFramework::getSingletonPtr()->m_pTrayMgr->setListener(0);
 }
 
 bool MenuState::keyPressed(const OIS::KeyEvent &keyEventRef)
@@ -89,35 +135,44 @@ bool MenuState::keyReleased(const OIS::KeyEvent &keyEventRef)
 
 bool MenuState::mouseMoved(const OIS::MouseEvent &evt)
 {
-	if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseMove(evt))
-	{
-		return true;
-	}
+	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseWheelChange(evt.state.Z.rel);
+	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseMove(evt.state.X.rel, evt.state.Y.rel);
+
+	//if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseMove(evt))
+	//{
+	//	return true;
+	//}
 	return true;
 }
 
 bool MenuState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
-	if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseDown(evt, id))
-	{
-		return true;
-	}
+	if(id == OIS::MB_Left)
+		OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseButtonDown(CEGUI::LeftButton);
+
+	//if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseDown(evt, id))
+	//{
+	//	return true;
+	//}
 	return true;
 }
 
 bool MenuState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
-	if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseUp(evt, id))
-	{
-		return true;
-	}
+	if(id == OIS::MB_Left)
+		OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseButtonUp(CEGUI::LeftButton);
+
+	//if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseUp(evt, id))
+	//{
+	//	return true;
+	//}
 	return true;
 }
 
 void MenuState::update(double timeSinceLastFrame)
 {
 	m_FrameEvent.timeSinceLastFrame = timeSinceLastFrame;
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->frameRenderingQueued(m_FrameEvent);
+	//OgreFramework::getSingletonPtr()->m_pTrayMgr->frameRenderingQueued(m_FrameEvent);
 
 	if(m_bQuit == true)
 	{
@@ -125,7 +180,7 @@ void MenuState::update(double timeSinceLastFrame)
 		return;
 	}
 }
-
+/*
 void MenuState::buttonHit(OgreBites::Button *button)
 {
 	if(button->getName() == "ExitBtn")
@@ -136,4 +191,20 @@ void MenuState::buttonHit(OgreBites::Button *button)
 	{
 		changeAppState(findByName("GameState"));
 	}
+}
+*/
+
+bool MenuState::onExitButton(const CEGUI::EventArgs &args)
+{
+	m_bQuit = true;
+	return true;
+}
+
+//|||||||||||||||||||||||||||||||||||||||||||||||
+
+bool MenuState::onEnterButton(const CEGUI::EventArgs &args)
+{
+	//this->pushAppState(findByName("GameState"));
+	changeAppState(findByName("GameState"));
+	return true;
 }

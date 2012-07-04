@@ -62,11 +62,16 @@ public:
 	OIS::Keyboard *m_pKeyboard;
 	OIS::Mouse *m_pMouse;
 
-	OgreBites::SdkTrayManager *m_pTrayMgr;
+	CEGUI::OgreRenderer *m_pGUIRenderer;
+	CEGUI::System *m_pGUISystem;
 
 private:
 	OgreFramework(const OgreFramework&);
 	OgreFramework& operator= (const OgreFramework&);
+
+	Ogre::Overlay *m_pDebugOverlay;
+	Ogre::Overlay *m_pInfoOverlay;
+	int	m_iNumScreenShots;
 };
 
 #endif

@@ -23,7 +23,7 @@ GameState::GameState(void):
 	m_bSettingsMode     = false;
 	m_isMoving 			= false;
 
-	m_pDetailsPanel	= NULL;
+	//m_pDetailsPanel	= NULL;
 }
 
 void GameState::buildUnits(void)
@@ -87,13 +87,15 @@ void GameState::enter()
 
 	buildGUI();
 
+	setUnbufferedMode();
+
 	createScene();
 }
 
 bool GameState::pause()
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Pausing GameState...");
-
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(0);
 	return true;
 }
 
@@ -101,15 +103,23 @@ void GameState::resume()
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Resuming GameState...");
 
-	buildGUI();
+	//buildGUI();
+
+	//OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
 
 	OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
+//	OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(m_pSceneMgr);
+
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(CEGUI::WindowManager::getSingleton().getWindow("AOF_GUI_GAME"));
+
 	m_bQuit = false;
 }
 
 void GameState::exit()
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leaving GameState...");
+
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(0);
 
 	m_pSceneMgr->destroyCamera(m_pCamera);
 	m_pSceneMgr->destroyQuery(m_pRSQ);
@@ -198,6 +208,7 @@ bool GameState::keyPressed(const OIS::KeyEvent& keyEventRef)
 {
 	if(m_bSettingsMode == true)
 	{
+		/*
 		if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_S))
 		{
 			OgreBites::SelectMenu* pMenu =
@@ -217,14 +228,21 @@ bool GameState::keyPressed(const OIS::KeyEvent& keyEventRef)
 				pMenu->selectItem(pMenu->getSelectionIndex() - 1);
 			}
 		}
+		*/
+	}
+
+	if(m_bChatMode == true)
+	{
+		OgreFramework::getSingletonPtr()->m_pGUISystem->injectKeyDown(keyEventRef.key);
+		OgreFramework::getSingletonPtr()->m_pGUISystem->injectChar(keyEventRef.text);
 	}
 
 	if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_ESCAPE))
 	{
-		pushAppState(findByName("PauseState"));
+		//pushAppState(findByName("PauseState"));
 		return true;
 	}
-
+/*
 	if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_I))
 	{
 		if(m_pDetailsPanel->getTrayLocation() == OgreBites::TL_NONE)
@@ -239,17 +257,29 @@ bool GameState::keyPressed(const OIS::KeyEvent& keyEventRef)
 			m_pDetailsPanel->hide();
 		}
 	}
-
+*/
 	if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_TAB))
 	{
 		m_bSettingsMode = !m_bSettingsMode;
+		m_bChatMode = !m_bChatMode;
+
+		if(m_bChatMode)
+			setBufferedMode();
+		else
+			setUnbufferedMode();
+
 		return true;
 	}
 
 	if(m_bSettingsMode && (OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_RETURN) ||
 		OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_NUMPADENTER)))
 	{
-
+		CEGUI::Editbox *pChatInputBox = (CEGUI::Editbox*)m_pChatWnd->getChild("ChatInputBox");
+		CEGUI::MultiLineEditbox *pChatContentBox = (CEGUI::MultiLineEditbox*)m_pChatWnd->getChild("ChatContentBox");
+		pChatContentBox->setText(pChatContentBox->getText() + pChatInputBox->getText() + "\n");
+		pChatInputBox->setText("");
+		pChatContentBox->setCaratIndex(pChatContentBox->getText().size());
+		pChatContentBox->ensureCaratIsVisible();
 	}
 
 	if(!m_bSettingsMode || (m_bSettingsMode &&
@@ -492,7 +522,10 @@ bool GameState::keyReleased(const OIS::KeyEvent &keyEventRef)
 
 bool GameState::mouseMoved(const OIS::MouseEvent &evt)
 {
-	if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseMove(evt)) return true;
+//	if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseMove(evt)) return true;
+
+	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseWheelChange(evt.state.Z.rel);
+	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseMove(evt.state.X.rel, evt.state.Y.rel);
 
 	if(m_bRMouseDown)
 	{
@@ -505,12 +538,14 @@ bool GameState::mouseMoved(const OIS::MouseEvent &evt)
 
 bool GameState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
-	if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseDown(evt, id)) return true;
+	//if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseDown(evt, id)) return true;
 
 	if(id == OIS::MB_Left)
 	{
 		onLeftPressed(evt);
 		m_bLMouseDown = true;
+
+		OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseButtonDown(CEGUI::LeftButton);
 	}
 	else if(id == OIS::MB_Right)
 	{
@@ -522,11 +557,12 @@ bool GameState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 
 bool GameState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
-	if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseUp(evt, id)) return true;
+	//if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseUp(evt, id)) return true;
 
 	if(id == OIS::MB_Left)
 	{
 		m_bLMouseDown = false;
+		OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseButtonUp(CEGUI::LeftButton);
 	}
 	else if(id == OIS::MB_Right)
 	{
@@ -538,6 +574,7 @@ bool GameState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 
 void GameState::onLeftPressed(const OIS::MouseEvent &evt)
 {
+	/*
 	if(m_pCurrentObject)
 	{
 		m_pCurrentObject->showBoundingBox(false);
@@ -569,6 +606,13 @@ void GameState::onLeftPressed(const OIS::MouseEvent &evt)
 			break;
 		}
 	}
+	*/
+}
+
+bool GameState::onExitButtonGame(const CEGUI::EventArgs &args)
+{
+	m_bQuit = true;
+	return true;
 }
 
 void GameState::moveCamera()
@@ -618,7 +662,7 @@ void GameState::getInput()
 void GameState::update(double timeSinceLastFrame)
 {
 	m_FrameEvent.timeSinceLastFrame = timeSinceLastFrame;
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->frameRenderingQueued(m_FrameEvent);
+	//OgreFramework::getSingletonPtr()->m_pTrayMgr->frameRenderingQueued(m_FrameEvent);
 
 	if(m_bQuit == true)
 	{
@@ -626,8 +670,8 @@ void GameState::update(double timeSinceLastFrame)
 		return;
 	}
 
-	if(!OgreFramework::getSingletonPtr()->m_pTrayMgr->isDialogVisible())
-	{
+//	if(!OgreFramework::getSingletonPtr()->m_pTrayMgr->isDialogVisible())
+	//{
 		/*
 		if(m_pDetailsPanel->isVisible())
 		{
@@ -644,7 +688,7 @@ void GameState::update(double timeSinceLastFrame)
 				m_pDetailsPanel->setParamValue(7, "Un-Buffered Input");
 		}
 		*/
-	}
+	//}
 
 	m_MoveScale = m_MoveSpeed   * timeSinceLastFrame;
 	m_RotScale  = m_RotateSpeed * timeSinceLastFrame;
@@ -657,6 +701,28 @@ void GameState::update(double timeSinceLastFrame)
 
 void GameState::buildGUI()
 {
+
+//	OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(m_pSceneMgr);
+
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setDefaultMouseCursor((CEGUI::utf8*)"TaharezLook", (CEGUI::utf8*)"MouseArrow");
+	CEGUI::MouseCursor::getSingleton().setImage("TaharezLook", "MouseArrow");
+	const OIS::MouseState state = OgreFramework::getSingletonPtr()->m_pMouse->getMouseState();
+	CEGUI::Point mousePos = CEGUI::MouseCursor::getSingleton().getPosition();
+	CEGUI::System::getSingleton().injectMouseMove(state.X.abs-mousePos.d_x,state.Y.abs-mousePos.d_y);
+
+	m_pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("AOF_GUI_GAME");
+	m_pChatWnd = CEGUI::WindowManager::getSingleton().getWindow("ChatWnd");
+
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(m_pMainWnd);
+
+	CEGUI::PushButton* pExitButton = (CEGUI::PushButton*)m_pMainWnd->getChild("ExitButton_Game");
+	pExitButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&GameState::onExitButtonGame, this));
+
+	m_bLMouseDown = m_bRMouseDown = false;
+	m_bQuit = false;
+	m_bChatMode = false;
+
+	/*
 	OgreFramework::getSingletonPtr()->m_pTrayMgr->showFrameStats(OgreBites::TL_BOTTOMLEFT);
 	//OgreFramework::getSingletonPtr()->m_pTrayMgr->showLogo(OgreBites::TL_BOTTOMRIGHT);
 	//OgreFramework::getSingletonPtr()->m_pTrayMgr->createLabel(OgreBites::TL_TOP, "GameLbl",
@@ -690,26 +756,50 @@ void GameState::buildGUI()
 	chatModes.push_back("Point mode");
 	//OgreFramework::getSingletonPtr()->m_pTrayMgr->createLongSelectMenu(
 	//	OgreBites::TL_TOPRIGHT, "ChatModeSelMenu", "ChatMode", 200, 3, chatModes);
+	 */
 }
 
-void GameState::itemSelected(OgreBites::SelectMenu *menu)
+void GameState::setBufferedMode()
 {
-	switch(menu->getSelectionIndex())
-	{
-		case 0:
-		{
-			m_pCamera->setPolygonMode(Ogre::PM_SOLID);
-			break;
-		}
-		case 1:
-		{
-			m_pCamera->setPolygonMode(Ogre::PM_WIREFRAME);
-			break;
-		}
-		case 2:
-		{
-			m_pCamera->setPolygonMode(Ogre::PM_POINTS);
-			break;
-		}
-	}
+	CEGUI::Editbox* pModeCaption = (CEGUI::Editbox*)m_pMainWnd->getChild("ModeCaption");
+	pModeCaption->setText("Buffered Input Mode");
+
+	CEGUI::Editbox* pChatInputBox = (CEGUI::Editbox*)m_pChatWnd->getChild("ChatInputBox");
+	pChatInputBox->setText("");
+	pChatInputBox->activate();
+	pChatInputBox->captureInput();
+
+	CEGUI::MultiLineEditbox* pControlsPanel = (CEGUI::MultiLineEditbox*)m_pMainWnd->getChild("ControlsPanel");
+	pControlsPanel->setText("[Tab] - To switch between input modes\n\nAll keys to write in the chat box.\n\nPress [Enter] or [Return] to send message.\n\n[Print] - Take screenshot\n\n[Esc] - Quit to main menu");
 }
+
+void GameState::setUnbufferedMode()
+{
+	CEGUI::Editbox* pModeCaption = (CEGUI::Editbox*)m_pMainWnd->getChild("ModeCaption");
+	pModeCaption->setText("Unuffered Input Mode");
+
+	CEGUI::MultiLineEditbox* pControlsPanel = (CEGUI::MultiLineEditbox*)m_pMainWnd->getChild("ControlsPanel");
+	pControlsPanel->setText("[Tab] - To switch between input modes\n\n[W] - Forward\n[S] - Backwards\n[A] - Left\n[D] - Right\n\nPress [Shift] to move faster\n\n[O] - Toggle Overlays\n[Print] - Take screenshot\n\n[Esc] - Quit to main menu");
+}
+
+//void GameState::itemSelected(OgreBites::SelectMenu *menu)
+//{
+	//switch(menu->getSelectionIndex())
+	//{
+		//case 0:
+		//{
+		//	m_pCamera->setPolygonMode(Ogre::PM_SOLID);
+		//	break;
+		//}
+		//case 1:
+//		{
+//			m_pCamera->setPolygonMode(Ogre::PM_WIREFRAME);
+//			break;
+//		}
+//		case 2:
+//		{
+//			m_pCamera->setPolygonMode(Ogre::PM_POINTS);
+//			break;
+//		}
+//	}
+//}

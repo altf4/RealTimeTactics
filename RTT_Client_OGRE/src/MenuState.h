@@ -21,6 +21,8 @@ public:
 	void enter();
 	void createScene();
 	void exit();
+	bool pause();
+	void resume();
 
 	bool keyPressed(const OIS::KeyEvent &keyEventRef);
 	bool keyReleased(const OIS::KeyEvent &keyEventRef);
@@ -29,7 +31,10 @@ public:
 	bool mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 	bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 
-	void buttonHit(OgreBites::Button* button);
+	//void buttonHit(OgreBites::Button* button);
+
+	bool onExitButton(const CEGUI::EventArgs &args);
+	bool onEnterButton(const CEGUI::EventArgs &args);
 
 	void update(double timeSinceLastFrame);
 

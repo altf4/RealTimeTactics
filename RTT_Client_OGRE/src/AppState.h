@@ -30,7 +30,7 @@ public:
 	virtual void popAllAndPushAppState(AppState *state) = 0;
 };
 
-class AppState : public OIS::KeyListener, public OIS::MouseListener, public OgreBites::SdkTrayListener
+class AppState : public OIS::KeyListener, public OIS::MouseListener
 {
 public:
 	static void create(AppStateListener *parent, const Ogre::String name){};
