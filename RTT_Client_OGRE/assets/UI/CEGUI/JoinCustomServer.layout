@@ -1,0 +1,55 @@
+<?xml version="1.0" ?>
+<GUILayout>
+
+<Window Type="DefaultGUISheet" Name="RTT_JoinCustomServer_GUI">
+		<Property Name="UnifiedSize" Value="{{1, 1},{1, 1}}" />
+
+		<Window Type="TaharezLook/Button" Name="BackButton">
+                <Property Name="UnifiedPosition" Value="{{0.15,0},{0.1,0}}" />
+                <Property Name="UnifiedSize" Value="{{0.1,0},{0.1,0}}" />
+                <Property Name="Text" Value="Back" />
+            </Window>
+			
+			<Window Type="TaharezLook/Editbox" Name="ServerAddressBox">
+				<Property Name="HorizontalAlignment" Value="Centre" />
+				<Property Name="UnifiedPosition" Value="{{0.35,0},{0.2,0}}" />
+				<Property Name="UnifiedSize" Value="{{0.9,0},{0.15,0}}" />
+				<Property Name="Text" Value="Enter Server Address..." />
+			</Window>
+			
+			<Window Type="TaharezLook/Editbox" Name="ServerPortBox">
+				<Property Name="HorizontalAlignment" Value="Centre" />
+				<Property Name="UnifiedPosition" Value="{{0.35,0},{0.3,0}}" />
+				<Property Name="UnifiedSize" Value="{{0.9,0},{0.15,0}}" />
+				<Property Name="Text" Value="Enter Server Port..." />
+			</Window>
+			<Window Type="TaharezLook/Editbox" Name="UsernameBox">
+				<Property Name="HorizontalAlignment" Value="Centre" />
+				<Property Name="UnifiedPosition" Value="{{0.35,0},{0.4,0}}" />
+				<Property Name="UnifiedSize" Value="{{0.9,0},{0.15,0}}" />
+				<Property Name="Text" Value="Enter Username..." />
+			</Window>
+			<Window Type="TaharezLook/Editbox" Name="PasswordBox">
+				<Property Name="HorizontalAlignment" Value="Centre" />
+				<Property Name="UnifiedPosition" Value="{{0.35,0},{0.5,0}}" />
+				<Property Name="UnifiedSize" Value="{{0.9,0},{0.15,0}}" />
+				<Property Name="Text" Value="Enter Password..." />
+			</Window>
+			
+			
+		<Window Type="TaharezLook/Button" Name="JoinServerButton">
+                <Property Name="UnifiedPosition" Value="{{0.35,0},{0.6,0}}" />
+                <Property Name="UnifiedSize" Value="{{0.3,0},{0.1,0}}" />
+                <Property Name="Text" Value="Connect to Server" />
+            </Window>
+
+		<Window Type="TaharezLook/Button" Name="ExitButton_JCS">
+                <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
+                <Property Name="UnifiedSize" Value="{{0.3,0},{0.1,0}}" />
+                <Property Name="Text" Value="Exit AdvancedOgreFramework" />
+            </Window>
+
+</Window>
+
+</GUILayout>
+

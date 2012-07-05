@@ -1,22 +1,22 @@
 //============================================================================
-// Name        : MenuState.h
+// Name        : JoinSuctomServerState.h
 // Author      : Mark Petro
 // Copyright   : 2011, GNU GPLv3
 // Description : Built from the Advanced OGRE Framework tutorial found here:
 //	http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Advanced+Ogre+Framework&structure=Tutorials
 //============================================================================
 
-#ifndef MENU_STATE_H
-#define MENU_STATE_H
+#ifndef JOINCUSTOMSERVER_STATE_H
+#define JOINCUSTOMSERVER_STATE_H
 
 #include "AppState.h"
 
-class MenuState : public AppState
+class JoinCustomServerState : public AppState
 {
 public:
-	MenuState();
+	JoinCustomServerState();
 
-	DECLARE_APPSTATE_CLASS(MenuState)
+	DECLARE_APPSTATE_CLASS(JoinCustomServerState)
 
 	void enter();
 	void createScene();
@@ -31,11 +31,9 @@ public:
 	bool mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 	bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 
-	//void buttonHit(OgreBites::Button* button);
-
 	bool onExitButton(const CEGUI::EventArgs &args);
-	bool onEnterButton(const CEGUI::EventArgs &args);
-	bool onJoinCustomServerButton(const CEGUI::EventArgs &args);
+	bool onBackButton(const CEGUI::EventArgs &args);
+	bool onJoinServerButton(const CEGUI::EventArgs &args);
 
 	void update(double timeSinceLastFrame);
 

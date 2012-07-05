@@ -8,6 +8,7 @@ CPP_SRCS += \
 ../src/AppStateManager.cpp \
 ../src/DemoApp.cpp \
 ../src/GameState.cpp \
+../src/JoinCustomServerState.cpp \
 ../src/MenuState.cpp \
 ../src/RTT_Ogre_Map.cpp \
 ../src/RTT_Ogre_Player.cpp \
@@ -19,6 +20,7 @@ OBJS += \
 ./src/AppStateManager.o \
 ./src/DemoApp.o \
 ./src/GameState.o \
+./src/JoinCustomServerState.o \
 ./src/MenuState.o \
 ./src/RTT_Ogre_Map.o \
 ./src/RTT_Ogre_Player.o \
@@ -30,6 +32,7 @@ CPP_DEPS += \
 ./src/AppStateManager.d \
 ./src/DemoApp.d \
 ./src/GameState.d \
+./src/JoinCustomServerState.d \
 ./src/MenuState.d \
 ./src/RTT_Ogre_Map.d \
 ./src/RTT_Ogre_Player.d \

@@ -9,7 +9,7 @@
 #include "DemoApp.h"
 #include "MenuState.h"
 #include "GameState.h"
-//#include "PauseState.h"
+#include "JoinCustomServerState.h"
 
 DemoApp::DemoApp()
 {
@@ -36,7 +36,7 @@ void DemoApp::startDemo()
 
 	MenuState::create(m_pAppStateManager, "MenuState");
 	GameState::create(m_pAppStateManager, "GameState");
-	//PauseState::create(m_pAppStateManager, "PauseState");
+	JoinCustomServerState::create(m_pAppStateManager, "JoinCustomServerState");
 
 	m_pAppStateManager->start(m_pAppStateManager->findByName("MenuState"));
 }

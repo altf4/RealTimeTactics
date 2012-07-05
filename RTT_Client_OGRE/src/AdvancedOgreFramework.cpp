@@ -220,11 +220,12 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 	CEGUI::SchemeManager::getSingleton().create((CEGUI::utf8*)"TaharezLookSkin.scheme");
 	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"AdvancedOgreFramework.layout");
 	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"AdvancedOgreFramework_Game.layout");
+	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"JoinCustomServer.layout");
 
 	m_pDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
 
 	//#############################################
-	//m_pDebugOverlay->show();  //WARNING!  WILL LOCK OUT INPUT!!!
+	m_pDebugOverlay->show();  //WARNING!  WILL LOCK OUT INPUT!!!
 	//#############################################
 
 	m_pRenderWnd->setActive(true);

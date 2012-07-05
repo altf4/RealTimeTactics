@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : MenuState.cpp
+// Name        : JoinCustomServerStateState.cpp
 // Author      : Mark Petro
 // Copyright   : 2011, GNU GPLv3
 // Description : An OGRE based 3D frontend to the RTT project.
@@ -7,25 +7,25 @@
 //	http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Advanced+Ogre+Framework&structure=Tutorials
 //============================================================================
 
-#include "MenuState.h"
+#include "JoinCustomServerState.h"
 
 using namespace Ogre;
 
-MenuState::MenuState()
+JoinCustomServerState::JoinCustomServerState()
 {
     m_bQuit = false;
     m_FrameEvent = Ogre::FrameEvent();
 }
 
-void MenuState::enter()
+void JoinCustomServerState::enter()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Entering MenuState...");
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Entering JoinCustomServerState...");
 
 	m_pSceneMgr = OgreFramework::getSingletonPtr()->m_pRoot->createSceneManager(
-			ST_GENERIC, "MenuSceneMgr");
+			ST_GENERIC, "JCSSceneMgr");
 	m_pSceneMgr->setAmbientLight(Ogre::ColourValue(0.7f, 0.7f, 0.7f));
 
-	m_pCamera = m_pSceneMgr->createCamera("MenuCam");
+	m_pCamera = m_pSceneMgr->createCamera("JCSCam");
 	m_pCamera->setPosition(Vector3(0, 25, -50));
 	m_pCamera->lookAt(Vector3(0, 0, 0));
 	m_pCamera->setNearClipDistance(1);
@@ -60,28 +60,28 @@ void MenuState::enter()
 	CEGUI::Point mousePos = CEGUI::MouseCursor::getSingleton().getPosition();
 	CEGUI::System::getSingleton().injectMouseMove(state.X.abs-mousePos.d_x,state.Y.abs-mousePos.d_y);
 
-	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("AOF_GUI");
+	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_JoinCustomServer_GUI");
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
 
-	CEGUI::PushButton *button = (CEGUI::PushButton*)pMainWnd->getChild("ExitButton");
-	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&MenuState::onExitButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("EnterButton");
-	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&MenuState::onEnterButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("JoinCustomServerButton");
-	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&MenuState::onJoinCustomServerButton, this));
+	CEGUI::PushButton *button = (CEGUI::PushButton*)pMainWnd->getChild("ExitButton_JCS");
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&JoinCustomServerState::onExitButton, this));
+	button = (CEGUI::PushButton*)pMainWnd->getChild("BackButton");
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&JoinCustomServerState::onBackButton, this));
+	button = (CEGUI::PushButton*)pMainWnd->getChild("JoinServerButton");
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&JoinCustomServerState::onJoinServerButton, this));
 
 	m_bQuit = false;
 
 	createScene();
 }
 
-void MenuState::createScene()
+void JoinCustomServerState::createScene()
 {
 }
 
-bool MenuState::pause()
+bool JoinCustomServerState::pause()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Pausing MenuState...");
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Pausing JoinCustomServerState...");
 
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(0);
 	//OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(0);
@@ -89,9 +89,9 @@ bool MenuState::pause()
 	return true;
 }
 
-void MenuState::resume()
+void JoinCustomServerState::resume()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Resuming MenuState...");
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Resuming JoinCustomServerState...");
 
 	OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
 	//OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(m_pSceneMgr);
@@ -101,9 +101,9 @@ void MenuState::resume()
 	m_bQuit = false;
 }
 
-void MenuState::exit()
+void JoinCustomServerState::exit()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leaving MenuState...");
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leaving JoinCustomServerState...");
 
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(0);
 	m_pSceneMgr->destroyCamera(m_pCamera);
@@ -117,7 +117,7 @@ void MenuState::exit()
 	//OgreFramework::getSingletonPtr()->m_pTrayMgr->setListener(0);
 }
 
-bool MenuState::keyPressed(const OIS::KeyEvent &keyEventRef)
+bool JoinCustomServerState::keyPressed(const OIS::KeyEvent &keyEventRef)
 {
 	if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_ESCAPE))
 	{
@@ -129,13 +129,13 @@ bool MenuState::keyPressed(const OIS::KeyEvent &keyEventRef)
 	return true;
 }
 
-bool MenuState::keyReleased(const OIS::KeyEvent &keyEventRef)
+bool JoinCustomServerState::keyReleased(const OIS::KeyEvent &keyEventRef)
 {
 	OgreFramework::getSingletonPtr()->keyReleased(keyEventRef);
 	return true;
 }
 
-bool MenuState::mouseMoved(const OIS::MouseEvent &evt)
+bool JoinCustomServerState::mouseMoved(const OIS::MouseEvent &evt)
 {
 	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseWheelChange(evt.state.Z.rel);
 	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseMove(evt.state.X.rel, evt.state.Y.rel);
@@ -147,7 +147,7 @@ bool MenuState::mouseMoved(const OIS::MouseEvent &evt)
 	return true;
 }
 
-bool MenuState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
+bool JoinCustomServerState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
 	if(id == OIS::MB_Left)
 		OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseButtonDown(CEGUI::LeftButton);
@@ -159,7 +159,7 @@ bool MenuState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 	return true;
 }
 
-bool MenuState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
+bool JoinCustomServerState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
 	if(id == OIS::MB_Left)
 		OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseButtonUp(CEGUI::LeftButton);
@@ -171,7 +171,7 @@ bool MenuState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 	return true;
 }
 
-void MenuState::update(double timeSinceLastFrame)
+void JoinCustomServerState::update(double timeSinceLastFrame)
 {
 	m_FrameEvent.timeSinceLastFrame = timeSinceLastFrame;
 	//OgreFramework::getSingletonPtr()->m_pTrayMgr->frameRenderingQueued(m_FrameEvent);
@@ -183,7 +183,7 @@ void MenuState::update(double timeSinceLastFrame)
 	}
 }
 /*
-void MenuState::buttonHit(OgreBites::Button *button)
+void JoinCustomServerState::buttonHit(OgreBites::Button *button)
 {
 	if(button->getName() == "ExitBtn")
 	{
@@ -196,20 +196,20 @@ void MenuState::buttonHit(OgreBites::Button *button)
 }
 */
 
-bool MenuState::onExitButton(const CEGUI::EventArgs &args)
+bool JoinCustomServerState::onExitButton(const CEGUI::EventArgs &args)
 {
 	m_bQuit = true;
 	return true;
 }
 
-bool MenuState::onEnterButton(const CEGUI::EventArgs &args)
+bool JoinCustomServerState::onBackButton(const CEGUI::EventArgs &args)
 {
-	changeAppState(findByName("GameState"));
+	changeAppState(findByName("MenuState"));
 	return true;
 }
 
-bool MenuState::onJoinCustomServerButton(const CEGUI::EventArgs &args)
+bool JoinCustomServerState::onJoinServerButton(const CEGUI::EventArgs &args)
 {
-	changeAppState(findByName("JoinCustomServerState"));
+	//changeAppState(findByName("JoinCustomServerStateState"));
 	return true;
 }
