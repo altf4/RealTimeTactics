@@ -1,0 +1,149 @@
+<?xml version="1.0" ?>
+<GUILayout>
+
+<Window Type="DefaultGUISheet" Name="RTT_ServerLobby_GUI">
+		<Property Name="UnifiedSize" Value="{{1, 1},{1, 1}}" />
+
+	<Window Type="OgreTray/Button" Name="ServerBackButton">
+		<Property Name="UnifiedPosition" Value="{{0.1,0},{0.1,0}}" />
+		<Property Name="UnifiedSize" Value="{{0.1,0},{0.05,0}}" />
+		<Property Name="Text" Value="Back" />
+	</Window>
+	<Window Type="OgreTray/Button" Name="CreateMatchButton">
+		<Property Name="UnifiedPosition" Value="{{0.1,0},{0.2,0}}" />
+		<Property Name="UnifiedSize" Value="{{0.15,0},{0.05,0}}" />
+		<Property Name="Text" Value="Create Match" />
+	</Window>
+		<Window Type="OgreTray/Button" Name="RefreshListButton">
+		<Property Name="UnifiedPosition" Value="{{0.1,0},{0.25,0}}" />
+		<Property Name="UnifiedSize" Value="{{0.15,0},{0.1,0}}" />
+		<Property Name="Text" Value="Refresh Match List" />
+	</Window>
+	<Window Type="OgreTray/Button" Name="JoinMatchButton">
+		<Property Name="UnifiedPosition" Value="{{0.1,0},{0.35,0}}" />
+		<Property Name="UnifiedSize" Value="{{0.15,0},{0.05,0}}" />
+		<Property Name="Text" Value="Join Match" />
+	</Window>
+
+	<Window Type="OgreTray/Button" Name="ServerExitButton">
+        <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
+        <Property Name="UnifiedSize" Value="{{0.3,0},{0.05,0}}" />
+        <Property Name="Text" Value="Exit AdvancedOgreFramework" />
+    </Window>
+    
+    <Window Type="OgreTray/ItemListbox" Name="ItemListBox">
+    	<Property Name="HorizontalAlignment" Value="Centre" />
+        <Property Name="UnifiedPosition" Value="{{0,0},{0.2,0}}" />
+        <Property Name="UnifiedSize" Value="{{0.5,0},{0.5,0}}" />
+        <Property Name="Text" Value="Item List Box" />
+        
+		<Window Type="OgreTray/ListboxItem" Name="Match_A">
+        	<Property Name="UnifiedSize" Value="{{0.5,0},{0.5,0}}" />
+        	<Property Name="Text" Value="" />
+        	
+        	<Window Type="OgreTray/StaticText" Name="MatchTitle_A">
+        		<Property Name="UnifiedPosition" Value="{{0,0},{0,0}}" />
+        		<Property Name="UnifiedSize" Value="{{0.25,0},{1,0}}" />
+        		<Property Name="BackgroundEnabled" Value="False" />
+        		<Property Name="FrameEnabled" Value="False" />
+        		<Property Name="MouseInputPropagationEnabled" Value="True" />
+        		<Property Name="MousePassThroughEnabled" Value="True" />
+        		<Property Name="Text" Value="Match A" />
+    		</Window>
+        	<Window Type="OgreTray/StaticText" Name="NumPlayers_A">
+        		<Property Name="UnifiedPosition" Value="{{0.25,0},{0,0}}" />
+        		<Property Name="UnifiedSize" Value="{{0.25,0},{1,0}}" />
+        		<Property Name="BackgroundEnabled" Value="False" />
+        		<Property Name="FrameEnabled" Value="False" />
+        		<Property Name="MouseInputPropagationEnabled" Value="True" />
+        		<Property Name="MousePassThroughEnabled" Value="True" />
+        		<Property Name="Text" Value="# Players" />
+    		</Window>
+    		<Window Type="OgreTray/StaticText" Name="MatchMode_A">
+        		<Property Name="UnifiedPosition" Value="{{0.5,0},{0,0}}" />
+        		<Property Name="UnifiedSize" Value="{{0.25,0},{1,0}}" />
+        		<Property Name="BackgroundEnabled" Value="False" />
+        		<Property Name="FrameEnabled" Value="False" />
+        		<Property Name="MouseInputPropagationEnabled" Value="True" />
+        		<Property Name="MousePassThroughEnabled" Value="True" />
+        		<Property Name="Text" Value="Mode" />
+    		</Window>
+    		<Window Type="OgreTray/StaticText" Name="Match Map_A">
+        		<Property Name="UnifiedPosition" Value="{{0.75,0},{0,0}}" />
+        		<Property Name="UnifiedSize" Value="{{0.25,0},{1,0}}" />
+        		<Property Name="BackgroundEnabled" Value="False" />
+        		<Property Name="FrameEnabled" Value="False" />
+        		<Property Name="MouseInputPropagationEnabled" Value="True" />
+        		<Property Name="MousePassThroughEnabled" Value="True" />
+        		<Property Name="Text" Value="Map" />
+    		</Window>
+        	
+        	
+    	</Window>
+    	
+    	<Window Type="OgreTray/ListboxItem" Name="Match_B">
+        	<Property Name="UnifiedSize" Value="{{0.5,0},{0.5,0}}" />
+        	<Property Name="Text" Value="" />
+        	
+        	<Window Type="OgreTray/StaticText" Name="MatchTitle_B">
+        		<Property Name="UnifiedPosition" Value="{{0,0},{0,0}}" />
+        		<Property Name="UnifiedSize" Value="{{0.25,0},{1,0}}" />
+        		<Property Name="BackgroundEnabled" Value="False" />
+        		<Property Name="FrameEnabled" Value="False" />
+        		<Property Name="MouseInputPropagationEnabled" Value="True" />
+        		<Property Name="MousePassThroughEnabled" Value="True" />
+        		<Property Name="Text" Value="Match B" />
+    		</Window>
+        	<Window Type="OgreTray/StaticText" Name="NumPlayers_B">
+        		<Property Name="UnifiedPosition" Value="{{0.25,0},{0,0}}" />
+        		<Property Name="UnifiedSize" Value="{{0.25,0},{1,0}}" />
+        		<Property Name="BackgroundEnabled" Value="False" />
+        		<Property Name="FrameEnabled" Value="False" />
+        		<Property Name="MouseInputPropagationEnabled" Value="True" />
+        		<Property Name="MousePassThroughEnabled" Value="True" />
+        		<Property Name="Text" Value="# Players" />
+    		</Window>
+    		<Window Type="OgreTray/StaticText" Name="MatchMode_B">
+        		<Property Name="UnifiedPosition" Value="{{0.5,0},{0,0}}" />
+        		<Property Name="UnifiedSize" Value="{{0.25,0},{1,0}}" />
+        		<Property Name="BackgroundEnabled" Value="False" />
+        		<Property Name="FrameEnabled" Value="False" />
+        		<Property Name="MouseInputPropagationEnabled" Value="True" />
+        		<Property Name="MousePassThroughEnabled" Value="True" />
+        		<Property Name="Text" Value="Mode" />
+    		</Window>
+    		<Window Type="OgreTray/StaticText" Name="Match Map_B">
+        		<Property Name="UnifiedPosition" Value="{{0.75,0},{0,0}}" />
+        		<Property Name="UnifiedSize" Value="{{0.25,0},{1,0}}" />
+        		<Property Name="BackgroundEnabled" Value="False" />
+        		<Property Name="FrameEnabled" Value="False" />
+        		<Property Name="MouseInputPropagationEnabled" Value="True" />
+        		<Property Name="MousePassThroughEnabled" Value="True" />
+        		<Property Name="Text" Value="Map" />
+    		</Window>
+        	
+        	
+    	</Window>
+    	
+	</Window>
+	
+</Window>
+
+<Window Type="DefaultGUISheet" Name="RTT_MatchJobby_GUI">
+		<Property Name="UnifiedSize" Value="{{1, 1},{1, 1}}" />
+
+	<Window Type="OgreTray/Button" Name="MatchBackButton">
+		<Property Name="UnifiedPosition" Value="{{0.1,0},{0.1,0}}" />
+		<Property Name="UnifiedSize" Value="{{0.1,0},{0.05,0}}" />
+		<Property Name="Text" Value="Back" />
+	</Window>
+
+	<Window Type="OgreTray/Button" Name="MatchExitButton">
+        <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
+        <Property Name="UnifiedSize" Value="{{0.3,0},{0.05,0}}" />
+        <Property Name="Text" Value="Exit AdvancedOgreFramework" />
+    </Window>
+
+</Window>
+
+</GUILayout>

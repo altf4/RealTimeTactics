@@ -221,6 +221,7 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"AdvancedOgreFramework.layout");
 	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"AdvancedOgreFramework_Game.layout");
 	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"JoinCustomServer.layout");
+	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"Lobby.layout");
 
 	m_pDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
 
