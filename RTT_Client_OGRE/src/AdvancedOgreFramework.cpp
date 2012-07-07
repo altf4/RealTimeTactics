@@ -217,16 +217,14 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 	m_pGUIRenderer = &CEGUI::OgreRenderer::bootstrapSystem(*m_pRenderWnd);
 	m_pGUISystem = CEGUI::System::getSingletonPtr();
 
-	CEGUI::SchemeManager::getSingleton().create((CEGUI::utf8*)"TaharezLookSkin.scheme");
+	CEGUI::SchemeManager::getSingleton().create((CEGUI::utf8*)"OgreTray.scheme");
 	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"AdvancedOgreFramework.layout");
 	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"AdvancedOgreFramework_Game.layout");
 	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"JoinCustomServer.layout");
 
 	m_pDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
 
-	//#############################################
-	m_pDebugOverlay->show();  //WARNING!  WILL LOCK OUT INPUT!!!
-	//#############################################
+	m_pDebugOverlay->show();
 
 	m_pRenderWnd->setActive(true);
 
@@ -241,7 +239,7 @@ bool OgreFramework::keyPressed(const OIS::KeyEvent &keyEventRef)
 		return true;
 	}
 
-	if(m_pKeyboard->isKeyDown(OIS::KC_O))
+	if(m_pKeyboard->isKeyDown(OIS::KC_GRAVE))
 	{
 		if(m_pDebugOverlay)
 		{
@@ -277,4 +275,37 @@ bool OgreFramework::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID
 
 void OgreFramework::updateOgre(double timeSinceLastFrame)
 {
+	updateStats();
+}
+
+void OgreFramework::updateStats()
+{
+	static String currFps = "Current FPS: ";
+    static String avgFps = "Average FPS: ";
+    static String bestFps = "Best FPS: ";
+    static String worstFps = "Worst FPS: ";
+    static String tris = "Triangle Count: ";
+    static String batches = "Batch Count: ";
+
+    OverlayElement* guiAvg = OverlayManager::getSingleton().getOverlayElement("Core/AverageFps");
+    OverlayElement* guiCurr = OverlayManager::getSingleton().getOverlayElement("Core/CurrFps");
+    OverlayElement* guiBest = OverlayManager::getSingleton().getOverlayElement("Core/BestFps");
+    OverlayElement* guiWorst = OverlayManager::getSingleton().getOverlayElement("Core/WorstFps");
+
+	const RenderTarget::FrameStats& stats = m_pRenderWnd->getStatistics();
+    guiAvg->setCaption(avgFps + StringConverter::toString(stats.avgFPS));
+    guiCurr->setCaption(currFps + StringConverter::toString(stats.lastFPS));
+    guiBest->setCaption(bestFps + StringConverter::toString(stats.bestFPS)
+            +" "+StringConverter::toString(stats.bestFrameTime)+" ms");
+    guiWorst->setCaption(worstFps + StringConverter::toString(stats.worstFPS)
+            +" "+StringConverter::toString(stats.worstFrameTime)+" ms");
+
+    OverlayElement* guiTris = OverlayManager::getSingleton().getOverlayElement("Core/NumTris");
+    guiTris->setCaption(tris + StringConverter::toString(stats.triangleCount));
+
+	OverlayElement* guiBatches = OverlayManager::getSingleton().getOverlayElement("Core/NumBatches");
+    guiBatches->setCaption(batches + StringConverter::toString(stats.batchCount));
+
+	OverlayElement* guiDbg = OverlayManager::getSingleton().getOverlayElement("Core/DebugText");
+	guiDbg->setCaption("");
 }

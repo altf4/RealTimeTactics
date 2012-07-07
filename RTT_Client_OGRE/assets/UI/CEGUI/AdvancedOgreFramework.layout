@@ -4,19 +4,19 @@
 <Window Type="DefaultGUISheet" Name="AOF_GUI">
 		<Property Name="UnifiedSize" Value="{{1, 1},{1, 1}}" />
 
-		<Window Type="TaharezLook/Button" Name="JoinCustomServerButton">
+		<Window Type="OgreTray/Button" Name="JoinCustomServerButton">
                 <Property Name="UnifiedPosition" Value="{{0.35,0},{0.1,0}}" />
                 <Property Name="UnifiedSize" Value="{{0.3,0},{0.1,0}}" />
                 <Property Name="Text" Value="Join Server" />
             </Window>
 
-		<Window Type="TaharezLook/Button" Name="EnterButton">
+		<Window Type="OgreTray/Button" Name="EnterButton">
                 <Property Name="UnifiedPosition" Value="{{0.35,0},{0.3,0}}" />
                 <Property Name="UnifiedSize" Value="{{0.3,0},{0.1,0}}" />
                 <Property Name="Text" Value="Enter GameState" />
             </Window>
 
-		<Window Type="TaharezLook/Button" Name="ExitButton">
+		<Window Type="OgreTray/Button" Name="ExitButton">
                 <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
                 <Property Name="UnifiedSize" Value="{{0.3,0},{0.1,0}}" />
                 <Property Name="Text" Value="Exit AdvancedOgreFramework" />

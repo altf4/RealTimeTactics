@@ -52,6 +52,8 @@ public:
 	bool mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 	bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 
+	void updateStats();
+
 	Ogre::Root *m_pRoot;
 	Ogre::RenderWindow *m_pRenderWnd;
 	Ogre::Viewport *m_pViewport;

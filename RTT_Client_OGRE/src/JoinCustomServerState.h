@@ -10,6 +10,15 @@
 #define JOINCUSTOMSERVER_STATE_H
 
 #include "AppState.h"
+#include "ClientProtocolHandler.h"
+#include "CallbackHandler.h"
+
+#include <iostream>
+#include <arpa/inet.h>
+#include <vector>
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include <openssl/sha.h>
+#include "Player.h"
 
 class JoinCustomServerState : public AppState
 {
@@ -35,7 +44,25 @@ public:
 	bool onBackButton(const CEGUI::EventArgs &args);
 	bool onJoinServerButton(const CEGUI::EventArgs &args);
 
+	bool onAddressActivate(const CEGUI::EventArgs &args);
+	bool onAddressDeactivate(const CEGUI::EventArgs &args);
+
+	bool onPortActivate(const CEGUI::EventArgs &args);
+	bool onPortDeactivate(const CEGUI::EventArgs &args);
+
+	bool onUsernameActivate(const CEGUI::EventArgs &args);
+	bool onUsernameDeactivate(const CEGUI::EventArgs &args);
+
+	bool onPasswordActivate(const CEGUI::EventArgs &args);
+	bool onPasswordDeactivate(const CEGUI::EventArgs &args);
+
+	//CEGUI::Window *m_pJCSWnd;
+
 	void update(double timeSinceLastFrame);
+
+	RTT::PlayerDescription m_playerDescription;
+
+	RTT::CallbackHandler *m_callbackHandler;
 
 private:
 	bool m_bQuit;
