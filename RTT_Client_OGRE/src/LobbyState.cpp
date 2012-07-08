@@ -158,20 +158,20 @@ void LobbyState::listMatches()
 		{
 			//TreeModel::Row row = *(refListStore->append());
 
-			multiColumnList->addRow();
+			multiColumnList->addRow((int)descriptions[i].m_ID);
 			//row[columns->m_matchID] = (int)descriptions[i].m_ID;
-			itemMultiColumnList = new CEGUI::ListboxTextItem(CEGUI::PropertyHelper::intToString((int)descriptions[i].m_ID), 301);
+			itemMultiColumnList = new CEGUI::ListboxTextItem(CEGUI::PropertyHelper::intToString((int)descriptions[i].m_ID), i);
 						itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
 						multiColumnList->setItem(itemMultiColumnList, 0, i); // ColumnID, RowID
 			//row[columns->m_maxPlayers] = (int)descriptions[i].m_maxPlayers;
 			//row[columns->m_currentPlayers] = (int)descriptions[i].m_currentPlayerCount;
 			CEGUI::String playerCount = CEGUI::PropertyHelper::intToString(
 					(int)descriptions[i].m_currentPlayerCount) + "/" + CEGUI::PropertyHelper::intToString((int)descriptions[i].m_maxPlayers);
-			itemMultiColumnList = new CEGUI::ListboxTextItem(playerCount, 302);
+			itemMultiColumnList = new CEGUI::ListboxTextItem(playerCount, i);
 						itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
 						multiColumnList->setItem(itemMultiColumnList, 1, i); // ColumnID, RowID
 			//row[columns->m_name] = descriptions[i].m_name;
-			itemMultiColumnList = new CEGUI::ListboxTextItem(descriptions[i].m_name, 303);
+			itemMultiColumnList = new CEGUI::ListboxTextItem(descriptions[i].m_name, i);
 						itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
 						multiColumnList->setItem(itemMultiColumnList, 2, i); // ColumnID, RowID
 
@@ -179,7 +179,7 @@ void LobbyState::listMatches()
 			std::string timeString = boost::posix_time::to_simple_string(time);
 
 			//row[columns->m_timeCreated] = timeString;
-			itemMultiColumnList = new CEGUI::ListboxTextItem(timeString.c_str(), 303);
+			itemMultiColumnList = new CEGUI::ListboxTextItem(timeString.c_str(), i);
 						itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
 						multiColumnList->setItem(itemMultiColumnList, 4, i); // ColumnID, RowID
 
