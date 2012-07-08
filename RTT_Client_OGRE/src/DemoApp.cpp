@@ -11,7 +11,6 @@
 #include "GameState.h"
 #include "JoinCustomServerState.h"
 #include "LobbyState.h"
-#include "MatchLobbyState.h"
 
 DemoApp::DemoApp()
 {
@@ -40,7 +39,6 @@ void DemoApp::startDemo()
 	GameState::create(m_pAppStateManager, "GameState");
 	JoinCustomServerState::create(m_pAppStateManager, "JoinCustomServerState");
 	LobbyState::create(m_pAppStateManager, "LobbyState");
-	MatchLobbyState::create(m_pAppStateManager, "MatchLobbyState");
 
 
 

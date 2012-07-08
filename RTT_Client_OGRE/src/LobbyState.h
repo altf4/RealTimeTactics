@@ -41,8 +41,12 @@ public:
 
 	CEGUI::MultiColumnList *multiColumnList;
 
+	RTT::PlayerDescription m_playerDescription;
+	RTT::MatchDescription m_currentMatch;
+
 private:
 	bool m_bQuit;
+	bool m_bInMatch;
 };
 
 #endif
