@@ -53,6 +53,52 @@ void LobbyState::enter()
 	button = (CEGUI::PushButton*)pMainWnd->getChild("ServerBackButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::onBackButton, this));
 
+
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Starting to make MCL");
+
+	CEGUI::MultiColumnList* multiColumnList = (CEGUI::MultiColumnList*)pMainWnd->getChild("MCL");
+
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("MCL Init adding cols...");
+
+	multiColumnList->addColumn("ID", 0, CEGUI::UDim(0.07f, 0));
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Col A");
+	multiColumnList->addColumn("Players", 1, CEGUI::UDim(0.16f, 0));
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Col B");
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Col C  all columns added");
+	multiColumnList->addColumn("Mode", 2, CEGUI::UDim(0.13f, 0));
+	multiColumnList->addColumn("Map", 2, CEGUI::UDim(0.11f, 0));
+	multiColumnList->addColumn("Time Created", 2, CEGUI::UDim(0.27f, 0));
+	multiColumnList->setSelectionMode(CEGUI::MultiColumnList::RowSingle); // MultiColumnList::RowMultiple
+	CEGUI::ListboxTextItem* itemMultiColumnList;
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Adding rows...");
+	multiColumnList->addRow();
+	itemMultiColumnList = new CEGUI::ListboxTextItem("A1", 101);
+		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+		multiColumnList->setItem(itemMultiColumnList, 0, 0); // ColumnID, RowID
+	itemMultiColumnList = new CEGUI::ListboxTextItem("B1", 102);
+		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+		// By commenting the line above a cell does not specify a selection indicator
+		//  selecting that line will show a "gap" in the selection.
+		multiColumnList->setItem(itemMultiColumnList, 1, 0); // ColumnID, RowID
+	itemMultiColumnList = new CEGUI::ListboxTextItem("C1", 103);
+		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+		multiColumnList->setItem(itemMultiColumnList, 2, 0); // ColumnID, RowID
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("First row");
+	multiColumnList->addRow();
+	itemMultiColumnList = new CEGUI::ListboxTextItem("A2", 201);
+		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+		multiColumnList->setItem(itemMultiColumnList, 0, 1); // ColumnID, RowID
+	itemMultiColumnList = new CEGUI::ListboxTextItem("B2", 202);
+		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+		multiColumnList->setItem(itemMultiColumnList, 1, 1); // ColumnID, RowID
+	itemMultiColumnList = new CEGUI::ListboxTextItem("C2", 203);
+		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+		multiColumnList->setItem(itemMultiColumnList, 2, 1); // ColumnID, RowID
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("second row");
+	CEGUI::MCLGridRef grid_ref(1, 0); // Select according to a grid reference; second row
+	multiColumnList->setItemSelectState(grid_ref, true);
+
+
 	m_bQuit = false;
 
 	createScene();
@@ -60,6 +106,7 @@ void LobbyState::enter()
 
 void LobbyState::createScene()
 {
+
 }
 
 bool LobbyState::pause()

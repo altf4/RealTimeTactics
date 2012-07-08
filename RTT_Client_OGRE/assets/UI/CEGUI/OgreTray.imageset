@@ -100,4 +100,5 @@
     <Image Name="MiniTextBoxOverBR" XPos="153" YPos="52" Width="9" Height="9" />
     <Image Name="MiniTextBoxOverTL" XPos="136" YPos="34" Width="9" Height="9" />
     <Image Name="MiniTextBoxOverTR" XPos="153" YPos="34" Width="9" Height="9" />
+    <Image Name="Select" XPos="146" YPos="38" Width="6" Height="18" />
 </Imageset>
