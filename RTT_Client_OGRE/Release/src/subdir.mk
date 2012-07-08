@@ -11,7 +11,6 @@ CPP_SRCS += \
 ../src/GameState.cpp \
 ../src/JoinCustomServerState.cpp \
 ../src/LobbyState.cpp \
-../src/MatchLobbyState.cpp \
 ../src/MenuState.cpp \
 ../src/RTT_Ogre_Map.cpp \
 ../src/RTT_Ogre_Player.cpp \
@@ -26,7 +25,6 @@ OBJS += \
 ./src/GameState.o \
 ./src/JoinCustomServerState.o \
 ./src/LobbyState.o \
-./src/MatchLobbyState.o \
 ./src/MenuState.o \
 ./src/RTT_Ogre_Map.o \
 ./src/RTT_Ogre_Player.o \
@@ -41,7 +39,6 @@ CPP_DEPS += \
 ./src/GameState.d \
 ./src/JoinCustomServerState.d \
 ./src/LobbyState.d \
-./src/MatchLobbyState.d \
 ./src/MenuState.d \
 ./src/RTT_Ogre_Map.d \
 ./src/RTT_Ogre_Player.d \
