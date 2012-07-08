@@ -229,6 +229,12 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 
 	m_pRenderWnd->setActive(true);
 
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setDefaultMouseCursor((CEGUI::utf8*)"OgreTrayImages", (CEGUI::utf8*)"MouseArrow");
+	CEGUI::MouseCursor::getSingleton().setImage("OgreTrayImages", "MouseArrow");
+	const OIS::MouseState state = m_pMouse->getMouseState();
+	CEGUI::Point mousePos = CEGUI::MouseCursor::getSingleton().getPosition();
+	CEGUI::System::getSingleton().injectMouseMove(state.X.abs-mousePos.d_x,state.Y.abs-mousePos.d_y);
+
 	return true;
 }
 

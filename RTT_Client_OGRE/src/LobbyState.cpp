@@ -41,12 +41,6 @@ void LobbyState::enter()
 	OgreFramework::getSingletonPtr()->m_pKeyboard->setEventCallback(this);
 	OgreFramework::getSingletonPtr()->m_pMouse->setEventCallback(this);
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setDefaultMouseCursor((CEGUI::utf8*)"OgreTrayImages", (CEGUI::utf8*)"MouseArrow");
-	CEGUI::MouseCursor::getSingleton().setImage("OgreTrayImages", "MouseArrow");
-	const OIS::MouseState state = OgreFramework::getSingletonPtr()->m_pMouse->getMouseState();
-	CEGUI::Point mousePos = CEGUI::MouseCursor::getSingleton().getPosition();
-	CEGUI::System::getSingleton().injectMouseMove(state.X.abs-mousePos.d_x,state.Y.abs-mousePos.d_y);
-
 	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_ServerLobby_GUI");
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
 
