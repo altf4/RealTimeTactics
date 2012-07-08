@@ -31,17 +31,16 @@
         <Property Name="Text" Value="Exit AdvancedOgreFramework" />
     </Window>
     
-    <Window Type="OgreTray/MultiColumnList" Name="MCL">
+    <Window Type="OgreTray/MultiColumnList" Name="MatchesMCL">
         <Property Name="UnifiedPosition" Value="{{0,0},{0.2,0}}" />
         <Property Name="UnifiedSize" Value="{{0.5,0},{0.5,0}}" />
         <Property Name="HorizontalAlignment" Value="Centre" />
-        <Property Name="Text" Value="" />
     </Window>
 	
 </Window>
 
 <Window Type="DefaultGUISheet" Name="RTT_MatchLobby_GUI">
-		<Property Name="UnifiedSize" Value="{{1, 1},{1, 1}}" />
+	<Property Name="UnifiedSize" Value="{{1, 1},{1, 1}}" />
 
 	<Window Type="OgreTray/Button" Name="MatchBackButton">
 		<Property Name="UnifiedPosition" Value="{{0.1,0},{0.1,0}}" />
@@ -53,6 +52,18 @@
         <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
         <Property Name="UnifiedSize" Value="{{0.3,0},{0.05,0}}" />
         <Property Name="Text" Value="Exit AdvancedOgreFramework" />
+    </Window>
+    
+    <Window Type="OgreTray/MultiColumnList" Name="PlayersMCL">
+        <Property Name="UnifiedPosition" Value="{{0,0},{0.2,0}}" />
+        <Property Name="UnifiedSize" Value="{{0.5,0},{0.25,0}}" />
+        <Property Name="HorizontalAlignment" Value="Centre" />
+    </Window>
+    
+    <Window Type="OgreTray/ListboxItem" Name="PlayerItem">
+   		<Property Name="Text" Value="PlayerItem" />
+
+		
     </Window>
 
 </Window>

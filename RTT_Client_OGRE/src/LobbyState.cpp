@@ -62,25 +62,25 @@ void LobbyState::enter()
 	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::JoinMatchButton, this));
 
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Initialized state");
-	createScene();
+	serverLobby();
 }
 
-void LobbyState::createScene()
+void LobbyState::serverLobby()
 {
 
 	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_ServerLobby_GUI");
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
 	m_bInMatch = false;
 
-	multiColumnList = (CEGUI::MultiColumnList*)pMainWnd->getChild("MCL");
+	multiColumnListMatch = (CEGUI::MultiColumnList*)pMainWnd->getChild("MatchesMCL");
 
-	multiColumnList->addColumn("ID", 0, CEGUI::UDim(0.1f, 0));
-	multiColumnList->addColumn("Players", 1, CEGUI::UDim(0.20f, 0));
-	multiColumnList->addColumn("Name", 2, CEGUI::UDim(0.20f, 0));
-	multiColumnList->addColumn("Map", 3, CEGUI::UDim(0.20f, 0));
-	multiColumnList->addColumn("Time Created", 4, CEGUI::UDim(0.27f, 0));
+	multiColumnListMatch->addColumn("ID", 0, CEGUI::UDim(0.1f, 0));
+	multiColumnListMatch->addColumn("Players", 1, CEGUI::UDim(0.20f, 0));
+	multiColumnListMatch->addColumn("Name", 2, CEGUI::UDim(0.20f, 0));
+	multiColumnListMatch->addColumn("Map", 3, CEGUI::UDim(0.20f, 0));
+	multiColumnListMatch->addColumn("Time Created", 4, CEGUI::UDim(0.27f, 0));
 
-	multiColumnList->setSelectionMode(CEGUI::MultiColumnList::RowSingle);
+	multiColumnListMatch->setSelectionMode(CEGUI::MultiColumnList::RowSingle);
 
 	listMatches();
 }
@@ -93,32 +93,32 @@ void LobbyState::listMatches()
 	uint numMatchesThisPage = ListMatches(1, descriptions);
 	CEGUI::ListboxTextItem* itemMultiColumnList;
 
-	multiColumnList->resetList();
+	multiColumnListMatch->resetList();
 
 	for(uint i = 0; i < numMatchesThisPage; i++)
 	{
-		multiColumnList->addRow((int)descriptions[i].m_ID);
+		multiColumnListMatch->addRow((int)descriptions[i].m_ID);
 		itemMultiColumnList = new CEGUI::ListboxTextItem(CEGUI::PropertyHelper::intToString((int)descriptions[i].m_ID), i);
 		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-		multiColumnList->setItem(itemMultiColumnList, 0, i);
+		multiColumnListMatch->setItem(itemMultiColumnList, 0, i);
 
 		CEGUI::String playerCount = CEGUI::PropertyHelper::intToString(
 				(int)descriptions[i].m_currentPlayerCount) + "/" + CEGUI::PropertyHelper::intToString((int)descriptions[i].m_maxPlayers);
 
 		itemMultiColumnList = new CEGUI::ListboxTextItem(playerCount, i);
 		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-		multiColumnList->setItem(itemMultiColumnList, 1, i);
+		multiColumnListMatch->setItem(itemMultiColumnList, 1, i);
 
 		itemMultiColumnList = new CEGUI::ListboxTextItem(descriptions[i].m_name, i);
 		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-		multiColumnList->setItem(itemMultiColumnList, 2, i);
+		multiColumnListMatch->setItem(itemMultiColumnList, 2, i);
 
 		boost::posix_time::ptime time = epoch + boost::posix_time::seconds(descriptions[i].m_timeCreated);
 		std::string timeString = boost::posix_time::to_simple_string(time);
 
 		itemMultiColumnList = new CEGUI::ListboxTextItem(timeString.c_str(), i);
 		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-		multiColumnList->setItem(itemMultiColumnList, 4, i);
+		multiColumnListMatch->setItem(itemMultiColumnList, 4, i);
 
 	}
 }
@@ -226,7 +226,7 @@ bool LobbyState::onBackButton(const CEGUI::EventArgs &args)
 		{
 			OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leaving Match ID: " + Ogre::StringConverter::toString(m_currentMatch.m_ID));
 			m_currentMatch.m_ID = 0;
-			createScene();
+			serverLobby();
 		}
 	}
 	else
@@ -239,7 +239,7 @@ bool LobbyState::onBackButton(const CEGUI::EventArgs &args)
 bool LobbyState::JoinMatchButton(const CEGUI::EventArgs &args)
 {
 	//Get selected match
-	CEGUI::ListboxItem *listboxItem = multiColumnList->getFirstSelectedItem();
+	CEGUI::ListboxItem *listboxItem = multiColumnListMatch->getFirstSelectedItem();
 
 	//Test to see if a match was selected
 	if(listboxItem == NULL)
@@ -261,10 +261,8 @@ bool LobbyState::JoinMatchButton(const CEGUI::EventArgs &args)
 	if( playerCount > 0 )
 	{
 		m_currentMatch.m_ID = matchID;
-
-		OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby_GUI"));
-		m_bInMatch = true;
 		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Joined match ID: " + Ogre::StringConverter::toString(matchID));
+		matchLobby(playerDescriptions, playerCount);
 	}
 	else
 	{
@@ -273,4 +271,27 @@ bool LobbyState::JoinMatchButton(const CEGUI::EventArgs &args)
 	}
 
 	return true;
+}
+
+void LobbyState::matchLobby(RTT::PlayerDescription *playerDescriptions,
+		uint playerCount)
+{
+	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby_GUI");
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
+	m_bInMatch = true;
+	multiColumnListPlayer = (CEGUI::MultiColumnList*)pMainWnd->getChild("PlayersMCL");
+
+	multiColumnListPlayer->addColumn("Leader", 0, CEGUI::UDim(0.17f, 0));
+	multiColumnListPlayer->addColumn("Name", 1, CEGUI::UDim(0.25f, 0));
+	multiColumnListPlayer->addColumn("Team", 2, CEGUI::UDim(0.40f, 0));
+
+	listPlayers();
+}
+
+void LobbyState::listPlayers()
+{
+
+
+
+
 }

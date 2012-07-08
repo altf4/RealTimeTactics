@@ -19,7 +19,7 @@ public:
 	DECLARE_APPSTATE_CLASS(LobbyState)
 
 	void enter();
-	void createScene();
+	void serverLobby();
 	void exit();
 	bool pause();
 	void resume();
@@ -37,9 +37,14 @@ public:
 	bool JoinMatchButton(const CEGUI::EventArgs &args);
 
 	void listMatches();
+	void listPlayers();
+
+	void matchLobby(RTT::PlayerDescription *playerDescriptions, uint playerCount);
+
 	void update(double timeSinceLastFrame);
 
-	CEGUI::MultiColumnList *multiColumnList;
+	CEGUI::MultiColumnList *multiColumnListMatch;
+	CEGUI::MultiColumnList *multiColumnListPlayer;
 
 	RTT::PlayerDescription m_playerDescription;
 	RTT::MatchDescription m_currentMatch;
