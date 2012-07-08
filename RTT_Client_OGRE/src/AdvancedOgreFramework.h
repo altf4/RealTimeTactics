@@ -27,7 +27,7 @@
 #include <OISMouse.h>
 
 #include <CEGUI.h>
-#include <CEGUIOgreRenderer.h>
+#include <CEGUI/RendererModules/Ogre/CEGUIOgreRenderer.h>
 
 #define RESOURCES_CFG_FILENAME "resources.cfg"
 #define PLUGINS_CFG_FILENAME "plugins.cfg"

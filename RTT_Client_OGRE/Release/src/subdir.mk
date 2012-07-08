@@ -6,10 +6,13 @@
 CPP_SRCS += \
 ../src/AdvancedOgreFramework.cpp \
 ../src/AppStateManager.cpp \
+../src/CallbackHandler.cpp \
 ../src/DemoApp.cpp \
 ../src/GameState.cpp \
+../src/JoinCustomServerState.cpp \
+../src/LobbyState.cpp \
+../src/MatchLobbyState.cpp \
 ../src/MenuState.cpp \
-../src/PauseState.cpp \
 ../src/RTT_Ogre_Map.cpp \
 ../src/RTT_Ogre_Player.cpp \
 ../src/RTT_Ogre_Unit.cpp \
@@ -18,10 +21,13 @@ CPP_SRCS += \
 OBJS += \
 ./src/AdvancedOgreFramework.o \
 ./src/AppStateManager.o \
+./src/CallbackHandler.o \
 ./src/DemoApp.o \
 ./src/GameState.o \
+./src/JoinCustomServerState.o \
+./src/LobbyState.o \
+./src/MatchLobbyState.o \
 ./src/MenuState.o \
-./src/PauseState.o \
 ./src/RTT_Ogre_Map.o \
 ./src/RTT_Ogre_Player.o \
 ./src/RTT_Ogre_Unit.o \
@@ -30,10 +36,13 @@ OBJS += \
 CPP_DEPS += \
 ./src/AdvancedOgreFramework.d \
 ./src/AppStateManager.d \
+./src/CallbackHandler.d \
 ./src/DemoApp.d \
 ./src/GameState.d \
+./src/JoinCustomServerState.d \
+./src/LobbyState.d \
+./src/MatchLobbyState.d \
 ./src/MenuState.d \
-./src/PauseState.d \
 ./src/RTT_Ogre_Map.d \
 ./src/RTT_Ogre_Player.d \
 ./src/RTT_Ogre_Unit.d \
@@ -44,7 +53,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I/usr/local/lib -I../../RTT_Client_Core/src -I../../RTT_Common/src -I/usr/local/include/OGRE/Terrain -I/usr/local/include/CEGUI -I/usr/include/OIS -I/usr/local/lib/OGRE -I/usr/local/include/OGRE -I/usr/local/include -O3 -Wall -c -fmessage-length=0 -std=c++0x -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I../../RTT_Client_Core/src -I../../RTT_Common/src -O3 -Wall -c -fmessage-length=0 -std=c++0x -pthread `pkg-config --cflags glib-2.0 gtkmm-3.0 OGRE OIS CEGUI CEGUI-OGRE` -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
