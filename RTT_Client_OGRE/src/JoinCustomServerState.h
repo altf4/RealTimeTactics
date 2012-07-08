@@ -10,15 +10,6 @@
 #define JOINCUSTOMSERVER_STATE_H
 
 #include "AppState.h"
-#include "ClientProtocolHandler.h"
-#include "CallbackHandler.h"
-
-#include <iostream>
-#include <arpa/inet.h>
-#include <vector>
-#include "boost/date_time/posix_time/posix_time.hpp"
-#include <openssl/sha.h>
-#include "Player.h"
 
 class JoinCustomServerState : public AppState
 {

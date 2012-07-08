@@ -1,22 +1,22 @@
 //============================================================================
-// Name        : LobbyState.h
+// Name        : MatchLobbyState.h
 // Author      : Mark Petro
 // Copyright   : 2011, GNU GPLv3
 // Description : Built from the Advanced OGRE Framework tutorial found here:
 //	http://www.ogre3d.org/tikiwiki/tiki-index.php?page=Advanced+Ogre+Framework&structure=Tutorials
 //============================================================================
 
-#ifndef LOBBY_STATE_H
-#define LOBBY_STATE_H
+#ifndef MATCH_LOBBY_STATE_H
+#define MATCH_LOBBY_STATE_H
 
 #include "AppState.h"
 
-class LobbyState : public AppState
+class MatchLobbyState : public AppState
 {
 public:
-	LobbyState();
+	MatchLobbyState();
 
-	DECLARE_APPSTATE_CLASS(LobbyState)
+	DECLARE_APPSTATE_CLASS(MatchLobbyState)
 
 	void enter();
 	void createScene();
@@ -31,15 +31,10 @@ public:
 	bool mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 	bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 
-	bool onExitButton(const CEGUI::EventArgs &args);
-	bool onBackButton(const CEGUI::EventArgs &args);
-	bool listMatchesButton(const CEGUI::EventArgs &args);
-	bool JoinMatchButton(const CEGUI::EventArgs &args);
+	bool MatchExitButton(const CEGUI::EventArgs &args);
+	bool MatchBackButton(const CEGUI::EventArgs &args);
 
-	void listMatches();
 	void update(double timeSinceLastFrame);
-
-	CEGUI::MultiColumnList *multiColumnList;
 
 private:
 	bool m_bQuit;

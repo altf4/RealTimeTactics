@@ -9,8 +9,6 @@
 
 #include "JoinCustomServerState.h"
 
-#include "messaging/MessageManager.h"
-
 using boost::posix_time::ptime;
 using boost::posix_time::time_duration;
 using boost::gregorian::date;

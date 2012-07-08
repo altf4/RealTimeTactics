@@ -8,8 +8,7 @@
 //============================================================================
 
 #include "LobbyState.h"
-#include "messaging/MessageManager.h"
-#include "ClientProtocolHandler.h"
+
 
 using namespace Ogre;
 
@@ -22,7 +21,6 @@ LobbyState::LobbyState()
 void LobbyState::enter()
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Entering LobbyState...");
-	//RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
 	m_pSceneMgr = OgreFramework::getSingletonPtr()->m_pRoot->createSceneManager(
 			ST_GENERIC, "LobbySceneMgr");
 	m_pSceneMgr->setAmbientLight(Ogre::ColourValue(0.7f, 0.7f, 0.7f));
@@ -52,6 +50,9 @@ void LobbyState::enter()
 	button = (CEGUI::PushButton*)pMainWnd->getChild("RefreshListButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::listMatchesButton, this));
 
+	button = (CEGUI::PushButton*)pMainWnd->getChild("JoinMatchButton");
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::JoinMatchButton, this));
+
 	multiColumnList = (CEGUI::MultiColumnList*)pMainWnd->getChild("MCL");
 
 	multiColumnList->addColumn("ID", 0, CEGUI::UDim(0.1f, 0));
@@ -62,68 +63,6 @@ void LobbyState::enter()
 
 	multiColumnList->setSelectionMode(CEGUI::MultiColumnList::RowSingle); // MultiColumnList::RowMultiple
 
-
-/*
-	multiColumnList->addRow();
-		itemMultiColumnList = new CEGUI::ListboxTextItem("1", 101);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 0, 0); // ColumnID, RowID
-		itemMultiColumnList = new CEGUI::ListboxTextItem("0/4", 102);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 1, 0); // ColumnID, RowID
-		itemMultiColumnList = new CEGUI::ListboxTextItem("CTF", 103);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 2, 0); // ColumnID, RowID
-		itemMultiColumnList = new CEGUI::ListboxTextItem("Forest", 104);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 3, 0); // ColumnID, RowID
-		itemMultiColumnList = new CEGUI::ListboxTextItem("Now", 105);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 4, 0); // ColumnID, RowID
-
-	multiColumnList->addRow();
-		itemMultiColumnList = new CEGUI::ListboxTextItem("2", 201);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 0, 1); // ColumnID, RowID
-		itemMultiColumnList = new CEGUI::ListboxTextItem("0/2", 202);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 1, 1); // ColumnID, RowID
-		itemMultiColumnList = new CEGUI::ListboxTextItem("DM", 203);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 2, 1); // ColumnID, RowID
-		itemMultiColumnList = new CEGUI::ListboxTextItem("City", 204);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 3, 1); // ColumnID, RowID
-		itemMultiColumnList = new CEGUI::ListboxTextItem("Now", 205);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 4, 1); // ColumnID, RowID
-
-	multiColumnList->addRow();
-		itemMultiColumnList = new CEGUI::ListboxTextItem("3", 301);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 0, 2); // ColumnID, RowID
-		itemMultiColumnList = new CEGUI::ListboxTextItem("1/3", 302);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 1, 2); // ColumnID, RowID
-		itemMultiColumnList = new CEGUI::ListboxTextItem("DM", 303);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 2, 2); // ColumnID, RowID
-		itemMultiColumnList = new CEGUI::ListboxTextItem("City", 304);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 3, 2); // ColumnID, RowID
-		itemMultiColumnList = new CEGUI::ListboxTextItem("Now", 305);
-			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-			multiColumnList->setItem(itemMultiColumnList, 4, 2); // ColumnID, RowID
-			OgreFramework::getSingletonPtr()->m_pLog->logMessage("Got here 3");
-
-*/
-
-
-
-	//CEGUI::MCLGridRef grid_ref(0, 0); // Select according to a grid reference; second row
-	//multiColumnList->setItemSelectState(grid_ref, true);
-
-
 	m_bQuit = false;
 
 	createScene();
@@ -133,6 +72,7 @@ void LobbyState::createScene()
 {
 	listMatches();
 }
+
 void LobbyState::listMatches()
 {
 	boost::posix_time::ptime epoch(boost::gregorian::date(1970,boost::gregorian::Jan,1));
@@ -140,51 +80,43 @@ void LobbyState::listMatches()
 		struct RTT::MatchDescription descriptions[MATCHES_PER_PAGE];
 		uint numMatchesThisPage = ListMatches(1, descriptions);
 		CEGUI::ListboxTextItem* itemMultiColumnList;
-		//m_match_lists->set_current_page(page);
 
-		//MatchListColumns *columns = new MatchListColumns();
-
-		//Glib::RefPtr<ListStore> refListStore = ListStore::create(*columns);
-		//view->set_model(refListStore);
 		multiColumnList->resetList();
 
 		for(uint i = 0; i < numMatchesThisPage; i++)
 		{
-			//TreeModel::Row row = *(refListStore->append());
-
 			multiColumnList->addRow((int)descriptions[i].m_ID);
-			//row[columns->m_matchID] = (int)descriptions[i].m_ID;
 			itemMultiColumnList = new CEGUI::ListboxTextItem(CEGUI::PropertyHelper::intToString((int)descriptions[i].m_ID), i);
-						itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-						multiColumnList->setItem(itemMultiColumnList, 0, i); // ColumnID, RowID
-			//row[columns->m_maxPlayers] = (int)descriptions[i].m_maxPlayers;
-			//row[columns->m_currentPlayers] = (int)descriptions[i].m_currentPlayerCount;
+			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+			multiColumnList->setItem(itemMultiColumnList, 0, i);
+
 			CEGUI::String playerCount = CEGUI::PropertyHelper::intToString(
 					(int)descriptions[i].m_currentPlayerCount) + "/" + CEGUI::PropertyHelper::intToString((int)descriptions[i].m_maxPlayers);
+
 			itemMultiColumnList = new CEGUI::ListboxTextItem(playerCount, i);
-						itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-						multiColumnList->setItem(itemMultiColumnList, 1, i); // ColumnID, RowID
-			//row[columns->m_name] = descriptions[i].m_name;
+			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+			multiColumnList->setItem(itemMultiColumnList, 1, i);
+
 			itemMultiColumnList = new CEGUI::ListboxTextItem(descriptions[i].m_name, i);
-						itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-						multiColumnList->setItem(itemMultiColumnList, 2, i); // ColumnID, RowID
+			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+			multiColumnList->setItem(itemMultiColumnList, 2, i);
 
 			boost::posix_time::ptime time = epoch + boost::posix_time::seconds(descriptions[i].m_timeCreated);
 			std::string timeString = boost::posix_time::to_simple_string(time);
 
-			//row[columns->m_timeCreated] = timeString;
 			itemMultiColumnList = new CEGUI::ListboxTextItem(timeString.c_str(), i);
-						itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
-						multiColumnList->setItem(itemMultiColumnList, 4, i); // ColumnID, RowID
-
+			itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+			multiColumnList->setItem(itemMultiColumnList, 4, i);
 
 		}
 }
+
 bool LobbyState::listMatchesButton(const CEGUI::EventArgs &args)
 {
 	listMatches();
 	return true;
 }
+
 bool LobbyState::pause()
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Pausing LobbyState...");
@@ -280,3 +212,8 @@ bool LobbyState::onBackButton(const CEGUI::EventArgs &args)
 	return true;
 }
 
+bool LobbyState::JoinMatchButton(const CEGUI::EventArgs &args)
+{
+	changeAppState(findByName("MatchLobbyState"));
+	return true;
+}

@@ -40,7 +40,7 @@
 	
 </Window>
 
-<Window Type="DefaultGUISheet" Name="RTT_MatchJobby_GUI">
+<Window Type="DefaultGUISheet" Name="RTT_MatchLobby_GUI">
 		<Property Name="UnifiedSize" Value="{{1, 1},{1, 1}}" />
 
 	<Window Type="OgreTray/Button" Name="MatchBackButton">
