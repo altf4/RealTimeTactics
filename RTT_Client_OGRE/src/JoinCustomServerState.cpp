@@ -286,7 +286,6 @@ bool JoinCustomServerState::onJoinServerButton(const CEGUI::EventArgs &args)
 	{
 		StatusBox->setText("Connection Successful!");
 		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Connection Successful!");
-		//LaunchMainLobbyPane();
 		changeAppState(findByName("LobbyState"));
 
 		//Launch the Callback Thread

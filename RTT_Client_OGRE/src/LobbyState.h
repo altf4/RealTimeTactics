@@ -10,6 +10,15 @@
 #define LOBBY_STATE_H
 
 #include "AppState.h"
+#include "ClientProtocolHandler.h"
+#include "CallbackHandler.h"
+
+#include <iostream>
+#include <arpa/inet.h>
+#include <vector>
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include <openssl/sha.h>
+#include "Player.h"
 
 class LobbyState : public AppState
 {
@@ -33,8 +42,12 @@ public:
 
 	bool onExitButton(const CEGUI::EventArgs &args);
 	bool onBackButton(const CEGUI::EventArgs &args);
+	bool listMatchesButton(const CEGUI::EventArgs &args);
 
+	void listMatches();
 	void update(double timeSinceLastFrame);
+
+	CEGUI::MultiColumnList *multiColumnList;
 
 private:
 	bool m_bQuit;
