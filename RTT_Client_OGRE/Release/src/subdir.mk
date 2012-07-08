@@ -11,6 +11,10 @@ CPP_SRCS += \
 ../src/GameState.cpp \
 ../src/JoinCustomServerState.cpp \
 ../src/LobbyState.cpp \
+<<<<<<< HEAD
+=======
+../src/MatchLobbyState.cpp \
+>>>>>>> upstream/CEGUI
 ../src/MenuState.cpp \
 ../src/RTT_Ogre_Map.cpp \
 ../src/RTT_Ogre_Player.cpp \
@@ -25,6 +29,10 @@ OBJS += \
 ./src/GameState.o \
 ./src/JoinCustomServerState.o \
 ./src/LobbyState.o \
+<<<<<<< HEAD
+=======
+./src/MatchLobbyState.o \
+>>>>>>> upstream/CEGUI
 ./src/MenuState.o \
 ./src/RTT_Ogre_Map.o \
 ./src/RTT_Ogre_Player.o \
@@ -39,6 +47,10 @@ CPP_DEPS += \
 ./src/GameState.d \
 ./src/JoinCustomServerState.d \
 ./src/LobbyState.d \
+<<<<<<< HEAD
+=======
+./src/MatchLobbyState.d \
+>>>>>>> upstream/CEGUI
 ./src/MenuState.d \
 ./src/RTT_Ogre_Map.d \
 ./src/RTT_Ogre_Player.d \
@@ -50,7 +62,11 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
+<<<<<<< HEAD
 	g++ -I/usr/local/include/CEGUI -I/usr/local/include/OGRE -I/usr/include/OIS -I/usr/include/glib-2.0 -I/usr/lib64/glib-2.0/include -I/usr/include/gtkmm-3.0 -I/usr/local/lib -I/usr/lib64/gtkmm-3.0/include -I/usr/include/atkmm-1.6 -I/usr/include/giomm-2.4 -I/usr/lib64/giomm-2.4/include -I/usr/include/pangomm-1.4 -I/usr/lib64/pangomm-1.4/include -I/usr/include/gtk-3.0 -I/usr/include/cairomm-1.0 -I/usr/local/include/CEGUI/RendererModules/Ogre -I/usr/lib64/cairomm-1.0/include -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/gtk-3.0/unix-print -I/usr/include/gdkmm-3.0 -I/usr/lib64/gdkmm-3.0/include -I/usr/include/atk-1.0 -I/usr/include/glibmm-2.4 -I/usr/lib64/glibmm-2.4/include -I/usr/include/sigc++-2.0 -I/usr/lib64/sigc++-2.0/include -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/pixman-1 -I/usr/include/freetype2 -I/usr/include/libpng15 -I/usr/include/gio-unix-2.0/ -I../../RTT_Client_Core/src -I../../RTT_Common/src -I/usr/local/lib/OGRE -O3 -Wall -c -fmessage-length=0 -std=c++0x -pthread -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+=======
+	g++ -I../../RTT_Client_Core/src -I../../RTT_Common/src -O3 -Wall -c -fmessage-length=0 -std=c++0x -pthread `pkg-config --cflags glib-2.0 gtkmm-3.0 OGRE OIS CEGUI CEGUI-OGRE` -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+>>>>>>> upstream/CEGUI
 	@echo 'Finished building: $<'
 	@echo ' '
 

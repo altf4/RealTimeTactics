@@ -60,11 +60,7 @@
         <Property Name="HorizontalAlignment" Value="Centre" />
     </Window>
     
-    <Window Type="OgreTray/ListboxItem" Name="PlayerItem">
-   		<Property Name="Text" Value="PlayerItem" />
 
-		
-    </Window>
 
 </Window>
 

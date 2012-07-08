@@ -17,52 +17,73 @@ LobbyState::LobbyState()
     m_bQuit = false;
     m_bInMatch = false;
     m_FrameEvent = Ogre::FrameEvent();
+    m_bInit = false;
 }
 
 void LobbyState::enter()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Joining Server Lobby...");
-	m_pSceneMgr = OgreFramework::getSingletonPtr()->m_pRoot->createSceneManager(
-			ST_GENERIC, "LobbySceneMgr");
-	m_pSceneMgr->setAmbientLight(Ogre::ColourValue(0.7f, 0.7f, 0.7f));
+	if(m_bInit == false)
+	{
+		m_bInit = true;
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Joining Server Lobby...");
+		m_pSceneMgr = OgreFramework::getSingletonPtr()->m_pRoot->createSceneManager(
+				ST_GENERIC, "LobbySceneMgr");
+		m_pSceneMgr->setAmbientLight(Ogre::ColourValue(0.7f, 0.7f, 0.7f));
 
-	m_pCamera = m_pSceneMgr->createCamera("LobbyCam");
-	m_pCamera->setPosition(Vector3(0, 25, -50));
-	m_pCamera->lookAt(Vector3(0, 0, 0));
-	m_pCamera->setNearClipDistance(1);
+		m_pCamera = m_pSceneMgr->createCamera("LobbyCam");
+		m_pCamera->setPosition(Vector3(0, 25, -50));
+		m_pCamera->lookAt(Vector3(0, 0, 0));
+		m_pCamera->setNearClipDistance(1);
 
-	m_pCamera->setAspectRatio(
-		Real(OgreFramework::getSingletonPtr()->m_pViewport->getActualWidth()) /
-		Real(OgreFramework::getSingletonPtr()->m_pViewport->getActualHeight()));
+		m_pCamera->setAspectRatio(
+			Real(OgreFramework::getSingletonPtr()->m_pViewport->getActualWidth()) /
+			Real(OgreFramework::getSingletonPtr()->m_pViewport->getActualHeight()));
 
-	OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
+		OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
 
-	OgreFramework::getSingletonPtr()->m_pKeyboard->setEventCallback(this);
-	OgreFramework::getSingletonPtr()->m_pMouse->setEventCallback(this);
+		OgreFramework::getSingletonPtr()->m_pKeyboard->setEventCallback(this);
+		OgreFramework::getSingletonPtr()->m_pMouse->setEventCallback(this);
 
-	m_bQuit = false;
+		m_bQuit = false;
 
 
-	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby_GUI");
+		CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby_GUI");
 
-	CEGUI::PushButton *button = (CEGUI::PushButton*)pMainWnd->getChild("MatchExitButton");
-	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::onExitButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("MatchBackButton");
-	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::onBackButton, this));
+		CEGUI::PushButton *button = (CEGUI::PushButton*)pMainWnd->getChild("MatchExitButton");
+		button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::onExitButton, this));
+		button = (CEGUI::PushButton*)pMainWnd->getChild("MatchBackButton");
+		button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::onBackButton, this));
 
-	pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_ServerLobby_GUI");
+		multiColumnListPlayer = (CEGUI::MultiColumnList*)pMainWnd->getChild("PlayersMCL");
 
-	button = (CEGUI::PushButton*)pMainWnd->getChild("ServerExitButton");
-	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::onExitButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("ServerBackButton");
-	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::onBackButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("RefreshListButton");
-	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::listMatchesButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("JoinMatchButton");
-	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::JoinMatchButton, this));
+		multiColumnListPlayer->addColumn("Leader", 0, CEGUI::UDim(0.17f, 0));
+		multiColumnListPlayer->addColumn("Name", 1, CEGUI::UDim(0.25f, 0));
+		multiColumnListPlayer->addColumn("Team", 2, CEGUI::UDim(0.40f, 0));
 
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Initialized state");
-	serverLobby();
+		pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_ServerLobby_GUI");
+
+		button = (CEGUI::PushButton*)pMainWnd->getChild("ServerExitButton");
+		button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::onExitButton, this));
+		button = (CEGUI::PushButton*)pMainWnd->getChild("ServerBackButton");
+		button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::onBackButton, this));
+		button = (CEGUI::PushButton*)pMainWnd->getChild("RefreshListButton");
+		button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::listMatchesButton, this));
+		button = (CEGUI::PushButton*)pMainWnd->getChild("JoinMatchButton");
+		button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&LobbyState::JoinMatchButton, this));
+
+		multiColumnListMatch = (CEGUI::MultiColumnList*)pMainWnd->getChild("MatchesMCL");
+
+		multiColumnListMatch->addColumn("ID", 0, CEGUI::UDim(0.1f, 0));
+		multiColumnListMatch->addColumn("Players", 1, CEGUI::UDim(0.20f, 0));
+		multiColumnListMatch->addColumn("Name", 2, CEGUI::UDim(0.20f, 0));
+		multiColumnListMatch->addColumn("Map", 3, CEGUI::UDim(0.20f, 0));
+		multiColumnListMatch->addColumn("Time Created", 4, CEGUI::UDim(0.27f, 0));
+
+		multiColumnListMatch->setSelectionMode(CEGUI::MultiColumnList::RowSingle);
+
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Initialized state");
+		serverLobby();
+	}
 }
 
 void LobbyState::serverLobby()
@@ -71,17 +92,6 @@ void LobbyState::serverLobby()
 	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_ServerLobby_GUI");
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
 	m_bInMatch = false;
-
-	multiColumnListMatch = (CEGUI::MultiColumnList*)pMainWnd->getChild("MatchesMCL");
-
-	multiColumnListMatch->addColumn("ID", 0, CEGUI::UDim(0.1f, 0));
-	multiColumnListMatch->addColumn("Players", 1, CEGUI::UDim(0.20f, 0));
-	multiColumnListMatch->addColumn("Name", 2, CEGUI::UDim(0.20f, 0));
-	multiColumnListMatch->addColumn("Map", 3, CEGUI::UDim(0.20f, 0));
-	multiColumnListMatch->addColumn("Time Created", 4, CEGUI::UDim(0.27f, 0));
-
-	multiColumnListMatch->setSelectionMode(CEGUI::MultiColumnList::RowSingle);
-
 	listMatches();
 }
 
@@ -91,7 +101,7 @@ void LobbyState::listMatches()
 	struct RTT::ServerStats stats = RTT::GetServerStats();
 	struct RTT::MatchDescription descriptions[MATCHES_PER_PAGE];
 	uint numMatchesThisPage = ListMatches(1, descriptions);
-	CEGUI::ListboxTextItem* itemMultiColumnList;
+	CEGUI::ListboxTextItem *itemMultiColumnList;
 
 	multiColumnListMatch->resetList();
 
@@ -279,11 +289,7 @@ void LobbyState::matchLobby(RTT::PlayerDescription *playerDescriptions,
 	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby_GUI");
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
 	m_bInMatch = true;
-	multiColumnListPlayer = (CEGUI::MultiColumnList*)pMainWnd->getChild("PlayersMCL");
 
-	multiColumnListPlayer->addColumn("Leader", 0, CEGUI::UDim(0.17f, 0));
-	multiColumnListPlayer->addColumn("Name", 1, CEGUI::UDim(0.25f, 0));
-	multiColumnListPlayer->addColumn("Team", 2, CEGUI::UDim(0.40f, 0));
 
 	listPlayers();
 }

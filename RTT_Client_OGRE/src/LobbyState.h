@@ -52,6 +52,7 @@ public:
 private:
 	bool m_bQuit;
 	bool m_bInMatch;
+	bool m_bInit;
 };
 
 #endif
