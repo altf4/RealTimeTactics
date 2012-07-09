@@ -226,8 +226,8 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 	m_pDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
 	if(m_pDebugOverlay == NULL)
 	{
-		cerr << "ERROR: Could not find resource: Core/DebugOverlay" << endl;
-		exit();
+		std::cerr << "ERROR: Could not find resource: Core/DebugOverlay" << std::endl;
+		::exit(EXIT_FAILURE);
 	}
 
 	m_pDebugOverlay->show();
