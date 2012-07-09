@@ -241,6 +241,8 @@ bool LobbyState::onBackButton(const CEGUI::EventArgs &args)
 	}
 	else
 	{
+		RTT::ExitServer();
+
 		changeAppState(findByName("JoinCustomServerState"));
 	}
 	return true;

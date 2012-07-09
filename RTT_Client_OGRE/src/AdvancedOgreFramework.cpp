@@ -8,6 +8,7 @@
 
 #include "AdvancedOgreFramework.h"
 #include <fstream>
+#include "CallbackHandler.h"
 
 using namespace Ogre;
 

@@ -67,6 +67,8 @@ public:
 	CEGUI::OgreRenderer *m_pGUIRenderer;
 	CEGUI::System *m_pGUISystem;
 
+	RTT::CallbackHandler *m_callbackHandler;
+
 private:
 	OgreFramework(const OgreFramework&);
 	OgreFramework& operator= (const OgreFramework&);
