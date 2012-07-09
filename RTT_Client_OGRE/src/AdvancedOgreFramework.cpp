@@ -224,6 +224,11 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"Lobby.layout");
 
 	m_pDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
+	if(m_pDebugOverlay == NULL)
+	{
+		cerr << "ERROR: Could not find resource: Core/DebugOverlay" << endl;
+		exit();
+	}
 
 	m_pDebugOverlay->show();
 
