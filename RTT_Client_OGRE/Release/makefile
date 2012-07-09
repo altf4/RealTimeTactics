@@ -44,7 +44,7 @@ all: RTT_Client_OGRE
 RTT_Client_OGRE: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: GCC C++ Linker'
-	g++ -L/usr/local/lib -L../../RTT_Client_Core/Release/ -L/usr/local/lib -o "RTT_Client_OGRE" $(OBJS) $(USER_OBJS) $(LIBS)
+	g++ -L../../RTT_Client_Core/Release/ -o "RTT_Client_OGRE" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
