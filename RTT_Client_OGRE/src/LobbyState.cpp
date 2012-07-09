@@ -242,7 +242,7 @@ bool LobbyState::onBackButton(const CEGUI::EventArgs &args)
 	else
 	{
 		RTT::ExitServer();
-
+		OgreFramework::getSingletonPtr()->m_callbackHandler->Stop();
 		changeAppState(findByName("JoinCustomServerState"));
 	}
 	return true;

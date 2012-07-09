@@ -10,15 +10,6 @@
 #define APP_STATE_H
 
 #include "AdvancedOgreFramework.h"
-#include "messaging/MessageManager.h"
-#include "ClientProtocolHandler.h"
-#include <iostream>
-#include <arpa/inet.h>
-#include <vector>
-#include "boost/date_time/posix_time/posix_time.hpp"
-#include <openssl/sha.h>
-#include "Player.h"
-#include "CallbackHandler.h"
 
 class AppState;
 

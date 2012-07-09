@@ -19,13 +19,10 @@ JoinCustomServerState::JoinCustomServerState()
 {
     m_bQuit = false;
     m_FrameEvent = Ogre::FrameEvent();
-    //m_pJCSWnd = NULL;
 }
 
 void JoinCustomServerState::enter()
 {
-    RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
-
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Entering JoinCustomServerState...");
 
 	m_pSceneMgr = OgreFramework::getSingletonPtr()->m_pRoot->createSceneManager(
@@ -43,23 +40,9 @@ void JoinCustomServerState::enter()
 
 	OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
 
-/*
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->destroyAllWidgets();
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->showFrameStats(OgreBites::TL_BOTTOMLEFT);
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->showLogo(OgreBites::TL_BOTTOMRIGHT);
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->showCursor();
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->createButton(
-			OgreBites::TL_CENTER, "EnterBtn", "Enter Match", 250);
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->createButton(
-			OgreBites::TL_CENTER, "ExitBtn", "Exit Real Time Tactics", 250);
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->createLabel(
-			OgreBites::TL_TOP, "MenuLbl", "Menu mode", 250);
-*/
 
 	OgreFramework::getSingletonPtr()->m_pKeyboard->setEventCallback(this);
 	OgreFramework::getSingletonPtr()->m_pMouse->setEventCallback(this);
-
-	//OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(m_pSceneMgr);
 
 	CEGUI::Window *m_pJCSWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_JoinCustomServer_GUI");
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(m_pJCSWnd);
@@ -99,7 +82,6 @@ bool JoinCustomServerState::pause()
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Pausing JoinCustomServerState...");
 
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(0);
-	//OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(0);
 
 	return true;
 }
@@ -109,7 +91,6 @@ void JoinCustomServerState::resume()
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Resuming JoinCustomServerState...");
 
 	OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
-	//OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(m_pSceneMgr);
 
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(CEGUI::WindowManager::getSingleton().getWindow("AOF_GUI"));
 
@@ -126,10 +107,6 @@ void JoinCustomServerState::exit()
 	{
 		OgreFramework::getSingletonPtr()->m_pRoot->destroySceneManager(m_pSceneMgr);
 	}
-
-	//OgreFramework::getSingletonPtr()->m_pTrayMgr->clearAllTrays();
-	//OgreFramework::getSingletonPtr()->m_pTrayMgr->destroyAllWidgets();
-	//OgreFramework::getSingletonPtr()->m_pTrayMgr->setListener(0);
 }
 
 bool JoinCustomServerState::keyPressed(const OIS::KeyEvent &keyEventRef)
@@ -158,42 +135,30 @@ bool JoinCustomServerState::mouseMoved(const OIS::MouseEvent &evt)
 {
 	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseWheelChange(evt.state.Z.rel);
 	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseMove(evt.state.X.rel, evt.state.Y.rel);
-
-	//if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseMove(evt))
-	//{
-	//	return true;
-	//}
 	return true;
 }
 
 bool JoinCustomServerState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
 	if(id == OIS::MB_Left)
+	{
 		OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseButtonDown(CEGUI::LeftButton);
-
-	//if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseDown(evt, id))
-	//{
-	//	return true;
-	//}
+	}
 	return true;
 }
 
 bool JoinCustomServerState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
 	if(id == OIS::MB_Left)
+	{
 		OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseButtonUp(CEGUI::LeftButton);
-
-	//if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseUp(evt, id))
-	//{
-	//	return true;
-	//}
+	}
 	return true;
 }
 
 void JoinCustomServerState::update(double timeSinceLastFrame)
 {
 	m_FrameEvent.timeSinceLastFrame = timeSinceLastFrame;
-	//OgreFramework::getSingletonPtr()->m_pTrayMgr->frameRenderingQueued(m_FrameEvent);
 
 	if(m_bQuit == true)
 	{
@@ -201,19 +166,7 @@ void JoinCustomServerState::update(double timeSinceLastFrame)
 		return;
 	}
 }
-/*
-void JoinCustomServerState::buttonHit(OgreBites::Button *button)
-{
-	if(button->getName() == "ExitBtn")
-	{
-		m_bQuit = true;
-	}
-	else if(button->getName() == "EnterBtn")
-	{
-		changeAppState(findByName("GameState"));
-	}
-}
-*/
+
 
 bool JoinCustomServerState::onExitButton(const CEGUI::EventArgs &args)
 {
@@ -278,20 +231,19 @@ bool JoinCustomServerState::onJoinServerButton(const CEGUI::EventArgs &args)
 	{
 		StatusBox->setText("Connection Successful!");
 		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Connection Successful!");
-		changeAppState(findByName("LobbyState"));
 
 		//Launch the Callback Thread
-		if(m_callbackHandler != NULL)
+		if(OgreFramework::getSingletonPtr()->m_callbackHandler != NULL)
 		{
-			m_callbackHandler->Start();
+			OgreFramework::getSingletonPtr()->m_callbackHandler->Start();
 		}
+		changeAppState(findByName("LobbyState"));
 	}
 	else
 	{
 		StatusBox->setText("Failed to connect to server");
 		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Failed to connect to server");
 	}
-	//changeAppState(findByName("JoinCustomServerStateState"));
 	return true;
 }
 

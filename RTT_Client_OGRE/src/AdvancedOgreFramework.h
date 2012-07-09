@@ -29,6 +29,16 @@
 #include <CEGUI.h>
 #include <CEGUI/RendererModules/Ogre/CEGUIOgreRenderer.h>
 
+#include "messaging/MessageManager.h"
+#include "ClientProtocolHandler.h"
+#include <iostream>
+#include <arpa/inet.h>
+#include <vector>
+#include "boost/date_time/posix_time/posix_time.hpp"
+#include <openssl/sha.h>
+#include "Player.h"
+#include "CallbackHandler.h"
+
 #define RESOURCES_CFG_FILENAME "resources.cfg"
 #define PLUGINS_CFG_FILENAME "plugins.cfg"
 #define OGRE_CFG_FILENAME "ogre.cfg"
@@ -53,6 +63,7 @@ public:
 	bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 
 	void updateStats();
+	void startCallBack();
 
 	Ogre::Root *m_pRoot;
 	Ogre::RenderWindow *m_pRenderWnd;
