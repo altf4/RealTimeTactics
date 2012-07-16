@@ -110,7 +110,7 @@ void GameState::resume()
 	OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
 //	OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(m_pSceneMgr);
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(CEGUI::WindowManager::getSingleton().getWindow("AOF_GUI_GAME"));
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(CEGUI::WindowManager::getSingleton().getWindow("RTT_Game"));
 
 	m_bQuit = false;
 }
@@ -208,27 +208,7 @@ bool GameState::keyPressed(const OIS::KeyEvent& keyEventRef)
 {
 	if(m_bSettingsMode == true)
 	{
-		/*
-		if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_S))
-		{
-			OgreBites::SelectMenu* pMenu =
-					(OgreBites::SelectMenu*)OgreFramework::getSingletonPtr()->m_pTrayMgr->getWidget(
-							"ChatModeSelMenu");
-			if(pMenu->getSelectionIndex() + 1 < (int)pMenu->getNumItems())
-			{
-				pMenu->selectItem(pMenu->getSelectionIndex() + 1);
-			}
-		}
 
-		if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_W))
-		{
-			OgreBites::SelectMenu* pMenu = (OgreBites::SelectMenu*)OgreFramework::getSingletonPtr()->m_pTrayMgr->getWidget("ChatModeSelMenu");
-			if(pMenu->getSelectionIndex() - 1 >= 0)
-			{
-				pMenu->selectItem(pMenu->getSelectionIndex() - 1);
-			}
-		}
-		*/
 	}
 
 	if(m_bChatMode == true)
@@ -239,25 +219,10 @@ bool GameState::keyPressed(const OIS::KeyEvent& keyEventRef)
 
 	if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_ESCAPE))
 	{
-		//pushAppState(findByName("PauseState"));
+		//TODO Make this pause the game and allow menu options
 		return true;
 	}
-/*
-	if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_I))
-	{
-		if(m_pDetailsPanel->getTrayLocation() == OgreBites::TL_NONE)
-		{
-			OgreFramework::getSingletonPtr()->m_pTrayMgr->moveWidgetToTray(
-					m_pDetailsPanel, OgreBites::TL_TOPLEFT, 0);
-			m_pDetailsPanel->show();
-		}
-		else
-		{
-			OgreFramework::getSingletonPtr()->m_pTrayMgr->removeWidgetFromTray(m_pDetailsPanel);
-			m_pDetailsPanel->hide();
-		}
-	}
-*/
+
 	if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_TAB))
 	{
 		m_bSettingsMode = !m_bSettingsMode;
@@ -715,7 +680,7 @@ void GameState::buildGUI()
 	CEGUI::Point mousePos = CEGUI::MouseCursor::getSingleton().getPosition();
 	CEGUI::System::getSingleton().injectMouseMove(state.X.abs-mousePos.d_x,state.Y.abs-mousePos.d_y);
 
-	m_pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("AOF_GUI_GAME");
+	m_pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_Game");
 	m_pChatWnd = CEGUI::WindowManager::getSingleton().getWindow("ChatWnd");
 
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(m_pMainWnd);

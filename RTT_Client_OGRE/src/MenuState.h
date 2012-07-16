@@ -11,6 +11,15 @@
 
 #include "AppState.h"
 
+enum GUIState
+{
+	MAINMENU,
+	JOINCUSTOMSERVER,
+	SERVERLOBBY,
+	MATCHLOBBY,
+	CREATEMATCH
+};
+
 class MenuState : public AppState
 {
 public:
@@ -31,16 +40,53 @@ public:
 	bool mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 	bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 
-	//void buttonHit(OgreBites::Button* button);
-
 	bool onExitButton(const CEGUI::EventArgs &args);
+	bool onBackButton(const CEGUI::EventArgs &args);
 	bool onEnterButton(const CEGUI::EventArgs &args);
-	bool onJoinCustomServerButton(const CEGUI::EventArgs &args);
+
+	bool onCustomServerButton(const CEGUI::EventArgs &args);
+	bool onJoinServerButton(const CEGUI::EventArgs &args);
+
+	bool onAddressActivate(const CEGUI::EventArgs &args);
+	bool onAddressDeactivate(const CEGUI::EventArgs &args);
+
+	bool onPortActivate(const CEGUI::EventArgs &args);
+	bool onPortDeactivate(const CEGUI::EventArgs &args);
+
+	bool onUsernameActivate(const CEGUI::EventArgs &args);
+	bool onUsernameDeactivate(const CEGUI::EventArgs &args);
+
+	bool onPasswordActivate(const CEGUI::EventArgs &args);
+	bool onPasswordDeactivate(const CEGUI::EventArgs &args);
+
+	bool listMatchesButton(const CEGUI::EventArgs &args);
+	bool JoinMatchButton(const CEGUI::EventArgs &args);
+
+	bool createMatchButton(const CEGUI::EventArgs &args);
+	bool createMatchSubmitButton(const CEGUI::EventArgs &args);
+
+	bool onMatchNameActivate(const CEGUI::EventArgs &args);
+	bool onMatchNameDeactivate(const CEGUI::EventArgs &args);
+
+	void listMatches();
+	void listPlayers();
+
+	void matchLobby(RTT::PlayerDescription *playerDescriptions, uint playerCount);
+	void serverLobby();
+
+	CEGUI::MultiColumnList *multiColumnListMatch;
+	CEGUI::MultiColumnList *multiColumnListPlayer;
+
+	RTT::PlayerDescription m_playerDescription;
+	RTT::MatchDescription m_currentMatch;
 
 	void update(double timeSinceLastFrame);
 
 private:
 	bool m_bQuit;
+	bool m_bInMatch;
+	bool m_bInit;
+	GUIState mLocation;
 };
 
 #endif

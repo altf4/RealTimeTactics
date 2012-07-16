@@ -212,10 +212,7 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 	m_pGUISystem = CEGUI::System::getSingletonPtr();
 
 	CEGUI::SchemeManager::getSingleton().create((CEGUI::utf8*)"OgreTray.scheme");
-	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"AdvancedOgreFramework.layout");
-	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"AdvancedOgreFramework_Game.layout");
-	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"JoinCustomServer.layout");
-	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"Lobby.layout");
+	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"RTT_GUI.layout");
 
 	m_pDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
 	if(m_pDebugOverlay == NULL)

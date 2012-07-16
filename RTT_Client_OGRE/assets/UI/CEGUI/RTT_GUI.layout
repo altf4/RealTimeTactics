@@ -1,0 +1,329 @@
+<?xml version="1.0" ?>
+<GUILayout>
+
+<Window Type="DefaultGUISheet" Name="RTT_ServerLobby">
+		<Property Name="UnifiedSize" Value="{{1, 1},{1, 1}}" />
+
+	<Window Type="OgreTray/Button" Name="ServerBackButton">
+		<Property Name="UnifiedPosition" Value="{{0.1,0},{0.1,0}}" />
+		<Property Name="UnifiedSize" Value="{{0.1,0},{0.05,0}}" />
+		<Property Name="Text" Value="Back" />
+	</Window>
+	<Window Type="OgreTray/Button" Name="CreateMatchButton">
+		<Property Name="UnifiedPosition" Value="{{0.1,0},{0.2,0}}" />
+		<Property Name="UnifiedSize" Value="{{0.15,0},{0.05,0}}" />
+		<Property Name="Text" Value="Create Match" />
+	</Window>
+		<Window Type="OgreTray/Button" Name="RefreshListButton">
+		<Property Name="UnifiedPosition" Value="{{0.1,0},{0.25,0}}" />
+		<Property Name="UnifiedSize" Value="{{0.15,0},{0.1,0}}" />
+		<Property Name="Text" Value="Refresh Match List" />
+	</Window>
+	<Window Type="OgreTray/Button" Name="JoinMatchButton">
+		<Property Name="UnifiedPosition" Value="{{0.1,0},{0.35,0}}" />
+		<Property Name="UnifiedSize" Value="{{0.15,0},{0.05,0}}" />
+		<Property Name="Text" Value="Join Match" />
+	</Window>
+
+	<Window Type="OgreTray/Button" Name="ServerExitButton">
+        <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
+        <Property Name="UnifiedSize" Value="{{0.3,0},{0.05,0}}" />
+        <Property Name="Text" Value="Exit AdvancedOgreFramework" />
+    </Window>
+    
+    <Window Type="OgreTray/MultiColumnList" Name="MatchesMCL">
+        <Property Name="UnifiedPosition" Value="{{0,0},{0.2,0}}" />
+        <Property Name="UnifiedSize" Value="{{0.5,0},{0.5,0}}" />
+        <Property Name="HorizontalAlignment" Value="Centre" />
+    </Window>
+    
+    <Window Type="OgreTray/FrameWindow" Name="RTT_CreateMatchWindow">
+    	<Property Name="HorizontalAlignment" Value="Centre" />
+    	<Property Name="VerticalAlignment" Value="Centre" />
+        <Property Name="UnifiedSize" Value="{{0.6,0},{0.6,0}}" />
+        <Property Name="Text" Value="Create Match Window" />
+        <Property Name="AlwaysOnTop" Value="True" />
+        <Property Name="Visible" Value="False" />
+        <Property Name="SizingEnabled" Value="False" />
+        <Property Name="DragMovingEnabled" Value="False" />
+        <Property Name="RollUpEnabled" Value="False" />
+	    
+	    <Window Type="OgreTray/StaticText" Name="MatchNameText">
+			<Property Name="UnifiedPosition" Value="{{0.15,0},{0.2,0}}" />
+			<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+			<Property Name="HorzFormatting" Value="RightAligned" />
+			<Property Name="BackgroundEnabled" Value="False" />
+			<Property Name="FrameEnabled" Value="False" />
+			<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
+			<Property Name="Text" Value="Match Name: " />
+		</Window>
+		
+		<Window Type="OgreTray/StaticText" Name="MapText">
+			<Property Name="UnifiedPosition" Value="{{0.15,0},{0.3,0}}" />
+			<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+			<Property Name="HorzFormatting" Value="RightAligned" />
+			<Property Name="BackgroundEnabled" Value="False" />
+			<Property Name="FrameEnabled" Value="False" />
+			<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
+			<Property Name="Text" Value="Map: " />
+		</Window>
+		
+		<Window Type="OgreTray/StaticText" Name="MaxPlayersText">
+		    <Property Name="UnifiedPosition" Value="{{0.15,0},{0.4,0}}" />
+		    <Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+		    <Property Name="BackgroundEnabled" Value="False" />
+		    <Property Name="HorzFormatting" Value="RightAligned" />
+			<Property Name="FrameEnabled" Value="False" />
+			<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
+		    <Property Name="Text" Value="Max Players: " />
+		</Window>
+		
+		<Window Type="OgreTray/StaticText" Name="PrivateText">
+		    <Property Name="UnifiedPosition" Value="{{0.15,0},{0.5,0}}" />
+		    <Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+		    <Property Name="BackgroundEnabled" Value="False" />
+		    <Property Name="HorzFormatting" Value="RightAligned" />
+			<Property Name="FrameEnabled" Value="False" />
+			<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
+		    <Property Name="Text" Value="Private: " />
+		</Window>
+	    
+		<Window Type="OgreTray/Editbox" Name="MatchNameBox">
+			<Property Name="HorizontalAlignment" Value="Centre" />
+			<Property Name="UnifiedPosition" Value="{{0.1,0},{0.2,0}}" />
+			<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+			<Property Name="Text" Value="Enter Match Name..." />
+		</Window>
+		
+		<Window Type="OgreTray/Combobox" Name="MapComboBox">
+			<Property Name="HorizontalAlignment" Value="Centre" />
+			<Property Name="UnifiedPosition" Value="{{0.1,0},{0.3,0}}" />
+			<Property Name="UnifiedSize" Value="{{0.3,0},{0.5,0}}" />
+			<Property Name="Text" Value="Map" />
+		</Window>
+		
+		<Window Type="OgreTray/Combobox" Name="MaxPlayersComboBox">
+			<Property Name="HorizontalAlignment" Value="Centre" />
+			<Property Name="UnifiedPosition" Value="{{0.1,0},{0.4,0}}" />
+			<Property Name="UnifiedSize" Value="{{0.3,0},{0.5,0}}" />
+			<Property Name="Text" Value="Max Players" />
+		</Window>
+		
+		<Window Type="OgreTray/Checkbox" Name="PrivateCheckBox">
+			<Property Name="HorizontalAlignment" Value="Centre" />
+			<Property Name="UnifiedPosition" Value="{{0.1,0},{0.5,0}}" />
+			<Property Name="UnifiedSize" Value="{{0.3,0},{0.1,0}}" />
+			<Property Name="Text" Value="" />
+		</Window>
+	    
+	    <Window Type="OgreTray/Button" Name="CreateMatchCancelButton">
+	    	<Property Name="HorizontalAlignment" Value="Centre" />
+		    <Property Name="UnifiedPosition" Value="{{0,0},{0.9,0}}" />
+		    <Property Name="UnifiedSize" Value="{{0.6,0},{0.1,0}}" />
+		    <Property Name="Text" Value="Cancel" />
+		</Window>
+		
+		<Window Type="OgreTray/Button" Name="CreateMatchSubmitButton">
+			<Property Name="HorizontalAlignment" Value="Centre" />
+	        <Property Name="UnifiedPosition" Value="{{0,0},{0.8,0}}" />
+	        <Property Name="UnifiedSize" Value="{{0.6,0},{0.1,0}}" />
+	        <Property Name="Text" Value="Create Match" />
+	    </Window>
+        
+    </Window>
+	
+</Window>
+
+<Window Type="DefaultGUISheet" Name="RTT_MatchLobby">
+	<Property Name="UnifiedSize" Value="{{1, 1},{1, 1}}" />
+
+	<Window Type="OgreTray/Button" Name="MatchBackButton">
+		<Property Name="UnifiedPosition" Value="{{0.1,0},{0.1,0}}" />
+		<Property Name="UnifiedSize" Value="{{0.1,0},{0.05,0}}" />
+		<Property Name="Text" Value="Back" />
+	</Window>
+
+	<Window Type="OgreTray/Button" Name="MatchExitButton">
+        <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
+        <Property Name="UnifiedSize" Value="{{0.3,0},{0.05,0}}" />
+        <Property Name="Text" Value="Exit AdvancedOgreFramework" />
+    </Window>
+    
+    <Window Type="OgreTray/MultiColumnList" Name="PlayersMCL">
+        <Property Name="UnifiedPosition" Value="{{0,0},{0.2,0}}" />
+        <Property Name="UnifiedSize" Value="{{0.5,0},{0.25,0}}" />
+        <Property Name="HorizontalAlignment" Value="Centre" />
+    </Window>
+    
+
+
+</Window>
+
+<Window Type="DefaultGUISheet" Name="RTT_MainMenu">
+		<Property Name="UnifiedSize" Value="{{1, 1},{1, 1}}" />
+
+		<Window Type="OgreTray/Button" Name="JoinCustomServerButton">
+                <Property Name="UnifiedPosition" Value="{{0.35,0},{0.1,0}}" />
+                <Property Name="UnifiedSize" Value="{{0.3,0},{0.1,0}}" />
+                <Property Name="Text" Value="Join Server" />
+        </Window>
+
+		<Window Type="OgreTray/Button" Name="EnterButton">
+                <Property Name="UnifiedPosition" Value="{{0.35,0},{0.3,0}}" />
+                <Property Name="UnifiedSize" Value="{{0.3,0},{0.1,0}}" />
+                <Property Name="Text" Value="Enter GameState" />
+        </Window>
+
+		<Window Type="OgreTray/Button" Name="ExitButton">
+                <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
+                <Property Name="UnifiedSize" Value="{{0.3,0},{0.1,0}}" />
+                <Property Name="Text" Value="Exit AdvancedOgreFramework" />
+        </Window>
+        
+        <Window Type="OgreTray/FrameWindow" Name="RTT_CustomServerWindow">
+	    	<Property Name="HorizontalAlignment" Value="Centre" />
+	    	<Property Name="VerticalAlignment" Value="Centre" />
+	        <Property Name="UnifiedSize" Value="{{0.6,0},{0.6,0}}" />
+	        <Property Name="Text" Value="Enter Server Information" />
+	        <Property Name="AlwaysOnTop" Value="True" />
+	        <Property Name="Visible" Value="False" />
+	        <Property Name="SizingEnabled" Value="False" />
+	        <Property Name="DragMovingEnabled" Value="False" />
+	        <Property Name="RollUpEnabled" Value="False" />
+	        
+	        	<Window Type="OgreTray/StaticText" Name="ServerText">
+					<Property Name="UnifiedPosition" Value="{{0.15,0},{0.2,0}}" />
+					<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+					<Property Name="HorzFormatting" Value="RightAligned" />
+					<Property Name="BackgroundEnabled" Value="False" />
+					<Property Name="FrameEnabled" Value="False" />
+					<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
+					<Property Name="Text" Value="Server Address: " />
+				</Window>
+				
+				<Window Type="OgreTray/StaticText" Name="PortText">
+					<Property Name="UnifiedPosition" Value="{{0.15,0},{0.3,0}}" />
+					<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+					<Property Name="HorzFormatting" Value="RightAligned" />
+					<Property Name="BackgroundEnabled" Value="False" />
+					<Property Name="FrameEnabled" Value="False" />
+					<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
+					<Property Name="Text" Value="Server Port: " />
+				</Window>
+				
+				<Window Type="OgreTray/StaticText" Name="UnameText">
+				    <Property Name="UnifiedPosition" Value="{{0.15,0},{0.4,0}}" />
+				    <Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+				    <Property Name="BackgroundEnabled" Value="False" />
+				    <Property Name="HorzFormatting" Value="RightAligned" />
+					<Property Name="FrameEnabled" Value="False" />
+					<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
+				    <Property Name="Text" Value="Username: " />
+				</Window>
+				
+				<Window Type="OgreTray/StaticText" Name="PassText">
+				    <Property Name="UnifiedPosition" Value="{{0.15,0},{0.5,0}}" />
+				    <Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+				    <Property Name="BackgroundEnabled" Value="False" />
+				    <Property Name="HorzFormatting" Value="RightAligned" />
+					<Property Name="FrameEnabled" Value="False" />
+					<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
+				    <Property Name="Text" Value="Password: " />
+				</Window>
+			    
+				<Window Type="OgreTray/Editbox" Name="ServerAddressBox">
+					<Property Name="HorizontalAlignment" Value="Centre" />
+					<Property Name="UnifiedPosition" Value="{{0.1,0},{0.2,0}}" />
+					<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+					<Property Name="Text" Value="127.0.0.1" />
+				</Window>
+				
+				<Window Type="OgreTray/Editbox" Name="ServerPortBox">
+					<Property Name="HorizontalAlignment" Value="Centre" />
+					<Property Name="UnifiedPosition" Value="{{0.1,0},{0.3,0}}" />
+					<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+					<Property Name="Text" Value="23000" />
+				</Window>
+				
+				<Window Type="OgreTray/Editbox" Name="UsernameBox">
+					<Property Name="HorizontalAlignment" Value="Centre" />
+					<Property Name="UnifiedPosition" Value="{{0.1,0},{0.4,0}}" />
+					<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+					<Property Name="Text" Value="Enter Username..." />
+				</Window>
+				
+				<Window Type="OgreTray/Editbox" Name="PasswordBox">
+					<Property Name="HorizontalAlignment" Value="Centre" />
+					<Property Name="UnifiedPosition" Value="{{0.1,0},{0.5,0}}" />
+					<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+					<Property Name="Text" Value="Enter Password..." />
+				</Window>
+				
+				<Window Type="OgreTray/Button" Name="JoinServerButton">
+					<Property Name="HorizontalAlignment" Value="Centre" />
+			        <Property Name="UnifiedPosition" Value="{{0,0},{0.8,0}}" />
+			        <Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+			        <Property Name="Text" Value="Connect to Server" />
+			    </Window>
+			    
+	    	    <Window Type="OgreTray/Button" Name="CustomServerCancelButton">
+			    	<Property Name="HorizontalAlignment" Value="Centre" />
+				    <Property Name="UnifiedPosition" Value="{{0,0},{0.9,0}}" />
+				    <Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
+				    <Property Name="Text" Value="Cancel" />
+				</Window>
+				        
+	    </Window>
+
+</Window>
+
+<Window Type="DefaultGUISheet" Name="RTT_Game">
+		<Property Name="UnifiedSize" Value="{{1, 1},{1, 1}}" />
+
+		<Window Type="OgreTray/Button" Name="ExitButton_Game">
+                <Property Name="UnifiedPosition" Value="{{0,0},{0,0}}" />
+                <Property Name="UnifiedSize" Value="{{0.15,0},{0.05,0}}" />
+                <Property Name="Text" Value="Exit to menu"/>
+            </Window>
+
+		<Window Type="OgreTray/Editbox" Name="ModeCaption">
+			<Property Name="UnifiedPosition" Value="{{0.75,0},{0.35,0}}" />
+			<Property Name="UnifiedSize" Value="{{0.25,0},{0.05,0}}" />
+			<Property Name="Text" Value="Unbuffered Input Mode" />
+			<Property Name="ReadOnly" Value="true" />
+		</Window>
+
+		<Window Type="OgreTray/MultiLineEditbox" Name="ControlsPanel">
+			<Property Name="UnifiedPosition" Value="{{0.75,0},{0.40,0}}" />
+			<Property Name="UnifiedSize" Value="{{0.25,0},{0.45,0}}" />
+			<Property Name="Text" Value="Standard Controls" />
+			<Property Name="ReadOnly" Value="true" />
+		</Window>
+
+
+		<Window Type="OgreTray/FrameWindow" Name="ChatWnd">
+			<Property Name="UnifiedPosition" Value="{{0.75,0},{0,0}}" />
+			<Property Name="UnifiedMinSize" Value="{{0.25,0},{0.2,0}}" />
+			<Property Name="UnifiedMaxSize" Value="{{0.45,0},{0.45,0}}" />
+			<Property Name="Text" Value="Chat" />
+			<Property Name="CloseButtonEnabled" Value="False" />
+
+			<Window Type="OgreTray/MultiLineEditbox" Name="ChatContentBox">
+				<Property Name="HorizontalAlignment" Value="Centre" />
+				<Property Name="UnifiedPosition" Value="{{0,0},{0.1,0}}" />
+				<Property Name="UnifiedSize" Value="{{0.9,0},{0.80,0}}" />
+				<Property Name="ReadOnly" Value="true" />
+				<Property Name="WordWrap" Value="true" />
+			</Window>
+			
+			<Window Type="OgreTray/Editbox" Name="ChatInputBox">
+				<Property Name="HorizontalAlignment" Value="Centre" />
+				<Property Name="UnifiedPosition" Value="{{0,0},{0.85,0}}" />
+				<Property Name="UnifiedSize" Value="{{0.9,0},{0.15,0}}" />
+				<Property Name="Text" Value="Enter text here..." />
+			</Window>
+		</Window>
+
+</Window>
+
+</GUILayout>
