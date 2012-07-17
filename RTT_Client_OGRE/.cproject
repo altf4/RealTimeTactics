@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<?fileVersion 4.0.0?><cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
+<?fileVersion 4.0.0?>
+
+<cproject storage_type_id="org.eclipse.cdt.core.XmlProjectDescriptionStorage">
 	<storageModule moduleId="org.eclipse.cdt.core.settings">
 		<cconfiguration id="cdt.managedbuild.config.gnu.exe.debug.1163055859">
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.debug.1163055859" moduleId="org.eclipse.cdt.core.settings" name="Debug">
@@ -28,7 +30,7 @@
 									<listOptionValue builtIn="false" value="../../RTT_Common/src"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.pic.1946278016" name="Position Independent Code (-fPIC)" superClass="gnu.cpp.compiler.option.other.pic" value="true" valueType="boolean"/>
-								<option id="gnu.cpp.compiler.option.other.other.1975536884" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x -pthread `pkg-config gtkmm-3.0 glib-2.0 --cflags OGRE OIS CEGUI CEGUI-OGRE`" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.1975536884" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x -pthread `pkg-config glibmm-2.4 --cflags OGRE OIS CEGUI CEGUI-OGRE`" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.757860493" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.985645519" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
@@ -47,24 +49,7 @@
 									<listOptionValue builtIn="false" value="CEGUIBase"/>
 									<listOptionValue builtIn="false" value="OIS"/>
 									<listOptionValue builtIn="false" value="glib-2.0"/>
-									<listOptionValue builtIn="false" value="gtkmm-3.0"/>
-									<listOptionValue builtIn="false" value="atkmm-1.6"/>
-									<listOptionValue builtIn="false" value="gdkmm-3.0"/>
-									<listOptionValue builtIn="false" value="giomm-2.4"/>
-									<listOptionValue builtIn="false" value="pangomm-1.4"/>
-									<listOptionValue builtIn="false" value="gtk-3"/>
 									<listOptionValue builtIn="false" value="glibmm-2.4"/>
-									<listOptionValue builtIn="false" value="cairomm-1.0"/>
-									<listOptionValue builtIn="false" value="gdk-3"/>
-									<listOptionValue builtIn="false" value="atk-1.0"/>
-									<listOptionValue builtIn="false" value="gio-2.0"/>
-									<listOptionValue builtIn="false" value="pangocairo-1.0"/>
-									<listOptionValue builtIn="false" value="gdk_pixbuf-2.0"/>
-									<listOptionValue builtIn="false" value="cairo-gobject"/>
-									<listOptionValue builtIn="false" value="pango-1.0"/>
-									<listOptionValue builtIn="false" value="cairo"/>
-									<listOptionValue builtIn="false" value="sigc-2.0"/>
-									<listOptionValue builtIn="false" value="gobject-2.0"/>
 									<listOptionValue builtIn="false" value="boost_date_time"/>
 									<listOptionValue builtIn="false" value="RTT_Client_Core"/>
 									<listOptionValue builtIn="false" value="crypto"/>
@@ -125,7 +110,7 @@
 									<listOptionValue builtIn="false" value="../../RTT_Common/src"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.other.pic.182688306" name="Position Independent Code (-fPIC)" superClass="gnu.cpp.compiler.option.other.pic" value="true" valueType="boolean"/>
-								<option id="gnu.cpp.compiler.option.other.other.837236241" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x -pthread `pkg-config --cflags glib-2.0 gtkmm-3.0 OGRE OIS CEGUI CEGUI-OGRE`" valueType="string"/>
+								<option id="gnu.cpp.compiler.option.other.other.837236241" name="Other flags" superClass="gnu.cpp.compiler.option.other.other" value="-c -fmessage-length=0 -std=c++0x -pthread `pkg-config glibmm-2.4 --cflags OGRE OIS CEGUI CEGUI-OGRE`" valueType="string"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1075112727" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.release.1750973959" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.release">
@@ -144,24 +129,7 @@
 									<listOptionValue builtIn="false" value="CEGUIBase"/>
 									<listOptionValue builtIn="false" value="OIS"/>
 									<listOptionValue builtIn="false" value="glib-2.0"/>
-									<listOptionValue builtIn="false" value="gtkmm-3.0"/>
-									<listOptionValue builtIn="false" value="atkmm-1.6"/>
-									<listOptionValue builtIn="false" value="gdkmm-3.0"/>
-									<listOptionValue builtIn="false" value="giomm-2.4"/>
-									<listOptionValue builtIn="false" value="pangomm-1.4"/>
-									<listOptionValue builtIn="false" value="gtk-3"/>
 									<listOptionValue builtIn="false" value="glibmm-2.4"/>
-									<listOptionValue builtIn="false" value="cairomm-1.0"/>
-									<listOptionValue builtIn="false" value="gdk-3"/>
-									<listOptionValue builtIn="false" value="atk-1.0"/>
-									<listOptionValue builtIn="false" value="gio-2.0"/>
-									<listOptionValue builtIn="false" value="pangocairo-1.0"/>
-									<listOptionValue builtIn="false" value="gdk_pixbuf-2.0"/>
-									<listOptionValue builtIn="false" value="cairo-gobject"/>
-									<listOptionValue builtIn="false" value="pango-1.0"/>
-									<listOptionValue builtIn="false" value="cairo"/>
-									<listOptionValue builtIn="false" value="sigc-2.0"/>
-									<listOptionValue builtIn="false" value="gobject-2.0"/>
 									<listOptionValue builtIn="false" value="boost_date_time"/>
 									<listOptionValue builtIn="false" value="RTT_Client_Core"/>
 									<listOptionValue builtIn="false" value="crypto"/>
