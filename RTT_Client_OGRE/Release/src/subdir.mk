@@ -9,8 +9,6 @@ CPP_SRCS += \
 ../src/CallbackHandler.cpp \
 ../src/DemoApp.cpp \
 ../src/GameState.cpp \
-../src/JoinCustomServerState.cpp \
-../src/LobbyState.cpp \
 ../src/MenuState.cpp \
 ../src/RTT_Ogre_Map.cpp \
 ../src/RTT_Ogre_Player.cpp \
@@ -23,8 +21,6 @@ OBJS += \
 ./src/CallbackHandler.o \
 ./src/DemoApp.o \
 ./src/GameState.o \
-./src/JoinCustomServerState.o \
-./src/LobbyState.o \
 ./src/MenuState.o \
 ./src/RTT_Ogre_Map.o \
 ./src/RTT_Ogre_Player.o \
@@ -37,8 +33,6 @@ CPP_DEPS += \
 ./src/CallbackHandler.d \
 ./src/DemoApp.d \
 ./src/GameState.d \
-./src/JoinCustomServerState.d \
-./src/LobbyState.d \
 ./src/MenuState.d \
 ./src/RTT_Ogre_Map.d \
 ./src/RTT_Ogre_Player.d \
