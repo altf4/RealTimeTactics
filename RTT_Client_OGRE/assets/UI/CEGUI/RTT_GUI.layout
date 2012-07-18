@@ -52,9 +52,7 @@
 			<Property Name="UnifiedPosition" Value="{{0.15,0},{0.2,0}}" />
 			<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
 			<Property Name="HorzFormatting" Value="RightAligned" />
-			<Property Name="BackgroundEnabled" Value="False" />
 			<Property Name="FrameEnabled" Value="False" />
-			<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
 			<Property Name="Text" Value="Match Name: " />
 		</Window>
 		
@@ -62,29 +60,23 @@
 			<Property Name="UnifiedPosition" Value="{{0.15,0},{0.3,0}}" />
 			<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
 			<Property Name="HorzFormatting" Value="RightAligned" />
-			<Property Name="BackgroundEnabled" Value="False" />
 			<Property Name="FrameEnabled" Value="False" />
-			<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
 			<Property Name="Text" Value="Map: " />
 		</Window>
 		
 		<Window Type="OgreTray/StaticText" Name="MaxPlayersText">
 		    <Property Name="UnifiedPosition" Value="{{0.15,0},{0.4,0}}" />
 		    <Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
-		    <Property Name="BackgroundEnabled" Value="False" />
 		    <Property Name="HorzFormatting" Value="RightAligned" />
 			<Property Name="FrameEnabled" Value="False" />
-			<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
 		    <Property Name="Text" Value="Max Players: " />
 		</Window>
 		
 		<Window Type="OgreTray/StaticText" Name="PrivateText">
 		    <Property Name="UnifiedPosition" Value="{{0.15,0},{0.5,0}}" />
 		    <Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
-		    <Property Name="BackgroundEnabled" Value="False" />
 		    <Property Name="HorzFormatting" Value="RightAligned" />
 			<Property Name="FrameEnabled" Value="False" />
-			<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
 		    <Property Name="Text" Value="Private: " />
 		</Window>
 	    
@@ -147,15 +139,21 @@
         <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
         <Property Name="UnifiedSize" Value="{{0.3,0},{0.05,0}}" />
         <Property Name="Text" Value="Exit AdvancedOgreFramework" />
-    </Window>
+    </Window> 
     
-    <Window Type="OgreTray/MultiColumnList" Name="PlayersMCL">
+    <Window Type="OgreTray/ScrollablePane" Name="PlayersPane">
         <Property Name="UnifiedPosition" Value="{{0,0},{0.2,0}}" />
-        <Property Name="UnifiedSize" Value="{{0.5,0},{0.25,0}}" />
+        <Property Name="UnifiedSize" Value="{{0.5,0},{0.5,0}}" />
         <Property Name="HorizontalAlignment" Value="Centre" />
+        <Property Name="Visible" Value="True" />
+        <Property Name="ContentArea" Value="l:0 t:0 r:0 b:0" />
+        <Property Name="HorzStepSize" Value="0.1" />
+        <Property Name="VertStepSize" Value="0.1" />
+        <Property Name="UnifiedMaxSize" Value="{{1,0},{1,0}}" />
+        <Property Name="HorzOverlapSize" Value="0.01" />
+        <Property Name="VertOverlapSize" Value="0.01" />
+        <Property Name="HorzScrollPosition" Value="0" />
     </Window>
-    
-
 
 </Window>
 
@@ -195,9 +193,7 @@
 					<Property Name="UnifiedPosition" Value="{{0.15,0},{0.2,0}}" />
 					<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
 					<Property Name="HorzFormatting" Value="RightAligned" />
-					<Property Name="BackgroundEnabled" Value="False" />
 					<Property Name="FrameEnabled" Value="False" />
-					<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
 					<Property Name="Text" Value="Server Address: " />
 				</Window>
 				
@@ -205,29 +201,23 @@
 					<Property Name="UnifiedPosition" Value="{{0.15,0},{0.3,0}}" />
 					<Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
 					<Property Name="HorzFormatting" Value="RightAligned" />
-					<Property Name="BackgroundEnabled" Value="False" />
 					<Property Name="FrameEnabled" Value="False" />
-					<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
 					<Property Name="Text" Value="Server Port: " />
 				</Window>
 				
 				<Window Type="OgreTray/StaticText" Name="UnameText">
 				    <Property Name="UnifiedPosition" Value="{{0.15,0},{0.4,0}}" />
 				    <Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
-				    <Property Name="BackgroundEnabled" Value="False" />
 				    <Property Name="HorzFormatting" Value="RightAligned" />
 					<Property Name="FrameEnabled" Value="False" />
-					<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
 				    <Property Name="Text" Value="Username: " />
 				</Window>
 				
 				<Window Type="OgreTray/StaticText" Name="PassText">
 				    <Property Name="UnifiedPosition" Value="{{0.15,0},{0.5,0}}" />
 				    <Property Name="UnifiedSize" Value="{{0.3,0},{0.075,0}}" />
-				    <Property Name="BackgroundEnabled" Value="False" />
 				    <Property Name="HorzFormatting" Value="RightAligned" />
 					<Property Name="FrameEnabled" Value="False" />
-					<Property Name="TextColours" Value="tl:FF8fbf6b tr:FF8fbf6b bl:FF8fbf6b br:FF8fbf6b" />
 				    <Property Name="Text" Value="Password: " />
 				</Window>
 			    

@@ -69,7 +69,7 @@ public:
 	bool onMatchNameDeactivate(const CEGUI::EventArgs &args);
 
 	void listMatches();
-	void listPlayers();
+	void listPlayers(RTT::PlayerDescription *playerDescriptions, uint playerCount);
 
 	void matchLobby(RTT::PlayerDescription *playerDescriptions, uint playerCount);
 	void serverLobby();
