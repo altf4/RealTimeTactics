@@ -487,12 +487,22 @@ bool GameState::keyReleased(const OIS::KeyEvent &keyEventRef)
 
 bool GameState::mouseMoved(const OIS::MouseEvent &evt)
 {
-//	if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseMove(evt)) return true;
 
 	//Mouse scroll wheel zoom
-	m_pCamera->pitch(Degree(evt.state.Z.rel * -0.015f));
-	m_TranslateVector.z = (evt.state.Z.rel * -0.04f);
-	moveCamera();
+	if(evt.state.Z.rel > 0)
+	{
+		m_pCamera->pitch(Degree(evt.state.Z.rel * -0.015f));
+		m_TranslateVector.z = (evt.state.Z.rel * -0.04f);
+		m_pCamera->moveRelative(m_TranslateVector / 10);
+	}
+	else if(evt.state.Z.rel < 0)
+	{
+		m_TranslateVector.z = (evt.state.Z.rel * -0.04f);
+		m_pCamera->moveRelative(m_TranslateVector / 10);
+		m_pCamera->pitch(Degree(evt.state.Z.rel * -0.015f));
+	}
+
+	//moveCamera();
 
 	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseWheelChange(evt.state.Z.rel);
 	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseMove(evt.state.X.rel, evt.state.Y.rel);
