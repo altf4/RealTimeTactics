@@ -11,7 +11,6 @@
 #include <iostream>
 
 using namespace std;
-//using namespace Gtk;
 using namespace RTT;
 
 CallbackHandler::CallbackHandler()

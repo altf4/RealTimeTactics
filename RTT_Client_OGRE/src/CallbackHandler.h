@@ -10,7 +10,8 @@
 
 #include "ClientProtocolHandler.h"
 
-#include "gtkmm.h"
+#include <glibmm/dispatcher.h>
+#include <glibmm/thread.h>
 #include <queue>
 
 namespace RTT

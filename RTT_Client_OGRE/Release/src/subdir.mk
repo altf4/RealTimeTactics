@@ -9,8 +9,6 @@ CPP_SRCS += \
 ../src/CallbackHandler.cpp \
 ../src/DemoApp.cpp \
 ../src/GameState.cpp \
-../src/JoinCustomServerState.cpp \
-../src/LobbyState.cpp \
 ../src/MenuState.cpp \
 ../src/RTT_Ogre_Map.cpp \
 ../src/RTT_Ogre_Player.cpp \
@@ -23,8 +21,6 @@ OBJS += \
 ./src/CallbackHandler.o \
 ./src/DemoApp.o \
 ./src/GameState.o \
-./src/JoinCustomServerState.o \
-./src/LobbyState.o \
 ./src/MenuState.o \
 ./src/RTT_Ogre_Map.o \
 ./src/RTT_Ogre_Player.o \
@@ -37,8 +33,6 @@ CPP_DEPS += \
 ./src/CallbackHandler.d \
 ./src/DemoApp.d \
 ./src/GameState.d \
-./src/JoinCustomServerState.d \
-./src/LobbyState.d \
 ./src/MenuState.d \
 ./src/RTT_Ogre_Map.d \
 ./src/RTT_Ogre_Player.d \
@@ -50,7 +44,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I../../RTT_Client_Core/src -I../../RTT_Common/src -O3 -Wall -c -fmessage-length=0 -std=c++0x -pthread `pkg-config --cflags glib-2.0 gtkmm-3.0 OGRE OIS CEGUI CEGUI-OGRE` -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I../../RTT_Client_Core/src -I../../RTT_Common/src -O3 -Wall -c -fmessage-length=0 -std=c++0x -pthread `pkg-config glibmm-2.4 --cflags OGRE OIS CEGUI CEGUI-OGRE` -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
