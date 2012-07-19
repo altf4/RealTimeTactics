@@ -519,7 +519,7 @@ void MenuState::listPlayers(uint playerCount)
 	CEGUI::DefaultWindow *playerName;
 	CEGUI::UDim offSet;
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Adding " + Ogre::StringConverter::toString((int)playerCount) + " Players");
-	for(int i = 0; i < playerCount; i++)
+	for(uint i = 0; i < playerCount; i++)
 	{
 		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player " + Ogre::StringConverter::toString((int)m_otherPlayers[i].m_ID) + " added");
 
@@ -584,7 +584,8 @@ void MenuState::listMatches()
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Listing Matches...");
 
 	boost::posix_time::ptime epoch(boost::gregorian::date(1970,boost::gregorian::Jan,1));
-	struct RTT::ServerStats stats = RTT::GetServerStats();
+	//TODO: Unused variable?
+	//struct RTT::ServerStats stats = RTT::GetServerStats();
 	struct RTT::MatchDescription descriptions[MATCHES_PER_PAGE];
 	uint numMatchesThisPage = ListMatches(1, descriptions);
 	CEGUI::ListboxTextItem *itemMultiColumnList;
@@ -676,7 +677,8 @@ bool MenuState::createMatchSubmitButton(const CEGUI::EventArgs &args)
 	CEGUI::Editbox *matchNameBox = (CEGUI::Editbox*)pCreateMatchWnd->getChild("MatchNameBox");
 	CEGUI::Combobox *mapCombobox = (CEGUI::Combobox*)pCreateMatchWnd->getChild("MapComboBox");
 	CEGUI::Combobox *maxPlayersCombobox = (CEGUI::Combobox*)pCreateMatchWnd->getChild("MaxPlayersComboBox");
-	CEGUI::Checkbox *privateCheckBox = (CEGUI::Checkbox*)pCreateMatchWnd->getChild("PrivateCheckBox");
+	//TODO: Unused variable?
+	//CEGUI::Checkbox *privateCheckBox = (CEGUI::Checkbox*)pCreateMatchWnd->getChild("PrivateCheckBox");
 
 
 	string matchName = matchNameBox->getText().c_str();
