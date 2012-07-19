@@ -490,9 +490,25 @@ bool GameState::mouseMoved(const OIS::MouseEvent &evt)
 //	if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseMove(evt)) return true;
 
 	//Mouse scroll wheel zoom
-	m_pCamera->pitch(Degree(evt.state.Z.rel * -0.015f));
-	m_TranslateVector.z = (evt.state.Z.rel * -0.04f);
-	moveCamera();
+	static double scrollZoomTotal = 0;
+
+	//If we're trying to zoom past the max.
+	if((evt.state.Z.rel > 0) &&
+			(evt.state.Z.rel + scrollZoomTotal < 720))
+	{
+		scrollZoomTotal += evt.state.Z.rel;
+		m_pCamera->pitch(Degree(evt.state.Z.rel * 0.015f));
+		m_TranslateVector.z = (evt.state.Z.rel * -0.04f);
+		moveCamera();
+	}
+	else if((evt.state.Z.rel < 0) &&
+			(evt.state.Z.rel + scrollZoomTotal > 0))
+	{
+		scrollZoomTotal += evt.state.Z.rel;
+		m_TranslateVector.z = (evt.state.Z.rel * -0.04f);
+		moveCamera();
+		m_pCamera->pitch(Degree(evt.state.Z.rel * 0.015f));
+	}
 
 	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseWheelChange(evt.state.Z.rel);
 	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseMove(evt.state.X.rel, evt.state.Y.rel);
@@ -500,7 +516,7 @@ bool GameState::mouseMoved(const OIS::MouseEvent &evt)
 	if(m_bRMouseDown)
 	{
 		m_pCamera->yaw(Degree(evt.state.X.rel * -0.1f));
-		m_pCamera->pitch(Degree(evt.state.Y.rel * -0.1f));
+		m_pCamera->pitch(Degree(evt.state.Y.rel * -0.2f));
 	}
 
 	return true;
