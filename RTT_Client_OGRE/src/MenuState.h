@@ -69,15 +69,18 @@ public:
 	bool onMatchNameDeactivate(const CEGUI::EventArgs &args);
 
 	void listMatches();
-	void listPlayers(RTT::PlayerDescription *playerDescriptions, uint playerCount);
+	void listPlayers(uint playerCount);
 
-	void matchLobby(RTT::PlayerDescription *playerDescriptions, uint playerCount);
+	void matchLobby(uint playerCount);
 	void serverLobby();
 
 	CEGUI::MultiColumnList *multiColumnListMatch;
 	CEGUI::MultiColumnList *multiColumnListPlayer;
 
 	RTT::PlayerDescription m_playerDescription;
+
+	RTT::PlayerDescription m_otherPlayers[MAX_PLAYERS_IN_MATCH];
+
 	RTT::MatchDescription m_currentMatch;
 
 	void update(double timeSinceLastFrame);

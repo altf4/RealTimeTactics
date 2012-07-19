@@ -482,15 +482,15 @@ bool MenuState::JoinMatchButton(const CEGUI::EventArgs &args)
 
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Trying to join Match ID: " + Ogre::StringConverter::toString(matchID));
 
-	RTT::PlayerDescription playerDescriptions[MAX_PLAYERS_IN_MATCH];
+	//RTT::PlayerDescription playerDescriptions[MAX_PLAYERS_IN_MATCH];
 
-	uint playerCount = JoinMatch(matchID, playerDescriptions, &m_currentMatch);
+	uint playerCount = JoinMatch(matchID,  m_otherPlayers, &m_currentMatch);
 
 	if( playerCount > 0 )
 	{
 		m_currentMatch.m_ID = matchID;
 		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Joined match ID: " + Ogre::StringConverter::toString(matchID));
-		matchLobby(playerDescriptions, playerCount);
+		matchLobby(playerCount);
 	}
 	else
 	{
@@ -501,19 +501,17 @@ bool MenuState::JoinMatchButton(const CEGUI::EventArgs &args)
 	return true;
 }
 
-void MenuState::matchLobby(RTT::PlayerDescription *playerDescriptions,
-		uint playerCount)
+void MenuState::matchLobby(uint playerCount)
 {
 	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby");
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
 	m_bInMatch = true;
 	mLocation = MATCHLOBBY;
-	listPlayers(playerDescriptions, playerCount);
+	listPlayers(playerCount);
 	return;
 }
 
-void MenuState::listPlayers(RTT::PlayerDescription *playerDescriptions,
-		uint playerCount)
+void MenuState::listPlayers(uint playerCount)
 {
 	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby");
 	CEGUI::ScrollablePane *scrollpane = (CEGUI::ScrollablePane*)pMainWnd->getChild("PlayersPane");
@@ -523,21 +521,21 @@ void MenuState::listPlayers(RTT::PlayerDescription *playerDescriptions,
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Adding " + Ogre::StringConverter::toString((int)playerCount) + " Players");
 	for(int i = 0; i < playerCount; i++)
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player " + Ogre::StringConverter::toString((int)playerDescriptions[i].m_ID) + " added");
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player " + Ogre::StringConverter::toString((int)m_otherPlayers[i].m_ID) + " added");
 
 		//Check to see if window object names already exist, if so delete them
-		if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" + CEGUI::PropertyHelper::intToString((int)playerDescriptions[i].m_ID)))
+		if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" + CEGUI::PropertyHelper::intToString((int)m_otherPlayers[i].m_ID)))
 		{
-			CEGUI::WindowManager::getSingleton().destroyWindow("IsLeader" + CEGUI::PropertyHelper::intToString((int)playerDescriptions[i].m_ID));
-			CEGUI::WindowManager::getSingleton().destroyWindow(playerDescriptions[i].m_name);
+			CEGUI::WindowManager::getSingleton().destroyWindow("IsLeader" + CEGUI::PropertyHelper::intToString((int)m_otherPlayers[i].m_ID));
+			CEGUI::WindowManager::getSingleton().destroyWindow(m_otherPlayers[i].m_name);
 		}
 
 		isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/RadioButton","IsLeader" + CEGUI::PropertyHelper::intToString((int)playerDescriptions[i].m_ID));
-		playerName = (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/StaticText",playerDescriptions[i].m_name);
+		playerName = (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/StaticText",m_otherPlayers[i].m_name);
 
 		isLeader->setGroupID(1);
-		isLeader->setID((int)playerDescriptions[i].m_ID);
-		if(playerDescriptions[i].m_ID == m_currentMatch.m_leaderID)
+		isLeader->setID((int)m_otherPlayers[i].m_ID);
+		if(m_otherPlayers[i].m_ID == m_currentMatch.m_leaderID)
 		{
 			isLeader->setSelected(true);
 		}
@@ -550,7 +548,7 @@ void MenuState::listPlayers(RTT::PlayerDescription *playerDescriptions,
 			isLeader->setEnabled(false);
 		}
 
-		playerName->setText(playerDescriptions[i].m_name);
+		playerName->setText(m_otherPlayers[i].m_name);
 
 		offSet = offSet + CEGUI::UDim(0.1f, 0.0f);
 
