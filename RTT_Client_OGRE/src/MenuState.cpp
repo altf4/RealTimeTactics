@@ -15,6 +15,20 @@ MenuState::MenuState()
 {
     m_bQuit = false;
     m_FrameEvent = Ogre::FrameEvent();
+    RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
+    OgreFramework::getSingletonPtr()->m_pLog->logMessage("Is there a callback thread?");
+    if(OgreFramework::getSingletonPtr()->m_callbackHandler == NULL)
+    {
+    	OgreFramework::getSingletonPtr()->m_pLog->logMessage("No, make one");
+    	OgreFramework::getSingletonPtr()->m_callbackHandler = new RTT::CallbackHandler();
+    }
+    else
+    {
+    	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Yes, use it");
+    }
+
+    RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
+    OgreFramework::getSingletonPtr()->m_callbackHandler->m_sig_leader_change.connect(sigc::mem_fun(*this, &MenuState::LeaderChangedEvent));
 }
 
 void MenuState::enter()
@@ -364,6 +378,7 @@ bool MenuState::onJoinServerButton(const CEGUI::EventArgs &args)
 		//Launch the Callback Thread
 		if(OgreFramework::getSingletonPtr()->m_callbackHandler != NULL)
 		{
+			OgreFramework::getSingletonPtr()->m_pLog->logMessage("Starting Callback Thread");
 			OgreFramework::getSingletonPtr()->m_callbackHandler->Start();
 		}
 		serverLobby();
@@ -530,7 +545,7 @@ void MenuState::listPlayers(uint playerCount)
 			CEGUI::WindowManager::getSingleton().destroyWindow(m_otherPlayers[i].m_name);
 		}
 
-		isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/RadioButton","IsLeader" + CEGUI::PropertyHelper::intToString((int)playerDescriptions[i].m_ID));
+		isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/RadioButton","IsLeader" + CEGUI::PropertyHelper::intToString((int)m_otherPlayers[i].m_ID));
 		playerName = (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/StaticText",m_otherPlayers[i].m_name);
 
 		isLeader->setGroupID(1);
@@ -552,9 +567,9 @@ void MenuState::listPlayers(uint playerCount)
 
 		offSet = offSet + CEGUI::UDim(0.1f, 0.0f);
 
-		isLeader->setPosition(CEGUI::UVector2(CEGUI::UDim(0.0f, 0.0f),offSet));
+		isLeader->setPosition(CEGUI::UVector2(CEGUI::UDim(0.0f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
 		isLeader->setSize(CEGUI::UVector2(CEGUI::UDim(0.075f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
-		playerName->setPosition(CEGUI::UVector2(CEGUI::UDim(0.1f, 0.0f),offSet));
+		playerName->setPosition(CEGUI::UVector2(CEGUI::UDim(0.1f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
 		playerName->setSize(CEGUI::UVector2(CEGUI::UDim(0.2f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
 		playerName->setProperty("FrameEnabled", "False");
 
@@ -713,7 +728,7 @@ bool MenuState::createMatchSubmitButton(const CEGUI::EventArgs &args)
 
 	if (CreateMatch(options, &m_currentMatch) )
 	{
-		matchLobby(&m_playerDescription, 1);
+		matchLobby(1);
 	}
 	else
 	{
@@ -744,4 +759,36 @@ bool MenuState::onMatchNameDeactivate(const CEGUI::EventArgs &args)
 		tMatchNameBox->setText("Enter Match Name...");
 	}
 	return true;
+}
+
+//Callback Events
+void MenuState::LeaderChangedEvent()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leader Change Event");
+	struct RTT::CallbackChange change = OgreFramework::getSingletonPtr()->m_callbackHandler->PopCallbackChange();
+	if(change.m_type == RTT::CALLBACK_ERROR)
+	{
+		cerr << "ERROR: Got an error in callback processing" << endl;
+		return;
+	}
+	//PlayerListColumns playerColumns;
+	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby");
+	CEGUI::RadioButton *oldLeader = (CEGUI::RadioButton*)pMainWnd->getChild("IsLeader" + CEGUI::PropertyHelper::intToString((int)m_currentMatch.m_leaderID));
+	CEGUI::RadioButton *newLeader = (CEGUI::RadioButton*)pMainWnd->getChild("IsLeader" + CEGUI::PropertyHelper::intToString((int)change.m_playerID));
+
+	oldLeader->setSelected(false);
+	newLeader->setSelected(true);
+
+	m_currentMatch.m_leaderID = change.m_playerID;
+
+	if(m_playerDescription.m_ID == m_currentMatch.m_leaderID)
+	{
+		newLeader->setEnabled(true);
+	}
+	else
+	{
+		newLeader->setEnabled(false);
+	}
+
+	return;
 }

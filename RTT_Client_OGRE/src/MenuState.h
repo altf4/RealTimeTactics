@@ -90,6 +90,8 @@ private:
 	bool m_bInMatch;
 	bool m_bInit;
 	GUIState mLocation;
+protected:
+	void LeaderChangedEvent();
 };
 
 #endif
