@@ -91,10 +91,9 @@ void MenuState::createScene()
 	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&MenuState::onExitButton, this));
 	button = (CEGUI::PushButton*)pMainWnd->getChild("MatchBackButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&MenuState::onBackButton, this));
-	multiColumnListPlayer = (CEGUI::MultiColumnList*)pMainWnd->getChild("PlayersMCL");
-	multiColumnListPlayer->addColumn("Leader", 0, CEGUI::UDim(0.17f, 0));
-	multiColumnListPlayer->addColumn("Name", 1, CEGUI::UDim(0.25f, 0));
-	multiColumnListPlayer->addColumn("Team", 2, CEGUI::UDim(0.40f, 0));
+
+
+
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Match Lobby");
 
 	//Server Lobby Menu
@@ -509,13 +508,62 @@ void MenuState::matchLobby(RTT::PlayerDescription *playerDescriptions,
 	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
 	m_bInMatch = true;
 	mLocation = MATCHLOBBY;
-	listPlayers();
+	listPlayers(playerDescriptions, playerCount);
 	return;
 }
 
-void MenuState::listPlayers()
+void MenuState::listPlayers(RTT::PlayerDescription *playerDescriptions,
+		uint playerCount)
 {
+	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby");
+	CEGUI::ScrollablePane *scrollpane = (CEGUI::ScrollablePane*)pMainWnd->getChild("PlayersPane");
+	CEGUI::RadioButton *isLeader;
+	CEGUI::DefaultWindow *playerName;
+	CEGUI::UDim offSet;
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Adding " + Ogre::StringConverter::toString((int)playerCount) + " Players");
+	for(int i = 0; i < playerCount; i++)
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player " + Ogre::StringConverter::toString((int)playerDescriptions[i].m_ID) + " added");
 
+		//Check to see if window object names already exist, if so delete them
+		if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" + CEGUI::PropertyHelper::intToString((int)playerDescriptions[i].m_ID)))
+		{
+			CEGUI::WindowManager::getSingleton().destroyWindow("IsLeader" + CEGUI::PropertyHelper::intToString((int)playerDescriptions[i].m_ID));
+			CEGUI::WindowManager::getSingleton().destroyWindow(playerDescriptions[i].m_name);
+		}
+
+		isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/RadioButton","IsLeader" + CEGUI::PropertyHelper::intToString((int)playerDescriptions[i].m_ID));
+		playerName = (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/StaticText",playerDescriptions[i].m_name);
+
+		isLeader->setGroupID(1);
+		isLeader->setID((int)playerDescriptions[i].m_ID);
+		if(playerDescriptions[i].m_ID == m_currentMatch.m_leaderID)
+		{
+			isLeader->setSelected(true);
+		}
+		if(m_playerDescription.m_ID == m_currentMatch.m_leaderID)
+		{
+			isLeader->setEnabled(true);
+		}
+		else
+		{
+			isLeader->setEnabled(false);
+		}
+
+		playerName->setText(playerDescriptions[i].m_name);
+
+		offSet = offSet + CEGUI::UDim(0.1f, 0.0f);
+
+		isLeader->setPosition(CEGUI::UVector2(CEGUI::UDim(0.0f, 0.0f),offSet));
+		isLeader->setSize(CEGUI::UVector2(CEGUI::UDim(0.075f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
+		playerName->setPosition(CEGUI::UVector2(CEGUI::UDim(0.1f, 0.0f),offSet));
+		playerName->setSize(CEGUI::UVector2(CEGUI::UDim(0.2f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
+		playerName->setProperty("FrameEnabled", "False");
+
+		scrollpane->addChildWindow(isLeader);
+		scrollpane->addChildWindow(playerName);
+
+	}
 
 }
 
@@ -588,6 +636,7 @@ bool MenuState::createMatchButton(const CEGUI::EventArgs &args)
 
 	CEGUI::Combobox *mapCombobox = (CEGUI::Combobox*)pCreateMatchWnd->getChild("MapComboBox");
 	mapCombobox->setReadOnly(true);
+	mapCombobox->resetList();
 	CEGUI::ListboxTextItem *itemCombobox = new CEGUI::ListboxTextItem("Cool Map", 1);
 	itemCombobox->setSelectionBrushImage("OgreTrayImages", "Select");
 	mapCombobox->addItem(itemCombobox);
@@ -601,6 +650,7 @@ bool MenuState::createMatchButton(const CEGUI::EventArgs &args)
 
 	CEGUI::Combobox *maxPlayersCombobox = (CEGUI::Combobox*)pCreateMatchWnd->getChild("MaxPlayersComboBox");
 	maxPlayersCombobox->setReadOnly(true);
+	maxPlayersCombobox->resetList();
 
 	//max number of players in a match is 8, minimum number of players is 2
 	//TODO make these dynamically adjustable based on map
@@ -664,7 +714,6 @@ bool MenuState::createMatchSubmitButton(const CEGUI::EventArgs &args)
 	if (CreateMatch(options, &m_currentMatch) )
 	{
 		matchLobby(&m_playerDescription, 1);
-		//LaunchMatchLobbyPane(&m_playerDescription, 1);
 	}
 	else
 	{

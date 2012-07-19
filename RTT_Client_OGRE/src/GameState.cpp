@@ -516,7 +516,7 @@ bool GameState::mouseMoved(const OIS::MouseEvent &evt)
 	if(m_bRMouseDown)
 	{
 		m_pCamera->yaw(Degree(evt.state.X.rel * -0.1f));
-		m_pCamera->pitch(Degree(evt.state.Y.rel * -0.2f));
+		m_pCamera->pitch(Degree(evt.state.Y.rel * -0.1f));
 	}
 
 	return true;
