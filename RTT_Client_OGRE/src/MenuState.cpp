@@ -20,7 +20,7 @@ MenuState::MenuState()
     if(OgreFramework::getSingletonPtr()->m_callbackHandler == NULL)
     {
     	OgreFramework::getSingletonPtr()->m_pLog->logMessage("No, make one");
-    	OgreFramework::getSingletonPtr()->m_callbackHandler = new RTT::CallbackHandler();
+    	t_callbackHandler = new RTT::CallbackHandler();
     }
     else
     {
@@ -28,7 +28,7 @@ MenuState::MenuState()
     }
 
     RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
-    OgreFramework::getSingletonPtr()->m_callbackHandler->m_sig_leader_change.connect(sigc::mem_fun(*this, &MenuState::LeaderChangedEvent));
+    t_callbackHandler->m_sig_leader_change.connect(sigc::mem_fun(*this, &MenuState::LeaderChangedEvent));
 }
 
 void MenuState::enter()
@@ -534,23 +534,70 @@ void MenuState::listPlayers(uint playerCount)
 	CEGUI::DefaultWindow *playerName;
 	CEGUI::UDim offSet;
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Adding " + Ogre::StringConverter::toString((int)playerCount) + " Players");
-	for(uint i = 0; i < playerCount; i++)
+	if(playerCount > 1)
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player " + Ogre::StringConverter::toString((int)m_otherPlayers[i].m_ID) + " added");
+		for(uint i = 0; i < playerCount; i++)
+		{
+			OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player " + Ogre::StringConverter::toString((int)m_otherPlayers[i].m_ID) + " added");
+
+			//Check to see if window object names already exist, if so delete them
+			if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" + CEGUI::PropertyHelper::intToString((int)m_otherPlayers[i].m_ID)))
+			{
+				CEGUI::WindowManager::getSingleton().destroyWindow("IsLeader" + CEGUI::PropertyHelper::intToString((int)m_otherPlayers[i].m_ID));
+				CEGUI::WindowManager::getSingleton().destroyWindow(m_otherPlayers[i].m_name);
+			}
+
+			isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/RadioButton","IsLeader" + CEGUI::PropertyHelper::intToString((int)m_otherPlayers[i].m_ID));
+			playerName = (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/StaticText",m_otherPlayers[i].m_name);
+
+			isLeader->setGroupID(1);
+			isLeader->setID((int)m_otherPlayers[i].m_ID);
+			if(m_otherPlayers[i].m_ID == m_currentMatch.m_leaderID)
+			{
+				isLeader->setSelected(true);
+			}
+			if(m_playerDescription.m_ID == m_currentMatch.m_leaderID)
+			{
+				isLeader->setEnabled(true);
+			}
+			else
+			{
+				isLeader->setEnabled(false);
+			}
+
+			playerName->setText(m_otherPlayers[i].m_name);
+
+			offSet = offSet + CEGUI::UDim(0.1f, 0.0f);
+
+			isLeader->setPosition(CEGUI::UVector2(CEGUI::UDim(0.0f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
+			isLeader->setSize(CEGUI::UVector2(CEGUI::UDim(0.075f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
+			playerName->setPosition(CEGUI::UVector2(CEGUI::UDim(0.1f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
+			playerName->setSize(CEGUI::UVector2(CEGUI::UDim(0.2f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
+			playerName->setProperty("FrameEnabled", "False");
+
+			scrollpane->addChildWindow(isLeader);
+			scrollpane->addChildWindow(playerName);
+
+			isLeader->subscribeEvent(CEGUI::RadioButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&MenuState::onLeaderClick, this));
+		}
+	}
+	else
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player " + Ogre::StringConverter::toString((int)m_playerDescription.m_ID) + " added");
 
 		//Check to see if window object names already exist, if so delete them
-		if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" + CEGUI::PropertyHelper::intToString((int)m_otherPlayers[i].m_ID)))
+		if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" + CEGUI::PropertyHelper::intToString((int)m_playerDescription.m_ID)))
 		{
-			CEGUI::WindowManager::getSingleton().destroyWindow("IsLeader" + CEGUI::PropertyHelper::intToString((int)m_otherPlayers[i].m_ID));
-			CEGUI::WindowManager::getSingleton().destroyWindow(m_otherPlayers[i].m_name);
+			CEGUI::WindowManager::getSingleton().destroyWindow("IsLeader" + CEGUI::PropertyHelper::intToString((int)m_playerDescription.m_ID));
+			CEGUI::WindowManager::getSingleton().destroyWindow(m_playerDescription.m_name);
 		}
 
-		isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/RadioButton","IsLeader" + CEGUI::PropertyHelper::intToString((int)m_otherPlayers[i].m_ID));
-		playerName = (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/StaticText",m_otherPlayers[i].m_name);
+		isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/RadioButton","IsLeader" + CEGUI::PropertyHelper::intToString((int)m_playerDescription.m_ID));
+		playerName = (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/StaticText",m_playerDescription.m_name);
 
 		isLeader->setGroupID(1);
-		isLeader->setID((int)m_otherPlayers[i].m_ID);
-		if(m_otherPlayers[i].m_ID == m_currentMatch.m_leaderID)
+		isLeader->setID((int)m_playerDescription.m_ID);
+		if(m_playerDescription.m_ID == m_currentMatch.m_leaderID)
 		{
 			isLeader->setSelected(true);
 		}
@@ -563,21 +610,46 @@ void MenuState::listPlayers(uint playerCount)
 			isLeader->setEnabled(false);
 		}
 
-		playerName->setText(m_otherPlayers[i].m_name);
+		playerName->setText(m_playerDescription.m_name);
 
 		offSet = offSet + CEGUI::UDim(0.1f, 0.0f);
 
-		isLeader->setPosition(CEGUI::UVector2(CEGUI::UDim(0.0f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
+		isLeader->setPosition(CEGUI::UVector2(CEGUI::UDim(0.0f, 0.0f),CEGUI::UDim(0.1f , 0.0f)));
 		isLeader->setSize(CEGUI::UVector2(CEGUI::UDim(0.075f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
-		playerName->setPosition(CEGUI::UVector2(CEGUI::UDim(0.1f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
+		playerName->setPosition(CEGUI::UVector2(CEGUI::UDim(0.1f, 0.0f),CEGUI::UDim(0.1f , 0.0f)));
 		playerName->setSize(CEGUI::UVector2(CEGUI::UDim(0.2f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
 		playerName->setProperty("FrameEnabled", "False");
 
 		scrollpane->addChildWindow(isLeader);
 		scrollpane->addChildWindow(playerName);
 
+		isLeader->subscribeEvent(CEGUI::RadioButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&MenuState::onLeaderClick, this));
 	}
+	return;
+}
 
+bool MenuState::onLeaderClick(const CEGUI::EventArgs &args)
+{
+	CEGUI::RadioButton *leaderRadio = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().getWindow("IsLeader" + CEGUI::PropertyHelper::intToString((int)m_playerDescription.m_ID));
+	uint newLeaderID = leaderRadio->getSelectedButtonInGroup()->getID();
+	if(newLeaderID != m_currentMatch.m_leaderID)
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Trying to changing Leader from " + Ogre::StringConverter::toString((int)m_currentMatch.m_leaderID) +
+				" to " + Ogre::StringConverter::toString((int)newLeaderID));
+
+		if(RTT::ChangeLeader(newLeaderID) == false)
+		{
+			OgreFramework::getSingletonPtr()->m_pLog->logMessage("WARNING: Change of leader on the server failed");
+			m_currentMatch.m_leaderID = newLeaderID;
+			return true;
+		}
+
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Successful leader change from " + Ogre::StringConverter::toString((int)m_currentMatch.m_leaderID) +
+				" to " + Ogre::StringConverter::toString((int)newLeaderID));
+
+		m_currentMatch.m_leaderID = newLeaderID;
+	}
+	return true;
 }
 
 void MenuState::serverLobby()

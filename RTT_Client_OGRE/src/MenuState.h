@@ -68,11 +68,15 @@ public:
 	bool onMatchNameActivate(const CEGUI::EventArgs &args);
 	bool onMatchNameDeactivate(const CEGUI::EventArgs &args);
 
+	bool onLeaderClick(const CEGUI::EventArgs &args);
+
 	void listMatches();
 	void listPlayers(uint playerCount);
 
 	void matchLobby(uint playerCount);
 	void serverLobby();
+
+
 
 	CEGUI::MultiColumnList *multiColumnListMatch;
 	CEGUI::MultiColumnList *multiColumnListPlayer;
@@ -83,6 +87,8 @@ public:
 
 	RTT::MatchDescription m_currentMatch;
 
+	RTT::CallbackHandler *t_callbackHandler;
+
 	void update(double timeSinceLastFrame);
 
 private:
@@ -92,6 +98,7 @@ private:
 	GUIState mLocation;
 protected:
 	void LeaderChangedEvent();
+
 };
 
 #endif

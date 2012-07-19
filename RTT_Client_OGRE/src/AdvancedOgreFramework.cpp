@@ -240,7 +240,7 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 
 void OgreFramework::startCallBack()
 {
-	m_callbackHandler = new RTT::CallbackHandler();
+	//m_callbackHandler = new RTT::CallbackHandler();
 
 //	TODO: these things...
 //	m_callbackHandler->m_sig_team_change.connect(sigc::mem_fun(*this, &WelcomeWindow::TeamChangedEvent));
@@ -255,6 +255,7 @@ void OgreFramework::startCallBack()
 //	m_callbackHandler->m_sig_match_started.connect(sigc::mem_fun(*this, &WelcomeWindow::MatchStartedEvent));
 //	m_callbackHandler->m_sig_callback_closed.connect(sigc::mem_fun(*this, &WelcomeWindow::CallbackClosedEvent));
 //	m_callbackHandler->m_sig_callback_error.connect(sigc::mem_fun(*this, &WelcomeWindow::CallbackErrorEvent));
+
 }
 
 bool OgreFramework::keyPressed(const OIS::KeyEvent &keyEventRef)
