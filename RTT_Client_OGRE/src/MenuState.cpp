@@ -20,7 +20,7 @@ MenuState::MenuState()
     if(OgreFramework::getSingletonPtr()->m_callbackHandler == NULL)
     {
     	OgreFramework::getSingletonPtr()->m_pLog->logMessage("No, make one");
-    	t_callbackHandler = new RTT::CallbackHandler();
+    	OgreFramework::getSingletonPtr()->m_callbackHandler = new RTT::CallbackHandler();
     }
     else
     {
@@ -28,7 +28,7 @@ MenuState::MenuState()
     }
 
     RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
-    t_callbackHandler->m_sig_leader_change.connect(sigc::mem_fun(*this, &MenuState::LeaderChangedEvent));
+    greFramework::getSingletonPtr()->m_callbackHandler->m_sig_leader_change.connect(sigc::mem_fun(*this, &MenuState::LeaderChangedEvent));
 }
 
 void MenuState::enter()
@@ -562,7 +562,7 @@ void MenuState::listPlayers(uint playerCount)
 			}
 			else
 			{
-				isLeader->setEnabled(false);
+				//isLeader->setEnabled(false);
 			}
 
 			playerName->setText(m_otherPlayers[i].m_name);
@@ -648,6 +648,14 @@ bool MenuState::onLeaderClick(const CEGUI::EventArgs &args)
 				" to " + Ogre::StringConverter::toString((int)newLeaderID));
 
 		m_currentMatch.m_leaderID = newLeaderID;
+		for(int i = 0; i< MAX_PLAYERS_IN_MATCH; i++)
+		{
+			if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" + CEGUI::PropertyHelper::intToString((int)m_otherPlayers[i].m_ID)))
+			{
+				leaderRadio = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().getWindow("IsLeader" + CEGUI::PropertyHelper::intToString((int)m_otherPlayers[i].m_ID));
+				leaderRadio->setEnabled(false);
+			}
+		}
 	}
 	return true;
 }

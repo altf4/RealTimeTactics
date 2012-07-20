@@ -240,7 +240,7 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 
 void OgreFramework::startCallBack()
 {
-	//m_callbackHandler = new RTT::CallbackHandler();
+	m_callbackHandler = new RTT::CallbackHandler();
 
 //	TODO: these things...
 //	m_callbackHandler->m_sig_team_change.connect(sigc::mem_fun(*this, &WelcomeWindow::TeamChangedEvent));
