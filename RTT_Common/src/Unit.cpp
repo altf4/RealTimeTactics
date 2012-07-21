@@ -16,6 +16,7 @@ Unit::Unit( )
 {
 
 	m_ID = lastIDGiven++;
+	m_currentCharge = 0;
 	pthread_mutex_init(&m_unitLock, NULL);
 }
 
@@ -33,3 +34,9 @@ bool Unit::Equals(Unit *testUnit)
 		return false;
 	}
 }
+
+Lock Unit::LockUnit()
+{
+	return Lock(&m_unitLock);
+}
+

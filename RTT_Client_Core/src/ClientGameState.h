@@ -32,8 +32,8 @@ public:
 	//				Query Functions
 	//********************************************
 
-	//NOTE: If the Unit does not exist, the returned Unit will have ID set to 0
-	Unit GetUnit(uint32_t ID);
+	//NOTE: If the Unit does not exist, returns NULL
+	Unit *GetUnit(uint32_t ID);
 	bool HasUnit(uint32_t ID);
 
 
@@ -44,7 +44,7 @@ public:
 	//Adds a new unit to the game state
 	//	newUnit - A copy of the Unit to add
 	//	returns - True if the Unit was added successfully, false on error
-	bool AddUnit(Unit newUnit);
+	bool AddUnit(Unit *newUnit);
 
 	//Move a Unit to a new specified (possibly distant) tile
 	//	unitID - The ID of the unit moved
@@ -64,19 +64,10 @@ public:
 			enum Direction direction, enum Direction facing);
 
 	//Clear all game data and start over again
+	//WARNING: This is not (yet) threadsafe. Make sure no other threads are using
+	//	And Unit objects before this is called. Since this will delete those
+	//	objects out from underneath them
 	void Reset();
-
-
-	//********************************************
-	//				Synchronization Functions
-	//********************************************
-
-	//Concurrency functions for use when the Unit is in a list
-	//If the returned Unit's ID is zero, then there was an error and no lock was set.
-	//	So don't try checking it back in
-	Unit CheckOutUnit(uint32_t ID);
-	void CheckInUnit(Unit newUnit);
-
 
 private:
 
@@ -84,7 +75,7 @@ private:
 
 	Gameboard m_gameboard;
 
-	vector <Unit> m_units;			//TODO: Maybe use a hash map?
+	vector <Unit*> m_units;			//TODO: Maybe use a hash map?
 	pthread_mutex_t m_unitsLock;	//Lock on reading/writing from the units list
 
 	//Private constructor, since you should just use Instance()
