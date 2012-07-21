@@ -36,10 +36,14 @@ ClientGameState::ClientGameState()
 //	returns - True if the Unit was added successfully, false on error
 bool ClientGameState::AddUnit(Unit newUnit)
 {
+	//If the unit ID is already here, then don't add a new one
+	if(HasUnit(newUnit.m_ID))
+	{
+		return false;
+	}
 	Lock lock(&m_unitsLock);
-	bool successResult = true;
 	m_units.push_back(newUnit);
-	return successResult;
+	return true;
 }
 
 //NOTE: If the Unit does not exist, the returned Unit will have ID set to 0
