@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "ClientGameState.h"
+#include "Lock.h"
 
 using namespace RTT;
 
@@ -35,12 +36,9 @@ ClientGameState::ClientGameState()
 //	returns - True if the Unit was added successfully, false on error
 bool ClientGameState::AddUnit(Unit newUnit)
 {
+	Lock lock(&m_unitsLock);
 	bool successResult = true;
-	pthread_mutex_lock(&m_unitsLock);
-
 	m_units.push_back(newUnit);
-
-	pthread_mutex_unlock(&m_unitsLock);
 	return successResult;
 }
 
@@ -49,7 +47,7 @@ Unit ClientGameState::GetUnit(uint32_t ID)
 {
 	Unit returnUnit;
 	returnUnit.m_ID = 0;
-	pthread_mutex_lock(&m_unitsLock);
+	Lock lock(&m_unitsLock);
 
 	for(uint i = 0; i < m_units.size(); i++)
 	{
@@ -60,14 +58,13 @@ Unit ClientGameState::GetUnit(uint32_t ID)
 		}
 	}
 
-	pthread_mutex_unlock(&m_unitsLock);
 	return returnUnit;
 }
 
 bool ClientGameState::HasUnit(uint32_t ID)
 {
 	bool successResult = false;
-	pthread_mutex_lock(&m_unitsLock);
+	Lock lock(&m_unitsLock);
 
 	for(uint i = 0; i < m_units.size(); i++)
 	{
@@ -77,8 +74,6 @@ bool ClientGameState::HasUnit(uint32_t ID)
 			break;
 		}
 	}
-
-	pthread_mutex_unlock(&m_unitsLock);
 	return successResult;
 }
 
@@ -203,7 +198,7 @@ Unit ClientGameState::CheckOutUnit(uint32_t ID)
 {
 	Unit returnUnit;
 	returnUnit.m_ID = 0;
-	pthread_mutex_lock(&m_unitsLock);
+	Lock lock(&m_unitsLock);
 
 	for(uint i = 0; i < m_units.size(); i++)
 	{
@@ -225,13 +220,12 @@ Unit ClientGameState::CheckOutUnit(uint32_t ID)
 		}
 	}
 
-	pthread_mutex_unlock(&m_unitsLock);
 	return returnUnit;
 }
 
 void ClientGameState::CheckInUnit(Unit newUnit)
 {
-	pthread_mutex_lock(&m_unitsLock);
+	Lock lock(&m_unitsLock);
 
 	for(uint i = 0; i < m_units.size(); i++)
 	{
@@ -242,9 +236,5 @@ void ClientGameState::CheckInUnit(Unit newUnit)
 			break;
 		}
 	}
-
-	pthread_mutex_unlock(&m_unitsLock);
 }
-
-
 
