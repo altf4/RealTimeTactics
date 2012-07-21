@@ -11,7 +11,9 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string>
+
 #include "Job.h"
+#include "Lock.h"
 
 using namespace std;
 
@@ -33,6 +35,15 @@ class Unit : public Job
 {
 
 public:
+
+	Unit();
+
+	//Returns true if the given Unit is the same one as this
+	//	IE: The actual same unit. Not another unit with the same properties
+	//	Does this by comparing ID's
+	bool Equals(Unit *testUnit);
+
+	Lock LockUnit();
 
 	uint m_currentHealth;
 	uint m_currentEnergy;
@@ -56,13 +67,7 @@ public:
 	// The client can choose to name his Units unique things to distinguish them
 	std::string m_unitName;
 
-
-	Unit( );
-
-	//Returns true if the given Unit is the same one as this
-	//	IE: The actual same unit. Not another unit with the same properties
-	//	Does this by comparing ID's
-	bool Equals(Unit *testUnit);
+private:
 
 	//Used for making threadsafe access of the unit when in a list
 	pthread_mutex_t m_unitLock;
