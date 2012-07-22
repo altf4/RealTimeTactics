@@ -77,7 +77,6 @@ public:
 	void serverLobby();
 
 
-
 	CEGUI::MultiColumnList *multiColumnListMatch;
 	CEGUI::MultiColumnList *multiColumnListPlayer;
 
@@ -87,8 +86,6 @@ public:
 
 	RTT::MatchDescription m_currentMatch;
 
-	RTT::CallbackHandler *t_callbackHandler;
-
 	void update(double timeSinceLastFrame);
 
 private:
@@ -96,6 +93,7 @@ private:
 	bool m_bInMatch;
 	bool m_bInit;
 	GUIState mLocation;
+
 protected:
 	void LeaderChangedEvent();
 
