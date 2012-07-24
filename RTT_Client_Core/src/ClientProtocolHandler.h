@@ -39,6 +39,7 @@ enum CallbackType
 	MATCH_STARTED,
 	CALLBACK_CLOSED,
 	CALLBACK_ERROR,
+	NO_CALLBACK,
 };
 struct CallbackChange
 {

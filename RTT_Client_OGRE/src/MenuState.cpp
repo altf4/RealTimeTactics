@@ -28,8 +28,6 @@ MenuState::MenuState()
     }
 
     RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
-    OgreFramework::getSingletonPtr()->m_callbackHandler->m_sig_leader_change.connect(
-    		sigc::mem_fun(*this, &MenuState::LeaderChangedEvent));
 }
 
 void MenuState::enter()

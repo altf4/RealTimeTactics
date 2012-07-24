@@ -6,7 +6,6 @@
 CPP_SRCS += \
 ../src/AdvancedOgreFramework.cpp \
 ../src/AppStateManager.cpp \
-../src/CallbackHandler.cpp \
 ../src/DemoApp.cpp \
 ../src/GameState.cpp \
 ../src/MenuState.cpp \
@@ -18,7 +17,6 @@ CPP_SRCS += \
 OBJS += \
 ./src/AdvancedOgreFramework.o \
 ./src/AppStateManager.o \
-./src/CallbackHandler.o \
 ./src/DemoApp.o \
 ./src/GameState.o \
 ./src/MenuState.o \
@@ -30,7 +28,6 @@ OBJS += \
 CPP_DEPS += \
 ./src/AdvancedOgreFramework.d \
 ./src/AppStateManager.d \
-./src/CallbackHandler.d \
 ./src/DemoApp.d \
 ./src/GameState.d \
 ./src/MenuState.d \
@@ -44,7 +41,7 @@ CPP_DEPS += \
 src/%.o: ../src/%.cpp
 	@echo 'Building file: $<'
 	@echo 'Invoking: GCC C++ Compiler'
-	g++ -I../../RTT_Client_Core/src -I../../RTT_Common/src -O0 -g3 -Wall -c -fmessage-length=0 -std=c++0x -pthread `pkg-config glibmm-2.4 --cflags OGRE OIS CEGUI CEGUI-OGRE` -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
+	g++ -I../../RTT_Client_Core/src -I../../RTT_Common/src -O0 -g3 -Wall -c -fmessage-length=0 -std=c++0x -pthread `pkg-config --cflags OGRE OIS CEGUI CEGUI-OGRE` -fPIC -MMD -MP -MF"$(@:%.o=%.d)" -MT"$(@:%.o=%.d)" -o "$@" "$<"
 	@echo 'Finished building: $<'
 	@echo ' '
 
