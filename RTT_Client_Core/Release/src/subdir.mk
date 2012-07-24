@@ -4,18 +4,21 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/CallbackHandler.cpp \
 ../src/ClientGameState.cpp \
 ../src/ClientProtocolHandler.cpp \
 ../src/GameCommands.cpp \
 ../src/GameEvents.cpp 
 
 OBJS += \
+./src/CallbackHandler.o \
 ./src/ClientGameState.o \
 ./src/ClientProtocolHandler.o \
 ./src/GameCommands.o \
 ./src/GameEvents.o 
 
 CPP_DEPS += \
+./src/CallbackHandler.d \
 ./src/ClientGameState.d \
 ./src/ClientProtocolHandler.d \
 ./src/GameCommands.d \
