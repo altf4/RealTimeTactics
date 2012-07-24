@@ -10,6 +10,7 @@
 #include "MenuState.h"
 
 using namespace Ogre;
+using namespace RTT;
 
 MenuState::MenuState()
 {
@@ -1026,7 +1027,18 @@ void MenuState::LeaderChangedEvent()
 	return;
 }
 
-void MenuState::ProcessCallback(struct RTT::CallbackChange)
+void MenuState::ProcessCallback(struct RTT::CallbackChange change)
 {
-
+	switch(change.m_type)
+	{
+		case LEADER_CHANGE:
+		{
+			LeaderChangedEvent();
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
 }
