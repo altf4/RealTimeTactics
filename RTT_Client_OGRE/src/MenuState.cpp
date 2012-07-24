@@ -990,11 +990,9 @@ bool MenuState::onMatchNameDeactivate(const CEGUI::EventArgs &args)
 }
 
 //Callback Events
-void MenuState::LeaderChangedEvent()
+void MenuState::LeaderChangedEvent(struct CallbackChange change)
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leader Change Event");
-	struct RTT::CallbackChange change =
-			OgreFramework::getSingletonPtr()->m_callbackHandler->PopCallbackChange();
 	if(change.m_type == RTT::CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
@@ -1033,7 +1031,7 @@ void MenuState::ProcessCallback(struct RTT::CallbackChange change)
 	{
 		case LEADER_CHANGE:
 		{
-			LeaderChangedEvent();
+			LeaderChangedEvent(change);
 			break;
 		}
 		default:

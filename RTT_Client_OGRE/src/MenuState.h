@@ -97,7 +97,7 @@ private:
 	GUIState mLocation;
 
 protected:
-	void LeaderChangedEvent();
+	void LeaderChangedEvent(struct CallbackChange change);
 
 };
 
