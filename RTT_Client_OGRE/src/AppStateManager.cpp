@@ -89,9 +89,11 @@ void AppStateManager::start(AppState *state)
 			OgreFramework::getSingletonPtr()->updateOgre(timeSinceLastFrame);
 			OgreFramework::getSingletonPtr()->m_pRoot->renderOneFrame();
 
-			timeSinceLastFrame = OgreFramework::getSingletonPtr()->m_pTimer->getMillisecondsCPU() - startTime;
+			timeSinceLastFrame = OgreFramework::getSingletonPtr()->
+					m_pTimer->getMillisecondsCPU() - startTime;
 
-			OgreFramework::getSingletonPtr()->m_callbackHandler->PopCallbackChange();
+			m_ActiveStateStack.back()->ProcessCallback(OgreFramework::getSingletonPtr()->
+					m_callbackHandler->PopCallbackChange());
 		}
 		else
 		{

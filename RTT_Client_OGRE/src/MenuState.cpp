@@ -1025,3 +1025,8 @@ void MenuState::LeaderChangedEvent()
 
 	return;
 }
+
+void MenuState::ProcessCallback(struct RTT::CallbackChange)
+{
+
+}

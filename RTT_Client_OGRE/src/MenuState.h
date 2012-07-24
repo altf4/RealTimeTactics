@@ -88,6 +88,8 @@ public:
 
 	void update(double timeSinceLastFrame);
 
+	void ProcessCallback(struct RTT::CallbackChange);
+
 private:
 	bool m_bQuit;
 	bool m_bInMatch;
