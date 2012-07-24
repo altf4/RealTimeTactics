@@ -45,9 +45,8 @@ struct CallbackChange CallbackHandler::PopCallbackChange()
 	Lock lock (&m_queueMutex);
 	if(m_changeQueue.empty())
 	{
-		cerr << "ERROR: Callback change queue underflow!" << endl;
 		struct CallbackChange temp;
-		temp.m_type = CALLBACK_ERROR;
+		temp.m_type = NO_CALLBACK;
 		return temp;
 	}
 	else
