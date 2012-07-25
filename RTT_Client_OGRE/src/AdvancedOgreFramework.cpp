@@ -233,29 +233,10 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 
     RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
 
-    startCallBack();
+    //Create callback thread
+    m_callbackHandler = new RTT::CallbackHandler();
 
 	return true;
-}
-
-void OgreFramework::startCallBack()
-{
-	m_callbackHandler = new RTT::CallbackHandler();
-
-//	TODO: these things...
-//	m_callbackHandler->m_sig_team_change.connect(sigc::mem_fun(*this, &WelcomeWindow::TeamChangedEvent));
-//	m_callbackHandler->m_sig_color_change.connect(sigc::mem_fun(*this, &WelcomeWindow::TeamColorChangedEvent));
-//	m_callbackHandler->m_sig_map_change.connect(sigc::mem_fun(*this, &WelcomeWindow::MapChangedEvent));
-//	m_callbackHandler->m_sig_speed_change.connect(sigc::mem_fun(*this, &WelcomeWindow::GamespeedChangedEvent));
-//	m_callbackHandler->m_sig_victory_cond_change.connect(sigc::mem_fun(*this, &WelcomeWindow::VictoryConditionChangedEvent));
-//	m_callbackHandler->m_sig_player_left.connect(sigc::mem_fun(*this, &WelcomeWindow::PlayerLeftEvent));
-//	m_callbackHandler->m_sig_kicked.connect(sigc::mem_fun(*this, &WelcomeWindow::KickedFromMatchEvent));
-//	m_callbackHandler->m_sig_player_joined.connect(sigc::mem_fun(*this, &WelcomeWindow::PlayerJoinedEvent));
-//	m_callbackHandler->m_sig_leader_change.connect(sigc::mem_fun(*this, &WelcomeWindow::LeaderChangedEvent));
-//	m_callbackHandler->m_sig_match_started.connect(sigc::mem_fun(*this, &WelcomeWindow::MatchStartedEvent));
-//	m_callbackHandler->m_sig_callback_closed.connect(sigc::mem_fun(*this, &WelcomeWindow::CallbackClosedEvent));
-//	m_callbackHandler->m_sig_callback_error.connect(sigc::mem_fun(*this, &WelcomeWindow::CallbackErrorEvent));
-
 }
 
 bool OgreFramework::keyPressed(const OIS::KeyEvent &keyEventRef)

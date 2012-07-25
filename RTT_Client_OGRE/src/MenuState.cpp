@@ -17,33 +17,18 @@ MenuState::MenuState()
     m_bQuit = false;
     m_FrameEvent = Ogre::FrameEvent();
     OgreFramework::getSingletonPtr()->m_pLog->logMessage("Is there a callback thread?");
-    t_callbackHandler = OgreFramework::getSingletonPtr()->m_callbackHandler;
-    if(t_callbackHandler == NULL)
+
+    if(OgreFramework::getSingletonPtr()->m_callbackHandler == NULL)
     {
     	OgreFramework::getSingletonPtr()->m_pLog->logMessage("No, make one");
-    	t_callbackHandler = new RTT::CallbackHandler();
+    	OgreFramework::getSingletonPtr()->m_callbackHandler = new RTT::CallbackHandler();
     }
     else
     {
     	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Yes, use it");
     }
-<<<<<<< HEAD
-    t_callbackHandler->m_sig_leader_change.connect(sigc::mem_fun(*this, &MenuState::LeaderChangedEvent));
-    t_callbackHandler->m_sig_team_change.connect(sigc::mem_fun(*this, &MenuState::TeamChangedEvent));
-    t_callbackHandler->m_sig_color_change.connect(sigc::mem_fun(*this, &MenuState::TeamColorChangedEvent));
-    t_callbackHandler->m_sig_map_change.connect(sigc::mem_fun(*this, &MenuState::MapChangedEvent));
-    t_callbackHandler->m_sig_speed_change.connect(sigc::mem_fun(*this, &MenuState::GamespeedChangedEvent));
-    t_callbackHandler->m_sig_victory_cond_change.connect(sigc::mem_fun(*this, &MenuState::VictoryConditionChangedEvent));
-    t_callbackHandler->m_sig_player_left.connect(sigc::mem_fun(*this, &MenuState::PlayerLeftEvent));
-    t_callbackHandler->m_sig_kicked.connect(sigc::mem_fun(*this, &MenuState::KickedFromMatchEvent));
-    t_callbackHandler->m_sig_player_joined.connect(sigc::mem_fun(*this, &MenuState::PlayerJoinedEvent));
-    t_callbackHandler->m_sig_match_started.connect(sigc::mem_fun(*this, &MenuState::MatchStartedEvent));
-    t_callbackHandler->m_sig_callback_closed.connect(sigc::mem_fun(*this, &MenuState::CallbackClosedEvent));
-    t_callbackHandler->m_sig_callback_error.connect(sigc::mem_fun(*this, &MenuState::CallbackErrorEvent));
-=======
-
     RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
->>>>>>> upstream/CEGUI
+
 }
 
 void MenuState::enter()
@@ -442,18 +427,12 @@ bool MenuState::onJoinServerButton(const CEGUI::EventArgs &args)
 		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Connection Successful!");
 
 		//Launch the Callback Thread
-		if(t_callbackHandler != NULL)
+		if(OgreFramework::getSingletonPtr()->m_callbackHandler != NULL)
 		{
-<<<<<<< HEAD
-			OgreFramework::getSingletonPtr()->m_pLog->logMessage("Starting Callback Thread");
-			t_callbackHandler->Start();
-
-			OgreFramework::getSingletonPtr()->m_pLog->logMessage("Attaching signal functions");
-=======
 			OgreFramework::getSingletonPtr()->m_pLog->logMessage(
 					"Starting Callback Thread");
 			OgreFramework::getSingletonPtr()->m_callbackHandler->Start();
->>>>>>> upstream/CEGUI
+
 		}
 		serverLobby();
 	}
@@ -1012,7 +991,7 @@ bool MenuState::onMatchNameDeactivate(const CEGUI::EventArgs &args)
 }
 
 //Callback Events
-void MenuState::LeaderChangedEvent(struct CallbackChange change)
+void MenuState::LeaderChangedEvent(struct RTT::CallbackChange change)
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leader Change Event");
 	if(change.m_type == RTT::CALLBACK_ERROR)
@@ -1020,29 +999,54 @@ void MenuState::LeaderChangedEvent(struct CallbackChange change)
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;
 	}
-	//PlayerListColumns playerColumns;
-	CEGUI::Window *pMainWnd =
-			CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby");
-	CEGUI::RadioButton *oldLeader =
-			(CEGUI::RadioButton*)pMainWnd->getChild("IsLeader" +
-			CEGUI::PropertyHelper::intToString((int)m_currentMatch.m_leaderID));
-	CEGUI::RadioButton *newLeader =
-			(CEGUI::RadioButton*)pMainWnd->getChild("IsLeader" +
-			CEGUI::PropertyHelper::intToString((int)change.m_playerID));
 
-	oldLeader->setSelected(false);
-	newLeader->setSelected(true);
-
-	m_currentMatch.m_leaderID = change.m_playerID;
-
-	if(m_playerDescription.m_ID == m_currentMatch.m_leaderID)
+	CEGUI::RadioButton *newLeader;
+	CEGUI::RadioButton *oldLeader;
+	if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" +
+					CEGUI::PropertyHelper::intToString((int)m_currentMatch.m_leaderID)))
 	{
-		newLeader->setEnabled(true);
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Found IsLeader" +
+				Ogre::StringConverter::toString((int)m_currentMatch.m_leaderID));
+
+		oldLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().getWindow("IsLeader" +
+				CEGUI::PropertyHelper::intToString((int)m_currentMatch.m_leaderID));
 	}
 	else
 	{
-		newLeader->setEnabled(false);
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Could not find IsLeader" +
+						Ogre::StringConverter::toString((int)m_currentMatch.m_leaderID));
+		return;
 	}
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Unselected old leader");
+	if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" +
+					CEGUI::PropertyHelper::intToString((int)change.m_playerID)))
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Found IsLeader" +
+				Ogre::StringConverter::toString((int)change.m_playerID));
+
+		newLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().getWindow("IsLeader" +
+				CEGUI::PropertyHelper::intToString((int)change.m_playerID));
+		newLeader->setSelected(true);
+		m_currentMatch.m_leaderID = change.m_playerID;
+
+		if(m_playerDescription.m_ID == m_currentMatch.m_leaderID)
+		{
+			newLeader->setEnabled(true);
+			oldLeader->setEnabled(true);
+		}
+		else
+		{
+			newLeader->setEnabled(false);
+			oldLeader->setEnabled(false);
+		}
+	}
+	else
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Found IsLeader" +
+						Ogre::StringConverter::toString((int)change.m_playerID));
+		return;
+	}
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Selected new leader");
 
 	return;
 }

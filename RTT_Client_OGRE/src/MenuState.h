@@ -108,7 +108,7 @@ protected:
 	void MatchStartedEvent();
 	void CallbackClosedEvent();
 	void CallbackErrorEvent();
-	void LeaderChangedEvent(struct CallbackChange change);
+	void LeaderChangedEvent(struct RTT::CallbackChange change);
 
 };
 

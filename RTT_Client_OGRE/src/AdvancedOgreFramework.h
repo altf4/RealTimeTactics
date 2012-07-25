@@ -63,7 +63,6 @@ public:
 	bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 
 	void updateStats();
-	void startCallBack();
 
 	Ogre::Root *m_pRoot;
 	Ogre::RenderWindow *m_pRenderWnd;
