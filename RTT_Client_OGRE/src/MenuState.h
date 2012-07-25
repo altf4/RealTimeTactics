@@ -97,7 +97,18 @@ private:
 	bool m_bInit;
 	GUIState mLocation;
 protected:
+	void TeamChangedEvent();
+	void TeamColorChangedEvent();
+	void MapChangedEvent();
+	void GamespeedChangedEvent();
+	void VictoryConditionChangedEvent();
+	void PlayerLeftEvent();
+	void KickedFromMatchEvent();
+	void PlayerJoinedEvent();
 	void LeaderChangedEvent();
+	void MatchStartedEvent();
+	void CallbackClosedEvent();
+	void CallbackErrorEvent();
 
 };
 

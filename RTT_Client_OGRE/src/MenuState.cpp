@@ -15,20 +15,29 @@ MenuState::MenuState()
 {
     m_bQuit = false;
     m_FrameEvent = Ogre::FrameEvent();
-    RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
     OgreFramework::getSingletonPtr()->m_pLog->logMessage("Is there a callback thread?");
-    if(OgreFramework::getSingletonPtr()->m_callbackHandler == NULL)
+    t_callbackHandler = OgreFramework::getSingletonPtr()->m_callbackHandler;
+    if(t_callbackHandler == NULL)
     {
     	OgreFramework::getSingletonPtr()->m_pLog->logMessage("No, make one");
-    	OgreFramework::getSingletonPtr()->m_callbackHandler = new RTT::CallbackHandler();
+    	t_callbackHandler = new RTT::CallbackHandler();
     }
     else
     {
     	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Yes, use it");
     }
-
-    RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
-    greFramework::getSingletonPtr()->m_callbackHandler->m_sig_leader_change.connect(sigc::mem_fun(*this, &MenuState::LeaderChangedEvent));
+    t_callbackHandler->m_sig_leader_change.connect(sigc::mem_fun(*this, &MenuState::LeaderChangedEvent));
+    t_callbackHandler->m_sig_team_change.connect(sigc::mem_fun(*this, &MenuState::TeamChangedEvent));
+    t_callbackHandler->m_sig_color_change.connect(sigc::mem_fun(*this, &MenuState::TeamColorChangedEvent));
+    t_callbackHandler->m_sig_map_change.connect(sigc::mem_fun(*this, &MenuState::MapChangedEvent));
+    t_callbackHandler->m_sig_speed_change.connect(sigc::mem_fun(*this, &MenuState::GamespeedChangedEvent));
+    t_callbackHandler->m_sig_victory_cond_change.connect(sigc::mem_fun(*this, &MenuState::VictoryConditionChangedEvent));
+    t_callbackHandler->m_sig_player_left.connect(sigc::mem_fun(*this, &MenuState::PlayerLeftEvent));
+    t_callbackHandler->m_sig_kicked.connect(sigc::mem_fun(*this, &MenuState::KickedFromMatchEvent));
+    t_callbackHandler->m_sig_player_joined.connect(sigc::mem_fun(*this, &MenuState::PlayerJoinedEvent));
+    t_callbackHandler->m_sig_match_started.connect(sigc::mem_fun(*this, &MenuState::MatchStartedEvent));
+    t_callbackHandler->m_sig_callback_closed.connect(sigc::mem_fun(*this, &MenuState::CallbackClosedEvent));
+    t_callbackHandler->m_sig_callback_error.connect(sigc::mem_fun(*this, &MenuState::CallbackErrorEvent));
 }
 
 void MenuState::enter()
@@ -376,10 +385,12 @@ bool MenuState::onJoinServerButton(const CEGUI::EventArgs &args)
 		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Connection Successful!");
 
 		//Launch the Callback Thread
-		if(OgreFramework::getSingletonPtr()->m_callbackHandler != NULL)
+		if(t_callbackHandler != NULL)
 		{
 			OgreFramework::getSingletonPtr()->m_pLog->logMessage("Starting Callback Thread");
-			OgreFramework::getSingletonPtr()->m_callbackHandler->Start();
+			t_callbackHandler->Start();
+
+			OgreFramework::getSingletonPtr()->m_pLog->logMessage("Attaching signal functions");
 		}
 		serverLobby();
 	}
@@ -845,7 +856,7 @@ bool MenuState::onMatchNameDeactivate(const CEGUI::EventArgs &args)
 void MenuState::LeaderChangedEvent()
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leader Change Event");
-	struct RTT::CallbackChange change = OgreFramework::getSingletonPtr()->m_callbackHandler->PopCallbackChange();
+	struct RTT::CallbackChange change = t_callbackHandler->PopCallbackChange();
 	if(change.m_type == RTT::CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
@@ -871,4 +882,48 @@ void MenuState::LeaderChangedEvent()
 	}
 
 	return;
+}
+void MenuState::TeamChangedEvent()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Team Change Event");
+}
+void MenuState::TeamColorChangedEvent()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Team Color Change Event");
+}
+void MenuState::MapChangedEvent()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Map Change Event");
+}
+void MenuState::GamespeedChangedEvent()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("GameSpeed Change Event");
+}
+void MenuState::VictoryConditionChangedEvent()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Game Mode Change Event");
+}
+void MenuState::PlayerLeftEvent()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player Left Event");
+}
+void MenuState::KickedFromMatchEvent()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Kicked From Match Event");
+}
+void MenuState::PlayerJoinedEvent()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player Joined Event");
+}
+void MenuState::MatchStartedEvent()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Match Start Event");
+}
+void MenuState::CallbackClosedEvent()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("WARNING!!  Callback CLOSED event");
+}
+void MenuState::CallbackErrorEvent()
+{
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("ERROR!!  Callback ERROR Event");
 }
