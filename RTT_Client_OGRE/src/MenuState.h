@@ -71,9 +71,9 @@ public:
 	bool onLeaderClick(const CEGUI::EventArgs &args);
 
 	void listMatches();
-	void listPlayers(uint playerCount);
+	void listPlayers();
 
-	void matchLobby(uint playerCount);
+	void matchLobby();
 	void serverLobby();
 
 
@@ -97,18 +97,20 @@ private:
 	GUIState mLocation;
 
 protected:
-	void TeamChangedEvent();
-	void TeamColorChangedEvent();
-	void MapChangedEvent();
-	void GamespeedChangedEvent();
-	void VictoryConditionChangedEvent();
-	void PlayerLeftEvent();
-	void KickedFromMatchEvent();
-	void PlayerJoinedEvent();
-	void MatchStartedEvent();
-	void CallbackClosedEvent();
-	void CallbackErrorEvent();
+	void TeamChangedEvent(struct RTT::CallbackChange change);
+	void TeamColorChangedEvent(struct RTT::CallbackChange change);
+	void MapChangedEvent(struct RTT::CallbackChange change);
+	void GamespeedChangedEvent(struct RTT::CallbackChange change);
+	void VictoryConditionChangedEvent(struct RTT::CallbackChange change);
+	void PlayerLeftEvent(struct RTT::CallbackChange change);
+	void KickedFromMatchEvent(struct RTT::CallbackChange change);
+	void PlayerJoinedEvent(struct RTT::CallbackChange change);
+	void MatchStartedEvent(struct RTT::CallbackChange change);
+	void CallbackClosedEvent(struct RTT::CallbackChange change);
+	void CallbackErrorEvent(struct RTT::CallbackChange change);
 	void LeaderChangedEvent(struct RTT::CallbackChange change);
+
+	void enableLeader(bool value);
 
 };
 
