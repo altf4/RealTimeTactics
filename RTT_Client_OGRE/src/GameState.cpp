@@ -9,6 +9,7 @@
 #include "GameState.h"
 
 using namespace Ogre;
+using namespace RTT;
 
 GameState::GameState(void):
 		m_mainPlayer(),
@@ -766,6 +767,17 @@ void GameState::setUnbufferedMode()
 
 	CEGUI::MultiLineEditbox* pControlsPanel = (CEGUI::MultiLineEditbox*)m_pMainWnd->getChild("ControlsPanel");
 	pControlsPanel->setText("[Tab] - To switch between input modes\n\n[W] - Forward\n[S] - Backwards\n[A] - Left\n[D] - Right\n\nPress [Shift] to move faster\n\n[O] - Toggle Overlays\n[Print] - Take screenshot\n\n[Esc] - Quit to main menu");
+}
+
+void GameState::ProcessCallback(struct RTT::CallbackChange change)
+{
+	switch(change.m_type)
+	{
+		default:
+		{
+			break;
+		}
+	}
 }
 
 //void GameState::itemSelected(OgreBites::SelectMenu *menu)

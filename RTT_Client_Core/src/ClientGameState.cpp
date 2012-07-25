@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "ClientGameState.h"
+#include "Lock.h"
 
 using namespace RTT;
 
@@ -33,52 +34,51 @@ ClientGameState::ClientGameState()
 //Adds a new unit to the game state
 //	newUnit - A copy of the Unit to add
 //	returns - True if the Unit was added successfully, false on error
-bool ClientGameState::AddUnit(Unit newUnit)
+bool ClientGameState::AddUnit(Unit *newUnit)
 {
-	bool successResult = true;
-	pthread_mutex_lock(&m_unitsLock);
+	if(newUnit == NULL)
+	{
+		return false;
+	}
 
+	//If the unit ID is already here, then don't add a new one
+	if(HasUnit(newUnit->m_ID))
+	{
+		return false;
+	}
+
+	Lock lock(&m_unitsLock);
 	m_units.push_back(newUnit);
-
-	pthread_mutex_unlock(&m_unitsLock);
-	return successResult;
+	return true;
 }
 
-//NOTE: If the Unit does not exist, the returned Unit will have ID set to 0
-Unit ClientGameState::GetUnit(uint32_t ID)
+Unit *ClientGameState::GetUnit(uint32_t ID)
 {
-	Unit returnUnit;
-	returnUnit.m_ID = 0;
-	pthread_mutex_lock(&m_unitsLock);
-
+	Lock lock(&m_unitsLock);
 	for(uint i = 0; i < m_units.size(); i++)
 	{
-		if(m_units[i].m_ID == ID)
+		if(m_units[i]->m_ID == ID)
 		{
-			returnUnit = m_units[i];
-			break;
+			return m_units[i];
 		}
 	}
 
-	pthread_mutex_unlock(&m_unitsLock);
-	return returnUnit;
+	return NULL;
 }
 
 bool ClientGameState::HasUnit(uint32_t ID)
 {
 	bool successResult = false;
-	pthread_mutex_lock(&m_unitsLock);
+	Lock lock(&m_unitsLock);
 
 	for(uint i = 0; i < m_units.size(); i++)
 	{
-		if(m_units[i].m_ID == ID)
+		if(m_units[i]->m_ID == ID)
 		{
 			successResult = true;
 			break;
 		}
 	}
-
-	pthread_mutex_unlock(&m_unitsLock);
 	return successResult;
 }
 
@@ -91,26 +91,24 @@ bool ClientGameState::HasUnit(uint32_t ID)
 enum MoveResult ClientGameState::MoveUnit(uint32_t unitID, struct Coordinate source,
 		struct Coordinate destination, enum Direction facing)
 {
-	Unit movingUnit = CheckOutUnit(unitID);
-
-	if(movingUnit.m_ID == 0)
+	Unit *movingUnit = GetUnit(unitID);
+	if(movingUnit == NULL)
 	{
 		return MOVE_NO_SUCH_UNIT;
 	}
+	Lock lock = movingUnit->LockUnit();
 
 	//If the unit isn't at the source we expected...
-	if((movingUnit.m_x != source.m_x) || (movingUnit.m_y != source.m_y))
+	if((movingUnit->m_x != source.m_x) || (movingUnit->m_y != source.m_y))
 	{
 		return MOVE_WRONG_SOURCE;
 	}
 
 	//TODO: Legality checks on the movement
 
-	movingUnit.m_x = destination.m_x;
-	movingUnit.m_y = destination.m_y;
-	movingUnit.m_directionFacing = facing;
-
-	CheckInUnit(movingUnit);
+	movingUnit->m_x = destination.m_x;
+	movingUnit->m_y = destination.m_y;
+	movingUnit->m_directionFacing = facing;
 
 	return MOVE_SUCCESS;
 }
@@ -123,15 +121,16 @@ enum MoveResult ClientGameState::MoveUnit(uint32_t unitID, struct Coordinate sou
 enum MoveResult ClientGameState::MoveUnitDirection(uint32_t unitID, struct Coordinate source,
 		enum Direction direction, enum Direction facing)
 {
-	Unit movingUnit = CheckOutUnit(unitID);
-
-	if(movingUnit.m_ID == 0)
+	Unit *movingUnit = GetUnit(unitID);
+	if(movingUnit == NULL)
 	{
 		return MOVE_NO_SUCH_UNIT;
 	}
+	Lock lock = movingUnit->LockUnit();
+
 
 	//If the unit isn't at the source we expected...
-	if((movingUnit.m_x != source.m_x) || (movingUnit.m_y != source.m_y))
+	if((movingUnit->m_x != source.m_x) || (movingUnit->m_y != source.m_y))
 	{
 		return MOVE_WRONG_SOURCE;
 	}
@@ -143,108 +142,66 @@ enum MoveResult ClientGameState::MoveUnitDirection(uint32_t unitID, struct Coord
 		case NORTHEAST:
 		{
 			//if odd
-			if((movingUnit.m_y % 2) != 0)
+			if((movingUnit->m_y % 2) != 0)
 			{
-				movingUnit.m_x++;
+				movingUnit->m_x++;
 			}
-			movingUnit.m_y++;
+			movingUnit->m_y++;
 			break;
 		}
 		case NORTHWEST:
 		{
 			//if even
-			if((movingUnit.m_y % 2) == 0)
+			if((movingUnit->m_y % 2) == 0)
 			{
-				movingUnit.m_x--;
+				movingUnit->m_x--;
 			}
-			movingUnit.m_y++;
+			movingUnit->m_y++;
 			break;
 		}
 		case WEST:
 		{
-			movingUnit.m_x--;
+			movingUnit->m_x--;
 			break;
 		}
 		case SOUTHWEST:
 		{
 			//if even
-			if((movingUnit.m_y % 2) == 0)
+			if((movingUnit->m_y % 2) == 0)
 			{
-				movingUnit.m_x--;
+				movingUnit->m_x--;
 			}
-			movingUnit.m_y--;
+			movingUnit->m_y--;
 			break;
 		}
 		case SOUTHEAST:
 		{
 			//if odd
-			if((movingUnit.m_y % 2) != 0)
+			if((movingUnit->m_y % 2) != 0)
 			{
-				movingUnit.m_x++;
+				movingUnit->m_x++;
 			}
-			movingUnit.m_y--;
+			movingUnit->m_y--;
 			break;
 		}
 		case EAST:
 		{
-			movingUnit.m_x++;
+			movingUnit->m_x++;
 			break;
 		}
 	}
 
-	movingUnit.m_directionFacing = facing;
-
-	CheckInUnit(movingUnit);
+	movingUnit->m_directionFacing = facing;
 
 	return MOVE_SUCCESS;
 }
 
-Unit ClientGameState::CheckOutUnit(uint32_t ID)
+void ClientGameState::Reset()
 {
-	Unit returnUnit;
-	returnUnit.m_ID = 0;
-	pthread_mutex_lock(&m_unitsLock);
-
+	Lock lock(&m_unitsLock);
 	for(uint i = 0; i < m_units.size(); i++)
 	{
-		if(m_units[i].m_ID == ID)
-		{
-			//If we have to block, then release the list lock
-			if(pthread_mutex_trylock(&(m_units[i].m_unitLock)) != 0)
-			{
-				//Release the list lock
-				pthread_mutex_unlock(&m_unitsLock);
-				//Make the blocking call
-				pthread_mutex_lock(&(m_units[i].m_unitLock));
-				//Get the list lock again
-				pthread_mutex_lock(&m_unitsLock);
-			}
-			returnUnit = m_units[i];
-
-			break;
-		}
+		delete m_units[i];
 	}
-
-	pthread_mutex_unlock(&m_unitsLock);
-	return returnUnit;
+	m_units.clear();
 }
-
-void ClientGameState::CheckInUnit(Unit newUnit)
-{
-	pthread_mutex_lock(&m_unitsLock);
-
-	for(uint i = 0; i < m_units.size(); i++)
-	{
-		if(m_units[i].m_ID == newUnit.m_ID)
-		{
-			m_units[i] = newUnit;
-			pthread_mutex_unlock(&(m_units[i].m_unitLock));
-			break;
-		}
-	}
-
-	pthread_mutex_unlock(&m_unitsLock);
-}
-
-
-

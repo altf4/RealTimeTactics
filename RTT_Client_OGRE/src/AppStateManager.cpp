@@ -10,6 +10,8 @@
 
 #include <OgreWindowEventUtilities.h>
 
+using namespace RTT;
+
 AppStateManager::AppStateManager()
 {
 	m_bShutdown = false;
@@ -89,7 +91,20 @@ void AppStateManager::start(AppState *state)
 			OgreFramework::getSingletonPtr()->updateOgre(timeSinceLastFrame);
 			OgreFramework::getSingletonPtr()->m_pRoot->renderOneFrame();
 
-			timeSinceLastFrame = OgreFramework::getSingletonPtr()->m_pTimer->getMillisecondsCPU() - startTime;
+			timeSinceLastFrame = OgreFramework::getSingletonPtr()->
+					m_pTimer->getMillisecondsCPU() - startTime;
+
+			//Not an infinite loop. Breaks inside when NO_CALLBACK is found
+			while(true)
+			{
+				struct CallbackChange change = OgreFramework::getSingletonPtr()->
+						m_callbackHandler->PopCallbackChange();
+				if(change.m_type == NO_CALLBACK)
+				{
+					break;
+				}
+				m_ActiveStateStack.back()->ProcessCallback(change);
+			}
 		}
 		else
 		{

@@ -77,7 +77,6 @@ public:
 	void serverLobby();
 
 
-
 	CEGUI::MultiColumnList *multiColumnListMatch;
 	CEGUI::MultiColumnList *multiColumnListPlayer;
 
@@ -87,15 +86,16 @@ public:
 
 	RTT::MatchDescription m_currentMatch;
 
-	RTT::CallbackHandler *t_callbackHandler;
-
 	void update(double timeSinceLastFrame);
+
+	void ProcessCallback(struct RTT::CallbackChange);
 
 private:
 	bool m_bQuit;
 	bool m_bInMatch;
 	bool m_bInit;
 	GUIState mLocation;
+
 protected:
 	void TeamChangedEvent();
 	void TeamColorChangedEvent();
@@ -105,10 +105,10 @@ protected:
 	void PlayerLeftEvent();
 	void KickedFromMatchEvent();
 	void PlayerJoinedEvent();
-	void LeaderChangedEvent();
 	void MatchStartedEvent();
 	void CallbackClosedEvent();
 	void CallbackErrorEvent();
+	void LeaderChangedEvent(struct CallbackChange change);
 
 };
 

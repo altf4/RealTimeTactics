@@ -8,11 +8,10 @@
 #ifndef CALLBACKHANDLER_H_
 #define CALLBACKHANDLER_H_
 
-#include "ClientProtocolHandler.h"
-
-#include <glibmm/dispatcher.h>
-#include <glibmm/thread.h>
 #include <queue>
+#include "pthread.h"
+
+#include "ClientProtocolHandler.h"
 
 namespace RTT
 {
@@ -29,27 +28,16 @@ public:
 
 	struct CallbackChange PopCallbackChange();
 
-	Glib::Dispatcher m_sig_team_change;
-	Glib::Dispatcher m_sig_color_change;
-	Glib::Dispatcher m_sig_map_change;
-	Glib::Dispatcher m_sig_speed_change;
-	Glib::Dispatcher m_sig_victory_cond_change;
-	Glib::Dispatcher m_sig_player_left;
-	Glib::Dispatcher m_sig_kicked;
-	Glib::Dispatcher m_sig_player_joined;
-	Glib::Dispatcher m_sig_leader_change;
-	Glib::Dispatcher m_sig_match_started;
-	Glib::Dispatcher m_sig_callback_closed;
-	Glib::Dispatcher m_sig_callback_error;
-
 private:
 
-	void CallbackThread();
+	void *CallbackThread();
 	void PushCallbackChange(struct CallbackChange change);
 
-	Glib::Thread *m_thread;
+	static void *StartThreadHelper(void *ptr);
 
-	Glib::Mutex m_queueMutex;
+	pthread_t m_thread;
+
+	pthread_mutex_t m_queueMutex;
 	std::queue<struct CallbackChange> m_changeQueue;
 };
 
