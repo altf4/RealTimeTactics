@@ -612,7 +612,7 @@ void MenuState::ListPlayers()
 {
 	CEGUI::Window *pMainWnd;
 	CEGUI::ScrollablePane *scrollpane;
-
+	CEGUI::RadioButton *isLeader;
 	CEGUI::DefaultWindow *playerName;
 	CEGUI::UDim offSet;
 
