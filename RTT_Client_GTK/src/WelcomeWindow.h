@@ -109,7 +109,7 @@ public:
 
 	void LaunchMainLobbyPane();
 	void LaunchServerConnectPane();
-	void LaunchMatchLobbyPane(PlayerDescription *playerDescriptions, uint playerCount);
+	void LaunchMatchLobbyPane(const std::vector<PlayerDescription> &);
 
 	Glib::RefPtr<Gtk::ListStore> PopulateTeamNumberCombo();
 

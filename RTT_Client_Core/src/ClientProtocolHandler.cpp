@@ -324,15 +324,18 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 }
 
 //Joins the match at the given ID
-//	connectFD: Socket File descriptor of the server
-//	descPtr: The address of a pointer to PlayerDescription.
-//		The current players in the match are given here
 //	matchID: The server's unique ID for the chosen match
-//	Returns: true if the match is joined successfully
-uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr,
-		struct MatchDescription *outMatchDesc)
+//  outMatchDesc: Output variable for the match description that is created
+//	Returns: A vector of the player descriptions that are currently in the match
+//	NOTE: This vector includes us.
+//	NOTE: On error or failure, the vector will be set to be empty
+//	NOTE: Should immediately follow with InitializeCallback()
+vector<PlayerDescription> RTT::JoinMatch(uint matchID,
+		struct MatchDescription &outMatchDesc)
 {
 	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	vector<PlayerDescription> retPlayers;
+	retPlayers.clear();
 
 	//********************************
 	// Send Match Join Request
@@ -342,7 +345,7 @@ uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr,
 	if( Message::WriteMessage(&join_request, socketFD) == false)
 	{
 		//Error in write
-		return 0;
+		return retPlayers;
 	}
 
 	//**********************************
@@ -352,31 +355,31 @@ uint RTT::JoinMatch(uint matchID, PlayerDescription *descPtr,
 	if( join_reply_init->m_messageType != MESSAGE_LOBBY)
 	{
 		delete join_reply_init;
-		return 0;
+		return retPlayers;
 	}
 	LobbyMessage *join_reply = (LobbyMessage *)join_reply_init;
 	if(join_reply->m_lobbyType != MATCH_JOIN_REPLY)
 	{
 		delete join_reply;
-		return 0;
+		return retPlayers;
 	}
 
 	uint count = join_reply->m_returnedPlayersCount;
 	if(count > MAX_PLAYERS_IN_MATCH )
 	{
 		delete join_reply_init;
-		return 0;
+		return retPlayers;
 	}
 
 	for(uint i = 0; i < count; i++ )
 	{
-		descPtr[i] = join_reply->m_playerDescriptions[i];
+		retPlayers.push_back(join_reply->m_playerDescriptions[i]);
 	}
 
-	*outMatchDesc = join_reply->m_matchDescription;
+	outMatchDesc = join_reply->m_matchDescription;
 
 	delete join_reply_init;
-	return count;
+	return retPlayers;
 }
 
 //Leaves the match at the given ID

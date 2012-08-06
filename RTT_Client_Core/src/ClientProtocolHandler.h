@@ -110,14 +110,12 @@ bool CreateMatch(struct MatchOptions options, struct MatchDescription *outMatchD
 
 //Joins the match at the given ID
 //	matchID: The server's unique ID for the chosen match
-//	descPtr: The address of a pointer to PlayerDescription.
-//    The current players in the match are given here
 //  outMatchDesc: Output variable for the match description that is created
-
-//	Returns: true if the match is joined successfully
-//	Should immediately follow with InitializeCallback()
-uint JoinMatch(uint matchID, PlayerDescription *descPtr,
-		struct MatchDescription *outMatchDesc);
+//	Returns: A vector of the player descriptions that are currently in the match
+//	NOTE: This vector includes us.
+//	NOTE: On error or failure, the vector will be set to be empty
+//	NOTE: Should immediately follow with InitializeCallback()
+std::vector<PlayerDescription> JoinMatch(uint, struct MatchDescription &);
 
 //Leaves the match at the given ID
 //	matchID: The server's unique ID for the chosen match

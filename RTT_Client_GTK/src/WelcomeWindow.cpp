@@ -395,7 +395,9 @@ void WelcomeWindow::create_match_submit_click()
 
 	if (CreateMatch(options, &m_currentMatch) )
 	{
-		LaunchMatchLobbyPane(&m_playerDescription, 1);
+		vector<PlayerDescription> playerVector;
+		playerVector.push_back(m_playerDescription);
+		LaunchMatchLobbyPane(playerVector);
 	}
 	else
 	{
@@ -456,13 +458,15 @@ void WelcomeWindow::join_match_click()
 	TreeModel::Row row = *( iter );
 	int matchID = row[columns.m_matchID];
 
-	PlayerDescription playerDescriptions[MAX_PLAYERS_IN_MATCH];
 
-	uint playerCount = JoinMatch(matchID, playerDescriptions, &m_currentMatch);
-	if( playerCount > 0 )
+	vector<PlayerDescription> playerDescriptions;
+
+	playerDescriptions = JoinMatch(matchID, m_currentMatch);
+
+	if( playerDescriptions.size() > 0 )
 	{
 		m_currentMatch.m_ID = matchID;
-		LaunchMatchLobbyPane(playerDescriptions, playerCount);
+		LaunchMatchLobbyPane(playerDescriptions);
 	}
 	else
 	{
@@ -755,8 +759,8 @@ Glib::RefPtr<Gtk::ListStore> WelcomeWindow::PopulateTeamNumberCombo()
 	return listStore;
 }
 
-void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
-		uint playerCount)
+void WelcomeWindow::LaunchMatchLobbyPane(
+		const std::vector<PlayerDescription> &playerDescriptions)
 {
 	m_welcome_box->set_visible(false);
 	m_lobby_box->set_visible(false);
@@ -773,7 +777,7 @@ void WelcomeWindow::LaunchMatchLobbyPane(PlayerDescription *playerDescriptions,
 	m_teamNumberListStore = PopulateTeamNumberCombo();
 
 	//Add a new row for each player
-	for(uint i = 0; i < playerCount; i++)
+	for(uint i = 0; i < playerDescriptions.size(); i++)
 	{
 		TreeModel::Row row = *(m_playerListStore->append());
 

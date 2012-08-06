@@ -71,7 +71,7 @@ public:
 	bool onLeaderClick(const CEGUI::EventArgs &args);
 
 	void listMatches();
-	void listPlayers();
+	void ListPlayers();
 
 	void matchLobby();
 	void serverLobby();
@@ -82,7 +82,7 @@ public:
 
 	RTT::PlayerDescription m_playerDescription;
 
-	RTT::PlayerDescription m_otherPlayers[MAX_PLAYERS_IN_MATCH];
+	std::vector <RTT::PlayerDescription> m_currentPlayers;
 
 	RTT::MatchDescription m_currentMatch;
 
