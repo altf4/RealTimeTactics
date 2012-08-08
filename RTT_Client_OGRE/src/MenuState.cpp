@@ -610,16 +610,13 @@ void MenuState::matchLobby()
 
 void MenuState::ListPlayers()
 {
-	CEGUI::Window *pMainWnd;
+	CEGUI::Window *mainWnd;
 	CEGUI::ScrollablePane *scrollpane;
-	CEGUI::RadioButton *isLeader;
-	CEGUI::DefaultWindow *playerName;
-	CEGUI::UDim offSet;
 
 	try
 	{
-		pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby");
-		scrollpane = (CEGUI::ScrollablePane*)pMainWnd->getChild("PlayersPane");
+		mainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby");
+		scrollpane = (CEGUI::ScrollablePane*)mainWnd->getChild("PlayersPane");
 	}
 	catch(CEGUI::UnknownObjectException ex)
 	{
@@ -629,94 +626,34 @@ void MenuState::ListPlayers()
 	}
 
 	//Clear out the current player list widgets
+	for(uint i = 0; i < m_playerNameTextBoxes.size(); i++)
+	{
+		CEGUI::WindowManager::getSingleton().destroyWindow(m_playerNameTextBoxes[i]);
+	}
+	for(uint i = 0; i < m_isLeaderCheckBoxes.size(); i++)
+	{
+		CEGUI::WindowManager::getSingleton().destroyWindow(m_isLeaderCheckBoxes[i]);
+	}
+	m_playerNameTextBoxes.clear();
+	m_isLeaderCheckBoxes.clear();
+
 	for(uint i = 0; i < m_currentPlayers.size(); i++)
 	{
-		CEGUI::WindowManager::getSingleton().destroyWindow("IsLeader" +
-				CEGUI::PropertyHelper::intToString((int)m_currentPlayers[i].m_ID));
-		CEGUI::WindowManager::getSingleton().destroyWindow(
-				m_currentPlayers[i].m_name);
-	}
-
-	if(m_currentPlayers.size() > 1)
-	{
-		for(uint i = 0; i < m_currentPlayers.size(); i++)
-		{
-			isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().
-					createWindow("OgreTray/RadioButton","IsLeader" +
-					CEGUI::PropertyHelper::intToString((int)m_currentPlayers[i].m_ID));
-			playerName = (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().
-					createWindow("OgreTray/StaticText",m_currentPlayers[i].m_name);
-
-			isLeader->setGroupID(1);
-			isLeader->setID((int)m_currentPlayers[i].m_ID);
-			if(m_currentPlayers[i].m_ID == m_currentMatch.m_leaderID)
-			{
-				isLeader->setSelected(true);
-			}
-			if(m_playerDescription.m_ID == m_currentMatch.m_leaderID)
-			{
-				isLeader->setEnabled(true);
-			}
-			else
-			{
-				//isLeader->setEnabled(false);
-			}
-			playerName->setText(m_currentPlayers[i].m_name);
-
-			offSet = offSet + CEGUI::UDim(0.1f, 0.0f);
-
-			isLeader->setPosition(CEGUI::UVector2(
-					CEGUI::UDim(0.0f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
-			isLeader->setSize(CEGUI::UVector2(
-					CEGUI::UDim(0.075f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
-			playerName->setPosition(CEGUI::UVector2(
-					CEGUI::UDim(0.1f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
-			playerName->setSize(CEGUI::UVector2(
-					CEGUI::UDim(0.2f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
-			playerName->setProperty("FrameEnabled", "False");
-
-			scrollpane->addChildWindow(isLeader);
-			scrollpane->addChildWindow(playerName);
-
-			isLeader->subscribeEvent(
-					CEGUI::RadioButton::EventSelectStateChanged,
-					CEGUI::Event::Subscriber(&MenuState::onLeaderClick, this));
-		}
-	}
-	else
-	{
-		for(uint i = 0; i < m_currentPlayers.size(); i++)
-		{
-			//Clear all other players
-			if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" +
-					CEGUI::PropertyHelper::intToString((int)m_currentPlayers[i].m_ID)))
-			{
-				CEGUI::WindowManager::getSingleton().destroyWindow(
-						"IsLeader" + CEGUI::PropertyHelper::intToString(
-						(int)m_currentPlayers[i].m_ID));
-				CEGUI::WindowManager::getSingleton().destroyWindow(
-						m_currentPlayers[i].m_name);
-			}
-		}
-		//Check to see if window object names already exist, if so delete them
-		if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" +
-				CEGUI::PropertyHelper::intToString((int)m_playerDescription.m_ID)))
-		{
-			CEGUI::WindowManager::getSingleton().destroyWindow("IsLeader" +
-					CEGUI::PropertyHelper::intToString((int)m_playerDescription.m_ID));
-			CEGUI::WindowManager::getSingleton().destroyWindow(
-					m_playerDescription.m_name);
-		}
-
-		isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().
+		CEGUI::RadioButton *isLeader =
+				(CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().
 				createWindow("OgreTray/RadioButton","IsLeader" +
-				CEGUI::PropertyHelper::intToString((int)m_playerDescription.m_ID));
-		playerName = (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().
-				createWindow("OgreTray/StaticText",m_playerDescription.m_name);
+				CEGUI::PropertyHelper::intToString((int)m_currentPlayers[i].m_ID));
+
+		CEGUI::DefaultWindow *playerName =
+				(CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().
+				createWindow("OgreTray/StaticText",m_currentPlayers[i].m_name);
+
+		m_isLeaderCheckBoxes.push_back(isLeader);
+		m_playerNameTextBoxes.push_back(playerName);
 
 		isLeader->setGroupID(1);
-		isLeader->setID((int)m_playerDescription.m_ID);
-		if(m_playerDescription.m_ID == m_currentMatch.m_leaderID)
+		isLeader->setID((int)m_currentPlayers[i].m_ID);
+		if(m_currentPlayers[i].m_ID == m_currentMatch.m_leaderID)
 		{
 			isLeader->setSelected(true);
 		}
@@ -726,19 +663,18 @@ void MenuState::ListPlayers()
 		}
 		else
 		{
-			isLeader->setEnabled(false);
+			//isLeader->setEnabled(false);
 		}
+		playerName->setText(m_currentPlayers[i].m_name);
 
-		playerName->setText(m_playerDescription.m_name);
-
-		offSet = offSet + CEGUI::UDim(0.1f, 0.0f);
+		CEGUI::UDim offSet = offSet + CEGUI::UDim(0.1f, 0.0f);
 
 		isLeader->setPosition(CEGUI::UVector2(
-				CEGUI::UDim(0.0f, 0.0f),CEGUI::UDim(0.1f , 0.0f)));
+				CEGUI::UDim(0.0f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
 		isLeader->setSize(CEGUI::UVector2(
 				CEGUI::UDim(0.075f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
 		playerName->setPosition(CEGUI::UVector2(
-				CEGUI::UDim(0.1f, 0.0f),CEGUI::UDim(0.1f , 0.0f)));
+				CEGUI::UDim(0.1f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
 		playerName->setSize(CEGUI::UVector2(
 				CEGUI::UDim(0.2f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
 		playerName->setProperty("FrameEnabled", "False");
@@ -747,9 +683,10 @@ void MenuState::ListPlayers()
 		scrollpane->addChildWindow(playerName);
 
 		isLeader->subscribeEvent(
-				CEGUI::RadioButton::EventSelectStateChanged, CEGUI::Event::Subscriber(
-				&MenuState::onLeaderClick, this));
+				CEGUI::RadioButton::EventSelectStateChanged,
+				CEGUI::Event::Subscriber(&MenuState::onLeaderClick, this));
 	}
+
 	return;
 }
 

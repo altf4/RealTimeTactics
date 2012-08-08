@@ -84,6 +84,9 @@ public:
 
 	std::vector <RTT::PlayerDescription> m_currentPlayers;
 
+	std::vector <CEGUI::DefaultWindow*> m_playerNameTextBoxes;
+	std::vector <CEGUI::RadioButton*> m_isLeaderCheckBoxes;
+
 	RTT::MatchDescription m_currentMatch;
 
 	void update(double timeSinceLastFrame);
