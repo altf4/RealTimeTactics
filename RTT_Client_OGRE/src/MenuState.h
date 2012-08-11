@@ -86,6 +86,7 @@ public:
 
 	std::vector <CEGUI::DefaultWindow*> m_playerNameTextBoxes;
 	std::vector <CEGUI::RadioButton*> m_isLeaderCheckBoxes;
+	std::vector <CEGUI::Combobox*> m_playerTeamBoxes;
 
 	RTT::MatchDescription m_currentMatch;
 

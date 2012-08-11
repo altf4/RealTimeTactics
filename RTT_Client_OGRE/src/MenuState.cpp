@@ -634,8 +634,14 @@ void MenuState::ListPlayers()
 	{
 		CEGUI::WindowManager::getSingleton().destroyWindow(m_isLeaderCheckBoxes[i]);
 	}
+	for(uint i = 0; i < m_playerTeamBoxes.size(); i++)
+	{
+		CEGUI::WindowManager::getSingleton().destroyWindow(m_playerTeamBoxes[i]);
+	}
+
 	m_playerNameTextBoxes.clear();
 	m_isLeaderCheckBoxes.clear();
+	m_playerTeamBoxes.clear();
 
 	for(uint i = 0; i < m_currentPlayers.size(); i++)
 	{
@@ -648,8 +654,14 @@ void MenuState::ListPlayers()
 				(CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().
 				createWindow("OgreTray/StaticText",m_currentPlayers[i].m_name);
 
+		CEGUI::Combobox *playerTeam =
+				(CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().
+				createWindow("OgreTray/Combobox","Team" +
+				CEGUI::PropertyHelper::intToString((int)m_currentPlayers[i].m_ID));
+
 		m_isLeaderCheckBoxes.push_back(isLeader);
 		m_playerNameTextBoxes.push_back(playerName);
+		m_playerTeamBoxes.push_back(playerTeam);
 
 		isLeader->setGroupID(1);
 		isLeader->setID((int)m_currentPlayers[i].m_ID);
@@ -667,20 +679,49 @@ void MenuState::ListPlayers()
 		}
 		playerName->setText(m_currentPlayers[i].m_name);
 
+		playerTeam->setReadOnly(true);
+		playerTeam->resetList();
+		CEGUI::ListboxTextItem *teamItem;
+		teamItem = new CEGUI::ListboxTextItem("Spectator", 0);
+		teamItem->setSelectionBrushImage("OgreTrayImages", "Select");
+		playerTeam->addItem(teamItem);
+		if(m_currentPlayers[i].m_team == SPECTATOR)
+		{
+		   teamItem->setSelected(true);
+		}
+		for(int j = 1; j <= 8; j++)
+		{
+			teamItem = new CEGUI::ListboxTextItem("Team " + CEGUI::PropertyHelper::intToString((int)j), j);
+			teamItem->setSelectionBrushImage("OgreTrayImages", "Select");
+			playerTeam->addItem(teamItem);
+			if(m_currentPlayers[i].m_team == j) //*****************************here******************************
+			{
+			   teamItem->setSelected(true);
+			}
+		}
+		teamItem = new CEGUI::ListboxTextItem("Referee", 9);
+		teamItem->setSelectionBrushImage("OgreTrayImages", "Select");
+		playerTeam->addItem(teamItem);
+		if(m_currentPlayer[i].m_team == REFEREE)
+		{
+		   teamItem->setSelected(true);
+		}
+
 		CEGUI::UDim offSet = offSet + CEGUI::UDim(0.1f, 0.0f);
 
-		isLeader->setPosition(CEGUI::UVector2(
-				CEGUI::UDim(0.0f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
-		isLeader->setSize(CEGUI::UVector2(
-				CEGUI::UDim(0.075f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
-		playerName->setPosition(CEGUI::UVector2(
-				CEGUI::UDim(0.1f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
-		playerName->setSize(CEGUI::UVector2(
-				CEGUI::UDim(0.2f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
+		isLeader->setPosition(CEGUI::UVector2(CEGUI::UDim(0.0f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
+		isLeader->setSize(CEGUI::UVector2(CEGUI::UDim(0.075f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
+
+		playerName->setPosition(CEGUI::UVector2(CEGUI::UDim(0.1f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
+		playerName->setSize(CEGUI::UVector2(CEGUI::UDim(0.2f, 0.0f), CEGUI::UDim(0.075f, 0.0f)));
 		playerName->setProperty("FrameEnabled", "False");
+
+		playerTeam->setPosition(CEGUI::UVector2(CEGUI::UDim(0.35f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
+		playerTeam->setSize(CEGUI::UVector2(CEGUI::UDim(0.3f, 0.0f), CEGUI::UDim(0.5f, 0.0f)));
 
 		scrollpane->addChildWindow(isLeader);
 		scrollpane->addChildWindow(playerName);
+		scrollpane->addChildWindow(playerTeam);
 
 		isLeader->subscribeEvent(
 				CEGUI::RadioButton::EventSelectStateChanged,

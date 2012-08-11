@@ -68,6 +68,7 @@ install:
 
 uninstall:
 	rm -f $(DESTDIR)/usr/lib/libRTT_Client_Core.so
+	rm -f $(DESTDIR)/usr/local/lib/libRTT_Client_Core.so
 	rm -f $(DESTDIR)/usr/bin/RTT_Client_GTK
 	rm -f $(DESTDIR)/usr/bin/RTT_Server
 	rm -f $(DESTDIR)/usr/bin/RTT_Client_OGRE
