@@ -804,9 +804,9 @@ void MenuState::ListPlayers()
 	return;
 }
 
-bool MenuState::onTeamChangeClick(const CEGUI::EventArgs &args)
+bool MenuState::onTeamChangeClick(const CEGUI::EventArgs& args)
 {
-	const CEGUI::WindowEventArgs *teamChange = (const CEGUI::WindowEventArgs*)&args;
+	const CEGUI::WindowEventArgs teamChange = static_cast<const CEGUI::WindowEventArgs&>(args);
 
 	CEGUI::String windowName = teamChange.window->getName();
 	CEGUI::Combobox *newTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().getWindow(windowName);
