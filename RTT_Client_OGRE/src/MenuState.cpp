@@ -806,9 +806,10 @@ void MenuState::ListPlayers()
 
 bool MenuState::onTeamChangeClick(const CEGUI::EventArgs &args)
 {
-	const CEGUI::WindowEventArgs *teamChange = static_cast<const CEGUI::WindowEventArgs*>(&args);
+	const CEGUI::WindowEventArgs *teamChange = (const CEGUI::WindowEventArgs*)&args;
 
-	CEGUI::Combobox *newTeam = (CEGUI::Combobox*)teamChange.window;
+	CEGUI::String windowName = teamChange.window->getName();
+	CEGUI::Combobox *newTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().getWindow(windowName);
 
 	CEGUI::ListboxTextItem *teamItem = (CEGUI::ListboxTextItem*)newTeam->getSelectedItem();
 
@@ -816,13 +817,13 @@ bool MenuState::onTeamChangeClick(const CEGUI::EventArgs &args)
 
 	if(RTT::ChangeTeam(newTeam->getID(), (enum TeamNumber)teamItem->getID()))
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player " +Ogre::StringConverter::toString((int)newTeam.getID())+ " is now on Team " +
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player " +Ogre::StringConverter::toString((int)newTeam->getID())+ " is now on Team " +
 				Ogre::StringConverter::toString((int)teamItem->getID()));
 	}
 	else
 	{
 		OgreFramework::getSingletonPtr()->m_pLog->logMessage("WARNING: Change of team on the server failed!");
-		teamItem = (CEGUI::ListboxTextItem*)newTeam->getListboxItemFromIndex((uint)m_currentPlayers[newTeam->getID()].m_team());
+		teamItem = (CEGUI::ListboxTextItem*)newTeam->getListboxItemFromIndex((uint)m_currentPlayers[newTeam->getID()].m_team);
 		teamItem->setSelected(true);
 		newTeam->setText(teamItem->getText());
 	}
