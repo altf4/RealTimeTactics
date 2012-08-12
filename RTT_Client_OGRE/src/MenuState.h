@@ -69,6 +69,7 @@ public:
 	bool onMatchNameDeactivate(const CEGUI::EventArgs &args);
 
 	bool onLeaderClick(const CEGUI::EventArgs &args);
+	bool onTeamChangeClick(const CEGUI::EventArgs &args);
 
 	void listMatches();
 	void ListPlayers();

@@ -679,32 +679,104 @@ void MenuState::ListPlayers()
 		}
 		playerName->setText(m_currentPlayers[i].m_name);
 
+		playerTeam->setID(m_currentPlayers[i].m_ID);
 		playerTeam->setReadOnly(true);
 		playerTeam->resetList();
 		CEGUI::ListboxTextItem *teamItem;
-		teamItem = new CEGUI::ListboxTextItem("Spectator", 0);
-		teamItem->setSelectionBrushImage("OgreTrayImages", "Select");
-		playerTeam->addItem(teamItem);
-		if(m_currentPlayers[i].m_team == SPECTATOR)
+
+		for(int j = 0; j <= 9; j++)
 		{
-		   teamItem->setSelected(true);
-		}
-		for(int j = 1; j <= 8; j++)
-		{
-			teamItem = new CEGUI::ListboxTextItem("Team " + CEGUI::PropertyHelper::intToString((int)j), j);
+			if(j == 0)
+			{
+				teamItem = new CEGUI::ListboxTextItem("Spectator", j);
+			}
+			else if(j == 9)
+			{
+				teamItem = new CEGUI::ListboxTextItem("Referee", j);
+			}
+			else
+			{
+				teamItem = new CEGUI::ListboxTextItem("Team " + CEGUI::PropertyHelper::intToString((int)j), j);
+			}
 			teamItem->setSelectionBrushImage("OgreTrayImages", "Select");
 			playerTeam->addItem(teamItem);
-			if(m_currentPlayers[i].m_team == j) //*****************************here******************************
+
+			//To select the correct team
+			switch(m_currentPlayers[i].m_team)
 			{
-			   teamItem->setSelected(true);
+				case SPECTATOR:
+					if(j == 0)
+					{
+					   teamItem->setSelected(true);
+					   playerTeam->setText(teamItem->getText());
+					}
+					break;
+				case TEAM_1:
+					if(j == 1)
+					{
+					   teamItem->setSelected(true);
+					   playerTeam->setText(teamItem->getText());
+					}
+					break;
+				case TEAM_2:
+					if(j == 2)
+					{
+					   teamItem->setSelected(true);
+					   playerTeam->setText(teamItem->getText());
+					}
+					break;
+				case TEAM_3:
+					if(j == 3)
+					{
+					   teamItem->setSelected(true);
+					   playerTeam->setText(teamItem->getText());
+					}
+					break;
+				case TEAM_4:
+					if(j == 4)
+					{
+					   teamItem->setSelected(true);
+					   playerTeam->setText(teamItem->getText());
+					}
+					break;
+				case TEAM_5:
+					if(j == 5)
+					{
+					   teamItem->setSelected(true);
+					   playerTeam->setText(teamItem->getText());
+					}
+					break;
+				case TEAM_6:
+					if(j == 6)
+					{
+					   teamItem->setSelected(true);
+					   playerTeam->setText(teamItem->getText());
+					}
+					break;
+				case TEAM_7:
+					if(j == 7)
+					{
+					   teamItem->setSelected(true);
+					   playerTeam->setText(teamItem->getText());
+					}
+					break;
+				case TEAM_8:
+					if(j == 8)
+					{
+					   teamItem->setSelected(true);
+					   playerTeam->setText(teamItem->getText());
+					}
+					break;
+				case REFEREE:
+					if(j == 9)
+					{
+					   teamItem->setSelected(true);
+					   playerTeam->setText(teamItem->getText());
+					}
+					break;
+				default:
+					break;
 			}
-		}
-		teamItem = new CEGUI::ListboxTextItem("Referee", 9);
-		teamItem->setSelectionBrushImage("OgreTrayImages", "Select");
-		playerTeam->addItem(teamItem);
-		if(m_currentPlayer[i].m_team == REFEREE)
-		{
-		   teamItem->setSelected(true);
 		}
 
 		CEGUI::UDim offSet = offSet + CEGUI::UDim(0.1f, 0.0f);
@@ -717,18 +789,44 @@ void MenuState::ListPlayers()
 		playerName->setProperty("FrameEnabled", "False");
 
 		playerTeam->setPosition(CEGUI::UVector2(CEGUI::UDim(0.35f, 0.0f),CEGUI::UDim( (i+1) * 0.1f , 0.0f)));
-		playerTeam->setSize(CEGUI::UVector2(CEGUI::UDim(0.3f, 0.0f), CEGUI::UDim(0.5f, 0.0f)));
+		playerTeam->setSize(CEGUI::UVector2(CEGUI::UDim(0.3f, 0.0f), CEGUI::UDim(0.8f, 0.0f)));
 
 		scrollpane->addChildWindow(isLeader);
 		scrollpane->addChildWindow(playerName);
 		scrollpane->addChildWindow(playerTeam);
 
-		isLeader->subscribeEvent(
-				CEGUI::RadioButton::EventSelectStateChanged,
-				CEGUI::Event::Subscriber(&MenuState::onLeaderClick, this));
+		isLeader->subscribeEvent(CEGUI::RadioButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&MenuState::onLeaderClick, this));
+
+		playerTeam->subscribeEvent(CEGUI::Combobox::EventListSelectionAccepted, CEGUI::Event::Subscriber(&MenuState::onTeamChangeClick, this));
+
 	}
 
 	return;
+}
+
+bool MenuState::onTeamChangeClick(const CEGUI::EventArgs &args)
+{
+	const CEGUI::WindowEventArgs *teamChange = static_cast<const CEGUI::WindowEventArgs*>(&args);
+
+	CEGUI::Combobox *newTeam = (CEGUI::Combobox*)teamChange.window;
+
+	CEGUI::ListboxTextItem *teamItem = (CEGUI::ListboxTextItem*)newTeam->getSelectedItem();
+
+	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Trying to change Player " +Ogre::StringConverter::toString((int)newTeam->getID())+ "'s team.");
+
+	if(RTT::ChangeTeam(newTeam->getID(), (enum TeamNumber)teamItem->getID()))
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player " +Ogre::StringConverter::toString((int)newTeam.getID())+ " is now on Team " +
+				Ogre::StringConverter::toString((int)teamItem->getID()));
+	}
+	else
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("WARNING: Change of team on the server failed!");
+		teamItem = (CEGUI::ListboxTextItem*)newTeam->getListboxItemFromIndex((uint)m_currentPlayers[newTeam->getID()].m_team());
+		teamItem->setSelected(true);
+		newTeam->setText(teamItem->getText());
+	}
+	return true;
 }
 
 bool MenuState::onLeaderClick(const CEGUI::EventArgs &args)
@@ -740,7 +838,7 @@ bool MenuState::onLeaderClick(const CEGUI::EventArgs &args)
 	if(newLeaderID != m_currentMatch.m_leaderID)
 	{
 		OgreFramework::getSingletonPtr()->m_pLog->logMessage(
-				"Trying to changing Leader from " + Ogre::StringConverter::toString(
+				"Trying to change Leader from " + Ogre::StringConverter::toString(
 				(int)m_currentMatch.m_leaderID) + " to " +
 				Ogre::StringConverter::toString((int)newLeaderID));
 
@@ -1042,6 +1140,69 @@ void MenuState::enableLeader(bool value)
 void MenuState::TeamChangedEvent(struct RTT::CallbackChange change)
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Team Change Event");
+
+	CEGUI::Combobox *playerTeam;
+	if(CEGUI::WindowManager::getSingleton().isWindowPresent("Team" + CEGUI::PropertyHelper::intToString((int)change.m_playerID)))
+	{
+		playerTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().getWindow("Team" + CEGUI::PropertyHelper::intToString((int)change.m_playerID));
+	}
+	CEGUI::ListboxTextItem *teamItem;
+
+	switch(change.m_team)
+	{
+		case SPECTATOR:
+			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(0);
+			teamItem->setSelected(true);
+			playerTeam->setText(teamItem->getText());
+			break;
+		case TEAM_1:
+			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(1);
+			teamItem->setSelected(true);
+			playerTeam->setText(teamItem->getText());
+			break;
+		case TEAM_2:
+			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(2);
+			teamItem->setSelected(true);
+			playerTeam->setText(teamItem->getText());
+			break;
+		case TEAM_3:
+			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(3);
+			teamItem->setSelected(true);
+			playerTeam->setText(teamItem->getText());
+			break;
+		case TEAM_4:
+			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(4);
+			teamItem->setSelected(true);
+			playerTeam->setText(teamItem->getText());
+			break;
+		case TEAM_5:
+			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(5);
+			teamItem->setSelected(true);
+			playerTeam->setText(teamItem->getText());
+			break;
+		case TEAM_6:
+			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(6);
+			teamItem->setSelected(true);
+			playerTeam->setText(teamItem->getText());
+			break;
+		case TEAM_7:
+			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(7);
+			teamItem->setSelected(true);
+			playerTeam->setText(teamItem->getText());
+			break;
+		case TEAM_8:
+			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(8);
+			teamItem->setSelected(true);
+			playerTeam->setText(teamItem->getText());
+			break;
+		case REFEREE:
+			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(9);
+			teamItem->setSelected(true);
+			playerTeam->setText(teamItem->getText());
+			break;
+		default:
+			break;
+	}
 }
 void MenuState::TeamColorChangedEvent(struct RTT::CallbackChange change)
 {
@@ -1071,7 +1232,6 @@ void MenuState::PlayerLeftEvent(struct RTT::CallbackChange change)
 			m_currentPlayers.erase(m_currentPlayers.begin()+i);
 		}
 	}
-
 	ListPlayers();
 }
 void MenuState::KickedFromMatchEvent(struct RTT::CallbackChange change)
@@ -1114,6 +1274,11 @@ void MenuState::ProcessCallback(struct RTT::CallbackChange change)
 		case PLAYER_LEFT:
 		{
 			PlayerLeftEvent(change);
+			break;
+		}
+		case TEAM_CHANGE:
+		{
+			TeamChangedEvent(change);
 			break;
 		}
 		default:
