@@ -134,7 +134,13 @@
 		<Property Name="UnifiedSize" Value="{{0.1,0},{0.05,0}}" />
 		<Property Name="Text" Value="Back" />
 	</Window>
-
+	
+	<Window Type="OgreTray/Button" Name="MatchStartButton">
+        <Property Name="UnifiedPosition" Value="{{0.35,0},{0.65,0}}" />
+        <Property Name="UnifiedSize" Value="{{0.3,0},{0.05,0}}" />
+        <Property Name="Text" Value="Start Match" />
+    </Window> 
+    
 	<Window Type="OgreTray/Button" Name="MatchExitButton">
         <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
         <Property Name="UnifiedSize" Value="{{0.3,0},{0.05,0}}" />
@@ -143,7 +149,7 @@
     
     <Window Type="OgreTray/ScrollablePane" Name="PlayersPane">
         <Property Name="UnifiedPosition" Value="{{0,0},{0.2,0}}" />
-        <Property Name="UnifiedSize" Value="{{0.5,0},{0.5,0}}" />
+        <Property Name="UnifiedSize" Value="{{0.5,0},{0.4,0}}" />
         <Property Name="HorizontalAlignment" Value="Centre" />
         <Property Name="Visible" Value="True" />
         <Property Name="ContentArea" Value="l:0 t:0 r:0 b:0" />

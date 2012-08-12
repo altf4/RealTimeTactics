@@ -73,16 +73,12 @@ void MenuState::createScene()
 	CEGUI::PushButton *button = (CEGUI::PushButton*)pMainWnd->getChild("ExitButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
 			CEGUI::Event::Subscriber(&MenuState::onExitButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("EnterButton");
-	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::onEnterButton, this));
 	button = (CEGUI::PushButton*)pMainWnd->getChild("JoinCustomServerButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
 			CEGUI::Event::Subscriber(&MenuState::onCustomServerButton, this));
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Main Menu");
 
 	//Join Custom Server
-	//pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_JoinCustomServer");
 	CEGUI::FrameWindow *pCustomServerWnd =
 			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
 	pCustomServerWnd->setVisible(false);
@@ -123,9 +119,9 @@ void MenuState::createScene()
 	button = (CEGUI::PushButton*)pMainWnd->getChild("MatchBackButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
 			CEGUI::Event::Subscriber(&MenuState::onBackButton, this));
-
-
-
+	button = (CEGUI::PushButton*)pMainWnd->getChild("MatchStartButton");
+	button->subscribeEvent(CEGUI::PushButton::EventClicked,
+			CEGUI::Event::Subscriber(&MenuState::onMatchStartButton, this));
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Match Lobby");
 
 	//Server Lobby Menu
@@ -282,12 +278,6 @@ void MenuState::update(double timeSinceLastFrame)
 bool MenuState::onExitButton(const CEGUI::EventArgs &args)
 {
 	m_bQuit = true;
-	return true;
-}
-
-bool MenuState::onEnterButton(const CEGUI::EventArgs &args)
-{
-	changeAppState(findByName("GameState"));
 	return true;
 }
 
@@ -804,6 +794,37 @@ void MenuState::ListPlayers()
 	return;
 }
 
+bool MenuState::onMatchStartButton(const CEGUI::EventArgs &args)
+{
+	if(MatchStart())
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Match Start Event");
+		return true;
+	}
+	else
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("ERROR!! Match Start FAILED");
+		return false;
+	}
+	return true;
+}
+
+bool MenuState::MatchStart()
+{
+	if(RTT::StartMatch())
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Let the game BEGIN!  FIGHT!!");
+		changeAppState(findByName("GameState"));
+		return true;
+	}
+	else
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Failed to start match");
+		return false;
+	}
+	return true;
+}
+
 bool MenuState::onTeamChangeClick(const CEGUI::EventArgs& args)
 {
 	const CEGUI::WindowEventArgs teamChange = static_cast<const CEGUI::WindowEventArgs&>(args);
@@ -1049,6 +1070,7 @@ bool MenuState::createMatchSubmitButton(const CEGUI::EventArgs &args)
 	}
 	return true;
 }
+
 bool MenuState::onMatchNameActivate(const CEGUI::EventArgs &args)
 {
 	CEGUI::Window *pMainWnd =
@@ -1248,7 +1270,14 @@ void MenuState::PlayerJoinedEvent(struct RTT::CallbackChange change)
 }
 void MenuState::MatchStartedEvent(struct RTT::CallbackChange change)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Match Start Event");
+	if(MatchStart())
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Match Start Event");
+	}
+	else
+	{
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("ERROR!! Match Start Event FAILED");
+	}
 }
 void MenuState::CallbackClosedEvent(struct RTT::CallbackChange change)
 {

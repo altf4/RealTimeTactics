@@ -32,6 +32,7 @@ public:
 	void exit();
 	bool pause();
 	void resume();
+	bool MatchStart();
 
 	bool keyPressed(const OIS::KeyEvent &keyEventRef);
 	bool keyReleased(const OIS::KeyEvent &keyEventRef);
@@ -42,7 +43,6 @@ public:
 
 	bool onExitButton(const CEGUI::EventArgs &args);
 	bool onBackButton(const CEGUI::EventArgs &args);
-	bool onEnterButton(const CEGUI::EventArgs &args);
 
 	bool onCustomServerButton(const CEGUI::EventArgs &args);
 	bool onJoinServerButton(const CEGUI::EventArgs &args);
@@ -70,6 +70,8 @@ public:
 
 	bool onLeaderClick(const CEGUI::EventArgs &args);
 	bool onTeamChangeClick(const CEGUI::EventArgs &args);
+
+	bool onMatchStartButton(const CEGUI::EventArgs &args);
 
 	void listMatches();
 	void ListPlayers();
