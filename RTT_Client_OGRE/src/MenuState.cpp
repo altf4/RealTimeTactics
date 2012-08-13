@@ -602,6 +602,15 @@ void MenuState::ListPlayers()
 {
 	CEGUI::Window *mainWnd;
 	CEGUI::ScrollablePane *scrollpane;
+	CEGUI::String leaderString;
+	CEGUI::String nameString;
+	CEGUI::String teamString;
+
+	CEGUI::RadioButton *isLeader;
+
+	CEGUI::DefaultWindow *playerName;
+
+	CEGUI::Combobox *playerTeam;
 
 	try
 	{
@@ -635,19 +644,26 @@ void MenuState::ListPlayers()
 
 	for(uint i = 0; i < m_currentPlayers.size(); i++)
 	{
-		CEGUI::RadioButton *isLeader =
-				(CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().
-				createWindow("OgreTray/RadioButton","IsLeader" +
-				CEGUI::PropertyHelper::intToString((int)m_currentPlayers[i].m_ID));
+		leaderString = "IsLeader" + CEGUI::PropertyHelper::intToString((int)m_currentPlayers[i].m_ID);
+		nameString = m_currentPlayers[i].m_name;
+		teamString = "Team" + CEGUI::PropertyHelper::intToString((int)m_currentPlayers[i].m_ID);
 
-		CEGUI::DefaultWindow *playerName =
-				(CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().
-				createWindow("OgreTray/StaticText",m_currentPlayers[i].m_name);
+		if(CEGUI::WindowManager::getSingleton().isWindowPresent(leaderString))
+		{
+			CEGUI::WindowManager::getSingleton().destroyWindow(leaderString);
+		}
+		if(CEGUI::WindowManager::getSingleton().isWindowPresent(nameString))
+		{
+			CEGUI::WindowManager::getSingleton().destroyWindow(nameString);
+		}
+		if(CEGUI::WindowManager::getSingleton().isWindowPresent(teamString))
+		{
+			CEGUI::WindowManager::getSingleton().destroyWindow(teamString);
+		}
 
-		CEGUI::Combobox *playerTeam =
-				(CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().
-				createWindow("OgreTray/Combobox","Team" +
-				CEGUI::PropertyHelper::intToString((int)m_currentPlayers[i].m_ID));
+		isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/RadioButton",leaderString);
+		playerName =  (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/StaticText",nameString);
+		playerTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/Combobox",teamString);
 
 		m_isLeaderCheckBoxes.push_back(isLeader);
 		m_playerNameTextBoxes.push_back(playerName);
@@ -1270,14 +1286,8 @@ void MenuState::PlayerJoinedEvent(struct RTT::CallbackChange change)
 }
 void MenuState::MatchStartedEvent(struct RTT::CallbackChange change)
 {
-	if(MatchStart())
-	{
 		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Match Start Event");
-	}
-	else
-	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("ERROR!! Match Start Event FAILED");
-	}
+		changeAppState(findByName("GameState"));
 }
 void MenuState::CallbackClosedEvent(struct RTT::CallbackChange change)
 {
@@ -1309,6 +1319,11 @@ void MenuState::ProcessCallback(struct RTT::CallbackChange change)
 		case TEAM_CHANGE:
 		{
 			TeamChangedEvent(change);
+			break;
+		}
+		case MATCH_STARTED:
+		{
+			MatchStartedEvent(change);
 			break;
 		}
 		default:
