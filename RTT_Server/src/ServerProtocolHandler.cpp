@@ -584,6 +584,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				NotifyClients(playersMatch, &notification);
 			}
 
+			ret = IN_MATCH_LOBBY;
 			break;
 		}
 		case START_MATCH_REQUEST:
