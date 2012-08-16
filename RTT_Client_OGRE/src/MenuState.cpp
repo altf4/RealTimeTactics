@@ -1180,67 +1180,72 @@ void MenuState::TeamChangedEvent(struct RTT::CallbackChange change)
 {
 	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Team Change Event");
 
-	CEGUI::Combobox *playerTeam;
+
 	if(CEGUI::WindowManager::getSingleton().isWindowPresent("Team" + CEGUI::PropertyHelper::intToString((int)change.m_playerID)))
 	{
-		playerTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().getWindow("Team" + CEGUI::PropertyHelper::intToString((int)change.m_playerID));
-	}
-	CEGUI::ListboxTextItem *teamItem;
+		CEGUI::Combobox *playerTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().getWindow("Team" + CEGUI::PropertyHelper::intToString((int)change.m_playerID));
 
-	switch(change.m_team)
+		CEGUI::ListboxTextItem *teamItem;
+
+		switch(change.m_team)
+		{
+			case SPECTATOR:
+				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(0);
+				teamItem->setSelected(true);
+				playerTeam->setText(teamItem->getText());
+				break;
+			case TEAM_1:
+				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(1);
+				teamItem->setSelected(true);
+				playerTeam->setText(teamItem->getText());
+				break;
+			case TEAM_2:
+				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(2);
+				teamItem->setSelected(true);
+				playerTeam->setText(teamItem->getText());
+				break;
+			case TEAM_3:
+				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(3);
+				teamItem->setSelected(true);
+				playerTeam->setText(teamItem->getText());
+				break;
+			case TEAM_4:
+				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(4);
+				teamItem->setSelected(true);
+				playerTeam->setText(teamItem->getText());
+				break;
+			case TEAM_5:
+				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(5);
+				teamItem->setSelected(true);
+				playerTeam->setText(teamItem->getText());
+				break;
+			case TEAM_6:
+				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(6);
+				teamItem->setSelected(true);
+				playerTeam->setText(teamItem->getText());
+				break;
+			case TEAM_7:
+				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(7);
+				teamItem->setSelected(true);
+				playerTeam->setText(teamItem->getText());
+				break;
+			case TEAM_8:
+				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(8);
+				teamItem->setSelected(true);
+				playerTeam->setText(teamItem->getText());
+				break;
+			case REFEREE:
+				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(9);
+				teamItem->setSelected(true);
+				playerTeam->setText(teamItem->getText());
+				break;
+			default:
+				break;
+		}
+	}
+	else
 	{
-		case SPECTATOR:
-			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(0);
-			teamItem->setSelected(true);
-			playerTeam->setText(teamItem->getText());
-			break;
-		case TEAM_1:
-			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(1);
-			teamItem->setSelected(true);
-			playerTeam->setText(teamItem->getText());
-			break;
-		case TEAM_2:
-			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(2);
-			teamItem->setSelected(true);
-			playerTeam->setText(teamItem->getText());
-			break;
-		case TEAM_3:
-			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(3);
-			teamItem->setSelected(true);
-			playerTeam->setText(teamItem->getText());
-			break;
-		case TEAM_4:
-			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(4);
-			teamItem->setSelected(true);
-			playerTeam->setText(teamItem->getText());
-			break;
-		case TEAM_5:
-			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(5);
-			teamItem->setSelected(true);
-			playerTeam->setText(teamItem->getText());
-			break;
-		case TEAM_6:
-			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(6);
-			teamItem->setSelected(true);
-			playerTeam->setText(teamItem->getText());
-			break;
-		case TEAM_7:
-			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(7);
-			teamItem->setSelected(true);
-			playerTeam->setText(teamItem->getText());
-			break;
-		case TEAM_8:
-			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(8);
-			teamItem->setSelected(true);
-			playerTeam->setText(teamItem->getText());
-			break;
-		case REFEREE:
-			teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(9);
-			teamItem->setSelected(true);
-			playerTeam->setText(teamItem->getText());
-			break;
-		default:
-			break;
+		OgreFramework::getSingletonPtr()->m_pLog->logMessage("ERROR!! Player's team box not found!");
 	}
 }
 void MenuState::TeamColorChangedEvent(struct RTT::CallbackChange change)
