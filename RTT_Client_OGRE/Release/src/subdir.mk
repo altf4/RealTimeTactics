@@ -9,6 +9,7 @@ CPP_SRCS += \
 ../src/DemoApp.cpp \
 ../src/GameState.cpp \
 ../src/MenuState.cpp \
+../src/OgreGameEvents.cpp \
 ../src/RTT_Ogre_Map.cpp \
 ../src/RTT_Ogre_Player.cpp \
 ../src/RTT_Ogre_Unit.cpp \
@@ -20,6 +21,7 @@ OBJS += \
 ./src/DemoApp.o \
 ./src/GameState.o \
 ./src/MenuState.o \
+./src/OgreGameEvents.o \
 ./src/RTT_Ogre_Map.o \
 ./src/RTT_Ogre_Player.o \
 ./src/RTT_Ogre_Unit.o \
@@ -31,6 +33,7 @@ CPP_DEPS += \
 ./src/DemoApp.d \
 ./src/GameState.d \
 ./src/MenuState.d \
+./src/OgreGameEvents.d \
 ./src/RTT_Ogre_Map.d \
 ./src/RTT_Ogre_Player.d \
 ./src/RTT_Ogre_Unit.d \
