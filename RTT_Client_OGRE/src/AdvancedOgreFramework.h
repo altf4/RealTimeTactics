@@ -77,6 +77,8 @@ public:
 	CEGUI::OgreRenderer *m_pGUIRenderer;
 	CEGUI::System *m_pGUISystem;
 
+	CEGUI::String m_pGUIType;
+
 	RTT::CallbackHandler *m_callbackHandler;
 
 private:

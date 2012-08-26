@@ -28,7 +28,7 @@
 	<Window Type="OgreTray/Button" Name="ServerExitButton">
         <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
         <Property Name="UnifiedSize" Value="{{0.3,0},{0.05,0}}" />
-        <Property Name="Text" Value="Exit AdvancedOgreFramework" />
+        <Property Name="Text" Value="Exit Real Time Tactics" />
     </Window>
     
     <Window Type="OgreTray/MultiColumnList" Name="MatchesMCL">
@@ -144,7 +144,7 @@
 	<Window Type="OgreTray/Button" Name="MatchExitButton">
         <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
         <Property Name="UnifiedSize" Value="{{0.3,0},{0.05,0}}" />
-        <Property Name="Text" Value="Exit AdvancedOgreFramework" />
+        <Property Name="Text" Value="Exit Real Time Tactics" />
     </Window> 
     
     <Window Type="OgreTray/ScrollablePane" Name="PlayersPane">
@@ -181,7 +181,7 @@
 		<Window Type="OgreTray/Button" Name="ExitButton">
                 <Property Name="UnifiedPosition" Value="{{0.35,0},{0.7,0}}" />
                 <Property Name="UnifiedSize" Value="{{0.3,0},{0.1,0}}" />
-                <Property Name="Text" Value="Exit AdvancedOgreFramework" />
+                <Property Name="Text" Value="Exit Real Time Tactics" />
         </Window>
         
         <Window Type="OgreTray/FrameWindow" Name="RTT_CustomServerWindow">

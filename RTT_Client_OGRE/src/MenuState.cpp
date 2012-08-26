@@ -661,9 +661,9 @@ void MenuState::ListPlayers()
 			CEGUI::WindowManager::getSingleton().destroyWindow(teamString);
 		}
 
-		isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/RadioButton",leaderString);
-		playerName =  (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/StaticText",nameString);
-		playerTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().createWindow("OgreTray/Combobox",teamString);
+		isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().createWindow(OgreFramework::getSingletonPtr()->m_pGUIType + "/RadioButton",leaderString);
+		playerName =  (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().createWindow(OgreFramework::getSingletonPtr()->m_pGUIType +"/StaticText",nameString);
+		playerTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().createWindow(OgreFramework::getSingletonPtr()->m_pGUIType +"/Combobox",teamString);
 
 		m_isLeaderCheckBoxes.push_back(isLeader);
 		m_playerNameTextBoxes.push_back(playerName);
@@ -704,7 +704,7 @@ void MenuState::ListPlayers()
 			{
 				teamItem = new CEGUI::ListboxTextItem("Team " + CEGUI::PropertyHelper::intToString((int)j), j);
 			}
-			teamItem->setSelectionBrushImage("OgreTrayImages", "Select");
+			teamItem->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType + "Images", "Select");
 			playerTeam->addItem(teamItem);
 
 			//To select the correct team
@@ -944,7 +944,7 @@ void MenuState::listMatches()
 		multiColumnListMatch->addRow((int)descriptions[i].m_ID);
 		itemMultiColumnList = new CEGUI::ListboxTextItem(
 				CEGUI::PropertyHelper::intToString((int)descriptions[i].m_ID), i);
-		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+		itemMultiColumnList->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
 		multiColumnListMatch->setItem(itemMultiColumnList, 0, i);
 
 		CEGUI::String playerCount = CEGUI::PropertyHelper::intToString(
@@ -952,11 +952,11 @@ void MenuState::listMatches()
 				CEGUI::PropertyHelper::intToString((int)descriptions[i].m_maxPlayers);
 
 		itemMultiColumnList = new CEGUI::ListboxTextItem(playerCount, i);
-		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+		itemMultiColumnList->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
 		multiColumnListMatch->setItem(itemMultiColumnList, 1, i);
 
 		itemMultiColumnList = new CEGUI::ListboxTextItem(descriptions[i].m_name, i);
-		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+		itemMultiColumnList->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
 		multiColumnListMatch->setItem(itemMultiColumnList, 2, i);
 
 		boost::posix_time::ptime time = epoch +
@@ -964,7 +964,7 @@ void MenuState::listMatches()
 		std::string timeString = boost::posix_time::to_simple_string(time);
 
 		itemMultiColumnList = new CEGUI::ListboxTextItem(timeString.c_str(), i);
-		itemMultiColumnList->setSelectionBrushImage("OgreTrayImages", "Select");
+		itemMultiColumnList->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
 		multiColumnListMatch->setItem(itemMultiColumnList, 4, i);
 
 	}
@@ -990,14 +990,14 @@ bool MenuState::createMatchButton(const CEGUI::EventArgs &args)
 	mapCombobox->setReadOnly(true);
 	mapCombobox->resetList();
 	CEGUI::ListboxTextItem *itemCombobox = new CEGUI::ListboxTextItem("Cool Map", 1);
-	itemCombobox->setSelectionBrushImage("OgreTrayImages", "Select");
+	itemCombobox->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
 	mapCombobox->addItem(itemCombobox);
 	itemCombobox = new CEGUI::ListboxTextItem("Even Cooler Map", 2);
-	itemCombobox->setSelectionBrushImage("OgreTrayImages", "Select");
+	itemCombobox->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
 	itemCombobox->setSelected(true);
 	mapCombobox->addItem(itemCombobox);
 	itemCombobox = new CEGUI::ListboxTextItem("ZOMFG", 3);
-	itemCombobox->setSelectionBrushImage("OgreTrayImages", "Select");
+	itemCombobox->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
 	mapCombobox->addItem(itemCombobox);
 
 	CEGUI::Combobox *maxPlayersCombobox =
@@ -1015,7 +1015,7 @@ bool MenuState::createMatchButton(const CEGUI::EventArgs &args)
 		//i-min+1 so the first value is placed in the first item
 		itemCombobox = new CEGUI::ListboxTextItem(
 				Ogre::StringConverter::toString(i), (i-min+1) );
-		itemCombobox->setSelectionBrushImage("OgreTrayImages", "Select");
+		itemCombobox->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
 		maxPlayersCombobox->addItem(itemCombobox);
 	}
 
