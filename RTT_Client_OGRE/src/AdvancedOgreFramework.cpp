@@ -141,8 +141,13 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 
 	m_pRoot = new Ogre::Root(pluginsFilePath, ogrecfgFilePath, ogreLogFilePath);
 
-	if(!(m_pRoot->restoreConfig() || m_pRoot->showConfigDialog()))
-		return false;
+	if(!(m_pRoot->restoreConfig()))
+	{
+		if(!(m_pRoot->showConfigDialog()))
+		{
+			return false;
+		}
+	}
 
 	m_pRenderWnd = m_pRoot->initialise(true, wndTitle);
 
@@ -211,7 +216,9 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 	m_pGUIRenderer = &CEGUI::OgreRenderer::bootstrapSystem(*m_pRenderWnd);
 	m_pGUISystem = CEGUI::System::getSingletonPtr();
 
-	CEGUI::SchemeManager::getSingleton().create((CEGUI::utf8*)"OgreTray.scheme");
+	m_pGUIType = "OgreTray";
+
+	CEGUI::SchemeManager::getSingleton().create(m_pGUIType + ".scheme");
 	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"RTT_GUI.layout");
 
 	m_pDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
@@ -225,8 +232,8 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 
 	m_pRenderWnd->setActive(true);
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setDefaultMouseCursor((CEGUI::utf8*)"OgreTrayImages", (CEGUI::utf8*)"MouseArrow");
-	CEGUI::MouseCursor::getSingleton().setImage("OgreTrayImages", "MouseArrow");
+	OgreFramework::getSingletonPtr()->m_pGUISystem->setDefaultMouseCursor(m_pGUIType + "Images", (CEGUI::utf8*)"MouseArrow");
+	CEGUI::MouseCursor::getSingleton().setImage(m_pGUIType + "Images", "MouseArrow");
 	const OIS::MouseState state = m_pMouse->getMouseState();
 	CEGUI::Point mousePos = CEGUI::MouseCursor::getSingleton().getPosition();
 	CEGUI::System::getSingleton().injectMouseMove(state.X.abs-mousePos.d_x,state.Y.abs-mousePos.d_y);
@@ -243,7 +250,7 @@ bool OgreFramework::keyPressed(const OIS::KeyEvent &keyEventRef)
 {
 	if(m_pKeyboard->isKeyDown(OIS::KC_SYSRQ))
 	{
-		m_pRenderWnd->writeContentsToTimestampedFile("AOF_Screenshot_", ".jpg");
+		m_pRenderWnd->writeContentsToTimestampedFile("RTT_Screenshot_", ".jpg");
 		return true;
 	}
 

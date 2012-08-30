@@ -42,7 +42,7 @@ public:
 	virtual bool pause(){return true;}
 	virtual void resume(){};
 	virtual void update(double timeSinceLastFrame) = 0;
-	virtual void ProcessCallback(struct RTT::CallbackChange) = 0;
+	virtual void ProcessCallback(RTT::CallbackChange *) = 0;
 
 protected:
 	AppState(){};
