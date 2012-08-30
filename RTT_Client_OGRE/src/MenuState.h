@@ -10,6 +10,7 @@
 #define MENU_STATE_H
 
 #include "AppState.h"
+#include "callback/MainLobbyCallbackChange.h"
 
 enum GUIState
 {
@@ -95,7 +96,7 @@ public:
 
 	void update(double timeSinceLastFrame);
 
-	void ProcessCallback(struct RTT::CallbackChange);
+	void ProcessCallback(RTT::CallbackChange *);
 
 private:
 	bool m_bQuit;
@@ -104,18 +105,18 @@ private:
 	GUIState mLocation;
 
 protected:
-	void TeamChangedEvent(struct RTT::CallbackChange change);
-	void TeamColorChangedEvent(struct RTT::CallbackChange change);
-	void MapChangedEvent(struct RTT::CallbackChange change);
-	void GamespeedChangedEvent(struct RTT::CallbackChange change);
-	void VictoryConditionChangedEvent(struct RTT::CallbackChange change);
-	void PlayerLeftEvent(struct RTT::CallbackChange change);
-	void KickedFromMatchEvent(struct RTT::CallbackChange change);
-	void PlayerJoinedEvent(struct RTT::CallbackChange change);
-	void MatchStartedEvent(struct RTT::CallbackChange change);
-	void CallbackClosedEvent(struct RTT::CallbackChange change);
-	void CallbackErrorEvent(struct RTT::CallbackChange change);
-	void LeaderChangedEvent(struct RTT::CallbackChange change);
+	void TeamChangedEvent(RTT::MainLobbyCallbackChange *change);
+	void TeamColorChangedEvent(RTT::MainLobbyCallbackChange *change);
+	void MapChangedEvent(RTT::MainLobbyCallbackChange *change);
+	void GamespeedChangedEvent(RTT::MainLobbyCallbackChange *change);
+	void VictoryConditionChangedEvent(RTT::MainLobbyCallbackChange *change);
+	void PlayerLeftEvent(RTT::MainLobbyCallbackChange *change);
+	void KickedFromMatchEvent(RTT::MainLobbyCallbackChange *change);
+	void PlayerJoinedEvent(RTT::MainLobbyCallbackChange *change);
+	void MatchStartedEvent(RTT::MainLobbyCallbackChange *change);
+	void CallbackClosedEvent(RTT::MainLobbyCallbackChange *change);
+	void CallbackErrorEvent(RTT::MainLobbyCallbackChange *change);
+	void LeaderChangedEvent(RTT::MainLobbyCallbackChange *change);
 
 	void enableLeader(bool value);
 

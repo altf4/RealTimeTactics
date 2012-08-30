@@ -37,7 +37,7 @@
 #include "boost/date_time/posix_time/posix_time.hpp"
 #include <openssl/sha.h>
 #include "Player.h"
-#include "CallbackHandler.h"
+#include "callback/CallbackHandler.h"
 
 #define RESOURCES_CFG_FILENAME "resources.cfg"
 #define PLUGINS_CFG_FILENAME "plugins.cfg"

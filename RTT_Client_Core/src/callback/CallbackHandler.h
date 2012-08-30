@@ -11,7 +11,9 @@
 #include <queue>
 #include "pthread.h"
 
-#include "ClientProtocolHandler.h"
+#include "../ClientProtocolHandler.h"
+#include "CallbackChange.h"
+
 
 namespace RTT
 {
@@ -26,19 +28,19 @@ public:
 	bool Start();
 	void Stop();
 
-	struct CallbackChange PopCallbackChange();
+	CallbackChange *PopCallbackChange();
 
 private:
 
 	void *CallbackThread();
-	void PushCallbackChange(struct CallbackChange change);
+	void PushCallbackChange(CallbackChange *change);
 
 	static void *StartThreadHelper(void *ptr);
 
 	pthread_t m_thread;
 
 	pthread_mutex_t m_queueMutex;
-	std::queue<struct CallbackChange> m_changeQueue;
+	std::queue<CallbackChange*> m_changeQueue;
 };
 
 }
