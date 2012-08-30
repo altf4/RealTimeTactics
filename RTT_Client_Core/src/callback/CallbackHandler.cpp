@@ -40,24 +40,22 @@ void CallbackHandler::Stop()
 	pthread_join(m_thread, NULL);
 }
 
-struct CallbackChange CallbackHandler::PopCallbackChange()
+CallbackChange* CallbackHandler::PopCallbackChange()
 {
 	Lock lock (&m_queueMutex);
 	if(m_changeQueue.empty())
 	{
-		struct CallbackChange temp;
-		temp.m_type = NO_CALLBACK;
-		return temp;
+		return new CallbackChange(NO_CALLBACK);
 	}
 	else
 	{
-		struct CallbackChange temp = m_changeQueue.front();
+		CallbackChange *temp = m_changeQueue.front();
 		m_changeQueue.pop();
 		return temp;
 	}
 }
 
-void CallbackHandler::PushCallbackChange(struct CallbackChange change)
+void CallbackHandler::PushCallbackChange(CallbackChange *change)
 {
 	Lock lock(&m_queueMutex);
 	m_changeQueue.push(change);
@@ -68,8 +66,8 @@ void *CallbackHandler::CallbackThread()
 	bool keepGoing = true;
 	while(keepGoing)
 	{
-		struct CallbackChange change = ProcessCallbackCommand();
-		if(change.m_type == CALLBACK_CLOSED)
+		CallbackChange *change = ProcessCallbackCommand();
+		if(change->m_type == CALLBACK_CLOSED)
 		{
 			keepGoing = false;
 		}

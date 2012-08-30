@@ -67,7 +67,7 @@ public:
 
 	void buildUnits();
 
-	void ProcessCallback(struct RTT::CallbackChange);
+	void ProcessCallback(RTT::CallbackChange *);
 
 	private:
 	Ogre::SceneNode *m_pOgreHeadNode;

@@ -97,13 +97,14 @@ void AppStateManager::start(AppState *state)
 			//Not an infinite loop. Breaks inside when NO_CALLBACK is found
 			while(true)
 			{
-				struct CallbackChange change = OgreFramework::getSingletonPtr()->
-						m_callbackHandler->PopCallbackChange();
-				if(change.m_type == NO_CALLBACK)
+				CallbackChange *change = OgreFramework::getSingletonPtr()->m_callbackHandler->PopCallbackChange();
+				if(change->m_type == NO_CALLBACK)
 				{
+					delete change;
 					break;
 				}
 				m_ActiveStateStack.back()->ProcessCallback(change);
+				delete change;
 			}
 		}
 		else

@@ -50,25 +50,23 @@ void CallbackHandler::Stop()
 	m_thread = NULL;
 }
 
-struct CallbackChange CallbackHandler::PopCallbackChange()
+CallbackChange *CallbackHandler::PopCallbackChange()
 {
 	Glib::Mutex::Lock lock (m_queueMutex);
 	if(m_changeQueue.empty())
 	{
 		cerr << "ERROR: Callback change queue underflow!" << endl;
-		struct CallbackChange temp;
-		temp.m_type = CALLBACK_ERROR;
-		return temp;
+		return new CallbackChange(CALLBACK_ERROR);
 	}
 	else
 	{
-		struct CallbackChange temp = m_changeQueue.front();
+		MainLobbyCallbackChange *temp = m_changeQueue.front();
 		m_changeQueue.pop();
 		return temp;
 	}
 }
 
-void CallbackHandler::PushCallbackChange(struct CallbackChange change)
+void CallbackHandler::PushCallbackChange(MainLobbyCallbackChange *change)
 {
 	Glib::Mutex::Lock lock (m_queueMutex);
 	m_changeQueue.push(change);
@@ -78,9 +76,34 @@ void CallbackHandler::CallbackThread()
 {
 	while(true)
 	{
-		struct CallbackChange change = ProcessCallbackCommand();
-		PushCallbackChange(change);
-		switch( change.m_type )
+		CallbackChange *change = ProcessCallbackCommand();
+
+		//Check to see that it's not a game callback, since the gtk client can't run in game state
+		if(change->m_type == CHANGE_GAME)
+		{
+			cerr << "ERROR: Received game callback in Gtk client. Cannot run in game state" << endl;
+			delete change;
+			continue;
+		}
+		if(change->m_type == CALLBACK_CLOSED)
+		{
+			m_sig_callback_closed();
+			delete change;
+			continue;
+		}
+		if(change->m_type == CALLBACK_ERROR)
+		{
+			m_sig_callback_error();
+			delete change;
+			continue;
+		}
+
+		MainLobbyCallbackChange *lobbyChange = (MainLobbyCallbackChange*)change;
+
+		PushCallbackChange(lobbyChange);
+
+
+		switch( lobbyChange->m_mainLobbyType )
 		{
 			case TEAM_CHANGE:
 			{
@@ -138,16 +161,6 @@ void CallbackHandler::CallbackThread()
 				}
 
 				break;
-			}
-			case CALLBACK_CLOSED:
-			{
-				m_sig_callback_closed();
-				return;
-			}
-			case CALLBACK_ERROR:
-			{
-				m_sig_callback_error();
-				return;
 			}
 			default:
 			{

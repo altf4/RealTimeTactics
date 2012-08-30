@@ -9,6 +9,7 @@
 #define CALLBACKHANDLER_H_
 
 #include "ClientProtocolHandler.h"
+#include "callback/MainLobbyCallbackChange.h"
 
 #include "gtkmm.h"
 #include <queue>
@@ -26,7 +27,7 @@ public:
 	bool Start();
 	void Stop();
 
-	struct CallbackChange PopCallbackChange();
+	CallbackChange *PopCallbackChange();
 
 	Glib::Dispatcher m_sig_team_change;
 	Glib::Dispatcher m_sig_color_change;
@@ -44,12 +45,12 @@ public:
 private:
 
 	void CallbackThread();
-	void PushCallbackChange(struct CallbackChange change);
+	void PushCallbackChange(MainLobbyCallbackChange *change);
 
 	Glib::Thread *m_thread;
 
 	Glib::Mutex m_queueMutex;
-	std::queue<struct CallbackChange> m_changeQueue;
+	std::queue<MainLobbyCallbackChange*> m_changeQueue;
 };
 
 }

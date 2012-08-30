@@ -47,12 +47,14 @@ WelcomeWindow::~WelcomeWindow()
 
 void WelcomeWindow::TeamChangedEvent()
 {
-	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
-	if(change.m_type == CALLBACK_ERROR)
+	CallbackChange *change = m_callbackHandler->PopCallbackChange();
+	if(change->m_type == CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;
 	}
+	MainLobbyCallbackChange *lobbyChange = (MainLobbyCallbackChange*)change;
+
 	PlayerListColumns playerColumns;
 	TeamComboColumns teamColumns;
 
@@ -67,10 +69,10 @@ void WelcomeWindow::TeamChangedEvent()
 		}
 		TreeModel::Row playerRow=*rowIter;
 		int ID = playerRow[playerColumns.m_ID];
-		if( ID == (int)change.m_playerID )
+		if( ID == (int)lobbyChange->m_playerID )
 		{
 			playerRow[playerColumns.m_teamName] =
-					Team::TeamNumberToString((enum TeamNumber)change.m_team);
+					Team::TeamNumberToString((enum TeamNumber)lobbyChange->m_team);
 
 //						//Get set the new team number back into the combobox's data
 //						TreeValueProxy<Glib::RefPtr<TreeModel> > teamNumberListStore =
@@ -90,8 +92,8 @@ void WelcomeWindow::TeamChangedEvent()
 
 void WelcomeWindow::TeamColorChangedEvent()
 {
-	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
-	if(change.m_type == CALLBACK_ERROR)
+	CallbackChange *change = m_callbackHandler->PopCallbackChange();
+	if(change->m_type == CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;
@@ -101,50 +103,54 @@ void WelcomeWindow::TeamColorChangedEvent()
 
 void WelcomeWindow::MapChangedEvent()
 {
-	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
-	if(change.m_type == CALLBACK_ERROR)
+	CallbackChange *change = m_callbackHandler->PopCallbackChange();
+	if(change->m_type == CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;
 	}
+	MainLobbyCallbackChange *lobbyChange = (MainLobbyCallbackChange*)change;
 	stringstream ss;
-	ss << change.m_mapDescription.m_width;
+	ss << lobbyChange->m_mapDescription.m_width;
 	ss << " x ";
-	ss << change.m_mapDescription.m_length;
+	ss << lobbyChange->m_mapDescription.m_length;
 	m_map_size_label->set_text(ss.str());
 }
 
 void WelcomeWindow::GamespeedChangedEvent()
 {
-	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
-	if(change.m_type == CALLBACK_ERROR)
+	CallbackChange *change = m_callbackHandler->PopCallbackChange();
+	if(change->m_type == CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;
 	}
-	m_speed_label->set_text(Match::GameSpeedToString(change.m_speed));
+	MainLobbyCallbackChange *lobbyChange = (MainLobbyCallbackChange*)change;
+	m_speed_label->set_text(Match::GameSpeedToString(lobbyChange->m_speed));
 }
 
 void WelcomeWindow::VictoryConditionChangedEvent()
 {
-	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
-	if(change.m_type == CALLBACK_ERROR)
+	CallbackChange *change = m_callbackHandler->PopCallbackChange();
+	if(change->m_type == CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;
 	}
+	MainLobbyCallbackChange *lobbyChange = (MainLobbyCallbackChange*)change;
 	m_victory_cond_label->set_text(
-			Match::VictoryConditionToString(change.m_victory));
+			Match::VictoryConditionToString(lobbyChange->m_victory));
 }
 
 void WelcomeWindow::PlayerLeftEvent()
 {
-	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
-	if(change.m_type == CALLBACK_ERROR)
+	CallbackChange *change = m_callbackHandler->PopCallbackChange();
+	if(change->m_type == CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;
 	}
+	MainLobbyCallbackChange *lobbyChange = (MainLobbyCallbackChange*)change;
 	TreeModel::Children rows = m_playerListStore->children();
 	TreeModel::iterator rowIter;
 	for(rowIter=rows.begin(); rowIter!=rows.end(); rowIter++)
@@ -156,7 +162,7 @@ void WelcomeWindow::PlayerLeftEvent()
 		}
 		TreeModel::Row row=*rowIter;
 		uint ID = row[m_playerColumns->m_ID];
-		if( ID == change.m_playerID)
+		if(ID == lobbyChange->m_playerID)
 		{
 			m_playerListStore->erase(rowIter);
 		}
@@ -165,7 +171,7 @@ void WelcomeWindow::PlayerLeftEvent()
 	{
 		TreeModel::Row row=*rowIter;
 		uint ID = row[m_playerColumns->m_ID];
-		if( ID == change.m_newLeaderID )
+		if(ID == lobbyChange->m_newLeaderID )
 		{
 			row[m_playerColumns->m_isLeader] = true;
 		}
@@ -173,7 +179,7 @@ void WelcomeWindow::PlayerLeftEvent()
 		{
 			row[m_playerColumns->m_isLeader] = false;
 		}
-		if(m_playerDescription.m_ID == change.m_newLeaderID)
+		if(m_playerDescription.m_ID == lobbyChange->m_newLeaderID)
 		{
 			row[m_playerColumns->m_leaderSelectable] = true;
 			swap_leader_widgets(true);
@@ -184,14 +190,14 @@ void WelcomeWindow::PlayerLeftEvent()
 			swap_leader_widgets(false);
 		}
 	}
-	m_currentMatch.m_leaderID = change.m_newLeaderID;
+	m_currentMatch.m_leaderID = lobbyChange->m_newLeaderID;
 	m_player_list_view->show_all();
 }
 
 void WelcomeWindow::KickedFromMatchEvent()
 {
-	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
-	if(change.m_type == CALLBACK_ERROR)
+	CallbackChange *change = m_callbackHandler->PopCallbackChange();
+	if(change->m_type == CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;
@@ -201,23 +207,24 @@ void WelcomeWindow::KickedFromMatchEvent()
 
 void WelcomeWindow::PlayerJoinedEvent()
 {
-	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
-	if(change.m_type == CALLBACK_ERROR)
+	CallbackChange *change = m_callbackHandler->PopCallbackChange();
+	if(change->m_type == CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;
 	}
-	if(m_playerDescription.m_ID !=	change.m_playerDescription.m_ID)
+	MainLobbyCallbackChange *lobbyChange = (MainLobbyCallbackChange*)change;
+	if(m_playerDescription.m_ID !=	lobbyChange->m_playerDescription.m_ID)
 	{
 		PlayerListColumns playerColumns;
 
 		//Add a new row for the new player
 		TreeModel::Row row = *(m_playerListStore->append());
-		row[playerColumns.m_name] = change.m_playerDescription.m_name;
+		row[playerColumns.m_name] = lobbyChange->m_playerDescription.m_name;
 		row[playerColumns.m_teamChosen] =	PopulateTeamNumberCombo();
 		row[playerColumns.m_teamName] = Team::TeamNumberToString(
-				(enum TeamNumber)change.m_playerDescription.m_team);
-		row[playerColumns.m_ID] = change.m_playerDescription.m_ID;
+				(enum TeamNumber)lobbyChange->m_playerDescription.m_team);
+		row[playerColumns.m_ID] = lobbyChange->m_playerDescription.m_ID;
 		row[playerColumns.m_isLeader] = false;
 		if(m_playerDescription.m_ID == m_currentMatch.m_leaderID)
 		{
@@ -233,15 +240,16 @@ void WelcomeWindow::PlayerJoinedEvent()
 
 void WelcomeWindow::LeaderChangedEvent()
 {
-	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
-	if(change.m_type == CALLBACK_ERROR)
+	CallbackChange *change = m_callbackHandler->PopCallbackChange();
+	if(change->m_type == CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;
 	}
+	MainLobbyCallbackChange *lobbyChange = (MainLobbyCallbackChange*)change;
 	PlayerListColumns playerColumns;
 
-	m_currentMatch.m_leaderID = change.m_playerID;
+	m_currentMatch.m_leaderID = lobbyChange->m_playerID;
 
 	TreeModel::Children rows = m_playerListStore->children();
 	TreeModel::iterator rowIter;
@@ -254,7 +262,7 @@ void WelcomeWindow::LeaderChangedEvent()
 		}
 		TreeModel::Row row = *rowIter;
 		uint ID = row[playerColumns.m_ID];
-		if( ID == change.m_playerID)
+		if( ID == lobbyChange->m_playerID)
 		{
 			row[playerColumns.m_isLeader] = true;
 		}
@@ -262,7 +270,7 @@ void WelcomeWindow::LeaderChangedEvent()
 		{
 			row[playerColumns.m_isLeader] = false;
 		}
-		if(m_playerDescription.m_ID == change.m_playerID)
+		if(m_playerDescription.m_ID == lobbyChange->m_playerID)
 		{
 			row[playerColumns.m_leaderSelectable] = true;
 			//Swap out the game speed combo box and label
@@ -280,8 +288,8 @@ void WelcomeWindow::LeaderChangedEvent()
 
 void WelcomeWindow::MatchStartedEvent()
 {
-	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
-	if(change.m_type == CALLBACK_ERROR)
+	CallbackChange *change = m_callbackHandler->PopCallbackChange();
+	if(change->m_type == CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;
@@ -291,8 +299,8 @@ void WelcomeWindow::MatchStartedEvent()
 
 void WelcomeWindow::CallbackClosedEvent()
 {
-	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
-	if(change.m_type == CALLBACK_ERROR)
+	CallbackChange *change = m_callbackHandler->PopCallbackChange();
+	if(change->m_type == CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;
@@ -301,8 +309,8 @@ void WelcomeWindow::CallbackClosedEvent()
 
 void WelcomeWindow::CallbackErrorEvent()
 {
-	struct CallbackChange change = m_callbackHandler->PopCallbackChange();
-	if(change.m_type == CALLBACK_ERROR)
+	CallbackChange *change = m_callbackHandler->PopCallbackChange();
+	if(change->m_type == CALLBACK_ERROR)
 	{
 		cerr << "ERROR: Got an error in callback processing" << endl;
 		return;

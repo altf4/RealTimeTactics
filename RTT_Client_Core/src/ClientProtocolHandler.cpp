@@ -9,6 +9,7 @@
 #include "messaging/messages/AuthMessage.h"
 #include "messaging/messages/MatchLobbyMessage.h"
 #include "messaging/MessageManager.h"
+#include "callback/MainLobbyCallbackChange.h"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -814,16 +815,11 @@ bool RTT::StartMatch()
 //Process a Callback command from the server
 //	These are notifications sent by the server that an event has occurred
 //	We listen for these messages on a different socket than
-struct CallbackChange RTT::ProcessCallbackCommand()
+CallbackChange *RTT::ProcessCallbackCommand()
 {
-
-	struct CallbackChange change;
-	change.m_type = CALLBACK_ERROR;
-
 	if(!MessageManager::Instance().RegisterCallback(socketFD))
 	{
-		change.m_type = CALLBACK_CLOSED;
-		return change;
+		return new CallbackChange(CALLBACK_CLOSED);
 	}
 
 	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_CLIENT);
@@ -831,7 +827,7 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
-		return change;
+		return new CallbackChange(CALLBACK_ERROR);
 	}
 	MatchLobbyMessage *match_message = (MatchLobbyMessage*)message;
 
@@ -840,9 +836,9 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 		case TEAM_CHANGED_NOTIFICATION:
 		{
 			//Get what we need from the message
-			change.m_type = TEAM_CHANGE;
-			change.m_playerID = match_message->m_playerID;
-			change.m_team = match_message->m_newTeam;
+			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(TEAM_CHANGE);
+			change->m_playerID = match_message->m_playerID;
+			change->m_team = match_message->m_newTeam;
 
 			//***********************************
 			// Send Team Changed Ack
@@ -852,14 +848,16 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			{
 				//Error in write
 				delete match_message;
-				return change;
+				delete change;
+				return new CallbackChange(CALLBACK_ERROR);
 			}
-			break;
+			delete match_message;
+			return change;
 		}
 		case KICKED_FROM_MATCH_NOTIFICATION:
 		{
 			//Get what we need from the message
-			change.m_type = KICKED;
+			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(KICKED);
 
 			//***********************************
 			// Send Kicked From Match Ack
@@ -869,17 +867,19 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			{
 				//Error in write
 				delete match_message;
-				return change;
+				delete change;
+				return new CallbackChange(CALLBACK_ERROR);
 			}
 
-			break;
+			delete match_message;
+			return change;
 		}
 		case PLAYER_LEFT_MATCH_NOTIFICATION:
 		{
 			//Get what we need from the message
-			change.m_type = PLAYER_LEFT;
-			change.m_playerID = match_message->m_playerID;
-			change.m_newLeaderID = match_message->m_newLeaderID;
+			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(PLAYER_LEFT);
+			change->m_playerID = match_message->m_playerID;
+			change->m_newLeaderID = match_message->m_newLeaderID;
 
 			//***********************************
 			// Send Player Left Ack
@@ -889,15 +889,17 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			{
 				//Error in write
 				delete match_message;
-				return change;
+				delete change;
+				return new CallbackChange(CALLBACK_ERROR);
 			}
-			break;
+			delete match_message;
+			return change;
 		}
 		case PLAYER_JOINED_MATCH_NOTIFICATION:
 		{
 			//Get what we need from the message
-			change.m_type = PLAYER_JOINED;
-			change.m_playerDescription = match_message->m_playerDescription;
+			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(PLAYER_JOINED);
+			change->m_playerDescription = match_message->m_playerDescription;
 
 			//***********************************
 			// Send Player Joined Ack
@@ -907,16 +909,18 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			{
 				//Error in write
 				delete match_message;
-				return change;
+				delete change;
+				return new CallbackChange(CALLBACK_ERROR);
 			}
-			break;
+			delete match_message;
+			return change;
 		}
 		case COLOR_CHANGED_NOTIFICATION:
 		{
 			//Get what we need from the message
-			change.m_type = COLOR_CHANGE;
-			change.m_playerID = match_message->m_playerID;
-			change.m_color = match_message->m_newColor;
+			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(COLOR_CHANGE);
+			change->m_playerID = match_message->m_playerID;
+			change->m_color = match_message->m_newColor;
 
 			//***********************************
 			// Send Color Changed Ack
@@ -926,15 +930,17 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			{
 				//Error in write
 				delete match_message;
-				return change;
+				delete change;
+				return new CallbackChange(CALLBACK_ERROR);
 			}
-			break;
+			delete match_message;
+			return change;
 		}
 		case MAP_CHANGED_NOTIFICATION:
 		{
 			//Get what we need from the message
-			change.m_type = MAP_CHANGE;
-			change.m_mapDescription = match_message->m_mapDescription;
+			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(MAP_CHANGE);
+			change->m_mapDescription = match_message->m_mapDescription;
 
 			//***********************************
 			// Send Map Changed Ack
@@ -944,15 +950,17 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			{
 				//Error in write
 				delete match_message;
-				return change;
+				delete change;
+				return new CallbackChange(CALLBACK_ERROR);
 			}
-			break;
+			delete match_message;
+			return change;
 		}
 		case GAME_SPEED_CHANGED_NOTIFICATION:
 		{
 			//Get what we need from the message
-			change.m_type = SPEED_CHANGE;
-			change.m_speed = match_message->m_newSpeed;
+			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(SPEED_CHANGE);
+			change->m_speed = match_message->m_newSpeed;
 
 			//***********************************
 			// Send Game Speed Changed Ack
@@ -962,15 +970,17 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			{
 				//Error in write
 				delete match_message;
-				return change;
+				delete change;
+				return new CallbackChange(CALLBACK_ERROR);
 			}
-			break;
+			delete match_message;
+			return change;
 		}
 		case VICTORY_COND_CHANGED_NOTIFICATION:
 		{
 			//Get what we need from the message
-			change.m_type = VICTORY_CHANGE;
-			change.m_victory = match_message->m_newVictCond;
+			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(VICTORY_CHANGE);
+			change->m_victory = match_message->m_newVictCond;
 
 			//***********************************
 			// Send Victory Condition Changed Ack
@@ -980,15 +990,17 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			{
 				//Error in write
 				delete match_message;
-				return change;
+				delete change;
+				return new CallbackChange(CALLBACK_ERROR);
 			}
-			break;
+			delete match_message;
+			return change;
 		}
 		case CHANGE_LEADER_NOTIFICATION:
 		{
 			//Get what we need from the message
-			change.m_type = LEADER_CHANGE;
-			change.m_playerID = match_message->m_playerID;
+			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(LEADER_CHANGE);
+			change->m_playerID = match_message->m_playerID;
 
 			//***********************************
 			// Send Victory Condition Changed Ack
@@ -998,16 +1010,18 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			{
 				//Error in write
 				delete match_message;
-				return change;
+				delete change;
+				return new CallbackChange(CALLBACK_ERROR);
 			}
-			break;
+			delete match_message;
+			return change;
 		}
 		case MATCH_START_NOTIFICATION:
 		{
 			//TODO: Must accept first
 
 			//Get what we need from the message
-			change.m_type = MATCH_STARTED;
+			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(MATCH_STARTED);
 
 			//***********************************
 			// Send Match Started Ack
@@ -1018,19 +1032,21 @@ struct CallbackChange RTT::ProcessCallbackCommand()
 			{
 				//Error in write
 				delete match_message;
-				return change;
+				delete change;
+				return new CallbackChange(CALLBACK_ERROR);
 			}
-			break;
+			delete match_message;
+			return change;
 		}
 		default:
 		{
 			cerr << "ERROR: Received a bad message on the callback socket\n";
 			SendError(socketFD, AUTHENTICATION_ERROR, DIRECTION_TO_CLIENT);
-			break;
+			return new CallbackChange(CALLBACK_ERROR);
 		}
 	}
 	delete match_message;
-	return change;
+	return new CallbackChange(CALLBACK_ERROR);
 }
 
 

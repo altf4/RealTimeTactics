@@ -21,59 +21,10 @@
 #include "Map.h"
 #include "messaging/messages/LobbyMessage.h"
 #include "messaging/messages/ErrorMessage.h"
+#include "callback/CallbackChange.h"
 
 namespace RTT
 {
-
-enum CallbackType
-{
-	TEAM_CHANGE,
-	COLOR_CHANGE,
-	MAP_CHANGE,
-	SPEED_CHANGE,
-	VICTORY_CHANGE,
-	PLAYER_LEFT,
-	KICKED,
-	PLAYER_JOINED,
-	LEADER_CHANGE,
-	MATCH_STARTED,
-	CALLBACK_CLOSED,
-	CALLBACK_ERROR,
-	NO_CALLBACK,
-};
-struct CallbackChange
-{
-	//Type, which one of the following is used:
-	enum CallbackType m_type;
-
-	//Which of the following is used?
-
-	uint m_playerID; //several
-
-	//TEAM_CHANGE
-	enum TeamNumber m_team;
-
-	//COLOR_CHANGE
-	enum TeamColor m_color;
-
-	//MAP_CHANGE
-	struct MapDescription m_mapDescription;
-
-	//SPEED_CHANGE
-	enum GameSpeed m_speed;
-
-	//VICTORY_CHANGE
-	enum VictoryCondition m_victory;
-
-	//PLAYER_LEFT
-	uint m_newLeaderID;
-
-	//KICKED (nothing)
-
-	//PLAYER_JOINED
-	struct PlayerDescription m_playerDescription;
-
-};
 
 //********************************************
 //				Authentication Commands
@@ -179,7 +130,7 @@ bool StartMatch();
 //Process a Callback command from the server
 //	These are notifications sent by the server that an event has occurred
 //	We listen for these messages on a different socket than
-struct CallbackChange ProcessCallbackCommand();
+CallbackChange *ProcessCallbackCommand();
 
 
 //********************************************
