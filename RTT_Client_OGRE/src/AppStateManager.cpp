@@ -14,35 +14,35 @@ using namespace RTT;
 
 AppStateManager::AppStateManager()
 {
-	m_bShutdown = false;
+	m_isShutdown = false;
 }
 
 AppStateManager::~AppStateManager()
 {
 	state_info si;
 
-	while(!m_ActiveStateStack.empty())
+	while(!m_activeStateStack.empty())
 	{
-		m_ActiveStateStack.back()->exit();
-		m_ActiveStateStack.pop_back();
+		m_activeStateStack.back()->Exit();
+		m_activeStateStack.pop_back();
 	}
 
-	while(!m_States.empty())
+	while(!m_states.empty())
 	{
-		si = m_States.back();
-		si.m_state->destroy();
-		m_States.pop_back();
+		si = m_states.back();
+		si.m_state->Destroy();
+		m_states.pop_back();
 	}
 }
 
-void AppStateManager::manageAppState(Ogre::String stateName, AppState *state)
+void AppStateManager::ManageAppState(Ogre::String stateName, AppState *state)
 {
 	try
 	{
 		state_info new_state_info;
 		new_state_info.m_name = stateName;
 		new_state_info.m_state = state;
-		m_States.push_back(new_state_info);
+		m_states.push_back(new_state_info);
 	}
 	catch(std::exception& e)
 	{
@@ -53,11 +53,11 @@ void AppStateManager::manageAppState(Ogre::String stateName, AppState *state)
 	}
 }
 
-AppState* AppStateManager::findByName(Ogre::String stateName)
+AppState* AppStateManager::FindByName(Ogre::String stateName)
 {
 	std::vector<state_info>::iterator itr;
 
-	for(itr=m_States.begin(); itr!=m_States.end(); itr++)
+	for(itr=m_states.begin(); itr!=m_states.end(); itr++)
 	{
 		if(itr->m_name == stateName)
 			return itr->m_state;
@@ -66,33 +66,33 @@ AppState* AppStateManager::findByName(Ogre::String stateName)
 	return 0;
 }
 
-void AppStateManager::start(AppState *state)
+void AppStateManager::Start(AppState *state)
 {
-	changeAppState(state);
+	ChangeAppState(state);
 
 	int timeSinceLastFrame = 1;
 	int startTime = 0;
 
-	while(!m_bShutdown)
+	while(!m_isShutdown)
 	{
-		if(OgreFramework::getSingletonPtr()->m_pRenderWnd->isClosed())m_bShutdown = true;
+		if(OgreFramework::getSingletonPtr()->m_renderWnd->isClosed())m_isShutdown = true;
 
 		Ogre::WindowEventUtilities::messagePump();
 
-		if(OgreFramework::getSingletonPtr()->m_pRenderWnd->isActive())
+		if(OgreFramework::getSingletonPtr()->m_renderWnd->isActive())
 		{
-			startTime = OgreFramework::getSingletonPtr()->m_pTimer->getMillisecondsCPU();
+			startTime = OgreFramework::getSingletonPtr()->m_timer->getMillisecondsCPU();
 
-			OgreFramework::getSingletonPtr()->m_pKeyboard->capture();
-			OgreFramework::getSingletonPtr()->m_pMouse->capture();
+			OgreFramework::getSingletonPtr()->m_keyboard->capture();
+			OgreFramework::getSingletonPtr()->m_mouse->capture();
 
-			m_ActiveStateStack.back()->update(timeSinceLastFrame);
+			m_activeStateStack.back()->Update(timeSinceLastFrame);
 
-			OgreFramework::getSingletonPtr()->updateOgre(timeSinceLastFrame);
-			OgreFramework::getSingletonPtr()->m_pRoot->renderOneFrame();
+			OgreFramework::getSingletonPtr()->UpdateOgre(timeSinceLastFrame);
+			OgreFramework::getSingletonPtr()->m_root->renderOneFrame();
 
 			timeSinceLastFrame = OgreFramework::getSingletonPtr()->
-					m_pTimer->getMillisecondsCPU() - startTime;
+					m_timer->getMillisecondsCPU() - startTime;
 
 			//Not an infinite loop. Breaks inside when NO_CALLBACK is found
 			while(true)
@@ -103,7 +103,7 @@ void AppStateManager::start(AppState *state)
 					delete change;
 					break;
 				}
-				m_ActiveStateStack.back()->ProcessCallback(change);
+				m_activeStateStack.back()->ProcessCallback(change);
 				delete change;
 			}
 		}
@@ -117,89 +117,89 @@ void AppStateManager::start(AppState *state)
 		}
 	}
 
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Main loop quit");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Main loop quit");
 }
 
-void AppStateManager::changeAppState(AppState* state)
+void AppStateManager::ChangeAppState(AppState* state)
 {
-	if(!m_ActiveStateStack.empty())
+	if(!m_activeStateStack.empty())
 	{
-		m_ActiveStateStack.back()->exit();
-		m_ActiveStateStack.pop_back();
+		m_activeStateStack.back()->Exit();
+		m_activeStateStack.pop_back();
 	}
 
-	m_ActiveStateStack.push_back(state);
+	m_activeStateStack.push_back(state);
 	init(state);
-	m_ActiveStateStack.back()->enter();
+	m_activeStateStack.back()->Enter();
 }
 
-bool AppStateManager::pushAppState(AppState* state)
+bool AppStateManager::PushAppState(AppState* state)
 {
-	if(!m_ActiveStateStack.empty())
+	if(!m_activeStateStack.empty())
 	{
-		if(!m_ActiveStateStack.back()->pause())
+		if(!m_activeStateStack.back()->Pause())
 			return false;
 	}
 
-	m_ActiveStateStack.push_back(state);
+	m_activeStateStack.push_back(state);
 	init(state);
-	m_ActiveStateStack.back()->enter();
+	m_activeStateStack.back()->Enter();
 
 	return true;
 }
 
-void AppStateManager::popAppState()
+void AppStateManager::PopAppState()
 {
-	if(!m_ActiveStateStack.empty())
+	if(!m_activeStateStack.empty())
 	{
-		m_ActiveStateStack.back()->exit();
-		m_ActiveStateStack.pop_back();
+		m_activeStateStack.back()->Exit();
+		m_activeStateStack.pop_back();
 	}
 
-	if(!m_ActiveStateStack.empty())
+	if(!m_activeStateStack.empty())
 	{
-		init(m_ActiveStateStack.back());
-		m_ActiveStateStack.back()->resume();
+		init(m_activeStateStack.back());
+		m_activeStateStack.back()->Resume();
 	}
     else
-		shutdown();
+		Shutdown();
 }
 
-void AppStateManager::popAllAndPushAppState(AppState* state)
+void AppStateManager::PopAllAndPushAppState(AppState* state)
 {
-    while(!m_ActiveStateStack.empty())
+    while(!m_activeStateStack.empty())
     {
-        m_ActiveStateStack.back()->exit();
-        m_ActiveStateStack.pop_back();
+        m_activeStateStack.back()->Exit();
+        m_activeStateStack.pop_back();
     }
 
-    pushAppState(state);
+    PushAppState(state);
 }
 
-void AppStateManager::pauseAppState()
+void AppStateManager::PauseAppState()
 {
-	if(!m_ActiveStateStack.empty())
+	if(!m_activeStateStack.empty())
 	{
-		m_ActiveStateStack.back()->pause();
+		m_activeStateStack.back()->Pause();
 	}
 
-	if(m_ActiveStateStack.size() > 2)
+	if(m_activeStateStack.size() > 2)
 	{
-		init(m_ActiveStateStack.at(m_ActiveStateStack.size() - 2));
-		m_ActiveStateStack.at(m_ActiveStateStack.size() - 2)->resume();
+		init(m_activeStateStack.at(m_activeStateStack.size() - 2));
+		m_activeStateStack.at(m_activeStateStack.size() - 2)->Resume();
 	}
 }
 
-void AppStateManager::shutdown()
+void AppStateManager::Shutdown()
 {
-	m_bShutdown = true;
+	m_isShutdown = true;
 }
 
 void AppStateManager::init(AppState* state)
 {
-	OgreFramework::getSingletonPtr()->m_pKeyboard->setEventCallback(state);
-	OgreFramework::getSingletonPtr()->m_pMouse->setEventCallback(state);
+	OgreFramework::getSingletonPtr()->m_keyboard->setEventCallback(state);
+	OgreFramework::getSingletonPtr()->m_mouse->setEventCallback(state);
 	//OgreFramework::getSingletonPtr()->m_pTrayMgr->setListener(state);
 
-	OgreFramework::getSingletonPtr()->m_pRenderWnd->resetStatistics();
+	OgreFramework::getSingletonPtr()->m_renderWnd->resetStatistics();
 }

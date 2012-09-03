@@ -21,7 +21,7 @@ int main(int argc, char **argv)
 	DemoApp demo;
 	try
 	{
-		demo.startDemo();
+		demo.StartDemo();
 	}
 	catch(std::exception& e)
 	{

@@ -18,10 +18,10 @@ public:
 	DemoApp();
 	~DemoApp();
 
-	void startDemo();
+	void StartDemo();
 
 private:
-	AppStateManager *m_pAppStateManager;
+	AppStateManager *m_appStateManager;
 };
 
 #endif

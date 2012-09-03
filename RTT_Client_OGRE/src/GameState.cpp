@@ -15,122 +15,122 @@ GameState::GameState(void):
 		m_mainPlayer(),
 		m_playerCursor()
 {
-	m_MoveSpeed		= 0.1f;
-	m_RotateSpeed	= 0.3f;
+	m_moveSpeed		= 0.1f;
+	m_rotateSpeed	= 0.3f;
 
-	m_bLMouseDown       = false;
-	m_bRMouseDown       = false;
-	m_bQuit             = false;
-	m_bSettingsMode     = false;
+	m_isLMouseDown       = false;
+	m_isRMouseDown       = false;
+	m_quit             = false;
+	m_isSettingsMode     = false;
 	m_isMoving 			= false;
 
 	//m_pDetailsPanel	= NULL;
 }
 
-void GameState::buildUnits(void)
+void GameState::BuildUnits(void)
 {
 	//mainPlayer.ogreUnits[0] = new RTT_Ogre_Unit();
 
-	m_mainPlayer.ogreUnits.m_unitEntity = m_pSceneMgr->createEntity(
+	m_mainPlayer.ogreUnits.m_unitEntity = m_sceneMgr->createEntity(
 			"BlueMarine", "ColorMarine.mesh");
 
 	m_mainPlayer.ogreUnits.m_unitEntity->setCastShadows(true);
 	m_mainPlayer.ogreUnits.m_unitEntity->setMaterialName("BlueMarine");
 	m_mainPlayer.ogreUnits.m_unitNode =
-			m_pSceneMgr->getRootSceneNode()->createChildSceneNode("BlueMarine");
+			m_sceneMgr->getRootSceneNode()->createChildSceneNode("BlueMarine");
 	m_mainPlayer.ogreUnits.m_unitNode->attachObject(m_mainPlayer.ogreUnits.m_unitEntity);
 	m_mainPlayer.ogreUnits.m_unitNode->yaw(Degree(150));
 	m_mainPlayer.ogreUnits.m_locationX = 0;
 	m_mainPlayer.ogreUnits.m_locationY = 0;
 	m_mainPlayer.ogreUnits.m_moveRange = 3;
 
-	m_playerCursor.m_unitEntity = m_pSceneMgr->createEntity("Cursor", "Marker.mesh");
+	m_playerCursor.m_unitEntity = m_sceneMgr->createEntity("Cursor", "Marker.mesh");
 	m_playerCursor.m_unitEntity->setMaterialName("Marker");
-	m_playerCursor.m_unitNode = m_pSceneMgr->getRootSceneNode()->createChildSceneNode("Cursor");
+	m_playerCursor.m_unitNode = m_sceneMgr->getRootSceneNode()->createChildSceneNode("Cursor");
 	m_playerCursor.m_unitNode->attachObject(m_playerCursor.m_unitEntity);
 	m_playerCursor.m_locationX = 0;
 	m_playerCursor.m_locationY = 0;
 	m_playerCursor.m_unitNode->setVisible(false);
 }
 
-void GameState::enter()
+void GameState::Enter()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Entering GameState...");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Entering GameState...");
 
-	m_pSceneMgr = OgreFramework::getSingletonPtr()->m_pRoot->createSceneManager(
+	m_sceneMgr = OgreFramework::getSingletonPtr()->m_root->createSceneManager(
 			ST_GENERIC, "GameSceneMgr");
-	m_pSceneMgr->setAmbientLight(Ogre::ColourValue(0, 0, 0));
+	m_sceneMgr->setAmbientLight(Ogre::ColourValue(0, 0, 0));
 	//Shadowmaps	EXPERIMENTAL
-	m_pSceneMgr->setShadowTexturePixelFormat(Ogre::PF_FLOAT32_R);
-	m_pSceneMgr->setShadowTextureSelfShadow(true);
+	m_sceneMgr->setShadowTexturePixelFormat(Ogre::PF_FLOAT32_R);
+	m_sceneMgr->setShadowTextureSelfShadow(true);
 	//rttSceneManager->setShadowCasterRenderBackFaces(false);
-	m_pSceneMgr->setShadowTextureCasterMaterial("Ogre/DepthShadowmap/Caster/Float");
+	m_sceneMgr->setShadowTextureCasterMaterial("Ogre/DepthShadowmap/Caster/Float");
 	//rttSceneManager->setShadowTextureReceiverMaterial("Ogre/DepthShadowmap/BasicTemplateMaterial");
-	m_pSceneMgr->setShadowTextureSize(1024);
+	m_sceneMgr->setShadowTextureSize(1024);
 	m_isMoving = false;
 
-	buildUnits();
+	BuildUnits();
 
-	m_pRSQ = m_pSceneMgr->createRayQuery(Ray());
-	m_pRSQ->setQueryMask(OGRE_HEAD_MASK);
+	m_RSQ = m_sceneMgr->createRayQuery(Ray());
+	m_RSQ->setQueryMask(OGRE_HEAD_MASK);
 
-	m_pCamera = m_pSceneMgr->createCamera("GameCamera");
-	m_pCamera->setPosition(Ogre::Vector3(5.5,10.5,6.5));
-	m_pCamera->lookAt(Ogre::Vector3(5.5,0,-4));
-	m_pCamera->setNearClipDistance(5);
+	m_camera = m_sceneMgr->createCamera("GameCamera");
+	m_camera->setPosition(Ogre::Vector3(5.5,10.5,6.5));
+	m_camera->lookAt(Ogre::Vector3(5.5,0,-4));
+	m_camera->setNearClipDistance(5);
 
-	m_pCamera->setAspectRatio(
-		Real(OgreFramework::getSingletonPtr()->m_pViewport->getActualWidth()) /
-		Real(OgreFramework::getSingletonPtr()->m_pViewport->getActualHeight()));
+	m_camera->setAspectRatio(
+		Real(OgreFramework::getSingletonPtr()->m_viewport->getActualWidth()) /
+		Real(OgreFramework::getSingletonPtr()->m_viewport->getActualHeight()));
 
-	OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
-	m_pCurrentObject = NULL;
+	OgreFramework::getSingletonPtr()->m_viewport->setCamera(m_camera);
+	m_currentObject = NULL;
 
-	buildGUI();
+	BuildGUI();
 
-	setUnbufferedMode();
+	SetUnbufferedMode();
 
-	createScene();
+	CreateScene();
 }
 
-bool GameState::pause()
+bool GameState::Pause()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Pausing GameState...");
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(0);
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Pausing GameState...");
+	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(0);
 	return true;
 }
 
-void GameState::resume()
+void GameState::Resume()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Resuming GameState...");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Resuming GameState...");
 
 	//buildGUI();
 
 	//OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
 
-	OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
+	OgreFramework::getSingletonPtr()->m_viewport->setCamera(m_camera);
 //	OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(m_pSceneMgr);
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(CEGUI::WindowManager::getSingleton().getWindow("RTT_Game"));
+	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(CEGUI::WindowManager::getSingleton().getWindow("RTT_Game"));
 
-	m_bQuit = false;
+	m_quit = false;
 }
 
-void GameState::exit()
+void GameState::Exit()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leaving GameState...");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Leaving GameState...");
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(0);
+	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(0);
 
-	m_pSceneMgr->destroyCamera(m_pCamera);
-	m_pSceneMgr->destroyQuery(m_pRSQ);
-	if(m_pSceneMgr)
+	m_sceneMgr->destroyCamera(m_camera);
+	m_sceneMgr->destroyQuery(m_RSQ);
+	if(m_sceneMgr)
 	{
-		OgreFramework::getSingletonPtr()->m_pRoot->destroySceneManager(m_pSceneMgr);
+		OgreFramework::getSingletonPtr()->m_root->destroySceneManager(m_sceneMgr);
 	}
 }
 
-void GameState::createScene()
+void GameState::CreateScene()
 {
 	//m_pSceneMgr->createLight("Light")->setPosition(75,75,75);
 
@@ -153,10 +153,10 @@ void GameState::createScene()
 	//SceneNode* blueMarineNode = rttSceneManager->getRootSceneNode()->createChildSceneNode("BlueMarine");
 	//blueMarineNode->attachObject(blueMarine);
 	//blueMarineNode->yaw(Degree(90));
-	Entity* redMarine = m_pSceneMgr->createEntity("RedMarine", "ColorMarine.mesh");
+	Entity* redMarine = m_sceneMgr->createEntity("RedMarine", "ColorMarine.mesh");
 	redMarine->setCastShadows(true);
 	redMarine->setMaterialName("RedMarine");
-	SceneNode* redMarineNode = m_pSceneMgr->getRootSceneNode()->createChildSceneNode(
+	SceneNode* redMarineNode = m_sceneMgr->getRootSceneNode()->createChildSceneNode(
 			"RedMarine", Ogre::Vector3(7*1.732 -.866,0,-7*1.5));
 	redMarineNode->attachObject(redMarine);
 	redMarineNode->yaw(Degree(-30));
@@ -170,35 +170,35 @@ void GameState::createScene()
 			{
 				posX -= .866;  //steps over
 			}
-			tileVector[x][y] = m_pSceneMgr->createEntity(tileType +
+			tileVector[x][y] = m_sceneMgr->createEntity(tileType +
 					Ogre::StringConverter::toString(x) + Ogre::StringConverter::toString(y),
 					"DirtTile.mesh", "RTT");
 			tileVector[x][y]->setCastShadows(true);
-			nodeVector[x][y] = m_pSceneMgr->getRootSceneNode()->createChildSceneNode(
+			nodeVector[x][y] = m_sceneMgr->getRootSceneNode()->createChildSceneNode(
 					tileType + Ogre::StringConverter::toString(x) +
 					Ogre::StringConverter::toString(y), Ogre::Vector3(posX, posY, -y*1.5));
 			nodeVector[x][y]->attachObject(tileVector[x][y]);
 
-			rangeMarker[x][y] = m_pSceneMgr->createEntity(rangeType +
+			rangeMarker[x][y] = m_sceneMgr->createEntity(rangeType +
 					Ogre::StringConverter::toString(x) + Ogre::StringConverter::toString(y),
 					"Range.mesh", "RTT");
 			rangeMarker[x][y]->setMaterialName("Range");
-			m_mainPlayer.rangeNode[x][y] = m_pSceneMgr->getRootSceneNode()->createChildSceneNode(rangeType + Ogre::StringConverter::toString(x) + Ogre::StringConverter::toString(y), Ogre::Vector3(posX, posY, -y*1.5));
+			m_mainPlayer.rangeNode[x][y] = m_sceneMgr->getRootSceneNode()->createChildSceneNode(rangeType + Ogre::StringConverter::toString(x) + Ogre::StringConverter::toString(y), Ogre::Vector3(posX, posY, -y*1.5));
 			m_mainPlayer.rangeNode[x][y]->attachObject(rangeMarker[x][y]);
 			m_mainPlayer.rangeNode[x][y]->yaw(Ogre::Degree(0));
 			m_mainPlayer.rangeNode[x][y]->setVisible(false);
 		}
 	}
 	//end BUTCHERING
-	Entity *groundPlane = m_pSceneMgr->createEntity("Ground", "Plane.mesh");
+	Entity *groundPlane = m_sceneMgr->createEntity("Ground", "Plane.mesh");
 	groundPlane->setMaterialName("Claygreen");
 	groundPlane->setCastShadows(false);
-	SceneNode *groundPlaneNode = m_pSceneMgr->getRootSceneNode()->createChildSceneNode("Ground", Ogre::Vector3(2.25,0,0));
+	SceneNode *groundPlaneNode = m_sceneMgr->getRootSceneNode()->createChildSceneNode("Ground", Ogre::Vector3(2.25,0,0));
 	groundPlaneNode->attachObject(groundPlane);
 	//groundPlaneNode->scale(25,25,25);
 
 	// Create a light
-	Light *mainLight = m_pSceneMgr->createLight("MainLight");
+	Light *mainLight = m_sceneMgr->createLight("MainLight");
 	mainLight->setType(Light::LT_POINT);
 	//mainLight->mCastShadows=true;
 	mainLight->setPosition(20,30,15);
@@ -207,98 +207,98 @@ void GameState::createScene()
 
 bool GameState::keyPressed(const OIS::KeyEvent& keyEventRef)
 {
-	if(m_bSettingsMode == true)
+	if(m_isSettingsMode == true)
 	{
 
 	}
 
-	if(m_bChatMode == true)
+	if(m_isChatMode == true)
 	{
-		OgreFramework::getSingletonPtr()->m_pGUISystem->injectKeyDown(keyEventRef.key);
-		OgreFramework::getSingletonPtr()->m_pGUISystem->injectChar(keyEventRef.text);
+		OgreFramework::getSingletonPtr()->m_GUISystem->injectKeyDown(keyEventRef.key);
+		OgreFramework::getSingletonPtr()->m_GUISystem->injectChar(keyEventRef.text);
 	}
 
-	if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_ESCAPE))
+	if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_ESCAPE))
 	{
 		//TODO Make this pause the game and allow menu options
 		return true;
 	}
 
-	if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_TAB))
+	if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_TAB))
 	{
-		m_bSettingsMode = !m_bSettingsMode;
-		m_bChatMode = !m_bChatMode;
+		m_isSettingsMode = !m_isSettingsMode;
+		m_isChatMode = !m_isChatMode;
 
-		if(m_bChatMode)
-			setBufferedMode();
+		if(m_isChatMode)
+			SetBufferedMode();
 		else
-			setUnbufferedMode();
+			SetUnbufferedMode();
 
 		return true;
 	}
 
-	if(m_bSettingsMode && (OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_RETURN) ||
-		OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_NUMPADENTER)))
+	if(m_isSettingsMode && (OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_RETURN) ||
+		OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_NUMPADENTER)))
 	{
-		CEGUI::Editbox *pChatInputBox = (CEGUI::Editbox*)m_pChatWnd->getChild("ChatInputBox");
-		CEGUI::MultiLineEditbox *pChatContentBox = (CEGUI::MultiLineEditbox*)m_pChatWnd->getChild("ChatContentBox");
+		CEGUI::Editbox *pChatInputBox = (CEGUI::Editbox*)m_chatWnd->getChild("ChatInputBox");
+		CEGUI::MultiLineEditbox *pChatContentBox = (CEGUI::MultiLineEditbox*)m_chatWnd->getChild("ChatContentBox");
 		pChatContentBox->setText(pChatContentBox->getText() + pChatInputBox->getText() + "\n");
 		pChatInputBox->setText("");
 		pChatContentBox->setCaratIndex(pChatContentBox->getText().size());
 		pChatContentBox->ensureCaratIsVisible();
 	}
 
-	if(!m_bSettingsMode || (m_bSettingsMode &&
-			!OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_O)))
+	if(!m_isSettingsMode || (m_isSettingsMode &&
+			!OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_O)))
 		OgreFramework::getSingletonPtr()->keyPressed(keyEventRef);
 
 	switch (keyEventRef.key)
 	{
 		case OIS::KC_NUMPAD7: //Move North West
 		{
-			moveCursor(RTT::NORTHWEST);
+			MoveCursor(RTT::NORTHWEST);
 			break;
 		}
 		case OIS::KC_NUMPAD4: //Move North EDIT::::::::WEST!
 		{
-			moveCursor(RTT::WEST);
+			MoveCursor(RTT::WEST);
 			break;
 		}
 		case OIS::KC_NUMPAD9: //Move North East
 		{
-			moveCursor(RTT::NORTHEAST);
+			MoveCursor(RTT::NORTHEAST);
 			break;
 		}
 		case OIS::KC_NUMPAD1://Move South West
 		{
-			moveCursor(RTT::SOUTHWEST);
+			MoveCursor(RTT::SOUTHWEST);
 			break;
 		}
 		case OIS::KC_NUMPAD6: //Move South  EDIT:::::::::EAST!
 		{
-			moveCursor(RTT::EAST);
+			MoveCursor(RTT::EAST);
 			break;
 		}
 		case OIS::KC_NUMPAD3: //Move South East
 		{
-			moveCursor(RTT::SOUTHEAST);
+			MoveCursor(RTT::SOUTHEAST);
 			break;
 		}
 		case OIS::KC_M: //Move 'dialog'
 		{
 			if(!m_isMoving)
 			{
-				moveUnit(m_mainPlayer.ogreUnits);
+				MoveUnit(m_mainPlayer.ogreUnits);
 				break;
 			}
 			else
-				makeMove(m_mainPlayer.ogreUnits);
+				MakeMove(m_mainPlayer.ogreUnits);
 			break;
 		}
 		case OIS::KC_F: //Facing 'dialog'
 		{
 			m_isMoving = false;
-			showRange(m_mainPlayer.ogreUnits, m_isMoving);
+			ShowRange(m_mainPlayer.ogreUnits, m_isMoving);
 			break;
 		}
 		default:
@@ -309,7 +309,7 @@ bool GameState::keyPressed(const OIS::KeyEvent& keyEventRef)
 	return true;
 }
 
-void GameState::moveUnit(RTT::RTT_Ogre_Unit& toMove)
+void GameState::MoveUnit(RTT::RTT_Ogre_Unit& toMove)
 {
 	if(!m_isMoving)
 	{
@@ -317,17 +317,17 @@ void GameState::moveUnit(RTT::RTT_Ogre_Unit& toMove)
 		m_playerCursor.m_unitNode->setPosition(toMove.m_unitNode->getPosition());
 		m_playerCursor.m_locationX = toMove.m_locationX;
 		m_playerCursor.m_locationY = toMove.m_locationY;
-		showRange(toMove, m_isMoving);
+		ShowRange(toMove, m_isMoving);
 		m_playerCursor.m_unitNode->setVisible(m_isMoving);
 	}
 }
 
-void GameState::makeMove(RTT::RTT_Ogre_Unit& toMove)
+void GameState::MakeMove(RTT::RTT_Ogre_Unit& toMove)
 {
 	if(m_isMoving)
 	{
 		m_isMoving = false;
-		showRange(toMove, m_isMoving);
+		ShowRange(toMove, m_isMoving);
 		m_playerCursor.m_unitNode->setVisible(m_isMoving);
 		toMove.m_unitNode->setPosition(m_playerCursor.m_unitNode->getPosition());
 		toMove.m_locationX = m_playerCursor.m_locationX;
@@ -335,7 +335,7 @@ void GameState::makeMove(RTT::RTT_Ogre_Unit& toMove)
 	}
 }
 
-void GameState::showRange(RTT::RTT_Ogre_Unit& toShow, bool& value)
+void GameState::ShowRange(RTT::RTT_Ogre_Unit& toShow, bool& value)
 {
 	int radius = toShow.m_moveRange;
 	cout << "Currently at: " << toShow.m_locationX << ", " << toShow.m_locationY << endl;
@@ -393,7 +393,7 @@ void GameState::showRange(RTT::RTT_Ogre_Unit& toShow, bool& value)
 
 }
 
-void GameState::moveCursor(const RTT::Direction& moveDirection)
+void GameState::MoveCursor(const RTT::Direction& moveDirection)
 {
 	if(m_isMoving)
 	{
@@ -498,26 +498,26 @@ bool GameState::mouseMoved(const OIS::MouseEvent &evt)
 			(evt.state.Z.rel + scrollZoomTotal < 720))
 	{
 		scrollZoomTotal += evt.state.Z.rel;
-		m_pCamera->pitch(Degree(evt.state.Z.rel * 0.015f));
-		m_TranslateVector.z = (evt.state.Z.rel * -0.04f);
-		moveCamera();
+		m_camera->pitch(Degree(evt.state.Z.rel * 0.015f));
+		m_translateVector.z = (evt.state.Z.rel * -0.04f);
+		MoveCamera();
 	}
 	else if((evt.state.Z.rel < 0) &&
 			(evt.state.Z.rel + scrollZoomTotal > 0))
 	{
 		scrollZoomTotal += evt.state.Z.rel;
-		m_TranslateVector.z = (evt.state.Z.rel * -0.04f);
-		moveCamera();
-		m_pCamera->pitch(Degree(evt.state.Z.rel * 0.015f));
+		m_translateVector.z = (evt.state.Z.rel * -0.04f);
+		MoveCamera();
+		m_camera->pitch(Degree(evt.state.Z.rel * 0.015f));
 	}
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseWheelChange(evt.state.Z.rel);
-	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseMove(evt.state.X.rel, evt.state.Y.rel);
+	OgreFramework::getSingletonPtr()->m_GUISystem->injectMouseWheelChange(evt.state.Z.rel);
+	OgreFramework::getSingletonPtr()->m_GUISystem->injectMouseMove(evt.state.X.rel, evt.state.Y.rel);
 
-	if(m_bRMouseDown)
+	if(m_isRMouseDown)
 	{
-		m_pCamera->yaw(Degree(evt.state.X.rel * -0.1f));
-		m_pCamera->pitch(Degree(evt.state.Y.rel * -0.1f));
+		m_camera->yaw(Degree(evt.state.X.rel * -0.1f));
+		m_camera->pitch(Degree(evt.state.Y.rel * -0.1f));
 	}
 
 	return true;
@@ -529,14 +529,14 @@ bool GameState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 
 	if(id == OIS::MB_Left)
 	{
-		onLeftPressed(evt);
-		m_bLMouseDown = true;
+		OnLeftPressed(evt);
+		m_isLMouseDown = true;
 
-		OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseButtonDown(CEGUI::LeftButton);
+		OgreFramework::getSingletonPtr()->m_GUISystem->injectMouseButtonDown(CEGUI::LeftButton);
 	}
 	else if(id == OIS::MB_Right)
 	{
-		m_bRMouseDown = true;
+		m_isRMouseDown = true;
 	}
 
 	return true;
@@ -548,18 +548,18 @@ bool GameState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 
 	if(id == OIS::MB_Left)
 	{
-		m_bLMouseDown = false;
-		OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseButtonUp(CEGUI::LeftButton);
+		m_isLMouseDown = false;
+		OgreFramework::getSingletonPtr()->m_GUISystem->injectMouseButtonUp(CEGUI::LeftButton);
 	}
 	else if(id == OIS::MB_Right)
 	{
-		m_bRMouseDown = false;
+		m_isRMouseDown = false;
 	}
 
 	return true;
 }
 
-void GameState::onLeftPressed(const OIS::MouseEvent &evt)
+void GameState::OnLeftPressed(const OIS::MouseEvent &evt)
 {
 	/*
 	if(m_pCurrentObject)
@@ -596,64 +596,64 @@ void GameState::onLeftPressed(const OIS::MouseEvent &evt)
 	*/
 }
 
-bool GameState::onExitButtonGame(const CEGUI::EventArgs &args)
+bool GameState::OnExitButtonGame(const CEGUI::EventArgs &args)
 {
-	m_bQuit = true;
+	m_quit = true;
 	return true;
 }
 
-void GameState::moveCamera()
+void GameState::MoveCamera()
 {
-    if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_LSHIFT))
+    if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_LSHIFT))
     {
-        m_pCamera->moveRelative(m_TranslateVector);
+        m_camera->moveRelative(m_translateVector);
     }
-    m_pCamera->moveRelative(m_TranslateVector / 10);
+    m_camera->moveRelative(m_translateVector / 10);
 }
 
-void GameState::getInput()
+void GameState::GetInput()
 {
-    if(m_bSettingsMode == false)
+    if(m_isSettingsMode == false)
     {
-        if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_A))
-            m_TranslateVector.x = -m_MoveScale;
+        if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_A))
+            m_translateVector.x = -m_moveScale;
 
-        if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_D))
-            m_TranslateVector.x = m_MoveScale;
+        if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_D))
+            m_translateVector.x = m_moveScale;
 
-        if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_W))
-            m_TranslateVector.z = -m_MoveScale;
+        if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_W))
+            m_translateVector.z = -m_moveScale;
 
-        if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_S))
-            m_TranslateVector.z = m_MoveScale;
+        if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_S))
+            m_translateVector.z = m_moveScale;
 
-        if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_Q))
-            m_TranslateVector.y = -m_MoveScale;
+        if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_Q))
+            m_translateVector.y = -m_moveScale;
 
-        if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_E))
-            m_TranslateVector.y = m_MoveScale;
+        if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_E))
+            m_translateVector.y = m_moveScale;
 
         //camera roll
-        if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_Z))
-            m_pCamera->roll(Angle(-m_MoveScale));
+        if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_Z))
+            m_camera->roll(Angle(-m_moveScale));
 
-        if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_X))
-            m_pCamera->roll(Angle(m_MoveScale));
+        if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_X))
+            m_camera->roll(Angle(m_moveScale));
 
         //reset roll
-        if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_C))
-            m_pCamera->roll(-(m_pCamera->getRealOrientation().getRoll()));
+        if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_C))
+            m_camera->roll(-(m_camera->getRealOrientation().getRoll()));
     }
 }
 
-void GameState::update(double timeSinceLastFrame)
+void GameState::Update(double timeSinceLastFrame)
 {
-	m_FrameEvent.timeSinceLastFrame = timeSinceLastFrame;
+	m_frameEvent.timeSinceLastFrame = timeSinceLastFrame;
 	//OgreFramework::getSingletonPtr()->m_pTrayMgr->frameRenderingQueued(m_FrameEvent);
 
-	if(m_bQuit == true)
+	if(m_quit == true)
 	{
-		popAppState();
+		PopAppState();
 		return;
 	}
 
@@ -677,37 +677,37 @@ void GameState::update(double timeSinceLastFrame)
 		*/
 	//}
 
-	m_MoveScale = m_MoveSpeed   * timeSinceLastFrame;
-	m_RotScale  = m_RotateSpeed * timeSinceLastFrame;
+	m_moveScale = m_moveSpeed   * timeSinceLastFrame;
+	m_rotScale  = m_rotateSpeed * timeSinceLastFrame;
 
-	m_TranslateVector = Vector3::ZERO;
+	m_translateVector = Vector3::ZERO;
 
-	getInput();
-	moveCamera();
+	GetInput();
+	MoveCamera();
 }
 
-void GameState::buildGUI()
+void GameState::BuildGUI()
 {
 
 //	OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(m_pSceneMgr);
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setDefaultMouseCursor((CEGUI::utf8*)"OgreTrayImages", (CEGUI::utf8*)"MouseArrow");
+	OgreFramework::getSingletonPtr()->m_GUISystem->setDefaultMouseCursor((CEGUI::utf8*)"OgreTrayImages", (CEGUI::utf8*)"MouseArrow");
 	CEGUI::MouseCursor::getSingleton().setImage("OgreTrayImages", "MouseArrow");
-	const OIS::MouseState state = OgreFramework::getSingletonPtr()->m_pMouse->getMouseState();
+	const OIS::MouseState state = OgreFramework::getSingletonPtr()->m_mouse->getMouseState();
 	CEGUI::Point mousePos = CEGUI::MouseCursor::getSingleton().getPosition();
 	CEGUI::System::getSingleton().injectMouseMove(state.X.abs-mousePos.d_x,state.Y.abs-mousePos.d_y);
 
-	m_pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_Game");
-	m_pChatWnd = CEGUI::WindowManager::getSingleton().getWindow("ChatWnd");
+	m_mainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_Game");
+	m_chatWnd = CEGUI::WindowManager::getSingleton().getWindow("ChatWnd");
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(m_pMainWnd);
+	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(m_mainWnd);
 
-	CEGUI::PushButton* pExitButton = (CEGUI::PushButton*)m_pMainWnd->getChild("ExitButton_Game");
-	pExitButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&GameState::onExitButtonGame, this));
+	CEGUI::PushButton* pExitButton = (CEGUI::PushButton*)m_mainWnd->getChild("ExitButton_Game");
+	pExitButton->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&GameState::OnExitButtonGame, this));
 
-	m_bLMouseDown = m_bRMouseDown = false;
-	m_bQuit = false;
-	m_bChatMode = false;
+	m_isLMouseDown = m_isRMouseDown = false;
+	m_quit = false;
+	m_isChatMode = false;
 
 	/*
 	OgreFramework::getSingletonPtr()->m_pTrayMgr->showFrameStats(OgreBites::TL_BOTTOMLEFT);
@@ -746,26 +746,26 @@ void GameState::buildGUI()
 	 */
 }
 
-void GameState::setBufferedMode()
+void GameState::SetBufferedMode()
 {
-	CEGUI::Editbox* pModeCaption = (CEGUI::Editbox*)m_pMainWnd->getChild("ModeCaption");
+	CEGUI::Editbox* pModeCaption = (CEGUI::Editbox*)m_mainWnd->getChild("ModeCaption");
 	pModeCaption->setText("Buffered Input Mode");
 
-	CEGUI::Editbox* pChatInputBox = (CEGUI::Editbox*)m_pChatWnd->getChild("ChatInputBox");
+	CEGUI::Editbox* pChatInputBox = (CEGUI::Editbox*)m_chatWnd->getChild("ChatInputBox");
 	pChatInputBox->setText("");
 	pChatInputBox->activate();
 	pChatInputBox->captureInput();
 
-	CEGUI::MultiLineEditbox* pControlsPanel = (CEGUI::MultiLineEditbox*)m_pMainWnd->getChild("ControlsPanel");
+	CEGUI::MultiLineEditbox* pControlsPanel = (CEGUI::MultiLineEditbox*)m_mainWnd->getChild("ControlsPanel");
 	pControlsPanel->setText("[Tab] - To switch between input modes\n\nAll keys to write in the chat box.\n\nPress [Enter] or [Return] to send message.\n\n[Print] - Take screenshot\n\n[Esc] - Quit to main menu");
 }
 
-void GameState::setUnbufferedMode()
+void GameState::SetUnbufferedMode()
 {
-	CEGUI::Editbox* pModeCaption = (CEGUI::Editbox*)m_pMainWnd->getChild("ModeCaption");
+	CEGUI::Editbox* pModeCaption = (CEGUI::Editbox*)m_mainWnd->getChild("ModeCaption");
 	pModeCaption->setText("Unuffered Input Mode");
 
-	CEGUI::MultiLineEditbox* pControlsPanel = (CEGUI::MultiLineEditbox*)m_pMainWnd->getChild("ControlsPanel");
+	CEGUI::MultiLineEditbox* pControlsPanel = (CEGUI::MultiLineEditbox*)m_mainWnd->getChild("ControlsPanel");
 	pControlsPanel->setText("[Tab] - To switch between input modes\n\n[W] - Forward\n[S] - Backwards\n[A] - Left\n[D] - Right\n\nPress [Shift] to move faster\n\n[O] - Toggle Overlays\n[Print] - Take screenshot\n\n[Esc] - Quit to main menu");
 }
 

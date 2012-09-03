@@ -15,37 +15,37 @@ template<> OgreFramework *Ogre::Singleton<OgreFramework>::msSingleton = NULL;
 
 OgreFramework::OgreFramework()
 {
-	m_pRoot = NULL;
-	m_pRenderWnd = NULL;
-	m_pViewport = NULL;
-	m_pLog = NULL;
-	m_pTimer = NULL;
+	m_root = NULL;
+	m_renderWnd = NULL;
+	m_viewport = NULL;
+	m_log = NULL;
+	m_timer = NULL;
 
-	m_pInputMgr = NULL;
-	m_pKeyboard = NULL;
-	m_pMouse = NULL;
+	m_inputMgr = NULL;
+	m_keyboard = NULL;
+	m_mouse = NULL;
 
-	m_pDebugOverlay = NULL;
-	m_pInfoOverlay = NULL;
-	m_iNumScreenShots = 0;
+	m_debugOverlay = NULL;
+	m_infoOverlay = NULL;
+	m_numScreenShots = 0;
 	m_callbackHandler = NULL;
 }
 
 OgreFramework::~OgreFramework()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Shutdown OGRE...");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Shutdown OGRE...");
 
-	if(m_pInputMgr)
+	if(m_inputMgr)
 	{
-		OIS::InputManager::destroyInputSystem(m_pInputMgr);
+		OIS::InputManager::destroyInputSystem(m_inputMgr);
 	}
-	if(m_pRoot)
+	if(m_root)
 	{
-		delete m_pRoot;
+		delete m_root;
 	}
 }
 
-bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListener,
+bool OgreFramework::InitOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListener,
 		OIS::MouseListener *pMouseListener)
 {
 	bool useRelativePaths = true;
@@ -136,56 +136,56 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 
 	new Ogre::LogManager();
 
-	m_pLog = Ogre::LogManager::getSingleton().createLog(ogreLogFilePath, true, true, false);
-	m_pLog->setDebugOutputEnabled(true);
+	m_log = Ogre::LogManager::getSingleton().createLog(ogreLogFilePath, true, true, false);
+	m_log->setDebugOutputEnabled(true);
 
-	m_pRoot = new Ogre::Root(pluginsFilePath, ogrecfgFilePath, ogreLogFilePath);
+	m_root = new Ogre::Root(pluginsFilePath, ogrecfgFilePath, ogreLogFilePath);
 
-	if(!(m_pRoot->restoreConfig()))
+	if(!(m_root->restoreConfig()))
 	{
-		if(!(m_pRoot->showConfigDialog()))
+		if(!(m_root->showConfigDialog()))
 		{
 			return false;
 		}
 	}
 
-	m_pRenderWnd = m_pRoot->initialise(true, wndTitle);
+	m_renderWnd = m_root->initialise(true, wndTitle);
 
-	m_pViewport = m_pRenderWnd->addViewport(NULL);
-	m_pViewport->setBackgroundColour(ColourValue(0.5f, 0.5f, 0.5f, 1.0f));
+	m_viewport = m_renderWnd->addViewport(NULL);
+	m_viewport->setBackgroundColour(ColourValue(0.5f, 0.5f, 0.5f, 1.0f));
 
-	m_pViewport->setCamera(NULL);
+	m_viewport->setCamera(NULL);
 
 	size_t hWnd = 0;
 	OIS::ParamList paramList;
-	m_pRenderWnd->getCustomAttribute("WINDOW", &hWnd);
+	m_renderWnd->getCustomAttribute("WINDOW", &hWnd);
 
 	paramList.insert(OIS::ParamList::value_type("WINDOW", Ogre::StringConverter::toString(hWnd)));
 
-	m_pInputMgr = OIS::InputManager::createInputSystem(paramList);
+	m_inputMgr = OIS::InputManager::createInputSystem(paramList);
 
-	m_pKeyboard = static_cast<OIS::Keyboard*>(m_pInputMgr->createInputObject(OIS::OISKeyboard, true));
-	m_pMouse = static_cast<OIS::Mouse*>(m_pInputMgr->createInputObject(OIS::OISMouse, true));
+	m_keyboard = static_cast<OIS::Keyboard*>(m_inputMgr->createInputObject(OIS::OISKeyboard, true));
+	m_mouse = static_cast<OIS::Mouse*>(m_inputMgr->createInputObject(OIS::OISMouse, true));
 
-	m_pMouse->getMouseState().height = m_pRenderWnd->getHeight();
-	m_pMouse->getMouseState().width  = m_pRenderWnd->getWidth();
+	m_mouse->getMouseState().height = m_renderWnd->getHeight();
+	m_mouse->getMouseState().width  = m_renderWnd->getWidth();
 
 	if(pKeyListener == NULL)
 	{
-		m_pKeyboard->setEventCallback(this);
+		m_keyboard->setEventCallback(this);
 	}
 	else
 	{
-		m_pKeyboard->setEventCallback(pKeyListener);
+		m_keyboard->setEventCallback(pKeyListener);
 	}
 
 	if(pMouseListener == NULL)
 	{
-		m_pMouse->setEventCallback(this);
+		m_mouse->setEventCallback(this);
 	}
 	else
 	{
-		m_pMouse->setEventCallback(pMouseListener);
+		m_mouse->setEventCallback(pMouseListener);
 	}
 
 	Ogre::String secName, typeName, archName;
@@ -210,31 +210,31 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
 
-	m_pTimer = new Ogre::Timer();
-	m_pTimer->reset();
+	m_timer = new Ogre::Timer();
+	m_timer->reset();
 
-	m_pGUIRenderer = &CEGUI::OgreRenderer::bootstrapSystem(*m_pRenderWnd);
-	m_pGUISystem = CEGUI::System::getSingletonPtr();
+	m_GUIRenderer = &CEGUI::OgreRenderer::bootstrapSystem(*m_renderWnd);
+	m_GUISystem = CEGUI::System::getSingletonPtr();
 
-	m_pGUIType = "OgreTray";
+	m_GUIType = "OgreTray";
 
-	CEGUI::SchemeManager::getSingleton().create(m_pGUIType + ".scheme");
+	CEGUI::SchemeManager::getSingleton().create(m_GUIType + ".scheme");
 	CEGUI::WindowManager::getSingleton().loadWindowLayout((CEGUI::utf8*)"RTT_GUI.layout");
 
-	m_pDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
-	if(m_pDebugOverlay == NULL)
+	m_debugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
+	if(m_debugOverlay == NULL)
 	{
 		std::cerr << "ERROR: Could not find resource: Core/DebugOverlay" << std::endl;
 		::exit(EXIT_FAILURE);
 	}
 
-	m_pDebugOverlay->show();
+	m_debugOverlay->show();
 
-	m_pRenderWnd->setActive(true);
+	m_renderWnd->setActive(true);
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setDefaultMouseCursor(m_pGUIType + "Images", (CEGUI::utf8*)"MouseArrow");
-	CEGUI::MouseCursor::getSingleton().setImage(m_pGUIType + "Images", "MouseArrow");
-	const OIS::MouseState state = m_pMouse->getMouseState();
+	OgreFramework::getSingletonPtr()->m_GUISystem->setDefaultMouseCursor(m_GUIType + "Images", (CEGUI::utf8*)"MouseArrow");
+	CEGUI::MouseCursor::getSingleton().setImage(m_GUIType + "Images", "MouseArrow");
+	const OIS::MouseState state = m_mouse->getMouseState();
 	CEGUI::Point mousePos = CEGUI::MouseCursor::getSingleton().getPosition();
 	CEGUI::System::getSingleton().injectMouseMove(state.X.abs-mousePos.d_x,state.Y.abs-mousePos.d_y);
 
@@ -248,20 +248,20 @@ bool OgreFramework::initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 
 bool OgreFramework::keyPressed(const OIS::KeyEvent &keyEventRef)
 {
-	if(m_pKeyboard->isKeyDown(OIS::KC_SYSRQ))
+	if(m_keyboard->isKeyDown(OIS::KC_SYSRQ))
 	{
-		m_pRenderWnd->writeContentsToTimestampedFile("RTT_Screenshot_", ".jpg");
+		m_renderWnd->writeContentsToTimestampedFile("RTT_Screenshot_", ".jpg");
 		return true;
 	}
 
-	if(m_pKeyboard->isKeyDown(OIS::KC_GRAVE))
+	if(m_keyboard->isKeyDown(OIS::KC_GRAVE))
 	{
-		if(m_pDebugOverlay)
+		if(m_debugOverlay)
 		{
-			if(!m_pDebugOverlay->isVisible())
-				m_pDebugOverlay->show();
+			if(!m_debugOverlay->isVisible())
+				m_debugOverlay->show();
 			else
-				m_pDebugOverlay->hide();
+				m_debugOverlay->hide();
 		}
 	}
 
@@ -288,12 +288,12 @@ bool OgreFramework::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID
 	return true;
 }
 
-void OgreFramework::updateOgre(double timeSinceLastFrame)
+void OgreFramework::UpdateOgre(double timeSinceLastFrame)
 {
-	updateStats();
+	UpdateStats();
 }
 
-void OgreFramework::updateStats()
+void OgreFramework::UpdateStats()
 {
 	static String currFps = "Current FPS: ";
     static String avgFps = "Average FPS: ";
@@ -307,7 +307,7 @@ void OgreFramework::updateStats()
     OverlayElement* guiBest = OverlayManager::getSingleton().getOverlayElement("Core/BestFps");
     OverlayElement* guiWorst = OverlayManager::getSingleton().getOverlayElement("Core/WorstFps");
 
-	const RenderTarget::FrameStats& stats = m_pRenderWnd->getStatistics();
+	const RenderTarget::FrameStats& stats = m_renderWnd->getStatistics();
     guiAvg->setCaption(avgFps + StringConverter::toString(stats.avgFPS));
     guiCurr->setCaption(currFps + StringConverter::toString(stats.lastFPS));
     guiBest->setCaption(bestFps + StringConverter::toString(stats.bestFPS)

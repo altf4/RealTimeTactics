@@ -52,8 +52,8 @@ public:
 	OgreFramework();
 	~OgreFramework();
 
-	bool initOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListener = 0, OIS::MouseListener *pMouseListener = 0);
-	void updateOgre(double timeSinceLastFrame);
+	bool InitOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListener = 0, OIS::MouseListener *pMouseListener = 0);
+	void UpdateOgre(double timeSinceLastFrame);
 
 	bool keyPressed(const OIS::KeyEvent &keyEventRef);
 	bool keyReleased(const OIS::KeyEvent &keyEventRef);
@@ -62,22 +62,22 @@ public:
 	bool mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 	bool mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id);
 
-	void updateStats();
+	void UpdateStats();
 
-	Ogre::Root *m_pRoot;
-	Ogre::RenderWindow *m_pRenderWnd;
-	Ogre::Viewport *m_pViewport;
-	Ogre::Log *m_pLog;
-	Ogre::Timer *m_pTimer;
+	Ogre::Root *m_root;
+	Ogre::RenderWindow *m_renderWnd;
+	Ogre::Viewport *m_viewport;
+	Ogre::Log *m_log;
+	Ogre::Timer *m_timer;
 
-	OIS::InputManager *m_pInputMgr;
-	OIS::Keyboard *m_pKeyboard;
-	OIS::Mouse *m_pMouse;
+	OIS::InputManager *m_inputMgr;
+	OIS::Keyboard *m_keyboard;
+	OIS::Mouse *m_mouse;
 
-	CEGUI::OgreRenderer *m_pGUIRenderer;
-	CEGUI::System *m_pGUISystem;
+	CEGUI::OgreRenderer *m_GUIRenderer;
+	CEGUI::System *m_GUISystem;
 
-	CEGUI::String m_pGUIType;
+	CEGUI::String m_GUIType;
 
 	RTT::CallbackHandler *m_callbackHandler;
 
@@ -85,9 +85,9 @@ private:
 	OgreFramework(const OgreFramework&);
 	OgreFramework& operator= (const OgreFramework&);
 
-	Ogre::Overlay *m_pDebugOverlay;
-	Ogre::Overlay *m_pInfoOverlay;
-	int	m_iNumScreenShots;
+	Ogre::Overlay *m_debugOverlay;
+	Ogre::Overlay *m_infoOverlay;
+	int	m_numScreenShots;
 };
 
 #endif
