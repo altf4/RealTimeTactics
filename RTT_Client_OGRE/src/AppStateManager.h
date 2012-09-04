@@ -23,24 +23,24 @@ public:
 	AppStateManager();
 	~AppStateManager();
 
-	void manageAppState(Ogre::String stateName, AppState* state);
+	void ManageAppState(Ogre::String stateName, AppState* state);
 
-	AppState *findByName(Ogre::String stateName);
+	AppState *FindByName(Ogre::String stateName);
 
-	void start(AppState *state);
-	void changeAppState(AppState *state);
-	bool pushAppState(AppState *state);
-	void popAppState();
-	void pauseAppState();
-	void shutdown();
-	void popAllAndPushAppState(AppState *state);
+	void Start(AppState *state);
+	void ChangeAppState(AppState *state);
+	bool PushAppState(AppState *state);
+	void PopAppState();
+	void PauseAppState();
+	void Shutdown();
+	void PopAllAndPushAppState(AppState *state);
 
 protected:
 	void init(AppState *state);
 
-	std::vector<AppState*> m_ActiveStateStack;
-	std::vector<state_info> m_States;
-	bool m_bShutdown;
+	std::vector<AppState*> m_activeStateStack;
+	std::vector<state_info> m_states;
+	bool m_isShutdown;
 };
 
 #endif

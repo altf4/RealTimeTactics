@@ -14,214 +14,214 @@ using namespace RTT;
 
 MenuState::MenuState()
 {
-    m_bQuit = false;
-    m_FrameEvent = Ogre::FrameEvent();
-    OgreFramework::getSingletonPtr()->m_pLog->logMessage("Is there a callback thread?");
+    m_quit = false;
+    m_frameEvent = Ogre::FrameEvent();
+    OgreFramework::getSingletonPtr()->m_log->logMessage("Is there a callback thread?");
 
     if(OgreFramework::getSingletonPtr()->m_callbackHandler == NULL)
     {
-    	OgreFramework::getSingletonPtr()->m_pLog->logMessage("No, make one");
+    	OgreFramework::getSingletonPtr()->m_log->logMessage("No, make one");
     	OgreFramework::getSingletonPtr()->m_callbackHandler = new RTT::CallbackHandler();
     }
     else
     {
-    	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Yes, use it");
+    	OgreFramework::getSingletonPtr()->m_log->logMessage("Yes, use it");
     }
     RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
 
 }
 
-void MenuState::enter()
+void MenuState::Enter()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Entering MenuState...");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Entering MenuState...");
 
-	m_pSceneMgr = OgreFramework::getSingletonPtr()->m_pRoot->createSceneManager(
+	m_sceneMgr = OgreFramework::getSingletonPtr()->m_root->createSceneManager(
 			ST_GENERIC, "MenuSceneMgr");
-	m_pSceneMgr->setAmbientLight(Ogre::ColourValue(0.7f, 0.7f, 0.7f));
+	m_sceneMgr->setAmbientLight(Ogre::ColourValue(0.7f, 0.7f, 0.7f));
 
-	m_pCamera = m_pSceneMgr->createCamera("MenuCam");
-	m_pCamera->setPosition(Vector3(0, 25, -50));
-	m_pCamera->lookAt(Vector3(0, 0, 0));
-	m_pCamera->setNearClipDistance(1);
+	m_camera = m_sceneMgr->createCamera("MenuCam");
+	m_camera->setPosition(Vector3(0, 25, -50));
+	m_camera->lookAt(Vector3(0, 0, 0));
+	m_camera->setNearClipDistance(1);
 
-	m_pCamera->setAspectRatio(
-		Real(OgreFramework::getSingletonPtr()->m_pViewport->getActualWidth()) /
-		Real(OgreFramework::getSingletonPtr()->m_pViewport->getActualHeight()));
+	m_camera->setAspectRatio(
+		Real(OgreFramework::getSingletonPtr()->m_viewport->getActualWidth()) /
+		Real(OgreFramework::getSingletonPtr()->m_viewport->getActualHeight()));
 
-	OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
-
-
-	OgreFramework::getSingletonPtr()->m_pKeyboard->setEventCallback(this);
-	OgreFramework::getSingletonPtr()->m_pMouse->setEventCallback(this);
+	OgreFramework::getSingletonPtr()->m_viewport->setCamera(m_camera);
 
 
+	OgreFramework::getSingletonPtr()->m_keyboard->setEventCallback(this);
+	OgreFramework::getSingletonPtr()->m_mouse->setEventCallback(this);
 
-	m_bQuit = false;
 
-	createScene();
+
+	m_quit = false;
+
+	CreateScene();
 }
 
-void MenuState::createScene()
+void MenuState::CreateScene()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Initalizing GUI:");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Initalizing GUI:");
 
 	//Initialize:
 	//Main Menu
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
-	CEGUI::PushButton *button = (CEGUI::PushButton*)pMainWnd->getChild("ExitButton");
+	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(mainWnd);
+	CEGUI::PushButton *button = (CEGUI::PushButton*)mainWnd->getChild("ExitButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::onExitButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("JoinCustomServerButton");
+			CEGUI::Event::Subscriber(&MenuState::OnExitButton, this));
+	button = (CEGUI::PushButton*)mainWnd->getChild("JoinCustomServerButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::onCustomServerButton, this));
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Main Menu");
+			CEGUI::Event::Subscriber(&MenuState::OnCustomServerButton, this));
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Main Menu");
 
 	//Join Custom Server
 	CEGUI::FrameWindow *pCustomServerWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 	pCustomServerWnd->setVisible(false);
 	button = (CEGUI::PushButton*)pCustomServerWnd->getChild("CustomServerCancelButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::onBackButton, this));
+			CEGUI::Event::Subscriber(&MenuState::OnBackButton, this));
 	button = (CEGUI::PushButton*)pCustomServerWnd->getChild("JoinServerButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::onJoinServerButton, this));
+			CEGUI::Event::Subscriber(&MenuState::OnJoinServerButton, this));
 	CEGUI::Editbox *pInputBox =
 			(CEGUI::Editbox*)pCustomServerWnd->getChild("ServerAddressBox");
 	pInputBox->subscribeEvent(CEGUI::Editbox::EventActivated,
-			CEGUI::Event::Subscriber(&MenuState::onAddressActivate, this));
+			CEGUI::Event::Subscriber(&MenuState::OnAddressActivate, this));
 	pInputBox->subscribeEvent(CEGUI::Editbox::EventDeactivated,
-			CEGUI::Event::Subscriber(&MenuState::onAddressDeactivate, this));
+			CEGUI::Event::Subscriber(&MenuState::OnAddressDeactivate, this));
 	pInputBox = (CEGUI::Editbox*)pCustomServerWnd->getChild("ServerPortBox");
 	pInputBox->subscribeEvent(CEGUI::Editbox::EventActivated,
-			CEGUI::Event::Subscriber(&MenuState::onPortActivate, this));
+			CEGUI::Event::Subscriber(&MenuState::OnPortActivate, this));
 	pInputBox->subscribeEvent(CEGUI::Editbox::EventDeactivated,
-			CEGUI::Event::Subscriber(&MenuState::onPortDeactivate, this));
+			CEGUI::Event::Subscriber(&MenuState::OnPortDeactivate, this));
 	pInputBox = (CEGUI::Editbox*)pCustomServerWnd->getChild("UsernameBox");
 	pInputBox->subscribeEvent(CEGUI::Editbox::EventActivated,
-			CEGUI::Event::Subscriber(&MenuState::onUsernameActivate, this));
+			CEGUI::Event::Subscriber(&MenuState::OnUsernameActivate, this));
 	pInputBox->subscribeEvent(CEGUI::Editbox::EventDeactivated,
-			CEGUI::Event::Subscriber(&MenuState::onUsernameDeactivate, this));
+			CEGUI::Event::Subscriber(&MenuState::OnUsernameDeactivate, this));
 	pInputBox = (CEGUI::Editbox*)pCustomServerWnd->getChild("PasswordBox");
 	pInputBox->subscribeEvent(CEGUI::Editbox::EventActivated,
-			CEGUI::Event::Subscriber(&MenuState::onPasswordActivate, this));
+			CEGUI::Event::Subscriber(&MenuState::OnPasswordActivate, this));
 	pInputBox->subscribeEvent(CEGUI::Editbox::EventDeactivated,
-			CEGUI::Event::Subscriber(&MenuState::onPasswordDeactivate, this));
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Custom Server Menu");
+			CEGUI::Event::Subscriber(&MenuState::OnPasswordDeactivate, this));
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Custom Server Menu");
 
 	//Match Lobby Menu
-	pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby");
-	button = (CEGUI::PushButton*)pMainWnd->getChild("MatchExitButton");
+	mainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby");
+	button = (CEGUI::PushButton*)mainWnd->getChild("MatchExitButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::onExitButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("MatchBackButton");
+			CEGUI::Event::Subscriber(&MenuState::OnExitButton, this));
+	button = (CEGUI::PushButton*)mainWnd->getChild("MatchBackButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::onBackButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("MatchStartButton");
+			CEGUI::Event::Subscriber(&MenuState::OnBackButton, this));
+	button = (CEGUI::PushButton*)mainWnd->getChild("MatchStartButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::onMatchStartButton, this));
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Match Lobby");
+			CEGUI::Event::Subscriber(&MenuState::OnMatchStartButton, this));
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Match Lobby");
 
 	//Server Lobby Menu
-	pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_ServerLobby");
-	button = (CEGUI::PushButton*)pMainWnd->getChild("ServerExitButton");
+	mainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_ServerLobby");
+	button = (CEGUI::PushButton*)mainWnd->getChild("ServerExitButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::onExitButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("ServerBackButton");
+			CEGUI::Event::Subscriber(&MenuState::OnExitButton, this));
+	button = (CEGUI::PushButton*)mainWnd->getChild("ServerBackButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::onBackButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("RefreshListButton");
+			CEGUI::Event::Subscriber(&MenuState::OnBackButton, this));
+	button = (CEGUI::PushButton*)mainWnd->getChild("RefreshListButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::listMatchesButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("JoinMatchButton");
+			CEGUI::Event::Subscriber(&MenuState::DisplayMatchesButton, this));
+	button = (CEGUI::PushButton*)mainWnd->getChild("JoinMatchButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
 			CEGUI::Event::Subscriber(&MenuState::JoinMatchButton, this));
-	button = (CEGUI::PushButton*)pMainWnd->getChild("CreateMatchButton");
+	button = (CEGUI::PushButton*)mainWnd->getChild("CreateMatchButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::createMatchButton, this));
-	multiColumnListMatch = (CEGUI::MultiColumnList*)pMainWnd->getChild("MatchesMCL");
-	multiColumnListMatch->addColumn("ID", 0, CEGUI::UDim(0.1f, 0));
-	multiColumnListMatch->addColumn("Players", 1, CEGUI::UDim(0.20f, 0));
-	multiColumnListMatch->addColumn("Name", 2, CEGUI::UDim(0.20f, 0));
-	multiColumnListMatch->addColumn("Map", 3, CEGUI::UDim(0.20f, 0));
-	multiColumnListMatch->addColumn("Time Created", 4, CEGUI::UDim(0.27f, 0));
-	multiColumnListMatch->setSelectionMode(CEGUI::MultiColumnList::RowSingle);
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Server Lobby");
+			CEGUI::Event::Subscriber(&MenuState::CreateMatchButton, this));
+	m_ultiColumnListMatch = (CEGUI::MultiColumnList*)mainWnd->getChild("MatchesMCL");
+	m_ultiColumnListMatch->addColumn("ID", 0, CEGUI::UDim(0.1f, 0));
+	m_ultiColumnListMatch->addColumn("Players", 1, CEGUI::UDim(0.20f, 0));
+	m_ultiColumnListMatch->addColumn("Name", 2, CEGUI::UDim(0.20f, 0));
+	m_ultiColumnListMatch->addColumn("Map", 3, CEGUI::UDim(0.20f, 0));
+	m_ultiColumnListMatch->addColumn("Time Created", 4, CEGUI::UDim(0.27f, 0));
+	m_ultiColumnListMatch->setSelectionMode(CEGUI::MultiColumnList::RowSingle);
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Server Lobby");
 
 	//Create Match Menu
 	CEGUI::FrameWindow *pCreateMatchWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CreateMatchWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CreateMatchWindow");
 	pCreateMatchWnd->setVisible(false);
 	button = (CEGUI::PushButton*)pCreateMatchWnd->getChild("CreateMatchCancelButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::onBackButton, this));
+			CEGUI::Event::Subscriber(&MenuState::OnBackButton, this));
 	button = (CEGUI::PushButton*)pCreateMatchWnd->getChild("CreateMatchSubmitButton");
 	button->subscribeEvent(CEGUI::PushButton::EventClicked,
-			CEGUI::Event::Subscriber(&MenuState::createMatchSubmitButton, this));
+			CEGUI::Event::Subscriber(&MenuState::CreateMatchSubmitButton, this));
 	pInputBox = (CEGUI::Editbox*)pCreateMatchWnd->getChild("MatchNameBox");
 	pInputBox->subscribeEvent(CEGUI::Editbox::EventActivated,
-			CEGUI::Event::Subscriber(&MenuState::onMatchNameActivate, this));
+			CEGUI::Event::Subscriber(&MenuState::OnMatchNameActivate, this));
 	pInputBox->subscribeEvent(CEGUI::Editbox::EventDeactivated,
-			CEGUI::Event::Subscriber(&MenuState::onMatchNameDeactivate, this));
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Create Match Menu");
+			CEGUI::Event::Subscriber(&MenuState::OnMatchNameDeactivate, this));
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Create Match Menu");
 
 	//Set GUI to Main Menu
-	pMainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
+	mainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
+	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(mainWnd);
 
-	mLocation = MAINMENU;
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage(
+	m_location = MAINMENU;
+	OgreFramework::getSingletonPtr()->m_log->logMessage(
 			"GUI Initialized, entering Main Menu");
 
 	return;
 }
 
-bool MenuState::pause()
+bool MenuState::Pause()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Pausing MenuState...");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Pausing MenuState...");
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(0);
+	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(0);
 
 	return true;
 }
 
-void MenuState::resume()
+void MenuState::Resume()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Resuming MenuState...");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Resuming MenuState...");
 
-	OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
+	OgreFramework::getSingletonPtr()->m_viewport->setCamera(m_camera);
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(
+	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu"));
 
-	m_bQuit = false;
+	m_quit = false;
 }
 
-void MenuState::exit()
+void MenuState::Exit()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leaving MenuState...");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Leaving MenuState...");
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(0);
-	m_pSceneMgr->destroyCamera(m_pCamera);
-	if(m_pSceneMgr)
+	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(0);
+	m_sceneMgr->destroyCamera(m_camera);
+	if(m_sceneMgr)
 	{
-		OgreFramework::getSingletonPtr()->m_pRoot->destroySceneManager(m_pSceneMgr);
+		OgreFramework::getSingletonPtr()->m_root->destroySceneManager(m_sceneMgr);
 	}
 
 }
 
 bool MenuState::keyPressed(const OIS::KeyEvent &keyEventRef)
 {
-	if(OgreFramework::getSingletonPtr()->m_pKeyboard->isKeyDown(OIS::KC_ESCAPE))
+	if(OgreFramework::getSingletonPtr()->m_keyboard->isKeyDown(OIS::KC_ESCAPE))
 	{
-		m_bQuit = true;
+		m_quit = true;
 		return true;
 	}
 
-	OgreFramework::getSingletonPtr()->m_pGUISystem->injectKeyDown(keyEventRef.key);
-	OgreFramework::getSingletonPtr()->m_pGUISystem->injectChar(keyEventRef.text);
+	OgreFramework::getSingletonPtr()->m_GUISystem->injectKeyDown(keyEventRef.key);
+	OgreFramework::getSingletonPtr()->m_GUISystem->injectChar(keyEventRef.text);
 
 	OgreFramework::getSingletonPtr()->keyPressed(keyEventRef);
 	return true;
@@ -235,11 +235,10 @@ bool MenuState::keyReleased(const OIS::KeyEvent &keyEventRef)
 
 bool MenuState::mouseMoved(const OIS::MouseEvent &evt)
 {
-	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseWheelChange(
+	OgreFramework::getSingletonPtr()->m_GUISystem->injectMouseWheelChange(
 			evt.state.Z.rel);
-	OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseMove(
+	OgreFramework::getSingletonPtr()->m_GUISystem->injectMouseMove(
 			evt.state.X.rel, evt.state.Y.rel);
-
 
 	return true;
 }
@@ -248,7 +247,7 @@ bool MenuState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
 	if(id == OIS::MB_Left)
 	{
-		OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseButtonDown(
+		OgreFramework::getSingletonPtr()->m_GUISystem->injectMouseButtonDown(
 				CEGUI::LeftButton);
 	}
 	return true;
@@ -258,45 +257,45 @@ bool MenuState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
 	if(id == OIS::MB_Left)
 	{
-		OgreFramework::getSingletonPtr()->m_pGUISystem->injectMouseButtonUp(
+		OgreFramework::getSingletonPtr()->m_GUISystem->injectMouseButtonUp(
 				CEGUI::LeftButton);
 	}
 	return true;
 }
 
-void MenuState::update(double timeSinceLastFrame)
+void MenuState::Update(double timeSinceLastFrame)
 {
-	m_FrameEvent.timeSinceLastFrame = timeSinceLastFrame;
+	m_frameEvent.timeSinceLastFrame = timeSinceLastFrame;
 
-	if(m_bQuit == true)
+	if(m_quit == true)
 	{
-		shutdown();
+		Shutdown();
 		return;
 	}
 }
 
-bool MenuState::onExitButton(const CEGUI::EventArgs &args)
+bool MenuState::OnExitButton(const CEGUI::EventArgs &args)
 {
-	m_bQuit = true;
+	m_quit = true;
 	return true;
 }
 
-bool MenuState::onBackButton(const CEGUI::EventArgs &args)
+bool MenuState::OnBackButton(const CEGUI::EventArgs &args)
 {
-	switch(mLocation)
+	switch(m_location)
 	{
 		case MATCHLOBBY:
 		{
-			OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leaving Match ID: "
+			OgreFramework::getSingletonPtr()->m_log->logMessage("Leaving Match ID: "
 					+ Ogre::StringConverter::toString(m_currentMatch.m_ID));
 			if( RTT::LeaveMatch() )
 			{
 				m_currentMatch.m_ID = 0;
-				serverLobby();
+				ServerLobby();
 			}
 			else
 			{
-				OgreFramework::getSingletonPtr()->m_pLog->logMessage(
+				OgreFramework::getSingletonPtr()->m_log->logMessage(
 						"Server error in leaving Match ID: " +
 						Ogre::StringConverter::toString(m_currentMatch.m_ID));
 			}
@@ -304,35 +303,35 @@ bool MenuState::onBackButton(const CEGUI::EventArgs &args)
 		}
 		case SERVERLOBBY:
 		{
-			OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leaving Server");
+			OgreFramework::getSingletonPtr()->m_log->logMessage("Leaving Server");
 			RTT::ExitServer();
-			CEGUI::Window *pMainWnd =
+			CEGUI::Window *mainWnd =
 					CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
 			CEGUI::FrameWindow *pCustomServerWnd =
-					(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+					(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 			pCustomServerWnd->setVisible(false);
-			mLocation = MAINMENU;
-			OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
+			m_location = MAINMENU;
+			OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(mainWnd);
 			break;
 		}
 		case JOINCUSTOMSERVER:
 		{
-			CEGUI::Window *pMainWnd =
+			CEGUI::Window *mainWnd =
 					CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
 			CEGUI::FrameWindow *pCustomServerWnd =
-					(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+					(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 			pCustomServerWnd->setVisible(false);
-			mLocation = MAINMENU;
+			m_location = MAINMENU;
 			break;
 		}
 		case CREATEMATCH:
 		{
-			CEGUI::Window *pMainWnd =
+			CEGUI::Window *mainWnd =
 					CEGUI::WindowManager::getSingleton().getWindow("RTT_ServerLobby");
 			CEGUI::FrameWindow *pCreateMatchWnd =
-					(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CreateMatchWindow");
+					(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CreateMatchWindow");
 			pCreateMatchWnd->setVisible(false);
-			mLocation = SERVERLOBBY;
+			m_location = SERVERLOBBY;
 			break;
 		}
 		default:
@@ -344,25 +343,25 @@ bool MenuState::onBackButton(const CEGUI::EventArgs &args)
 	return true;
 }
 
-bool MenuState::onCustomServerButton(const CEGUI::EventArgs &args)
+bool MenuState::OnCustomServerButton(const CEGUI::EventArgs &args)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Custom Server Menu");
-	CEGUI::Window *pMainWnd =
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Custom Server Menu");
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
 	CEGUI::FrameWindow *pCustomServerWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 	pCustomServerWnd->setVisible(true);
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
-	mLocation = JOINCUSTOMSERVER;
+	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(mainWnd);
+	m_location = JOINCUSTOMSERVER;
 	return true;
 }
 
-bool MenuState::onJoinServerButton(const CEGUI::EventArgs &args)
+bool MenuState::OnJoinServerButton(const CEGUI::EventArgs &args)
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
 	CEGUI::FrameWindow *pCustomServerWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 	pCustomServerWnd->setVisible(true);
 	CEGUI::Editbox *AddressBox =
 			(CEGUI::Editbox*)pCustomServerWnd->getChild("ServerAddressBox");
@@ -374,7 +373,7 @@ bool MenuState::onJoinServerButton(const CEGUI::EventArgs &args)
 			(CEGUI::Editbox*)pCustomServerWnd->getChild("PasswordBox");
 
 	pCustomServerWnd->setText("Trying to connect...");
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Trying to connect...");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Trying to connect...");
 
 	//A little bit of input validation here
 	std::string serverIP = AddressBox->getText().c_str();
@@ -384,7 +383,7 @@ bool MenuState::onJoinServerButton(const CEGUI::EventArgs &args)
 	if (Res == 0)
 	{
 		pCustomServerWnd->setText("Invalid IP address");
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Invalid IP Address");
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Invalid IP Address");
 		return true;
 	}
 
@@ -394,7 +393,7 @@ bool MenuState::onJoinServerButton(const CEGUI::EventArgs &args)
 	{
 		//Error occurred
 		pCustomServerWnd->setText("Invalid port number");
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Invalid port number");
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Invalid port number");
 		return true;
 	}
 
@@ -402,7 +401,7 @@ bool MenuState::onJoinServerButton(const CEGUI::EventArgs &args)
 	if(givenName == "Enter Username...")
 	{
 		pCustomServerWnd->setText("Invalid Username");
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Invalid Username");
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Invalid Username");
 		return true;
 	}
 
@@ -414,33 +413,33 @@ bool MenuState::onJoinServerButton(const CEGUI::EventArgs &args)
 	if( SocketFD > 0 )
 	{
 		pCustomServerWnd->setText("Connection Successful!");
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Connection Successful!");
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Connection Successful!");
 
 		//Launch the Callback Thread
 		if(OgreFramework::getSingletonPtr()->m_callbackHandler != NULL)
 		{
-			OgreFramework::getSingletonPtr()->m_pLog->logMessage(
+			OgreFramework::getSingletonPtr()->m_log->logMessage(
 					"Starting Callback Thread");
 			OgreFramework::getSingletonPtr()->m_callbackHandler->Start();
 
 		}
-		serverLobby();
+		ServerLobby();
 	}
 	else
 	{
 		pCustomServerWnd->setText("Failed to connect to server");
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage(
+		OgreFramework::getSingletonPtr()->m_log->logMessage(
 				"Failed to connect to server");
 	}
 	return true;
 }
 
-bool MenuState::onAddressActivate(const CEGUI::EventArgs &args)
+bool MenuState::OnAddressActivate(const CEGUI::EventArgs &args)
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
 	CEGUI::FrameWindow *pCustomServerWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 	CEGUI::Editbox *tServerAddressBox =
 			(CEGUI::Editbox*)pCustomServerWnd->getChild("ServerAddressBox");
 	if(tServerAddressBox->getText() == "127.0.0.1")
@@ -449,12 +448,12 @@ bool MenuState::onAddressActivate(const CEGUI::EventArgs &args)
 	}
 	return true;
 }
-bool MenuState::onAddressDeactivate(const CEGUI::EventArgs &args)
+bool MenuState::OnAddressDeactivate(const CEGUI::EventArgs &args)
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
 	CEGUI::FrameWindow *pCustomServerWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 	CEGUI::Editbox *tServerAddressBox =
 			(CEGUI::Editbox*)pCustomServerWnd->getChild("ServerAddressBox");
 	if(tServerAddressBox->getText() == "")
@@ -463,12 +462,12 @@ bool MenuState::onAddressDeactivate(const CEGUI::EventArgs &args)
 	}
 	return true;
 }
-bool MenuState::onPortActivate(const CEGUI::EventArgs &args)
+bool MenuState::OnPortActivate(const CEGUI::EventArgs &args)
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
 	CEGUI::FrameWindow *pCustomServerWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 	CEGUI::Editbox *pInputBox =
 			(CEGUI::Editbox*)pCustomServerWnd->getChild("ServerPortBox");
 	if(pInputBox->getText() == "23000")
@@ -477,12 +476,12 @@ bool MenuState::onPortActivate(const CEGUI::EventArgs &args)
 	}
 	return true;
 }
-bool MenuState::onPortDeactivate(const CEGUI::EventArgs &args)
+bool MenuState::OnPortDeactivate(const CEGUI::EventArgs &args)
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
 	CEGUI::FrameWindow *pCustomServerWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 	CEGUI::Editbox *pInputBox =
 			(CEGUI::Editbox*)pCustomServerWnd->getChild("ServerPortBox");
 	if(pInputBox->getText() == "")
@@ -491,12 +490,12 @@ bool MenuState::onPortDeactivate(const CEGUI::EventArgs &args)
 	}
 	return true;
 }
-bool MenuState::onUsernameActivate(const CEGUI::EventArgs &args)
+bool MenuState::OnUsernameActivate(const CEGUI::EventArgs &args)
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
 	CEGUI::FrameWindow *pCustomServerWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 	CEGUI::Editbox *pInputBox =
 			(CEGUI::Editbox*)pCustomServerWnd->getChild("UsernameBox");
 	if(pInputBox->getText() == "Enter Username...")
@@ -505,12 +504,12 @@ bool MenuState::onUsernameActivate(const CEGUI::EventArgs &args)
 	}
 	return true;
 }
-bool MenuState::onUsernameDeactivate(const CEGUI::EventArgs &args)
+bool MenuState::OnUsernameDeactivate(const CEGUI::EventArgs &args)
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
 	CEGUI::FrameWindow *pCustomServerWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 	CEGUI::Editbox *pInputBox =
 			(CEGUI::Editbox*)pCustomServerWnd->getChild("UsernameBox");
 	if(pInputBox->getText() == "")
@@ -519,12 +518,12 @@ bool MenuState::onUsernameDeactivate(const CEGUI::EventArgs &args)
 	}
 	return true;
 }
-bool MenuState::onPasswordActivate(const CEGUI::EventArgs &args)
+bool MenuState::OnPasswordActivate(const CEGUI::EventArgs &args)
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
 	CEGUI::FrameWindow *pCustomServerWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 	CEGUI::Editbox *pInputBox =
 			(CEGUI::Editbox*)pCustomServerWnd->getChild("PasswordBox");
 	if(pInputBox->getText() == "Enter Password...")
@@ -533,12 +532,12 @@ bool MenuState::onPasswordActivate(const CEGUI::EventArgs &args)
 	}
 	return true;
 }
-bool MenuState::onPasswordDeactivate(const CEGUI::EventArgs &args)
+bool MenuState::OnPasswordDeactivate(const CEGUI::EventArgs &args)
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MainMenu");
 	CEGUI::FrameWindow *pCustomServerWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CustomServerWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CustomServerWindow");
 	CEGUI::Editbox *pInputBox =
 			(CEGUI::Editbox*)pCustomServerWnd->getChild("PasswordBox");
 	if(pInputBox->getText() == "")
@@ -550,12 +549,12 @@ bool MenuState::onPasswordDeactivate(const CEGUI::EventArgs &args)
 bool MenuState::JoinMatchButton(const CEGUI::EventArgs &args)
 {
 	//Get selected match
-	CEGUI::ListboxItem *listboxItem = multiColumnListMatch->getFirstSelectedItem();
+	CEGUI::ListboxItem *listboxItem = m_ultiColumnListMatch->getFirstSelectedItem();
 
 	//Test to see if a match was selected
 	if(listboxItem == NULL)
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("No match selected");
+		OgreFramework::getSingletonPtr()->m_log->logMessage("No match selected");
 		return true;
 	}
 
@@ -563,7 +562,7 @@ bool MenuState::JoinMatchButton(const CEGUI::EventArgs &args)
 	Ogre::String matchIDString = listboxItem->getText().c_str();
 	int matchID = Ogre::StringConverter::parseInt(matchIDString);
 
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Trying to join Match ID: " +
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Trying to join Match ID: " +
 			Ogre::StringConverter::toString(matchID));
 
 	m_currentPlayers = JoinMatch(matchID, m_currentMatch);
@@ -572,26 +571,26 @@ bool MenuState::JoinMatchButton(const CEGUI::EventArgs &args)
 	if( playerCount > 0 )
 	{
 		m_currentMatch.m_ID = matchID;
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Joined match ID: " +
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Joined match ID: " +
 				Ogre::StringConverter::toString(matchID));
-		matchLobby();
+		MatchLobby();
 	}
 	else
 	{
 		m_currentMatch.m_ID = 0;
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Failed to join match");
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Failed to join match");
 	}
 
 	return true;
 }
 
-void MenuState::matchLobby()
+void MenuState::MatchLobby()
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby");
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
-	m_bInMatch = true;
-	mLocation = MATCHLOBBY;
+	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(mainWnd);
+	m_inMatch = true;
+	m_location = MATCHLOBBY;
 
 	m_currentPlayers.push_back(m_playerDescription);
 	ListPlayers();
@@ -619,7 +618,7 @@ void MenuState::ListPlayers()
 	}
 	catch(CEGUI::UnknownObjectException ex)
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage(
+		OgreFramework::getSingletonPtr()->m_log->logMessage(
 				"Couldn't find required GUI element to ListPlayers()");
 		return;
 	}
@@ -650,6 +649,7 @@ void MenuState::ListPlayers()
 
 		if(CEGUI::WindowManager::getSingleton().isWindowPresent(leaderString))
 		{
+			cerr << "GRR, why did: " << leaderString << " not get deleted?!" << endl;
 			CEGUI::WindowManager::getSingleton().destroyWindow(leaderString);
 		}
 		if(CEGUI::WindowManager::getSingleton().isWindowPresent(nameString))
@@ -661,9 +661,9 @@ void MenuState::ListPlayers()
 			CEGUI::WindowManager::getSingleton().destroyWindow(teamString);
 		}
 
-		isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().createWindow(OgreFramework::getSingletonPtr()->m_pGUIType + "/RadioButton",leaderString);
-		playerName =  (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().createWindow(OgreFramework::getSingletonPtr()->m_pGUIType +"/StaticText",nameString);
-		playerTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().createWindow(OgreFramework::getSingletonPtr()->m_pGUIType +"/Combobox",teamString);
+		isLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().createWindow(OgreFramework::getSingletonPtr()->m_GUIType + "/RadioButton",leaderString);
+		playerName =  (CEGUI::DefaultWindow*)CEGUI::WindowManager::getSingleton().createWindow(OgreFramework::getSingletonPtr()->m_GUIType +"/StaticText",nameString);
+		playerTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().createWindow(OgreFramework::getSingletonPtr()->m_GUIType +"/Combobox",teamString);
 
 		m_isLeaderCheckBoxes.push_back(isLeader);
 		m_playerNameTextBoxes.push_back(playerName);
@@ -704,7 +704,7 @@ void MenuState::ListPlayers()
 			{
 				teamItem = new CEGUI::ListboxTextItem("Team " + CEGUI::PropertyHelper::intToString((int)j), j);
 			}
-			teamItem->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType + "Images", "Select");
+			teamItem->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_GUIType + "Images", "Select");
 			playerTeam->addItem(teamItem);
 
 			//To select the correct team
@@ -801,25 +801,25 @@ void MenuState::ListPlayers()
 		scrollpane->addChildWindow(playerName);
 		scrollpane->addChildWindow(playerTeam);
 
-		isLeader->subscribeEvent(CEGUI::RadioButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&MenuState::onLeaderClick, this));
+		isLeader->subscribeEvent(CEGUI::RadioButton::EventSelectStateChanged, CEGUI::Event::Subscriber(&MenuState::OnLeaderClick, this));
 
-		playerTeam->subscribeEvent(CEGUI::Combobox::EventListSelectionAccepted, CEGUI::Event::Subscriber(&MenuState::onTeamChangeClick, this));
+		playerTeam->subscribeEvent(CEGUI::Combobox::EventListSelectionAccepted, CEGUI::Event::Subscriber(&MenuState::OnTeamChangeClick, this));
 
 	}
 
 	return;
 }
 
-bool MenuState::onMatchStartButton(const CEGUI::EventArgs &args)
+bool MenuState::OnMatchStartButton(const CEGUI::EventArgs &args)
 {
 	if(MatchStart())
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Match Start Event");
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Match Start Event");
 		return true;
 	}
 	else
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("ERROR!! Match Start FAILED");
+		OgreFramework::getSingletonPtr()->m_log->logMessage("ERROR!! Match Start FAILED");
 		return false;
 	}
 	return true;
@@ -829,19 +829,19 @@ bool MenuState::MatchStart()
 {
 	if(RTT::StartMatch())
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Let the game BEGIN!  FIGHT!!");
-		changeAppState(findByName("GameState"));
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Let the game BEGIN!  FIGHT!!");
+		ChangeAppState(FindByName("GameState"));
 		return true;
 	}
 	else
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Failed to start match");
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Failed to start match");
 		return false;
 	}
 	return true;
 }
 
-bool MenuState::onTeamChangeClick(const CEGUI::EventArgs& args)
+bool MenuState::OnTeamChangeClick(const CEGUI::EventArgs& args)
 {
 	const CEGUI::WindowEventArgs teamChange = static_cast<const CEGUI::WindowEventArgs&>(args);
 
@@ -850,16 +850,16 @@ bool MenuState::onTeamChangeClick(const CEGUI::EventArgs& args)
 
 	CEGUI::ListboxTextItem *teamItem = (CEGUI::ListboxTextItem*)newTeam->getSelectedItem();
 
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Trying to change Player " +Ogre::StringConverter::toString((int)newTeam->getID())+ "'s team.");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Trying to change Player " +Ogre::StringConverter::toString((int)newTeam->getID())+ "'s team.");
 
 	if(RTT::ChangeTeam(newTeam->getID(), (enum TeamNumber)teamItem->getID()))
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player " +Ogre::StringConverter::toString((int)newTeam->getID())+ " is now on Team " +
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Player " +Ogre::StringConverter::toString((int)newTeam->getID())+ " is now on Team " +
 				Ogre::StringConverter::toString((int)teamItem->getID()));
 	}
 	else
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("WARNING: Change of team on the server failed!");
+		OgreFramework::getSingletonPtr()->m_log->logMessage("WARNING: Change of team on the server failed!");
 		teamItem = (CEGUI::ListboxTextItem*)newTeam->getListboxItemFromIndex((uint)m_currentPlayers[newTeam->getID()].m_team);
 		teamItem->setSelected(true);
 		newTeam->setText(teamItem->getText());
@@ -867,7 +867,7 @@ bool MenuState::onTeamChangeClick(const CEGUI::EventArgs& args)
 	return true;
 }
 
-bool MenuState::onLeaderClick(const CEGUI::EventArgs &args)
+bool MenuState::OnLeaderClick(const CEGUI::EventArgs &args)
 {
 	CEGUI::RadioButton *leaderRadio = (CEGUI::RadioButton*)
 			CEGUI::WindowManager::getSingleton().getWindow("IsLeader" +
@@ -875,20 +875,20 @@ bool MenuState::onLeaderClick(const CEGUI::EventArgs &args)
 	uint newLeaderID = leaderRadio->getSelectedButtonInGroup()->getID();
 	if(newLeaderID != m_currentMatch.m_leaderID)
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage(
+		OgreFramework::getSingletonPtr()->m_log->logMessage(
 				"Trying to change Leader from " + Ogre::StringConverter::toString(
 				(int)m_currentMatch.m_leaderID) + " to " +
 				Ogre::StringConverter::toString((int)newLeaderID));
 
 		if(RTT::ChangeLeader(newLeaderID) == false)
 		{
-			OgreFramework::getSingletonPtr()->m_pLog->logMessage(
+			OgreFramework::getSingletonPtr()->m_log->logMessage(
 					"WARNING: Change of leader on the server failed");
 			m_currentMatch.m_leaderID = newLeaderID;
 			return true;
 		}
 
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage(
+		OgreFramework::getSingletonPtr()->m_log->logMessage(
 				"Successful leader change from " + Ogre::StringConverter::toString(
 				(int)m_currentMatch.m_leaderID) +
 				" to " + Ogre::StringConverter::toString((int)newLeaderID));
@@ -910,25 +910,25 @@ bool MenuState::onLeaderClick(const CEGUI::EventArgs &args)
 	return true;
 }
 
-void MenuState::serverLobby()
+void MenuState::ServerLobby()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Server Lobby");
-	CEGUI::Window *pMainWnd = CEGUI::WindowManager::getSingleton().getWindow(
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Server Lobby");
+	CEGUI::Window *mainWnd = CEGUI::WindowManager::getSingleton().getWindow(
 			"RTT_ServerLobby");
-	OgreFramework::getSingletonPtr()->m_pGUISystem->setGUISheet(pMainWnd);
-	CEGUI::FrameWindow *pCreateMatchWnd = (CEGUI::FrameWindow*)pMainWnd->getChild(
+	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(mainWnd);
+	CEGUI::FrameWindow *pCreateMatchWnd = (CEGUI::FrameWindow*)mainWnd->getChild(
 			"RTT_CreateMatchWindow");
 	pCreateMatchWnd->setVisible(false);
-	m_bInMatch = false;
+	m_inMatch = false;
 	m_currentMatch.m_ID = 0;
-	mLocation = SERVERLOBBY;
-	listMatches();
+	m_location = SERVERLOBBY;
+	DisplayMatches();
 	return;
 }
 
-void MenuState::listMatches()
+void MenuState::DisplayMatches()
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Listing Matches...");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Listing Matches...");
 
 	boost::posix_time::ptime epoch(boost::gregorian::date(1970,boost::gregorian::Jan,1));
 	//TODO: Unused variable?
@@ -937,52 +937,52 @@ void MenuState::listMatches()
 	uint numMatchesThisPage = ListMatches(1, descriptions);
 	CEGUI::ListboxTextItem *itemMultiColumnList;
 
-	multiColumnListMatch->resetList();
+	m_ultiColumnListMatch->resetList();
 
 	for(uint i = 0; i < numMatchesThisPage; i++)
 	{
-		multiColumnListMatch->addRow((int)descriptions[i].m_ID);
+		m_ultiColumnListMatch->addRow((int)descriptions[i].m_ID);
 		itemMultiColumnList = new CEGUI::ListboxTextItem(
 				CEGUI::PropertyHelper::intToString((int)descriptions[i].m_ID), i);
-		itemMultiColumnList->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
-		multiColumnListMatch->setItem(itemMultiColumnList, 0, i);
+		itemMultiColumnList->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_GUIType+"Images", "Select");
+		m_ultiColumnListMatch->setItem(itemMultiColumnList, 0, i);
 
 		CEGUI::String playerCount = CEGUI::PropertyHelper::intToString(
 				(int)descriptions[i].m_currentPlayerCount) + "/" +
 				CEGUI::PropertyHelper::intToString((int)descriptions[i].m_maxPlayers);
 
 		itemMultiColumnList = new CEGUI::ListboxTextItem(playerCount, i);
-		itemMultiColumnList->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
-		multiColumnListMatch->setItem(itemMultiColumnList, 1, i);
+		itemMultiColumnList->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_GUIType+"Images", "Select");
+		m_ultiColumnListMatch->setItem(itemMultiColumnList, 1, i);
 
 		itemMultiColumnList = new CEGUI::ListboxTextItem(descriptions[i].m_name, i);
-		itemMultiColumnList->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
-		multiColumnListMatch->setItem(itemMultiColumnList, 2, i);
+		itemMultiColumnList->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_GUIType+"Images", "Select");
+		m_ultiColumnListMatch->setItem(itemMultiColumnList, 2, i);
 
 		boost::posix_time::ptime time = epoch +
 				boost::posix_time::seconds(descriptions[i].m_timeCreated);
 		std::string timeString = boost::posix_time::to_simple_string(time);
 
 		itemMultiColumnList = new CEGUI::ListboxTextItem(timeString.c_str(), i);
-		itemMultiColumnList->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
-		multiColumnListMatch->setItem(itemMultiColumnList, 4, i);
+		itemMultiColumnList->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_GUIType+"Images", "Select");
+		m_ultiColumnListMatch->setItem(itemMultiColumnList, 4, i);
 
 	}
 	return;
 }
 
-bool MenuState::listMatchesButton(const CEGUI::EventArgs &args)
+bool MenuState::DisplayMatchesButton(const CEGUI::EventArgs &args)
 {
-	listMatches();
+	DisplayMatches();
 	return true;
 }
 
-bool MenuState::createMatchButton(const CEGUI::EventArgs &args)
+bool MenuState::CreateMatchButton(const CEGUI::EventArgs &args)
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_ServerLobby");
 	CEGUI::FrameWindow *pCreateMatchWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CreateMatchWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CreateMatchWindow");
 	pCreateMatchWnd->setVisible(true);
 
 	CEGUI::Combobox *mapCombobox =
@@ -990,14 +990,14 @@ bool MenuState::createMatchButton(const CEGUI::EventArgs &args)
 	mapCombobox->setReadOnly(true);
 	mapCombobox->resetList();
 	CEGUI::ListboxTextItem *itemCombobox = new CEGUI::ListboxTextItem("Cool Map", 1);
-	itemCombobox->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
+	itemCombobox->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_GUIType+"Images", "Select");
 	mapCombobox->addItem(itemCombobox);
 	itemCombobox = new CEGUI::ListboxTextItem("Even Cooler Map", 2);
-	itemCombobox->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
+	itemCombobox->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_GUIType+"Images", "Select");
 	itemCombobox->setSelected(true);
 	mapCombobox->addItem(itemCombobox);
 	itemCombobox = new CEGUI::ListboxTextItem("ZOMFG", 3);
-	itemCombobox->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
+	itemCombobox->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_GUIType+"Images", "Select");
 	mapCombobox->addItem(itemCombobox);
 
 	CEGUI::Combobox *maxPlayersCombobox =
@@ -1015,23 +1015,23 @@ bool MenuState::createMatchButton(const CEGUI::EventArgs &args)
 		//i-min+1 so the first value is placed in the first item
 		itemCombobox = new CEGUI::ListboxTextItem(
 				Ogre::StringConverter::toString(i), (i-min+1) );
-		itemCombobox->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_pGUIType+"Images", "Select");
+		itemCombobox->setSelectionBrushImage(OgreFramework::getSingletonPtr()->m_GUIType+"Images", "Select");
 		maxPlayersCombobox->addItem(itemCombobox);
 	}
 
-	mLocation = CREATEMATCH;
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Create Match Menu");
+	m_location = CREATEMATCH;
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Create Match Menu");
 	return true;
 }
 
-bool MenuState::createMatchSubmitButton(const CEGUI::EventArgs &args)
+bool MenuState::CreateMatchSubmitButton(const CEGUI::EventArgs &args)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage(
+	OgreFramework::getSingletonPtr()->m_log->logMessage(
 			"Attempting to creating Match...");
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_ServerLobby");
 	CEGUI::FrameWindow *pCreateMatchWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CreateMatchWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CreateMatchWindow");
 
 	CEGUI::Editbox *matchNameBox =
 			(CEGUI::Editbox*)pCreateMatchWnd->getChild("MatchNameBox");
@@ -1077,7 +1077,7 @@ bool MenuState::createMatchSubmitButton(const CEGUI::EventArgs &args)
 
 	if (CreateMatch(options, &m_currentMatch) )
 	{
-		matchLobby();
+		MatchLobby();
 	}
 	else
 	{
@@ -1087,12 +1087,12 @@ bool MenuState::createMatchSubmitButton(const CEGUI::EventArgs &args)
 	return true;
 }
 
-bool MenuState::onMatchNameActivate(const CEGUI::EventArgs &args)
+bool MenuState::OnMatchNameActivate(const CEGUI::EventArgs &args)
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_ServerLobby");
 	CEGUI::FrameWindow *pCreateMatchWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CreateMatchWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CreateMatchWindow");
 	CEGUI::Editbox *tMatchNameBox =
 			(CEGUI::Editbox*)pCreateMatchWnd->getChild("MatchNameBox");
 	if(tMatchNameBox->getText() == "Enter Match Name...")
@@ -1102,12 +1102,12 @@ bool MenuState::onMatchNameActivate(const CEGUI::EventArgs &args)
 	return true;
 }
 
-bool MenuState::onMatchNameDeactivate(const CEGUI::EventArgs &args)
+bool MenuState::OnMatchNameDeactivate(const CEGUI::EventArgs &args)
 {
-	CEGUI::Window *pMainWnd =
+	CEGUI::Window *mainWnd =
 			CEGUI::WindowManager::getSingleton().getWindow("RTT_ServerLobby");
 	CEGUI::FrameWindow *pCreateMatchWnd =
-			(CEGUI::FrameWindow*)pMainWnd->getChild("RTT_CreateMatchWindow");
+			(CEGUI::FrameWindow*)mainWnd->getChild("RTT_CreateMatchWindow");
 	CEGUI::Editbox *tMatchNameBox =
 			(CEGUI::Editbox*)pCreateMatchWnd->getChild("MatchNameBox");
 	if(tMatchNameBox->getText() == "")
@@ -1120,15 +1120,15 @@ bool MenuState::onMatchNameDeactivate(const CEGUI::EventArgs &args)
 //Callback Events
 void MenuState::LeaderChangedEvent(MainLobbyCallbackChange *change)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Leader Change Event");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Leader Change Event");
 
 	CEGUI::RadioButton *newLeader;
 
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Unselected old leader");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Unselected old leader");
 	if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" +
 					CEGUI::PropertyHelper::intToString((int)change->m_playerID)))
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Found IsLeader" +
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Found IsLeader" +
 				Ogre::StringConverter::toString((int)change->m_playerID));
 
 		newLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().getWindow("IsLeader" +
@@ -1138,25 +1138,25 @@ void MenuState::LeaderChangedEvent(MainLobbyCallbackChange *change)
 
 		if(m_playerDescription.m_ID == m_currentMatch.m_leaderID)
 		{
-			enableLeader(true);
+			EnableLeader(true);
 		}
 		else
 		{
-			enableLeader(false);
+			EnableLeader(false);
 		}
 	}
 	else
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Found IsLeader" +
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Found IsLeader" +
 						Ogre::StringConverter::toString((int)change->m_playerID));
 		return;
 	}
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Selected new leader");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Selected new leader");
 
 	return;
 }
 
-void MenuState::enableLeader(bool value)
+void MenuState::EnableLeader(bool value)
 {
 	CEGUI::RadioButton *swapLeader;
 	for(int i = 0; i < 8; i++)
@@ -1173,7 +1173,7 @@ void MenuState::enableLeader(bool value)
 
 void MenuState::TeamChangedEvent(MainLobbyCallbackChange *change)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Team Change Event");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Team Change Event");
 
 	if(CEGUI::WindowManager::getSingleton().isWindowPresent("Team" + CEGUI::PropertyHelper::intToString((int)change.m_playerID)))
 	{
@@ -1244,23 +1244,23 @@ void MenuState::TeamChangedEvent(MainLobbyCallbackChange *change)
 }
 void MenuState::TeamColorChangedEvent(MainLobbyCallbackChange *change)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Team Color Change Event");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Team Color Change Event");
 }
 void MenuState::MapChangedEvent(MainLobbyCallbackChange *change)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Map Change Event");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Map Change Event");
 }
 void MenuState::GamespeedChangedEvent(MainLobbyCallbackChange *change)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("GameSpeed Change Event");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("GameSpeed Change Event");
 }
 void MenuState::VictoryConditionChangedEvent(MainLobbyCallbackChange *change)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Game Mode Change Event");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Game Mode Change Event");
 }
 void MenuState::PlayerLeftEvent(MainLobbyCallbackChange *change)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player Left Event");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Player Left Event");
 	m_currentMatch.m_currentPlayerCount--;
 
 	for(uint i = 0; i < m_currentPlayers.size(); i++)
@@ -1274,27 +1274,27 @@ void MenuState::PlayerLeftEvent(MainLobbyCallbackChange *change)
 }
 void MenuState::KickedFromMatchEvent(MainLobbyCallbackChange *change)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Kicked From Match Event");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Kicked From Match Event");
 }
 void MenuState::PlayerJoinedEvent(MainLobbyCallbackChange *change)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("Player Joined Event");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Player Joined Event");
 	m_currentMatch.m_currentPlayerCount++;
 	m_currentPlayers.push_back(change->m_playerDescription);
 	ListPlayers();
 }
 void MenuState::MatchStartedEvent(MainLobbyCallbackChange *change)
 {
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("Match Start Event");
-		changeAppState(findByName("GameState"));
+		OgreFramework::getSingletonPtr()->m_log->logMessage("Match Start Event");
+		ChangeAppState(FindByName("GameState"));
 }
 void MenuState::CallbackClosedEvent(MainLobbyCallbackChange *change)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("WARNING!!  Callback CLOSED event");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("WARNING!!  Callback CLOSED event");
 }
 void MenuState::CallbackErrorEvent(MainLobbyCallbackChange *change)
 {
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("ERROR!!  Callback ERROR Event");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("ERROR!!  Callback ERROR Event");
 }
 void MenuState::ProcessCallback(CallbackChange *change)
 {

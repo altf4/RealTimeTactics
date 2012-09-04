@@ -12,29 +12,29 @@
 
 DemoApp::DemoApp()
 {
-	m_pAppStateManager = NULL;
+	m_appStateManager = NULL;
 }
 
 DemoApp::~DemoApp()
 {
-	delete m_pAppStateManager;
+	delete m_appStateManager;
 	delete OgreFramework::getSingletonPtr();
 }
 
-void DemoApp::startDemo()
+void DemoApp::StartDemo()
 {
 	new OgreFramework();
-	if(!OgreFramework::getSingletonPtr()->initOgre("Real Time Tactics Render Window!", NULL, NULL))
+	if(!OgreFramework::getSingletonPtr()->InitOgre("Real Time Tactics Render Window!", NULL, NULL))
 	{
 		return;
 	}
 
-	OgreFramework::getSingletonPtr()->m_pLog->logMessage("RTT Client OGRE initialized!");
+	OgreFramework::getSingletonPtr()->m_log->logMessage("RTT Client OGRE initialized!");
 
-	m_pAppStateManager = new AppStateManager();
+	m_appStateManager = new AppStateManager();
 
-	MenuState::create(m_pAppStateManager, "MenuState");
-	GameState::create(m_pAppStateManager, "GameState");
+	MenuState::create(m_appStateManager, "MenuState");
+	GameState::create(m_appStateManager, "GameState");
 
-	m_pAppStateManager->start(m_pAppStateManager->findByName("MenuState"));
+	m_appStateManager->Start(m_appStateManager->FindByName("MenuState"));
 }
