@@ -41,102 +41,82 @@ Player::Player(string username, uint newID)
 
 string Player::GetName()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	string nameCopy = m_name;
-	pthread_rwlock_unlock(&m_lock);
-	return nameCopy;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_name;
 }
 
 uint Player::GetID()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	uint ID_Copy = m_ID;
-	pthread_rwlock_unlock(&m_lock);
-	return ID_Copy;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_ID;
 }
 
 enum TeamNumber Player::GetTeam()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	enum TeamNumber teamCopy = m_team;
-	pthread_rwlock_unlock(&m_lock);
-	return teamCopy;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_team;
 }
 
 enum TeamColor Player::GetColor()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	enum TeamColor colorCopy = m_color;
-	pthread_rwlock_unlock(&m_lock);
-	return colorCopy;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_color;
 }
 
 int Player::GetSocket()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	int socketCopy = m_socketFD;
-	pthread_rwlock_unlock(&m_lock);
-	return socketCopy;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_socketFD;
 }
 
 uint Player::GetCurrentMatchID()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	uint matchIDCopy = m_currentMatchID;
-	pthread_rwlock_unlock(&m_lock);
-	return matchIDCopy;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_currentMatchID;
 }
 
 struct PlayerDescription Player::GetDescription()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	struct PlayerDescription desrcCopy = m_description;
-	pthread_rwlock_unlock(&m_lock);
-	return desrcCopy;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_description;
 }
 
 void Player::SetName(string newName)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_name = newName;
 	strncpy(m_description.m_name, newName.c_str(), sizeof(m_description.m_name));
-	pthread_rwlock_unlock(&m_lock);
 }
 
 void Player::SetID(uint newID)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_ID = newID;
 	m_description.m_ID = newID;
-	pthread_rwlock_unlock(&m_lock);
 }
 
 void Player::SetTeam(enum TeamNumber newTeam)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_team = newTeam;
 	m_description.m_team = newTeam;
-	pthread_rwlock_unlock(&m_lock);
 }
 
 void Player::SetColor(enum TeamColor newColor)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_color = newColor;
 	m_description.m_color = newColor;
-	pthread_rwlock_unlock(&m_lock);
 }
 
 void Player::SetSocket(int socket)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_socketFD = socket;
-	pthread_rwlock_unlock(&m_lock);
 }
 
 void Player::SetCurrentMatchID(int matchID)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_currentMatchID = matchID;
-	pthread_rwlock_unlock(&m_lock);
 }

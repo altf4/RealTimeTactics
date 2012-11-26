@@ -110,14 +110,16 @@ Player *RTT::GetNewClient(Ticket &ticket)
 	Player *player = NULL;
 	if( authresult == AUTH_SUCCESS)
 	{
-		pthread_rwlock_wrlock(&playerIDLock);
-		uint ID = ++lastPlayerID;
-		pthread_rwlock_unlock(&playerIDLock);
-
+		uint ID;
+		{
+			Lock lock(&playerIDLock, WRITE_LOCK);
+			ID = ++lastPlayerID;
+		}
 		player = new Player(client_auth->m_username, ID);
-		pthread_rwlock_wrlock(&playerListLock);
-		playerList[ID] = player;
-		pthread_rwlock_unlock(&playerListLock);
+		{
+			Lock lock(&playerListLock, WRITE_LOCK);
+			playerList[ID] = player;
+		}
 	}
 
 	delete client_auth;
@@ -249,7 +251,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(Ticket &ticket, Player *player)
 
 			if( matchID == 0 )
 			{
-				//TODO: Find a better error message hereb
+				//TODO: Find a better error message
 				SendError(ticket, TOO_BUSY);
 				delete lobby_message;
 				return IN_MAIN_LOBBY;
@@ -260,10 +262,12 @@ enum LobbyReturn RTT::ProcessLobbyCommand(Ticket &ticket, Player *player)
 			// Send Match Create Reply
 			//***************************
 			LobbyMessage create_reply(MATCH_CREATE_REPLY);
-			pthread_rwlock_rdlock(&matchListLock);
-			Match *joinedMatch = matchList[matchID];
-			create_reply.m_matchDescription = joinedMatch->GetDescription();
-			pthread_rwlock_unlock(&matchListLock);
+			Match *joinedMatch;
+			{
+				Lock lock(&matchListLock, READ_LOCK);
+				joinedMatch = matchList[matchID];
+				create_reply.m_matchDescription = joinedMatch->GetDescription();
+			}
 			if( MessageManager::Instance().WriteMessage(ticket, &create_reply) == false)
 			{
 				//Error in write, do something?
@@ -289,11 +293,11 @@ enum LobbyReturn RTT::ProcessLobbyCommand(Ticket &ticket, Player *player)
 					// Send Match Join Reply
 					//***************************
 					LobbyMessage match_join(MATCH_JOIN_REPLY);
-
-					pthread_rwlock_rdlock(&matchListLock);
-					Match *joinedMatch = matchList[lobby_message->m_ID];
-					pthread_rwlock_unlock(&matchListLock);
-
+					Match *joinedMatch;
+					{
+						Lock lock(&matchListLock, READ_LOCK);
+						joinedMatch = matchList[lobby_message->m_ID];
+					}
 					match_join.m_matchDescription = joinedMatch->GetDescription();
 
 					//Put in the player descriptions of current members
@@ -360,14 +364,14 @@ enum LobbyReturn RTT::ProcessLobbyCommand(Ticket &ticket, Player *player)
 			//*******************************
 			LobbyMessage stats_reply(SERVER_STATS_REPLY);
 
-			pthread_rwlock_rdlock(&matchListLock);
-			stats_reply.m_serverStats.m_numMatches = matchList.size();
-			pthread_rwlock_unlock(&matchListLock);
-
-			pthread_rwlock_rdlock(&playerListLock);
-			stats_reply.m_serverStats.m_numPlayers = playerList.size();
-			pthread_rwlock_unlock(&playerListLock);
-
+			{
+				Lock lock(&matchListLock, READ_LOCK);
+				stats_reply.m_serverStats.m_numMatches = matchList.size();
+			}
+			{
+				Lock lock(&playerListLock, READ_LOCK);
+				stats_reply.m_serverStats.m_numPlayers = playerList.size();
+			}
 			if( MessageManager::Instance().WriteMessage(ticket, &stats_reply) == false )
 			{
 				//Error in write, do something?
@@ -411,21 +415,18 @@ enum LobbyReturn RTT::ProcessLobbyCommand(Ticket &ticket, Player *player)
 enum AuthResult RTT::AuthenticateClient(char *username, unsigned char *hashedPassword)
 {
 	//TODO: Authenticate!
-
+	Lock lock(&playerListLock, READ_LOCK);
 	//Check if the username exists in the active list
-	pthread_rwlock_rdlock(&playerListLock);
 	PlayerList::iterator it = playerList.begin();
 	for(; it != playerList.end(); ++it)
 	{
 		if( it->second->GetName().compare(username) == 0)
 		{
-			pthread_rwlock_unlock(&playerListLock);
 			return USERNAME_ALREADY_EXISTS;
 		}
 	}
 
 	//TODO: Check if the username exists in the non-active list (from file on disk)
-	pthread_rwlock_unlock(&playerListLock);
 	return AUTH_SUCCESS;
 }
 
@@ -444,13 +445,14 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(Ticket &ticket, Player *player)
 	uint matchID = player->GetCurrentMatchID();
 	uint playerID = player->GetID();
 
-	pthread_rwlock_rdlock(&matchListLock);
 	Match *playersMatch = NULL;
-	if( matchList.count(matchID) != 0)
 	{
-		playersMatch = matchList[matchID];
+		Lock lock(&matchListLock, READ_LOCK);
+		if( matchList.count(matchID) != 0)
+		{
+			playersMatch = matchList[matchID];
+		}
 	}
-	pthread_rwlock_unlock(&matchListLock);
 
 	//********************************
 	// Receive Initial MatchLobby Message
@@ -545,17 +547,16 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(Ticket &ticket, Player *player)
 			Player *changingPlayer = NULL;
 			bool changed = false;
 
-			pthread_rwlock_wrlock(&playerListLock);
-			if( playerList.count(match_lobby_message->m_playerID) > 0 )
 			{
-				changingPlayer = playerList[match_lobby_message->m_playerID];
-				pthread_rwlock_unlock(&playerListLock);
-				changed = playersMatch->ChangeTeam(changingPlayer
-					, match_lobby_message->m_newTeam);
+				Lock lock(&playerListLock, WRITE_LOCK);
+				if( playerList.count(match_lobby_message->m_playerID) > 0 )
+				{
+					changingPlayer = playerList[match_lobby_message->m_playerID];
+				}
 			}
-			else
+			if(changingPlayer != NULL)
 			{
-				pthread_rwlock_unlock(&playerListLock);
+				changed = playersMatch->ChangeTeam(changingPlayer, match_lobby_message->m_newTeam);
 			}
 
 			//*******************************
@@ -669,21 +670,21 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(Ticket &ticket, Player *player)
 				}
 			}
 
-			pthread_rwlock_rdlock(&playerListLock);
-			if( playerList.count(match_lobby_message->m_playerID) != 0 )
 			{
-				playerList[match_lobby_message->m_playerID]->SetColor(
-						match_lobby_message->m_newColor);
+				Lock lock(&playerListLock, READ_LOCK);
+				if( playerList.count(match_lobby_message->m_playerID) != 0 )
+				{
+					playerList[match_lobby_message->m_playerID]->SetColor(
+							match_lobby_message->m_newColor);
+				}
+				else
+				{
+					//Error, there is no such player
+					SendError(ticket, NO_SUCH_PLAYER);
+					ret = IN_MATCH_LOBBY;
+					break;
+				}
 			}
-			else
-			{
-				//Error, there is no such player
-				pthread_rwlock_unlock(&playerListLock);
-				SendError(ticket, NO_SUCH_PLAYER);
-				ret = IN_MATCH_LOBBY;
-				break;
-			}
-			pthread_rwlock_unlock(&playerListLock);
 
 			//*******************************
 			// Send CHANGE COLOR REPLY
@@ -975,13 +976,14 @@ enum LobbyReturn RTT::ProcessGameCommand(Ticket &ticket, Player *player)
 
 	uint matchID = player->GetCurrentMatchID();
 
-	pthread_rwlock_rdlock(&matchListLock);
 	Match *playersMatch = NULL;
-	if( matchList.count(matchID) != 0)
 	{
-		playersMatch = matchList[matchID];
+		Lock lock(&matchListLock, READ_LOCK);
+		if( matchList.count(matchID) != 0)
+		{
+			playersMatch = matchList[matchID];
+		}
 	}
-	pthread_rwlock_unlock(&matchListLock);
 
 	Message *message = MessageManager::Instance().ReadMessage(ticket);
 	if(message->m_messageType != MESSAGE_GAME)

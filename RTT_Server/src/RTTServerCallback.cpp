@@ -118,11 +118,11 @@ void RTTServerCallback::QuitServer(Player *player)
 
 	int ID = player->GetID();
 	//Remove from the list of current players
-	pthread_rwlock_wrlock(&playerListLock);
-	playerList[ID] = NULL;
-	playerList.erase(ID);
-	pthread_rwlock_unlock(&playerListLock);
-
+	{
+		Lock lock(&playerListLock, WRITE_LOCK);
+		playerList[ID] = NULL;
+		playerList.erase(ID);
+	}
 	delete player;
 }
 

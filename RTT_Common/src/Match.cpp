@@ -30,7 +30,7 @@ Match::Match(Player *player)
 
 Match::~Match()
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
 		if( m_teams[i] != NULL )
@@ -38,78 +38,68 @@ Match::~Match()
 			delete m_teams[i];
 		}
 	}
-	pthread_rwlock_unlock(&m_lock);
 }
 
 //SET methods
 void Match::SetID(uint newID)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_ID = newID;
 	m_description.m_ID = newID;
-	pthread_rwlock_unlock(&m_lock);
 }
 
 void Match::SetStatus(enum Status newStatus)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_status = newStatus;
 	m_description.m_status = newStatus;
-	pthread_rwlock_unlock(&m_lock);
 }
 
 void Match::SetMaxPlayers(uint newMaxPlayers)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_maxPlayers = newMaxPlayers;
 	m_description.m_maxPlayers = newMaxPlayers;
-	pthread_rwlock_unlock(&m_lock);
 }
 
 void Match::SetName(string newName)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_name = newName;
 	m_name.resize(MAX_MATCHNAME_LEN);
 	strncpy(m_description.m_name, newName.c_str(), MAX_MATCHNAME_LEN);
-	pthread_rwlock_unlock(&m_lock);
 }
 
 void Match::SetMap(struct MapDescription newMap)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_map = newMap;
-	pthread_rwlock_unlock(&m_lock);
 }
 
 void Match::SetVictoryCondition(enum VictoryCondition newVict)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_victoryCondition = newVict;
-	pthread_rwlock_unlock(&m_lock);
 }
 
 void Match::SetGamespeed(enum GameSpeed newSpeed)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_gameSpeed = newSpeed;
-	pthread_rwlock_unlock(&m_lock);
 }
 
 //Returns false if the given ID is not in this match
 bool Match::SetLeader(uint newID)
 {
-	pthread_rwlock_wrlock(&m_lock);
+	Lock lock(&m_lock, WRITE_LOCK);
 	if( GetPlayer(newID) == NULL)
 	{
-		pthread_rwlock_unlock(&m_lock);
 		return false;
 	}
 	else
 	{
 		m_leaderID = newID;
 		m_description.m_leaderID = newID;
-		pthread_rwlock_unlock(&m_lock);
 		return true;
 	}
 }
@@ -117,105 +107,83 @@ bool Match::SetLeader(uint newID)
 //GET methods
 enum Status Match::GetStatus()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	enum Status tempStatus = m_status;
-	pthread_rwlock_unlock(&m_lock);
-	return tempStatus;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_status;
 }
 
 uint Match::GetID()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	uint tempID = m_ID;
-	pthread_rwlock_unlock(&m_lock);
-	return tempID;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_ID;
 }
 
 uint Match::GetMaxPlayers()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	uint tempMax = m_maxPlayers;
-	pthread_rwlock_unlock(&m_lock);
-	return tempMax;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_maxPlayers;
 }
 
 uint Match::GetCurrentPlayerCount()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	uint tempCurr = m_currentPlayerCount;
-	pthread_rwlock_unlock(&m_lock);
-	return tempCurr;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_currentPlayerCount;
 }
 
 string Match::GetName()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	string tempName = m_name;
-	pthread_rwlock_unlock(&m_lock);
-	return tempName;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_name;
 }
 
 uint Match::GetLeaderID()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	uint tempID = m_leaderID;
-	pthread_rwlock_unlock(&m_lock);
-	return tempID;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_leaderID;
 }
 
 struct MatchDescription Match::GetDescription()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	struct MatchDescription tempDesc = m_description;
-	pthread_rwlock_unlock(&m_lock);
-	return tempDesc;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_description;
 }
 
 struct MapDescription Match::GetMap()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	struct MapDescription tempMap = m_map;
-	pthread_rwlock_unlock(&m_lock);
-	return tempMap;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_map;
 }
 
 enum VictoryCondition Match::GetVictoryCondition()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	enum VictoryCondition tempVict = m_victoryCondition;
-	pthread_rwlock_unlock(&m_lock);
-	return tempVict;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_victoryCondition;
 }
 
 enum GameSpeed Match::GetGamespeed()
 {
-	pthread_rwlock_rdlock(&m_lock);
-	enum GameSpeed tempSpeed = m_gameSpeed;
-	pthread_rwlock_unlock(&m_lock);
-	return tempSpeed;
+	Lock lock(&m_lock, READ_LOCK);
+	return m_gameSpeed;
 }
 
 bool Match::AddPlayer(Player *player, enum TeamNumber teamNum)
 {
-	pthread_rwlock_rdlock(&m_lock);
-	if( m_currentPlayerCount >= m_maxPlayers )
 	{
-		pthread_rwlock_unlock(&m_lock);
-		return false;
+		Lock lock(&m_lock, WRITE_LOCK);
+		if( m_currentPlayerCount >= m_maxPlayers )
+		{
+			return false;
+		}
+		if( teamNum > REFEREE)
+		{
+			return false;
+		}
 	}
-	if( teamNum > REFEREE)
-	{
-		pthread_rwlock_unlock(&m_lock);
-		return false;
-	}
-	pthread_rwlock_unlock(&m_lock);
-
 	m_teams[teamNum]->AddPlayer(player);
-
-	pthread_rwlock_wrlock(&m_lock);
-	m_currentPlayerCount++;
-	m_description.m_currentPlayerCount++;
-	pthread_rwlock_unlock(&m_lock);
+	{
+		Lock lock(&m_lock, WRITE_LOCK);
+		m_currentPlayerCount++;
+		m_description.m_currentPlayerCount++;
+	}
 
 	return true;
 }
@@ -228,7 +196,7 @@ bool Match::RemovePlayer( uint playerID )
 		if( m_teams[i]->RemovePlayer(playerID))
 		{
 			uint nextID = GetFirstPlayerID();
-			pthread_rwlock_wrlock(&m_lock);
+			Lock lock(&m_lock, WRITE_LOCK);
 			if( m_leaderID == playerID )
 			{
 				m_leaderID = nextID;
@@ -236,8 +204,6 @@ bool Match::RemovePlayer( uint playerID )
 			}
 			m_currentPlayerCount--;
 			m_description.m_currentPlayerCount--;
-			pthread_rwlock_unlock(&m_lock);
-
 			return true;
 		}
 	}
@@ -381,19 +347,14 @@ string Match::VictoryConditionToString(enum VictoryCondition victory)
 //		IE: This fact is important for the server to spawn a match loop thread
 bool Match::RegisterPlayer(uint playerID)
 {
-	pthread_rwlock_wrlock(&m_lock);
-
+	Lock lock(&m_lock, WRITE_LOCK);
 	m_registeredPlayers.push_back(playerID);
 
 	//If now full:
 	if(m_registeredPlayers.size() == m_currentPlayerCount)
 	{
-		pthread_rwlock_unlock(&m_lock);
 		return true;
 	}
 
-	pthread_rwlock_unlock(&m_lock);
 	return false;
-
-
 }

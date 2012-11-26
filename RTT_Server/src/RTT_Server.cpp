@@ -13,6 +13,7 @@
 #include "ServerProtocolHandler.h"
 #include "Player.h"
 #include "RTTServerCallback.h"
+#include "Lock.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -152,13 +153,12 @@ void RTT::ProcessRound(Match *match)
 //	Returns: The number of matches written
 uint RTT::GetMatchDescriptions(uint page, MatchDescription *descArray)
 {
-	pthread_rwlock_rdlock(&matchListLock);
+	Lock lock(&matchListLock, READ_LOCK);
 	MatchList::iterator it = matchList.begin();
 	uint count = 0;
 
 	if(matchList.empty())
 	{
-		pthread_rwlock_unlock(&matchListLock);
 		return 0;
 	}
 
@@ -179,14 +179,12 @@ uint RTT::GetMatchDescriptions(uint page, MatchDescription *descArray)
 	{
 		if(it == matchList.end())
 		{
-			pthread_rwlock_unlock(&matchListLock);
 			return i;
 		}
 		descArray[i] = it.pos->second->GetDescription();
 		it++;
 	}
 
-	pthread_rwlock_unlock(&matchListLock);
 	return MATCHES_PER_PAGE;
 }
 
@@ -197,17 +195,17 @@ uint RTT::GetMatchDescriptions(uint page, MatchDescription *descArray)
 //	Returns: The number of matches written
 uint RTT::GetPlayerDescriptions(uint matchID, PlayerDescription *descArray)
 {
-	pthread_rwlock_rdlock(&matchListLock);
-
-	if( matchList.count(matchID) == 0 )
+	Match *joinedMatch;
 	{
-		pthread_rwlock_unlock(&matchListLock);
-		return 0;
+		Lock lock(&matchListLock, READ_LOCK);
+
+		if( matchList.count(matchID) == 0 )
+		{
+			return 0;
+		}
+
+		joinedMatch = matchList[matchID];
 	}
-
-	Match *joinedMatch = matchList[matchID];
-	pthread_rwlock_unlock(&matchListLock);
-
 	uint count = 0;
 	for(uint i = 0; i < MAX_TEAMS; i++)
 	{
@@ -231,10 +229,11 @@ uint RTT::RegisterNewMatch(Player *player, struct MatchOptions options)
 	{
 		return 0;
 	}
-	pthread_rwlock_wrlock(&matchIDLock);
-	uint matchID = ++lastMatchID;
-	pthread_rwlock_unlock(&matchIDLock);
-
+	uint matchID;
+	{
+		Lock lock(&matchIDLock, READ_LOCK);
+		matchID = ++lastMatchID;
+	}
 	Match *match = new Match(player);
 	match->SetID(matchID);
 	match->SetStatus(WAITING_FOR_PLAYERS);
@@ -242,9 +241,10 @@ uint RTT::RegisterNewMatch(Player *player, struct MatchOptions options)
 	match->SetName(options.m_name);
 
 	//Put the match in the global match list
-	pthread_rwlock_wrlock(&matchListLock);
-	matchList[matchID] = match;
-	pthread_rwlock_unlock(&matchListLock);
+	{
+		Lock lock(&matchListLock, READ_LOCK);
+		matchList[matchID] = match;
+	}
 
 	//Put the match in this player's current match
 	player->SetCurrentMatchID(match->GetID());
@@ -270,14 +270,15 @@ enum LobbyResult RTT::JoinMatch(Player *player, uint matchID)
 		return LOBBY_ALREADY_IN_MATCH;
 	}
 
-	pthread_rwlock_rdlock(&matchListLock);
-	if( matchList.count(matchID) == 0)
+	Match *foundMatch;
 	{
-		pthread_rwlock_unlock(&matchListLock);
-		return LOBBY_MATCH_DOESNT_EXIST;
+		Lock lock(&matchListLock, READ_LOCK);
+		if( matchList.count(matchID) == 0)
+		{
+			return LOBBY_MATCH_DOESNT_EXIST;
+		}
+		foundMatch = matchList[matchID];
 	}
-	Match *foundMatch = matchList[matchID];
-	pthread_rwlock_unlock(&matchListLock);
 
 	if( foundMatch->GetCurrentPlayerCount() == foundMatch->GetMaxPlayers())
 	{
@@ -319,16 +320,15 @@ bool RTT::LeaveMatch(Player *player)
 		return false;
 	}
 	uint matchID = player->GetCurrentMatchID();
-
-	pthread_rwlock_rdlock(&matchListLock);
-	if( matchList.count(matchID) == 0 )
+	Match *foundMatch;
 	{
-		pthread_rwlock_unlock(&matchListLock);
-		return false;
+		Lock lock(&matchListLock, READ_LOCK);
+		if( matchList.count(matchID) == 0 )
+		{
+			return false;
+		}
+		foundMatch = matchList[matchID];
 	}
-	Match *foundMatch = matchList[matchID];
-	pthread_rwlock_unlock(&matchListLock);
-
 	foundOne = foundMatch->RemovePlayer( player->GetID() );
 	if( !foundOne )
 	{
@@ -340,9 +340,10 @@ bool RTT::LeaveMatch(Player *player)
 	if( foundMatch->GetCurrentPlayerCount() == 0 )
 	{
 		delete foundMatch;
-		pthread_rwlock_wrlock(&matchListLock);
-		matchList.erase(matchID);
-		pthread_rwlock_unlock(&matchListLock);
+		{
+			Lock lock(&matchListLock, WRITE_LOCK);
+			matchList.erase(matchID);
+		}
 		return true;
 	}
 
