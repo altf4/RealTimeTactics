@@ -21,72 +21,74 @@
 
 #include "messages/Message.h"
 #include "MessageQueue.h"
+#include "MessageEndpoint.h"
+#include "MessageEndpointLock.h"
+#include "ServerCallback.h"
 #include "../Lock.h"
+#include "Ticket.h"
 
 #include <map>
 #include <vector>
 #include "pthread.h"
+#include "event.h"
 
 namespace RTT
 {
+
+struct CallbackArg
+{
+	struct event_base *m_base;
+	ServerCallback *m_callback;
+};
+
 
 class MessageManager
 {
 
 public:
 
-	//Initialize must be called once at the beginning of the program, before any calls to Instance()
-	//	It informs the MessageManager which side of the protocol it will be handling.
-	//	direction - Tells MessageManager what side of the protocol
-	static void Initialize(enum ProtocolDirection direction);
 	static MessageManager &Instance();
 
 	//Grabs a message off of the given socket and returns a pointer to it
-	//	socketFD - The file descriptor of the socket to grab from
-	//	ProtocolDirection - Which direction is PROTOCOL to which this message belongs initiated
+	//	ticket - Ticket object holding all the necessary conversation info to pop a new message
 	//	timeout - How long (in seconds) to wait for the message before giving up
 	// Returns - A pointer to a valid Message object. Never NULL. Caller is responsible for life cycle of this message
 	//		On error, this function returns an ErrorMessage with the details of the error
 	//		IE: Returns ErrorMessage of type ERROR_TIMEOUT if timeout has been exceeded
-	//	NOTE: You must have the lock on the socket by calling UseSocket() prior to calling this
-	//		(Or bad things will happen)
+	//	NOTE: You can get a Ticket by calling StartConversation()
 	//	NOTE: Blocking function
-	//	NOTE: Will automatically call CloseSocket() for you if the message returned happens to be an ERROR_MESSAGE
-	//		of type ERROR_SOCKET_CLOSED. So there is no need to call it again yourself
 	//	NOTE: Due to physical constraints, this function may block for longer than timeout. Don't rely on it being very precise.
-	RTT::Message *PopMessage(int socketFD, enum ProtocolDirection direction, int timeout);
+	RTT::Message *ReadMessage(Ticket &ticket, int timeout = REPLY_TIMEOUT);
+
+	//Writes a given Message to the provided socket
+	//	ticket - Ticket object holding all the necessary conversation info to send this message
+	//	message - A pointer to the message object to send
+	// Returns - true on successfully sending the object, false on error
+	bool WriteMessage(const Ticket &ticket, Message *message);
+
+	//Informs the message manager that you would like to use the specified socket.
+	//	socketFD - The socket file descriptor to use
+	//	returns - A Ticket object which contains all the information necessary to have a conversation
+	//		on error, the Ticket object will be set with m_socketFD = -1
+	Ticket StartConversation(int socketFD);
 
 	//Initializes the socket and its underlying MessageQueues. Should be called prior to other socket operations on this socketFD
 	//	Failing to call StartSocket prior to use will cause you to get get ErrorMessges (but not crash)
 	//TODO: Maybe make the other functions automatically check and call this function for us. So we can make this private
 	//	socketFD - The socket file descriptor for which to make the initialization
-	//	returns - A reference to the newly created MessageQueue.
-	//NOTE: In order to use the returned MessageQueue safely, you must have a lock on it before calling this
+	//	bufferevent - The libevent structure used for i/o to this socket
 	//NOTE: Safely does nothing if socketFD already exists in the manager
-	MessageQueue &StartSocket(int socketFD);
-
-	//Informs the message manager that you would like to use the specified socket. Locks everyone else out from the socket.
-	//	socketFD - The socket file descriptor to use
-	//NOTE: Blocking function
-	Lock UseSocket(int socketFD);
+	void StartSocket(int socketFD, struct bufferevent *bufferevent);
 
 	//Deletes the MessageQueue object to which socketFD belongs
-	//	NOTE: Does not close the underlying socket. Use CloseSocket to do that.
-	//	NOTE: Only called by callback thread
-	void DeleteQueue(int socketFD);
-
-	//Closes the socket at the given file descriptor
-	//	socketFD - The file descriptor of the socket to close
-	//	NOTE: This will not immediately destroy the underlying MessageQueue. It will close the socket
-	//		such that no new messages can be read on it. At which point the read loop will mark the
-	//		queue as closed with an ErrorMessage with the appropriate sub-type and then exit.
-	//		The queue will not be actually destroyed until this last message is popped off.
-	void CloseSocket(int socketFD);
+	//	NOTE: Does not close the underlying socket.
+	void DeleteEndpoint(int socketFD);
 
 	//Waits for a new callback message to arrive on the given socketFD
 	//	socketFD - The socket file descriptor to wait on
+	//	outTicket - Output parameter which provides all the information necessary to talk on the new callback conversation
 	//	NOTE: Blocking call
-	bool RegisterCallback(int socketFD);
+	bool RegisterCallback(int socketFD, Ticket &outTicket);
 
 	//Gets a current list of all the open sockets in the manager
 	//	Returns - A vector of socket file descriptors
@@ -95,38 +97,36 @@ public:
 	//		be included in this list. You'll just have to deal with this fact.
 	std::vector <int>GetSocketList();
 
-	//Returns the current serial number for the MessageQueue at the given socket
-	//	socketFD - The socket file descriptor of the serial to return
-	//	direction - The protocol direction of the message you're trying to send
-	//	NOTE: You must have the lock on the socket by calling UseSocket() prior to calling this
-	//		(Or bad things will happen)
-	uint32_t GetSerialNumber(int socketFD,  enum ProtocolDirection direction);
+	//Begins server accept() loop. Only run this function if you want to be a server (not a UI)
+	//	callback - Pointer to a user defined ServerCallback object that contains the callback function to be run
+	//	portNumber - The TCP port on which to bind the server
+	//	NOTE: Blocking function. Begins the server main loop. Does not return.
+	void StartServer(ServerCallback *callback, uint portNumber);
+
+	//Function returns a read-locked MessageEndpoint
+	//	socketFD - The socket file descriptor of the endpoint you want
+	//	returns - An RAII MessageEndpointLock object that contains a read-locked MessageEndpoint
+	//		on error, the m_endpint  pointer will be NULL
+	MessageEndpointLock GetEndpoint(int socketFD);
+
+	static void MessageDispatcher(struct bufferevent *bev, void *ctx);
+	static void ErrorDispatcher(struct bufferevent *bev, short error, void *ctx);
 
 private:
 
 	static MessageManager *m_instance;
 
 	//Constructor for MessageManager
-	// direction: Tells the manager which protocol direction if "forward" to us.
-	//	IE: DIRECTION_TO_UI: We are Novad
-	//		DIRECTION_TO_NOVAD: We are a Nova UI
-	MessageManager(enum ProtocolDirection direction);
+	MessageManager();
 
-	//Safely (with locking) returns a pointer to a MessageQueue
-	//	socketFD - The file descriptor of the MessageQueue in question
-	//	returns - The MessageQueue with the given FD, NULL otherwise
-	MessageQueue *GetQueue(int socketFD);
+	static void DoAccept(evutil_socket_t listener, short event, void *arg);
 
-	//Mutexes for the lock maps;
-	pthread_mutex_t m_queuesLock;		//protects m_queueLocks
-	pthread_mutex_t m_protocolLock;		//protects m_socketLocks
+	static void *AcceptDispatcher(void *);
 
-	//These two maps must be kept synchronized
-	//	Maintains the message queues
-	std::map<int, MessageQueue*> m_queues;
-	std::map<int, pthread_mutex_t*> m_protocolLocks;
+	std::map<int, std::pair<MessageEndpoint*, pthread_rwlock_t*>> m_endpoints;
+	pthread_mutex_t m_endpointsMutex;
 
-	enum ProtocolDirection m_forwardDirection;
+	pthread_mutex_t m_deleteEndpointMutex;;
 };
 
 }

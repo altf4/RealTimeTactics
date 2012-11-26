@@ -19,8 +19,6 @@ WelcomeWindow *window;
 
 int main( int argc, char **argv)
 {
-	MessageManager::Initialize(DIRECTION_TO_SERVER);
-
 	Main kit(argc, argv);
 
 	refBuilder = Gtk::Builder::create();

@@ -11,16 +11,15 @@
 using namespace std;
 using namespace RTT;
 
-GameMessage::GameMessage(enum GameMessageType type, enum ProtocolDirection direction)
+GameMessage::GameMessage(enum GameMessageType type)
 {
 	m_messageType = MESSAGE_GAME;
 	m_gameMessageType = type;
-	m_direction = direction;
 }
 
 GameMessage::GameMessage(char *buffer, uint32_t length)
 {
-	if( length < MSG_HEADER_SIZE )
+	if( length < MESSAGE_HDR_SIZE )
 	{
 		return;
 	}
@@ -47,7 +46,7 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 			//		3) X coordinate, starting location
 			//		4) Y coordinate, starting location
 			//		5) Direction to move unit (one hop)
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_gameMessageType) + sizeof(m_unitID) +
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_gameMessageType) + sizeof(m_unitID) +
 					sizeof(m_xOld) + sizeof(m_yOld) + sizeof(m_unitDirection);
 			if( length != expectedSize)
 			{
@@ -76,7 +75,7 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 			//		2) MoveResult enum describing success or failure
 			//		3) X coordinate, correct starting location
 			//		4) Y coordinate, correct starting location
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_gameMessageType) + sizeof(m_moveResult)
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_gameMessageType) + sizeof(m_moveResult)
 					+ sizeof(m_xOld) + sizeof(m_yOld);
 			if( length != expectedSize)
 			{
@@ -105,7 +104,7 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 			//		3) X coordinate, starting location
 			//		4) Y coordinate, starting location
 			//		5) Direction unit moved (one hop)
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_gameMessageType) + sizeof(m_unitID)
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_gameMessageType) + sizeof(m_unitID)
 					+ sizeof(m_xOld) + sizeof(m_yOld) + sizeof(m_unitDirection);
 			if( length != expectedSize)
 			{
@@ -131,7 +130,7 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 		case UNIT_MOVED_DIRECTION_ACK:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_gameMessageType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_gameMessageType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -161,12 +160,12 @@ char *GameMessage::Serialize(uint32_t *length)
 			//		3) X coordinate, starting location
 			//		4) Y coordinate, starting location
 			//		5) Direction to move unit (one hop)
-			messageSize =  MSG_HEADER_SIZE + sizeof(m_gameMessageType) + sizeof(m_unitID)
+			messageSize =  MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_gameMessageType) + sizeof(m_unitID)
 					+ sizeof(m_xOld) + sizeof(m_yOld)	+ sizeof(m_unitDirection);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//GameMessage type
 			memcpy(buffer, &m_gameMessageType, sizeof(m_gameMessageType));
@@ -192,12 +191,12 @@ char *GameMessage::Serialize(uint32_t *length)
 			//		2) MoveResult enum describing success or failure
 			//		3) X coordinate, correct starting location
 			//		4) Y coordinate, correct starting location
-			messageSize =  MSG_HEADER_SIZE + sizeof(m_gameMessageType) + sizeof(m_moveResult)
+			messageSize =  MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_gameMessageType) + sizeof(m_moveResult)
 					+ sizeof(m_xOld) + sizeof(m_yOld);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//GameMessage type
 			memcpy(buffer, &m_gameMessageType, sizeof(m_gameMessageType));
@@ -221,12 +220,12 @@ char *GameMessage::Serialize(uint32_t *length)
 			//		3) X coordinate, starting location
 			//		4) Y coordinate, starting location
 			//		5) Direction moved (one hop)
-			messageSize =  MSG_HEADER_SIZE + sizeof(m_gameMessageType) + sizeof(m_unitID)
+			messageSize =  MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_gameMessageType) + sizeof(m_unitID)
 					+ sizeof(m_xOld) + sizeof(m_yOld)	+ sizeof(m_unitDirection);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//GameMessage type
 			memcpy(buffer, &m_gameMessageType, sizeof(m_gameMessageType));
@@ -249,11 +248,11 @@ char *GameMessage::Serialize(uint32_t *length)
 		case UNIT_MOVED_DIRECTION_ACK:
 		{
 			//Uses: 1) Message Type
-			messageSize =  MSG_HEADER_SIZE + sizeof(m_gameMessageType);
+			messageSize =  MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_gameMessageType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//GameMessage type
 			memcpy(buffer, &m_gameMessageType, sizeof(m_gameMessageType));
@@ -262,7 +261,7 @@ char *GameMessage::Serialize(uint32_t *length)
 		}
 		default:
 		{
-			break;
+			return NULL;
 		}
 	}
 

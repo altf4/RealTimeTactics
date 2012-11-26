@@ -16,16 +16,15 @@ MatchLobbyMessage::~MatchLobbyMessage()
 
 }
 
-MatchLobbyMessage::MatchLobbyMessage(enum MatchLobbyType type, enum ProtocolDirection direction)
+MatchLobbyMessage::MatchLobbyMessage(enum MatchLobbyType type)
 {
 	m_messageType = MESSAGE_MATCH_LOBBY;
 	m_matchLobbyType = type;
-	m_direction = direction;
 }
 
 MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 {
-	if( length < MSG_HEADER_SIZE )
+	if( length < MESSAGE_HDR_SIZE )
 	{
 		return;
 	}
@@ -47,7 +46,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case MATCH_LEAVE_NOTIFICATION:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -59,7 +58,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case MATCH_LEAVE_ACKNOWLEDGE:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -73,7 +72,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			//Uses: 1) Message Type
 			//		2) New team
 			//		3) Player ID to change
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newTeam) + sizeof(m_playerID);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newTeam) + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -93,7 +92,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -109,7 +108,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case START_MATCH_REQUEST:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -122,7 +121,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -140,7 +139,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			//Uses: 1) Message Type
 			//		2) New Color
 			//		3) Player ID
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newColor) + sizeof(m_playerID);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newColor) + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -160,7 +159,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -177,7 +176,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) New map data
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + MAP_DESCR_SIZE;
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + MAP_DESCR_SIZE;
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -197,7 +196,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -214,7 +213,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) New map data
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newVictCond);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newVictCond);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -231,7 +230,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -248,7 +247,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) New map data
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newSpeed);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newSpeed);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -265,7 +264,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -282,7 +281,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) playerID
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -299,7 +298,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) playerID
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -316,7 +315,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Success or failure (bool)
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -333,7 +332,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Player ID
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -350,7 +349,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -373,7 +372,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			//Uses: 1) Message Type
 			//		2) New team
 			//		3) Player ID
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newTeam) + sizeof(m_playerID);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newTeam) + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -392,7 +391,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case TEAM_CHANGED_ACK:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -404,7 +403,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case KICKED_FROM_MATCH_NOTIFICATION:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -416,7 +415,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case KICKED_FROM_MATCH_ACK:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -430,7 +429,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			//Uses: 1) Message Type
 			//		2) Player ID who left
 			//		3) Player ID of new leader
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID) +
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID) +
 					sizeof(m_newLeaderID);
 			if( length != expectedSize)
 			{
@@ -451,7 +450,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case PLAYER_LEFT_MATCH_ACK:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -464,7 +463,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Player Description
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + PLAYER_DESCR_SIZE;
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + PLAYER_DESCR_SIZE;
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -487,7 +486,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case PLAYER_JOINED_MATCH_ACK:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -501,7 +500,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 			//Uses: 1) Message Type
 			//		2) Player ID
 			//		3) New color
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID) + sizeof(m_newColor);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID) + sizeof(m_newColor);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -520,7 +519,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case COLOR_CHANGED_ACK:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -533,7 +532,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Map Description
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + MAP_DESCR_SIZE;
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + MAP_DESCR_SIZE;
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -553,7 +552,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case MAP_CHANGED_ACK:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -566,7 +565,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Game speed
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newSpeed);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newSpeed);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -582,7 +581,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case GAME_SPEED_CHANGED_ACK:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -595,7 +594,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Victory Condition
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newVictCond);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newVictCond);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -611,7 +610,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case VICTORY_COND_CHANGED_ACK:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -624,7 +623,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) PlayerID of new leader
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -640,7 +639,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case CHANGE_LEADER_ACK:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -652,7 +651,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		case MATCH_START_NOTIFICATION:
 		{
 			//Uses: 1) Message Type
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -665,7 +664,7 @@ MatchLobbyMessage::MatchLobbyMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			if( length != expectedSize)
 			{
 				m_serializeError = true;
@@ -703,11 +702,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case MATCH_LEAVE_NOTIFICATION:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
 			buffer += sizeof(m_matchLobbyType);
@@ -717,11 +716,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case MATCH_LEAVE_ACKNOWLEDGE:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -734,11 +733,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			//Uses: 1) Message Type
 			//		2) New team
 			//		3) Player ID to change
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newTeam) + sizeof(m_playerID);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_newTeam) + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -756,11 +755,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -774,11 +773,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case START_MATCH_REQUEST:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -790,11 +789,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -810,11 +809,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			//Uses: 1) Message Type
 			//		2) new Color
 			//		3) Player ID
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newColor) + sizeof(m_playerID);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_newColor) + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -832,11 +831,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -851,11 +850,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) New Map
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + MAP_DESCR_SIZE;
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + MAP_DESCR_SIZE;
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -875,11 +874,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -894,11 +893,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) New victory condition
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newVictCond);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_newVictCond);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -913,11 +912,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -932,11 +931,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) playerID of new leader
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -951,11 +950,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -970,11 +969,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) New Game Speed
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newSpeed);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_newSpeed);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -989,11 +988,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1008,11 +1007,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) PlayerID
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1027,11 +1026,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Player ID
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1046,11 +1045,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1071,11 +1070,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			//Uses: 1) Message Type
 			//		2) New team
 			//		3) Player ID
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newTeam) + sizeof(m_playerID);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_newTeam) + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1092,11 +1091,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case TEAM_CHANGED_ACK:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1107,11 +1106,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case KICKED_FROM_MATCH_NOTIFICATION:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1122,11 +1121,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case KICKED_FROM_MATCH_ACK:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1139,11 +1138,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			//Uses: 1) Message Type
 			//		2) Player ID who left
 			//		3) Player ID of new leader
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID) + sizeof(m_newLeaderID);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_playerID) + sizeof(m_newLeaderID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1160,11 +1159,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case PLAYER_LEFT_MATCH_ACK:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1176,11 +1175,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Player Description
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + PLAYER_DESCR_SIZE;
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + PLAYER_DESCR_SIZE;
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1201,11 +1200,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case PLAYER_JOINED_MATCH_ACK:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1218,11 +1217,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 			//Uses: 1) Message Type
 			//		2) Player ID
 			//		3) New Color
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID) + sizeof(m_newColor);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_playerID) + sizeof(m_newColor);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1239,11 +1238,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case COLOR_CHANGED_ACK:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1255,11 +1254,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Map Description
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + MAP_DESCR_SIZE;
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + MAP_DESCR_SIZE;
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1277,11 +1276,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case MAP_CHANGED_ACK:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1293,11 +1292,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Game Speed
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newSpeed);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_newSpeed);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1311,11 +1310,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case GAME_SPEED_CHANGED_ACK:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1327,11 +1326,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Victory Condition
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_newVictCond);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_newVictCond);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1345,11 +1344,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case VICTORY_COND_CHANGED_ACK:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1361,11 +1360,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) PlayerID of new leader
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_playerID);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_playerID);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1379,11 +1378,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case CHANGE_LEADER_ACK:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1394,11 +1393,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		case MATCH_START_NOTIFICATION:
 		{
 			//Uses: 1) Message Type
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));
@@ -1410,11 +1409,11 @@ char *MatchLobbyMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) Change Accepted
-			messageSize = MSG_HEADER_SIZE + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
+			messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_matchLobbyType) + sizeof(m_changeAccepted);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
 
-			SerializeHeader(&buffer);
+			SerializeHeader(&buffer, messageSize);
 
 			//Put the type in
 			memcpy(buffer, &m_matchLobbyType, sizeof(m_matchLobbyType));

@@ -11,6 +11,8 @@
 
 #include "Message.h"
 
+#define ERROR_MSG_MIN_SIZE 2
+
 namespace RTT
 {
 
@@ -51,16 +53,28 @@ enum ErrorType: char
 
 };
 
-class ErrorMessage: public Message
+class ErrorMessage : public Message
 {
+
 public:
+
+	ErrorMessage(enum ErrorType errorType);
+	ErrorMessage(enum ErrorType errorType, uint32_t ourSerial);
+
+	//Deserialization constructor
+	//	buffer - pointer to array in memory where serialized ControlMessage resides
+	//	length - the length of this array
+	//	On error, sets m_serializeError to true, on success sets it to false
+	ErrorMessage(char *buffer, uint32_t length);
 
 	enum ErrorType m_errorType;
 
-	ErrorMessage(enum ErrorType type, enum ProtocolDirection direction);
-	ErrorMessage(char *buffer, uint length);
-	char *Serialize(uint *length);
 
+	//Serializes the ErrorMessage object into a char array
+	//	*length - Return parameter, specifies the length of the serialized array returned
+	// Returns - A pointer to the serialized array
+	//	NOTE: The caller must manually free() the returned buffer after use
+	char *Serialize(uint32_t *length);
 };
 
 }

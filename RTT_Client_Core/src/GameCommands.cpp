@@ -33,7 +33,7 @@ extern int socketFD;
 //	returns - A MovementResult struct describing the success or error of the move
 struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, enum Direction direction)
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	struct MovementResult result;
 
@@ -45,21 +45,21 @@ struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, en
 		return result;
 	}
 
-	GameMessage moveRequest(MOVE_UNIT_DIRECTION_REQUEST, DIRECTION_TO_SERVER);
+	GameMessage moveRequest(MOVE_UNIT_DIRECTION_REQUEST);
 	moveRequest.m_unitID = unitID;
 	moveRequest.m_xOld = xOld;
 	moveRequest.m_yOld = xOld;
 	moveRequest.m_unitDirection = direction;
-	if(!Message::WriteMessage(&moveRequest, socketFD))
+	if(!MessageManager::Instance().WriteMessage(ticket, &moveRequest))
 	{
 		result.m_result = MOVE_MESSAGE_SEND_ERROR;
 		return result;
 	}
 
-	Message *reply = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *reply = MessageManager::Instance().ReadMessage(ticket);
 	if( reply->m_messageType != MESSAGE_GAME)
 	{
-		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+		SendError(ticket, PROTOCOL_ERROR);
 		result.m_result = MOVE_MESSAGE_SEND_ERROR;
 		delete reply;
 		return result;
@@ -67,7 +67,7 @@ struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, en
 	GameMessage *moveReply = (GameMessage*)reply;
 	if( moveReply->m_gameMessageType != MOVE_UNIT_DIRECTION_REPLY)
 	{
-		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+		SendError(ticket, PROTOCOL_ERROR);
 		result.m_result = MOVE_MESSAGE_SEND_ERROR;
 		delete moveReply;
 		return result;
@@ -87,7 +87,7 @@ struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, en
 //	returns - A MovementResult struct describing the success or error of the move
 struct MovementResult RTT::MoveUnit(uint32_t unitID, struct Coordinate destination)
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	struct MovementResult result;
 	result.m_result = MOVE_NO_SUCH_UNIT;
@@ -101,7 +101,7 @@ struct MovementResult RTT::MoveUnit(uint32_t unitID, struct Coordinate destinati
 //	returns - simple boolean result of whether the move succeeded
 bool RTT::ChangeUnitFacing(uint32_t unitID, enum Direction direction)
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	return false;
 }

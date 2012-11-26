@@ -79,10 +79,6 @@ enum LobbyResult JoinMatch(Player *player, uint matchID);
 //	Returns success or failure
 bool LeaveMatch(Player *player);
 
-//Player has quit the server, clean up any references to it
-//	Deletes the player object
-void QuitServer(Player *player);
-
 }
 
 #endif /* LOF_SERVER_H_ */

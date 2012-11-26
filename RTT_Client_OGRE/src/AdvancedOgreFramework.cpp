@@ -238,8 +238,6 @@ bool OgreFramework::InitOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 	CEGUI::Point mousePos = CEGUI::MouseCursor::getSingleton().getPosition();
 	CEGUI::System::getSingleton().injectMouseMove(state.X.abs-mousePos.d_x,state.Y.abs-mousePos.d_y);
 
-    RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
-
     //Create callback thread
     m_callbackHandler = new RTT::CallbackHandler();
 

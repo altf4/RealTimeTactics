@@ -24,6 +24,12 @@
 namespace RTT
 {
 
+enum lockType
+{
+	WRITE_LOCK,
+	READ_LOCK
+};
+
 class Lock
 {
 
@@ -31,21 +37,39 @@ public:
 	Lock(pthread_mutex_t *lock)
 	{
 		isMutex = true;
+		lockAquired = false;
 		m_mutex = lock;
-		pthread_mutex_lock(m_mutex);
+
+		if (!pthread_mutex_lock(m_mutex))
+		{
+			lockAquired = true;
+		} // TODO Throw exception?
 	}
 
-	Lock(pthread_rwlock_t *lock, bool isReadLock)
+	Lock(pthread_rwlock_t *lock, lockType type)
 	{
 		isMutex = false;
+		lockAquired = false;
 		m_rwlock = lock;
-		if(isReadLock)
+
+
+		if(type == READ_LOCK)
 		{
-			pthread_rwlock_rdlock(m_rwlock);
+			if (!pthread_rwlock_rdlock(m_rwlock))
+			{
+				lockAquired = true;
+			} // TODO Throw exception?
+		}
+		else if (type == WRITE_LOCK)
+		{
+			if (!pthread_rwlock_wrlock(m_rwlock))
+			{
+				lockAquired = true;
+			} // TODO Throw exception?
 		}
 		else
 		{
-			pthread_rwlock_wrlock(m_rwlock);
+			// TODO Throw exception?
 		}
 	}
 
@@ -55,27 +79,26 @@ public:
 		isMutex = true;
 	}
 
-	//Allows the user to get a lock outside the scope of where the Lock object is declared
-	void GetLock(pthread_mutex_t *lock)
-	{
-		m_mutex = lock;
-		pthread_mutex_lock(m_mutex);
-	}
-
 	~Lock()
 	{
-		if(isMutex)
+		// Only try to unlock if we acquired the lock okay
+		if (lockAquired)
 		{
-			pthread_mutex_unlock(m_mutex);
-		}
-		else
-		{
-			pthread_rwlock_unlock(m_rwlock);
+			if(isMutex)
+			{
+				pthread_mutex_unlock(m_mutex);
+			}
+			else
+			{
+				pthread_rwlock_unlock(m_rwlock);
+			}
 		}
 	}
 
 private:
 	bool isMutex;
+	bool lockAquired;
+
 	pthread_mutex_t *m_mutex;
 	pthread_rwlock_t *m_rwlock;
 };

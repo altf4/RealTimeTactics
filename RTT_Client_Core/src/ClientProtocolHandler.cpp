@@ -19,6 +19,8 @@
 #include <arpa/inet.h>
 #include <iostream>
 #include <string.h>
+#include "event.h"
+#include "event2/thread.h"
 
 #define SHA256_DIGEST_LENGTH 32
 
@@ -26,8 +28,19 @@ using namespace std;
 using namespace RTT;
 
 int socketFD = -1;
+static struct event_base *libeventBase = NULL;
+static struct bufferevent *bufferevent = NULL;
+pthread_t eventDispatchThread;
+
 string serverIP;
 struct PlayerDescription myPlayerDescription;
+
+void *EventDispatcherThread(void *arg)
+{
+	event_base_dispatch(libeventBase);
+	Disconnect();
+	return NULL;
+}
 
 int RTT::AuthToServer(string IPAddress, uint port,
 		string username, unsigned char *hashedPassword, struct PlayerDescription *outDescr)
@@ -35,16 +48,29 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	struct sockaddr_in stSockAddr;
 	serverIP = IPAddress;
 
-	//Make a socket
-	socketFD = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-	if (-1 == socketFD)
+	Disconnect();
+
+	//Create new base
+	if(libeventBase == NULL)
 	{
-		perror("cannot create socket");
+		evthread_use_pthreads();
+		libeventBase = event_base_new();
+	}
+
+	bufferevent = bufferevent_socket_new(libeventBase, -1, BEV_OPT_CLOSE_ON_FREE | BEV_OPT_THREADSAFE);
+	if(bufferevent == NULL)
+	{
+		cerr << "ERROR: Unable to create a socket\n";
 		return -1;
 	}
 
-	MessageManager::Instance().DeleteQueue(socketFD);
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	bufferevent_setcb(bufferevent, MessageManager::MessageDispatcher, NULL, MessageManager::ErrorDispatcher, NULL);
+
+	if(bufferevent_enable(bufferevent, EV_READ) == -1)
+	{
+		cerr << "ERROR: Unable to enable socket events\n";
+		return -1;
+	}
 
 	//Zero out the socket struct
 	memset(&stSockAddr, 0, sizeof(stSockAddr));
@@ -66,22 +92,36 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		return -1;
 	}
 
-	if (-1 == connect(socketFD, (struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
+	if(bufferevent_socket_connect(bufferevent, (struct sockaddr *)&stSockAddr, sizeof(stSockAddr)) == -1)
 	{
-		perror("connect failed");
-		close(socketFD);
+		bufferevent = NULL;
 		return -1;
 	}
+
+	socketFD = bufferevent_getfd(bufferevent);
+	if(socketFD == -1)
+	{
+		bufferevent_free(bufferevent);
+		bufferevent = NULL;
+		return -1;
+	}
+
+	MessageManager::Instance().DeleteEndpoint(socketFD);
+	MessageManager::Instance().StartSocket(socketFD, bufferevent);
+
+	pthread_create(&eventDispatchThread, NULL, EventDispatcherThread, NULL);
+
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	//***************************
 	// Send client Hello
 	//***************************
-	AuthMessage client_hello(CLIENT_HELLO, DIRECTION_TO_SERVER);
+	AuthMessage client_hello(CLIENT_HELLO);
 	client_hello.m_softwareVersion.m_major = CLIENT_VERSION_MAJOR;
 	client_hello.m_softwareVersion.m_minor = CLIENT_VERSION_MINOR;
 	client_hello.m_softwareVersion.m_rev = CLIENT_VERSION_REV;
 
-	if( Message::WriteMessage(&client_hello, socketFD) == false)
+	if(MessageManager::Instance().WriteMessage(ticket, &client_hello) == false)
 	{
 		//Error in write
 		return -1;
@@ -90,17 +130,17 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	//***************************
 	// Receive Server Hello
 	//***************************
-	Message *server_hello_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *server_hello_init = MessageManager::Instance().ReadMessage(ticket);
 	if( server_hello_init->m_messageType != MESSAGE_AUTH)
 	{
-		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+		SendError(ticket, PROTOCOL_ERROR);
 		delete server_hello_init;
 		return -1;
 	}
 	AuthMessage *server_hello = (AuthMessage*)server_hello_init;
 	if(server_hello->m_authType != SERVER_HELLO)
 	{
-		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+		SendError(ticket, PROTOCOL_ERROR);
 		delete server_hello;
 		return -1;
 	}
@@ -113,7 +153,7 @@ int RTT::AuthToServer(string IPAddress, uint port,
 		//Incompatible software versions.
 		//The server should have caught this, though.
 
-		SendError(socketFD, AUTHENTICATION_ERROR, DIRECTION_TO_SERVER);
+		SendError(ticket, AUTHENTICATION_ERROR);
 		delete server_hello_init;
 		return -1;
 	}
@@ -122,11 +162,11 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	//***************************
 	// Send Client Auth
 	//***************************
-	AuthMessage client_auth(CLIENT_AUTH, DIRECTION_TO_SERVER);
+	AuthMessage client_auth(CLIENT_AUTH);
 	strncpy( client_auth.m_username, username.data(), USERNAME_MAX_LENGTH);
 	memcpy(client_auth.m_hashedPassword, hashedPassword, SHA256_DIGEST_LENGTH);
 
-	if( Message::WriteMessage(&client_auth, socketFD) == false)
+	if(MessageManager::Instance().WriteMessage(ticket, &client_auth) == false)
 	{
 		//Error in write
 		return -1;
@@ -135,7 +175,7 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	//***************************
 	// Receive Server Auth Reply
 	//***************************
-	Message *server_auth_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *server_auth_reply_init = MessageManager::Instance().ReadMessage(ticket);
 	if( server_auth_reply_init->m_messageType != MESSAGE_AUTH)
 	{
 		delete server_auth_reply_init;
@@ -143,7 +183,7 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	}
 	AuthMessage *server_auth_reply = (AuthMessage*)server_auth_reply_init;
 
-	if( (server_auth_reply->m_authType != SERVER_AUTH_REPLY)
+	if((server_auth_reply->m_authType != SERVER_AUTH_REPLY)
 			|| (server_auth_reply->m_authSuccess != AUTH_SUCCESS))
 	{
 		delete server_auth_reply;
@@ -158,40 +198,69 @@ int RTT::AuthToServer(string IPAddress, uint port,
 	return socketFD;
 }
 
+void RTT::Disconnect()
+{
+	//Close out any possibly remaining socket artifacts
+	if(libeventBase != NULL)
+	{
+		if(eventDispatchThread != 0)
+		{
+			if(event_base_loopbreak(libeventBase) == -1)
+			{
+				cerr << "Unable to exit event loop\n";
+			}
+			pthread_join(eventDispatchThread, NULL);
+			eventDispatchThread = 0;
+		}
+	}
+
+	if(bufferevent != NULL)
+	{
+		bufferevent_free(bufferevent);
+		bufferevent = NULL;
+	}
+
+	MessageManager::Instance().DeleteEndpoint(socketFD);
+
+	socketFD = -1;
+}
+
 //Informs the server that we want to exit
 //	connectFD: Socket File descriptor of the server
 //	Returns true if we get a successful acknowledgment back
 bool RTT::ExitServer()
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
-
-	//********************************
-	// Send Exit Server Notification
-	//********************************
-	LobbyMessage exit_server_notice(MATCH_EXIT_SERVER_NOTIFICATION, DIRECTION_TO_SERVER);
-	if( Message::WriteMessage(&exit_server_notice, socketFD) == false)
 	{
-		//Error in write
-		return false;
+		Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
+
+		//********************************
+		// Send Exit Server Notification
+		//********************************
+		LobbyMessage exit_server_notice(MATCH_EXIT_SERVER_NOTIFICATION);
+		if(MessageManager::Instance().WriteMessage(ticket, &exit_server_notice) == false)
+		{
+			//Error in write
+			return false;
+		}
+
+		//**********************************
+		// Receive Exit Server Acknowledge
+		//**********************************
+		Message *exit_server_ack = MessageManager::Instance().ReadMessage(ticket);
+		if( exit_server_ack->m_messageType != MESSAGE_LOBBY)
+		{
+			delete exit_server_ack;
+			return false;
+		}
+		LobbyMessage *lobby_ack = (LobbyMessage*)exit_server_ack;
+		if(lobby_ack->m_lobbyType != MATCH_EXIT_SERVER_ACKNOWLEDGE)
+		{
+			delete lobby_ack;
+			return false;
+		}
 	}
 
-	//**********************************
-	// Receive Exit Server Acknowledge
-	//**********************************
-	Message *exit_server_ack = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( exit_server_ack->m_messageType != MESSAGE_LOBBY)
-	{
-		delete exit_server_ack;
-		return false;
-	}
-	LobbyMessage *lobby_ack = (LobbyMessage*)exit_server_ack;
-	if(lobby_ack->m_lobbyType != MATCH_EXIT_SERVER_ACKNOWLEDGE)
-	{
-		delete lobby_ack;
-		return false;
-	}
-
-	MessageManager::Instance().CloseSocket(socketFD);
+	Disconnect();
 
 	return true;
 }
@@ -209,14 +278,14 @@ uint RTT::ListMatches(uint page, MatchDescription *matchArray)
 		return 0;
 	}
 
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	//********************************
 	// Send Match List Request
 	//********************************
-	LobbyMessage list_request(MATCH_LIST_REQUEST, DIRECTION_TO_SERVER);
+	LobbyMessage list_request(MATCH_LIST_REQUEST);
 	list_request.m_requestedPage = page;
-	if( Message::WriteMessage(&list_request, socketFD) == false)
+	if( MessageManager::Instance().WriteMessage(ticket, &list_request) == false)
 	{
 		//Error in write
 		return 0;
@@ -225,7 +294,7 @@ uint RTT::ListMatches(uint page, MatchDescription *matchArray)
 	//**********************************
 	// Receive Match List Reply
 	//**********************************
-	Message *list_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *list_reply_init = MessageManager::Instance().ReadMessage(ticket);
 	if( list_reply_init->m_messageType != MESSAGE_LOBBY)
 	{
 		delete list_reply_init;
@@ -258,13 +327,13 @@ uint RTT::ListMatches(uint page, MatchDescription *matchArray)
 //	Returns: true if the match is created successfully
 bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outMatchDesc)
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	//********************************
 	// Send Match Create Request
 	//********************************
-	LobbyMessage create_request(MATCH_CREATE_REQUEST, DIRECTION_TO_SERVER);
-	if( Message::WriteMessage(&create_request, socketFD) == false)
+	LobbyMessage create_request(MATCH_CREATE_REQUEST);
+	if( MessageManager::Instance().WriteMessage(ticket, &create_request) == false)
 	{
 		//Error in write
 		return false;
@@ -273,7 +342,7 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 	//**********************************
 	// Receive Match Options Available
 	//**********************************
-	Message *ops_available_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *ops_available_init = MessageManager::Instance().ReadMessage(ticket);
 	if( ops_available_init->m_messageType != MESSAGE_LOBBY)
 	{
 		delete ops_available_init;
@@ -295,9 +364,9 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 	//********************************
 	// Send Match Create Request
 	//********************************
-	LobbyMessage ops_chosen(MATCH_CREATE_OPTIONS_CHOSEN, DIRECTION_TO_SERVER);
+	LobbyMessage ops_chosen(MATCH_CREATE_OPTIONS_CHOSEN);
 	ops_chosen.m_options = options;
-	if( Message::WriteMessage(&ops_chosen, socketFD) == false)
+	if( MessageManager::Instance().WriteMessage(ticket, &ops_chosen) == false)
 	{
 		//Error in write
 		return false;
@@ -306,7 +375,7 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 	//**********************************
 	// Receive Match Create Reply
 	//**********************************
-	Message *create_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *create_reply_init = MessageManager::Instance().ReadMessage(ticket);
 	if( create_reply_init->m_messageType != MESSAGE_LOBBY)
 	{
 		delete create_reply_init;
@@ -334,16 +403,17 @@ bool RTT::CreateMatch(struct MatchOptions options, struct MatchDescription *outM
 vector<PlayerDescription> RTT::JoinMatch(uint matchID,
 		struct MatchDescription &outMatchDesc)
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
+
 	vector<PlayerDescription> retPlayers;
 	retPlayers.clear();
 
 	//********************************
 	// Send Match Join Request
 	//********************************
-	LobbyMessage join_request(MATCH_JOIN_REQUEST, DIRECTION_TO_SERVER);
+	LobbyMessage join_request(MATCH_JOIN_REQUEST);
 	join_request.m_ID = matchID;
-	if( Message::WriteMessage(&join_request, socketFD) == false)
+	if( MessageManager::Instance().WriteMessage(ticket, &join_request) == false)
 	{
 		//Error in write
 		return retPlayers;
@@ -352,7 +422,7 @@ vector<PlayerDescription> RTT::JoinMatch(uint matchID,
 	//**********************************
 	// Receive Match Join Reply
 	//**********************************
-	Message *join_reply_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *join_reply_init = MessageManager::Instance().ReadMessage(ticket);
 	if( join_reply_init->m_messageType != MESSAGE_LOBBY)
 	{
 		delete join_reply_init;
@@ -389,13 +459,13 @@ vector<PlayerDescription> RTT::JoinMatch(uint matchID,
 //	Returns: true if the match is left cleanly
 bool RTT::LeaveMatch()
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	//********************************
 	// Send Match Leave Notification
 	//********************************
-	MatchLobbyMessage leave_note(MATCH_LEAVE_NOTIFICATION, DIRECTION_TO_SERVER);
-	if( Message::WriteMessage(&leave_note, socketFD) == false)
+	MatchLobbyMessage leave_note(MATCH_LEAVE_NOTIFICATION);
+	if( MessageManager::Instance().WriteMessage(ticket, &leave_note) == false)
 	{
 		//Error in write
 		return false;
@@ -404,7 +474,7 @@ bool RTT::LeaveMatch()
 	//**********************************
 	// Receive Match Leave Acknowledge
 	//**********************************
-	Message *leave_ack = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *leave_ack = MessageManager::Instance().ReadMessage(ticket);
 	if( leave_ack->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete leave_ack;
@@ -425,7 +495,7 @@ bool RTT::LeaveMatch()
 //	Returns: A ServerStats struct containing
 struct ServerStats RTT::GetServerStats()
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	struct ServerStats stats;
 	stats.m_numPlayers = 0;
@@ -434,8 +504,8 @@ struct ServerStats RTT::GetServerStats()
 	//********************************
 	// Send Server Stats Request
 	//********************************
-	LobbyMessage server_stats_req(SERVER_STATS_REQUEST, DIRECTION_TO_SERVER);
-	if( Message::WriteMessage(&server_stats_req, socketFD) == false)
+	LobbyMessage server_stats_req(SERVER_STATS_REQUEST);
+	if( MessageManager::Instance().WriteMessage(ticket, &server_stats_req) == false)
 	{
 		//Error in write
 		return stats;
@@ -444,7 +514,7 @@ struct ServerStats RTT::GetServerStats()
 	//**********************************
 	// Receive Server Stats Reply
 	//**********************************
-	Message *msg_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *msg_init = MessageManager::Instance().ReadMessage(ticket);
 	if( msg_init->m_messageType != MESSAGE_LOBBY)
 	{
 		delete msg_init;
@@ -467,15 +537,15 @@ struct ServerStats RTT::GetServerStats()
 //	Returns true if successfully changed
 bool RTT::ChangeTeam(uint playerID, enum TeamNumber team)
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	//********************************
 	// Send Change Team Request
 	//********************************
-	MatchLobbyMessage change_team_req(CHANGE_TEAM_REQUEST, DIRECTION_TO_SERVER);
+	MatchLobbyMessage change_team_req(CHANGE_TEAM_REQUEST);
 	change_team_req.m_playerID = playerID;
 	change_team_req.m_newTeam = team;
-	if( Message::WriteMessage(&change_team_req, socketFD) == false)
+	if( MessageManager::Instance().WriteMessage(ticket, &change_team_req) == false)
 	{
 		//Error in write
 		return false;
@@ -484,7 +554,7 @@ bool RTT::ChangeTeam(uint playerID, enum TeamNumber team)
 	//**********************************
 	// Receive Change Team Reply
 	//**********************************
-	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *message = MessageManager::Instance().ReadMessage(ticket);
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -511,15 +581,15 @@ bool RTT::ChangeTeam(uint playerID, enum TeamNumber team)
 //	Returns true if successfully changed
 bool RTT::ChangeColor(uint playerID, enum TeamColor color)
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	//********************************
 	// Send Change Color Request
 	//********************************
-	MatchLobbyMessage change_color_req(CHANGE_COLOR_REQUEST, DIRECTION_TO_SERVER);
+	MatchLobbyMessage change_color_req(CHANGE_COLOR_REQUEST);
 	change_color_req.m_playerID = playerID;
 	change_color_req.m_newColor = color;
-	if( Message::WriteMessage(&change_color_req, socketFD) == false)
+	if( MessageManager::Instance().WriteMessage(ticket, &change_color_req) == false)
 	{
 		//Error in write
 		return false;
@@ -528,7 +598,7 @@ bool RTT::ChangeColor(uint playerID, enum TeamColor color)
 	//**********************************
 	// Receive Change Color Reply
 	//**********************************
-	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *message = MessageManager::Instance().ReadMessage(ticket);
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -555,14 +625,14 @@ bool RTT::ChangeColor(uint playerID, enum TeamColor color)
 //	Returns true if successfully changed
 bool RTT::ChangeMap(struct MapDescription map)
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	//********************************
 	// Send Change Map Request
 	//********************************
-	MatchLobbyMessage change_map_req(CHANGE_MAP_REQUEST, DIRECTION_TO_SERVER);
+	MatchLobbyMessage change_map_req(CHANGE_MAP_REQUEST);
 	change_map_req.m_mapDescription = map;
-	if( Message::WriteMessage(&change_map_req, socketFD) == false)
+	if( MessageManager::Instance().WriteMessage(ticket, &change_map_req) == false)
 	{
 		//Error in write
 		return false;
@@ -571,7 +641,7 @@ bool RTT::ChangeMap(struct MapDescription map)
 	//**********************************
 	// Receive Change Map Reply
 	//**********************************
-	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *message = MessageManager::Instance().ReadMessage(ticket);
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -598,14 +668,14 @@ bool RTT::ChangeMap(struct MapDescription map)
 //	Returns true if successfully changed
 bool RTT::ChangeSpeed(enum GameSpeed speed)
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	//********************************
 	// Send Change Speed Request
 	//********************************
-	MatchLobbyMessage change_speed_req(CHANGE_GAME_SPEED_REQUEST, DIRECTION_TO_SERVER);
+	MatchLobbyMessage change_speed_req(CHANGE_GAME_SPEED_REQUEST);
 	change_speed_req.m_newSpeed = speed;
-	if( Message::WriteMessage(&change_speed_req, socketFD) == false)
+	if( MessageManager::Instance().WriteMessage(ticket, &change_speed_req) == false)
 	{
 		//Error in write
 		return false;
@@ -614,7 +684,7 @@ bool RTT::ChangeSpeed(enum GameSpeed speed)
 	//**********************************
 	// Receive Change Speed Reply
 	//**********************************
-	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *message = MessageManager::Instance().ReadMessage(ticket);
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -641,14 +711,14 @@ bool RTT::ChangeSpeed(enum GameSpeed speed)
 //	Returns true if successfully changed
 bool RTT::ChangeVictoryCondition(enum VictoryCondition victory)
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	//********************************
 	// Send Change Victory Request
 	//********************************
-	MatchLobbyMessage change_victory_req(CHANGE_VICTORY_COND_REQUEST, DIRECTION_TO_SERVER);
+	MatchLobbyMessage change_victory_req(CHANGE_VICTORY_COND_REQUEST);
 	change_victory_req.m_newVictCond = victory;
-	if( Message::WriteMessage(&change_victory_req, socketFD) == false)
+	if( MessageManager::Instance().WriteMessage(ticket, &change_victory_req) == false)
 	{
 		//Error in write
 		return false;
@@ -657,7 +727,7 @@ bool RTT::ChangeVictoryCondition(enum VictoryCondition victory)
 	//**********************************
 	// Receive Change Victory Reply
 	//**********************************
-	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *message = MessageManager::Instance().ReadMessage(ticket);
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -684,14 +754,14 @@ bool RTT::ChangeVictoryCondition(enum VictoryCondition victory)
 //	Returns true if the leader status successfully given
 bool RTT::ChangeLeader(uint newLeaderID)
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	//********************************
 	// Send Change Leader Request
 	//********************************
-	MatchLobbyMessage change_leader_req(CHANGE_LEADER_REQUEST, DIRECTION_TO_SERVER);
+	MatchLobbyMessage change_leader_req(CHANGE_LEADER_REQUEST);
 	change_leader_req.m_playerID = newLeaderID;
-	if( Message::WriteMessage(&change_leader_req, socketFD) == false)
+	if( MessageManager::Instance().WriteMessage(ticket, &change_leader_req) == false)
 	{
 		//Error in write
 		return false;
@@ -700,7 +770,7 @@ bool RTT::ChangeLeader(uint newLeaderID)
 	//**********************************
 	// Receive Change Leader Reply
 	//**********************************
-	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *message = MessageManager::Instance().ReadMessage(ticket);
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -727,14 +797,14 @@ bool RTT::ChangeLeader(uint newLeaderID)
 //	Returns true if successfully kicked
 bool RTT::KickPlayer(uint PlayerID)
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	//********************************
 	// Send Kick Player Request
 	//********************************
-	MatchLobbyMessage kick_player_req(KICK_PLAYER_REQUEST, DIRECTION_TO_SERVER);
+	MatchLobbyMessage kick_player_req(KICK_PLAYER_REQUEST);
 	kick_player_req.m_playerID = PlayerID;
-	if( Message::WriteMessage(&kick_player_req, socketFD) == false)
+	if( MessageManager::Instance().WriteMessage(ticket, &kick_player_req) == false)
 	{
 		//Error in write
 		return false;
@@ -743,7 +813,7 @@ bool RTT::KickPlayer(uint PlayerID)
 	//**********************************
 	// Receive Kick Player Reply
 	//**********************************
-	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *message = MessageManager::Instance().ReadMessage(ticket);
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -770,13 +840,13 @@ bool RTT::KickPlayer(uint PlayerID)
 //	Returns true if the match successfully started
 bool RTT::StartMatch()
 {
-	Lock lock = MessageManager::Instance().UseSocket(socketFD);
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	//********************************
 	// Send Start Match Request
 	//********************************
-	MatchLobbyMessage start_match_req(START_MATCH_REQUEST, DIRECTION_TO_SERVER);
-	if( Message::WriteMessage(&start_match_req, socketFD) == false)
+	MatchLobbyMessage start_match_req(START_MATCH_REQUEST);
+	if( MessageManager::Instance().WriteMessage(ticket, &start_match_req) == false)
 	{
 		//Error in write
 		return false;
@@ -785,7 +855,7 @@ bool RTT::StartMatch()
 	//**********************************
 	// Receive Start Match Reply
 	//**********************************
-	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *message = MessageManager::Instance().ReadMessage(ticket);
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
 		delete message;
@@ -817,12 +887,13 @@ bool RTT::StartMatch()
 //	We listen for these messages on a different socket than
 CallbackChange *RTT::ProcessCallbackCommand()
 {
-	if(!MessageManager::Instance().RegisterCallback(socketFD))
+	Ticket ticket;
+	if(!MessageManager::Instance().RegisterCallback(socketFD, ticket))
 	{
 		return new CallbackChange(CALLBACK_CLOSED);
 	}
 
-	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_CLIENT);
+	Message *message = MessageManager::Instance().ReadMessage(ticket);
 	//TODO: Accept more than just MatchLobby callbacks!!!
 	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
 	{
@@ -843,8 +914,8 @@ CallbackChange *RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Team Changed Ack
 			//***********************************
-			MatchLobbyMessage team_change_ack(TEAM_CHANGED_ACK, DIRECTION_TO_CLIENT);
-			if( Message::WriteMessage(&team_change_ack, socketFD) == false)
+			MatchLobbyMessage team_change_ack(TEAM_CHANGED_ACK);
+			if( MessageManager::Instance().WriteMessage(ticket, &team_change_ack) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -862,8 +933,8 @@ CallbackChange *RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Kicked From Match Ack
 			//***********************************
-			MatchLobbyMessage kicked_ack(KICKED_FROM_MATCH_ACK, DIRECTION_TO_CLIENT);
-			if( Message::WriteMessage(&kicked_ack, socketFD) == false)
+			MatchLobbyMessage kicked_ack(KICKED_FROM_MATCH_ACK);
+			if( MessageManager::Instance().WriteMessage(ticket, &kicked_ack) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -884,8 +955,8 @@ CallbackChange *RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Player Left Ack
 			//***********************************
-			MatchLobbyMessage player_left_ack(PLAYER_LEFT_MATCH_ACK, DIRECTION_TO_CLIENT);
-			if( Message::WriteMessage(&player_left_ack, socketFD) == false)
+			MatchLobbyMessage player_left_ack(PLAYER_LEFT_MATCH_ACK);
+			if( MessageManager::Instance().WriteMessage(ticket, &player_left_ack) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -904,8 +975,8 @@ CallbackChange *RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Player Joined Ack
 			//***********************************
-			MatchLobbyMessage player_joined_ack(PLAYER_JOINED_MATCH_ACK, DIRECTION_TO_CLIENT);
-			if( Message::WriteMessage(&player_joined_ack, socketFD) == false)
+			MatchLobbyMessage player_joined_ack(PLAYER_JOINED_MATCH_ACK);
+			if( MessageManager::Instance().WriteMessage(ticket, &player_joined_ack) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -925,8 +996,8 @@ CallbackChange *RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Color Changed Ack
 			//***********************************
-			MatchLobbyMessage color_change_ack(COLOR_CHANGED_ACK, DIRECTION_TO_CLIENT);
-			if( Message::WriteMessage(&color_change_ack, socketFD) == false)
+			MatchLobbyMessage color_change_ack(COLOR_CHANGED_ACK);
+			if( MessageManager::Instance().WriteMessage(ticket, &color_change_ack) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -945,8 +1016,8 @@ CallbackChange *RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Map Changed Ack
 			//***********************************
-			MatchLobbyMessage map_changed_ack(MAP_CHANGED_ACK, DIRECTION_TO_CLIENT);
-			if( Message::WriteMessage(&map_changed_ack, socketFD) == false)
+			MatchLobbyMessage map_changed_ack(MAP_CHANGED_ACK);
+			if( MessageManager::Instance().WriteMessage(ticket, &map_changed_ack) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -965,8 +1036,8 @@ CallbackChange *RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Game Speed Changed Ack
 			//***********************************
-			MatchLobbyMessage speed_changed_ack(GAME_SPEED_CHANGED_ACK, DIRECTION_TO_CLIENT);
-			if( Message::WriteMessage(&speed_changed_ack, socketFD) == false)
+			MatchLobbyMessage speed_changed_ack(GAME_SPEED_CHANGED_ACK);
+			if( MessageManager::Instance().WriteMessage(ticket, &speed_changed_ack) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -985,8 +1056,8 @@ CallbackChange *RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Victory Condition Changed Ack
 			//***********************************
-			MatchLobbyMessage victory_changed_ack(VICTORY_COND_CHANGED_ACK, DIRECTION_TO_CLIENT);
-			if( Message::WriteMessage(&victory_changed_ack, socketFD) == false)
+			MatchLobbyMessage victory_changed_ack(VICTORY_COND_CHANGED_ACK);
+			if( MessageManager::Instance().WriteMessage(ticket, &victory_changed_ack) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -1005,8 +1076,8 @@ CallbackChange *RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Victory Condition Changed Ack
 			//***********************************
-			MatchLobbyMessage leader_changed_ack(CHANGE_LEADER_ACK, DIRECTION_TO_CLIENT);
-			if( Message::WriteMessage(&leader_changed_ack, socketFD) == false)
+			MatchLobbyMessage leader_changed_ack(CHANGE_LEADER_ACK);
+			if( MessageManager::Instance().WriteMessage(ticket, &leader_changed_ack) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -1026,9 +1097,9 @@ CallbackChange *RTT::ProcessCallbackCommand()
 			//***********************************
 			// Send Match Started Ack
 			//***********************************
-			MatchLobbyMessage match_started_ack(MATCH_START_ACK, DIRECTION_TO_CLIENT);
+			MatchLobbyMessage match_started_ack(MATCH_START_ACK);
 			match_started_ack.m_changeAccepted = true;
-			if( Message::WriteMessage(&match_started_ack, socketFD) == false)
+			if(MessageManager::Instance().WriteMessage(ticket, &match_started_ack) == false)
 			{
 				//Error in write
 				delete match_message;
@@ -1041,7 +1112,7 @@ CallbackChange *RTT::ProcessCallbackCommand()
 		default:
 		{
 			cerr << "ERROR: Received a bad message on the callback socket\n";
-			SendError(socketFD, AUTHENTICATION_ERROR, DIRECTION_TO_CLIENT);
+			SendError(ticket, AUTHENTICATION_ERROR);
 			return new CallbackChange(CALLBACK_ERROR);
 		}
 	}
@@ -1055,10 +1126,10 @@ CallbackChange *RTT::ProcessCallbackCommand()
 //********************************************
 
 //Send a message of type Error to the client
-void  RTT::SendError(int socket, enum ErrorType errorType, enum ProtocolDirection direction)
+void  RTT::SendError(Ticket &ticket, enum ErrorType errorType)
 {
-	ErrorMessage error_msg(errorType, direction);
-	if( Message::WriteMessage(&error_msg, socket) == false)
+	ErrorMessage error_msg(errorType);
+	if( MessageManager::Instance().WriteMessage(ticket, &error_msg) == false)
 	{
 		cerr << "ERROR: Error message send returned failure.\n";
 	}

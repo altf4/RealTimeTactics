@@ -27,8 +27,6 @@ MenuState::MenuState()
     {
     	OgreFramework::getSingletonPtr()->m_log->logMessage("Yes, use it");
     }
-    RTT::MessageManager::Initialize(RTT::DIRECTION_TO_SERVER);
-
 }
 
 void MenuState::Enter()
@@ -1175,13 +1173,13 @@ void MenuState::TeamChangedEvent(MainLobbyCallbackChange *change)
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Team Change Event");
 
-	if(CEGUI::WindowManager::getSingleton().isWindowPresent("Team" + CEGUI::PropertyHelper::intToString((int)change.m_playerID)))
+	if(CEGUI::WindowManager::getSingleton().isWindowPresent("Team" + CEGUI::PropertyHelper::intToString((int)change->m_playerID)))
 	{
-		CEGUI::Combobox *playerTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().getWindow("Team" + CEGUI::PropertyHelper::intToString((int)change.m_playerID));
+		CEGUI::Combobox *playerTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().getWindow("Team" + CEGUI::PropertyHelper::intToString((int)change->m_playerID));
 
 		CEGUI::ListboxTextItem *teamItem;
 
-		switch(change.m_team)
+		switch(change->m_team)
 		{
 			case SPECTATOR:
 				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(0);
@@ -1239,7 +1237,7 @@ void MenuState::TeamChangedEvent(MainLobbyCallbackChange *change)
 	}
 	else
 	{
-		OgreFramework::getSingletonPtr()->m_pLog->logMessage("ERROR!! Player's team box not found!");
+		OgreFramework::getSingletonPtr()->m_log->logMessage("ERROR!! Player's team box not found!");
 	}
 }
 void MenuState::TeamColorChangedEvent(MainLobbyCallbackChange *change)

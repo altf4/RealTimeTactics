@@ -43,7 +43,7 @@ class GameMessage: public Message
 {
 public:
 
-	GameMessage(enum GameMessageType type, enum ProtocolDirection direction);
+	GameMessage(enum GameMessageType type);
 	GameMessage(char *buffer, uint length);
 	char *Serialize(uint *length);
 

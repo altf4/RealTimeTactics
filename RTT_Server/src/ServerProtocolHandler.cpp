@@ -32,20 +32,15 @@ extern uint lastPlayerID;
 
 //Negotiates the hello messages and authentication to a new client
 //	Returns a new Player object, NULL on error
-Player *RTT::GetNewClient(int socketFD)
+Player *RTT::GetNewClient(Ticket &ticket)
 {
-	if(!MessageManager::Instance().RegisterCallback(socketFD))
-	{
-		return NULL;
-	}
-
 	//***************************
 	// Read client Hello
 	//***************************
-	Message *client_hello_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *client_hello_init = MessageManager::Instance().ReadMessage(ticket);
 	if( client_hello_init->m_messageType != MESSAGE_AUTH)
 	{
-		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+		SendError(ticket, PROTOCOL_ERROR);
 		delete client_hello_init;
 		return NULL;
 	}
@@ -55,7 +50,7 @@ Player *RTT::GetNewClient(int socketFD)
 	{
 		cerr << "ERROR: Expected CLIENT_HELLO message, received: "
 				<< client_hello->m_authType << "\n";
-		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+		SendError(ticket, PROTOCOL_ERROR);
 		delete client_hello;
 		return NULL;
 	}
@@ -68,7 +63,7 @@ Player *RTT::GetNewClient(int socketFD)
 		//If versions are not the same, send an error message to the client
 		delete client_hello;
 		cout << "Client Connected with bad software version.\n";
-		SendError(socketFD, INCOMPATIBLE_SOFTWARE_VERSION, DIRECTION_TO_SERVER);
+		SendError(ticket, INCOMPATIBLE_SOFTWARE_VERSION);
 		return NULL;
 	}
 	delete client_hello;
@@ -77,13 +72,13 @@ Player *RTT::GetNewClient(int socketFD)
 	//***************************
 	// Send Server Hello
 	//***************************
-	AuthMessage server_hello(SERVER_HELLO, DIRECTION_TO_SERVER);
+	AuthMessage server_hello(SERVER_HELLO);
 	server_hello.m_softwareVersion.m_major = SERVER_VERSION_MAJOR;
 	server_hello.m_softwareVersion.m_minor = SERVER_VERSION_MINOR;
 	server_hello.m_softwareVersion.m_rev = SERVER_VERSION_REV;
 	server_hello.m_authMechanism = HASHED_SALTED_PASS;
 
-	if(  Message::WriteMessage(&server_hello, socketFD) == false)
+	if(MessageManager::Instance().WriteMessage(ticket, &server_hello) == false)
 	{
 		//Error in write
 		return NULL;
@@ -92,11 +87,11 @@ Player *RTT::GetNewClient(int socketFD)
 	//***************************
 	// Receive Client Auth
 	//***************************
-	Message *client_auth_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *client_auth_init = MessageManager::Instance().ReadMessage(ticket);
 	if( client_auth_init->m_messageType != MESSAGE_AUTH)
 	{
 		//Error
-		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+		SendError(ticket, PROTOCOL_ERROR);
 		delete client_auth_init;
 		return NULL;
 	}
@@ -104,7 +99,7 @@ Player *RTT::GetNewClient(int socketFD)
 	if(client_auth->m_authType != CLIENT_AUTH)
 	{
 		//Error
-		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+		SendError(ticket, PROTOCOL_ERROR);
 		delete client_auth;
 		return NULL;
 	}
@@ -131,13 +126,18 @@ Player *RTT::GetNewClient(int socketFD)
 	//***************************
 	// Send Server Auth Reply
 	//***************************
-	AuthMessage server_auth_reply(SERVER_AUTH_REPLY, DIRECTION_TO_SERVER);
+	AuthMessage server_auth_reply(SERVER_AUTH_REPLY);
 	server_auth_reply.m_authSuccess = authresult;
 	if( player != NULL )
 	{
 		server_auth_reply.m_playerDescription = player->GetDescription();
 	}
-	if( Message::WriteMessage(&server_auth_reply, socketFD) == false)
+	else
+	{
+		return NULL;
+	}
+
+	if(MessageManager::Instance().WriteMessage(ticket, &server_auth_reply) == false)
 	{
 		//Error in write
 		return NULL;
@@ -150,16 +150,9 @@ Player *RTT::GetNewClient(int socketFD)
 //	Starts out by listening on the given socket for a LobbyMessage
 //	Executes the Lobby protocol
 //	Returns a enum LobbyReturn to describe the end state
-enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
+enum LobbyReturn RTT::ProcessLobbyCommand(Ticket &ticket, Player *player)
 {
 	if( player == NULL )
-	{
-		return EXITING_SERVER;
-	}
-
-	//uint playerMatchID = player->GetCurrentMatchID();
-
-	if(!MessageManager::Instance().RegisterCallback(socketFD))
 	{
 		return EXITING_SERVER;
 	}
@@ -167,12 +160,12 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 	//********************************
 	// Receive Initial Lobby Message
 	//********************************
-	Message *lobby_message_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *lobby_message_init = MessageManager::Instance().ReadMessage(ticket);
 	if( lobby_message_init->m_messageType != MESSAGE_LOBBY )
 	{
 		//ERROR
-		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
-		return EXITING_SERVER;
+		SendError(ticket, PROTOCOL_ERROR);
+		return IN_MAIN_LOBBY;
 	}
 
 	LobbyMessage *lobby_message = (LobbyMessage*)lobby_message_init;
@@ -186,7 +179,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 			//***************************
 			// Send Query Reply
 			//***************************
-			LobbyMessage query_reply(MATCH_LIST_REPLY, DIRECTION_TO_SERVER);
+			LobbyMessage query_reply(MATCH_LIST_REPLY);
 			query_reply.m_returnedMatchesCount = matchCount;
 			query_reply.m_matchDescriptions = (MatchDescription*)
 					malloc(sizeof(struct MatchDescription) * matchCount);
@@ -194,7 +187,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 			{
 				query_reply.m_matchDescriptions[i] = matches[i];
 			}
-			if( Message::WriteMessage(&query_reply, socketFD) == false)
+			if( MessageManager::Instance().WriteMessage(ticket, &query_reply) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
@@ -208,9 +201,9 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 			//***************************
 			// Send Options Available
 			//***************************
-			LobbyMessage options_available(MATCH_CREATE_OPTIONS_AVAILABLE, DIRECTION_TO_SERVER);
+			LobbyMessage options_available(MATCH_CREATE_OPTIONS_AVAILABLE);
 			options_available.m_options.m_maxPlayers = MAX_PLAYERS_IN_MATCH;
-			if(  Message::WriteMessage(&options_available, socketFD) == false)
+			if(MessageManager::Instance().WriteMessage(ticket, &options_available) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
@@ -221,12 +214,12 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 			//********************************
 			// Receive Options Chosen
 			//********************************
-			Message *options_chosen_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+			Message *options_chosen_init = MessageManager::Instance().ReadMessage(ticket);
 			if( options_chosen_init->m_messageType !=  MESSAGE_LOBBY)
 			{
 				//Error
 				cerr << "ERROR: Client gave us the wrong message type.\n";
-				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+				SendError(ticket, PROTOCOL_ERROR);
 				delete options_chosen_init;
 				delete lobby_message;
 				return IN_MAIN_LOBBY;
@@ -237,7 +230,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 			{
 				//Error
 				cerr << "ERROR: Client gave us the wrong message type.\n";
-				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+				SendError(ticket, PROTOCOL_ERROR);
 				delete options_chosen;
 				delete lobby_message;
 				return IN_MAIN_LOBBY;
@@ -247,7 +240,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 					(options_chosen->m_options.m_maxPlayers < 2))
 			{
 				cerr << "ERROR: Client asked an invalid number of max playersb.\n";
-				SendError(socketFD, INVALID_MAX_PLAYERS, DIRECTION_TO_SERVER);
+				SendError(ticket, INVALID_MAX_PLAYERS);
 				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
@@ -257,7 +250,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 			if( matchID == 0 )
 			{
 				//TODO: Find a better error message hereb
-				SendError(socketFD, TOO_BUSY, DIRECTION_TO_SERVER);
+				SendError(ticket, TOO_BUSY);
 				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
@@ -266,12 +259,12 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 			//***************************
 			// Send Match Create Reply
 			//***************************
-			LobbyMessage create_reply(MATCH_CREATE_REPLY, DIRECTION_TO_SERVER);
+			LobbyMessage create_reply(MATCH_CREATE_REPLY);
 			pthread_rwlock_rdlock(&matchListLock);
 			Match *joinedMatch = matchList[matchID];
 			create_reply.m_matchDescription = joinedMatch->GetDescription();
 			pthread_rwlock_unlock(&matchListLock);
-			if( Message::WriteMessage(&create_reply, socketFD) == false)
+			if( MessageManager::Instance().WriteMessage(ticket, &create_reply) == false)
 			{
 				//Error in write, do something?
 				//TODO: This case is awkward. Should probably
@@ -295,7 +288,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 					//***************************
 					// Send Match Join Reply
 					//***************************
-					LobbyMessage match_join(MATCH_JOIN_REPLY, DIRECTION_TO_SERVER);
+					LobbyMessage match_join(MATCH_JOIN_REPLY);
 
 					pthread_rwlock_rdlock(&matchListLock);
 					Match *joinedMatch = matchList[lobby_message->m_ID];
@@ -313,7 +306,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 
 
 
-					if( Message::WriteMessage(&match_join, socketFD) == false)
+					if( MessageManager::Instance().WriteMessage(ticket, &match_join) == false)
 					{
 						//Error in write, do something?
 						cerr << "ERROR: Message send returned failure.\n";
@@ -322,7 +315,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 					//*******************************
 					// Send Client Notifications
 					//*******************************
-					MatchLobbyMessage notification(PLAYER_JOINED_MATCH_NOTIFICATION, DIRECTION_TO_CLIENT);
+					MatchLobbyMessage notification(PLAYER_JOINED_MATCH_NOTIFICATION);
 					notification.m_playerDescription = player->GetDescription();
 
 					NotifyClients(joinedMatch, &notification);
@@ -354,7 +347,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 					errorType = PROTOCOL_ERROR;
 					break;
 				}
-				SendError(socketFD, errorType, DIRECTION_TO_SERVER);
+				SendError(ticket, errorType);
 				delete lobby_message;
 				return IN_MAIN_LOBBY;
 			}
@@ -365,7 +358,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send Server Stats Reply
 			//*******************************
-			LobbyMessage stats_reply(SERVER_STATS_REPLY, DIRECTION_TO_SERVER);
+			LobbyMessage stats_reply(SERVER_STATS_REPLY);
 
 			pthread_rwlock_rdlock(&matchListLock);
 			stats_reply.m_serverStats.m_numMatches = matchList.size();
@@ -375,7 +368,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 			stats_reply.m_serverStats.m_numPlayers = playerList.size();
 			pthread_rwlock_unlock(&playerListLock);
 
-			if( Message::WriteMessage(&stats_reply, socketFD) == false )
+			if( MessageManager::Instance().WriteMessage(ticket, &stats_reply) == false )
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
@@ -388,8 +381,8 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send Exit Server Acknowledge
 			//*******************************
-			LobbyMessage exit_server(MATCH_EXIT_SERVER_ACKNOWLEDGE, DIRECTION_TO_SERVER);
-			if( Message::WriteMessage(&exit_server, socketFD) == false)
+			LobbyMessage exit_server(MATCH_EXIT_SERVER_ACKNOWLEDGE);
+			if( MessageManager::Instance().WriteMessage(ticket, &exit_server) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
@@ -399,7 +392,7 @@ enum LobbyReturn RTT::ProcessLobbyCommand(int socketFD, Player *player)
 		}
 		default:
 		{
-			SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+			SendError(ticket, PROTOCOL_ERROR);
 			delete lobby_message_init;
 			lobby_message_init = NULL;
 			return IN_MAIN_LOBBY;
@@ -440,7 +433,7 @@ enum AuthResult RTT::AuthenticateClient(char *username, unsigned char *hashedPas
 //	Starts out by listening on the given socket for a MatchLobbyMessage
 //	Executes the MatchLobby protocol
 //	Returns a enum LobbyReturn to describe the end state
-enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
+enum LobbyReturn RTT::ProcessMatchLobbyCommand(Ticket &ticket, Player *player)
 {
 	if( player == NULL )
 	{
@@ -459,21 +452,24 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 	}
 	pthread_rwlock_unlock(&matchListLock);
 
-	if(!MessageManager::Instance().RegisterCallback(socketFD))
-	{
-		return EXITING_SERVER;
-	}
-
 	//********************************
 	// Receive Initial MatchLobby Message
 	//********************************
-	Message *match_lobby_message_init = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
-	if( match_lobby_message_init->m_messageType != MESSAGE_MATCH_LOBBY )
+	Message *match_lobby_message_init = MessageManager::Instance().ReadMessage(ticket);
+	if(match_lobby_message_init->m_messageType != MESSAGE_MATCH_LOBBY )
 	{
 		//ERROR
+		if(match_lobby_message_init->m_messageType == MESSAGE_ERROR)
+		{
+			ErrorMessage *error = (ErrorMessage*)match_lobby_message_init;
+			if(error->m_errorType == ERROR_SOCKET_CLOSED)
+			{
+				return EXITING_SERVER;
+			}
+		}
 		cerr << "ERROR: Lobby message came back NULL\n";
-		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
-		return EXITING_SERVER;
+		SendError(ticket, PROTOCOL_ERROR);
+		return IN_MATCH_LOBBY;
 	}
 
 	enum LobbyReturn ret = IN_MAIN_LOBBY;
@@ -485,17 +481,17 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 		{
 			if( matchID == 0 )
 			{
-				SendError(socketFD, NOT_IN_THAT_MATCH, DIRECTION_TO_SERVER);
+				SendError(ticket, NOT_IN_THAT_MATCH);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
-			if( LeaveMatch(player) )
+			if(LeaveMatch(player))
 			{
 				//*******************************
 				// Send Match Leave Acknowledge
 				//*******************************
-				MatchLobbyMessage leave_ack(MATCH_LEAVE_ACKNOWLEDGE, DIRECTION_TO_SERVER);
-				if(  Message::WriteMessage(&leave_ack, socketFD) == false)
+				MatchLobbyMessage leave_ack(MATCH_LEAVE_ACKNOWLEDGE);
+				if(MessageManager::Instance().WriteMessage(ticket, &leave_ack) == false)
 				{
 					//Error in write, do something?
 					cerr << "ERROR: Message send returned failure.\n";
@@ -505,7 +501,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			}
 			else
 			{
-				SendError(socketFD, NOT_IN_THAT_MATCH, DIRECTION_TO_SERVER);
+				SendError(ticket, NOT_IN_THAT_MATCH);
 				delete match_lobby_message;
 				if( matchID == 0)
 				{
@@ -520,7 +516,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 		{
 			if( matchID == 0 )
 			{
-				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+				SendError(ticket, PROTOCOL_ERROR);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -528,7 +524,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
-				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
+				SendError(ticket, MATCH_DOESNT_EXIST);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -540,7 +536,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				if( playersMatch->GetLeaderID() != playerID)
 				{
 					//Error, there is no such Match
-					SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
+					SendError(ticket, NOT_ALLOWED_TO_CHANGE_THAT);
 					ret = IN_MATCH_LOBBY;
 					break;
 				}
@@ -565,9 +561,9 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send CHANGE TEAM REPLY
 			//*******************************
-			MatchLobbyMessage change_team_reply(CHANGE_TEAM_REPLY, DIRECTION_TO_SERVER);
+			MatchLobbyMessage change_team_reply(CHANGE_TEAM_REPLY);
 			change_team_reply.m_changeAccepted = changed;
-			if(  Message::WriteMessage(&change_team_reply, socketFD) == false)
+			if(MessageManager::Instance().WriteMessage(ticket, &change_team_reply) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
@@ -578,7 +574,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				//*******************************
 				// Send Client Notifications
 				//*******************************
-				MatchLobbyMessage notification(TEAM_CHANGED_NOTIFICATION, DIRECTION_TO_CLIENT);
+				MatchLobbyMessage notification(TEAM_CHANGED_NOTIFICATION);
 				notification.m_newTeam = match_lobby_message->m_newTeam;
 				notification.m_playerID = match_lobby_message->m_playerID;
 				NotifyClients(playersMatch, &notification);
@@ -591,7 +587,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 		{
 			if( matchID == 0 )
 			{
-				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+				SendError(ticket, PROTOCOL_ERROR);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -599,7 +595,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if(playersMatch == NULL)
 			{
 				//Error, there is no such Match
-				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
+				SendError(ticket, MATCH_DOESNT_EXIST);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -607,7 +603,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, there is no such Match
-				SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
+				SendError(ticket, NOT_ALLOWED_TO_CHANGE_THAT);
 				ret = IN_MATCH_LOBBY;
 				break;
 			}
@@ -617,9 +613,9 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send START MATCH REPLY
 			//*******************************
-			MatchLobbyMessage start_match_reply(START_MATCH_REPLY, DIRECTION_TO_SERVER);
+			MatchLobbyMessage start_match_reply(START_MATCH_REPLY);
 			start_match_reply.m_changeAccepted = started;
-			if(  Message::WriteMessage(&start_match_reply, socketFD) == false)
+			if(  MessageManager::Instance().WriteMessage(ticket, &start_match_reply) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
@@ -631,7 +627,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				// Send Client Notifications
 				//*******************************
 				//TODO: Make sure each client is ready. IE: Listed for replies
-				MatchLobbyMessage notification(MATCH_START_NOTIFICATION, DIRECTION_TO_CLIENT);
+				MatchLobbyMessage notification(MATCH_START_NOTIFICATION);
 				NotifyClients(playersMatch, &notification);
 
 				MatchLoop(playersMatch);
@@ -648,7 +644,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 		{
 			if( matchID == 0 )
 			{
-				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+				SendError(ticket, PROTOCOL_ERROR);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -656,7 +652,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
-				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
+				SendError(ticket, MATCH_DOESNT_EXIST);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -667,7 +663,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				if(playersMatch->GetLeaderID() != playerID)
 				{
 					//Error, not allowed
-					SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
+					SendError(ticket, NOT_ALLOWED_TO_CHANGE_THAT);
 					ret = IN_MATCH_LOBBY;
 					break;
 				}
@@ -683,7 +679,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			{
 				//Error, there is no such player
 				pthread_rwlock_unlock(&playerListLock);
-				SendError(socketFD, NO_SUCH_PLAYER, DIRECTION_TO_SERVER);
+				SendError(ticket, NO_SUCH_PLAYER);
 				ret = IN_MATCH_LOBBY;
 				break;
 			}
@@ -692,9 +688,9 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send CHANGE COLOR REPLY
 			//*******************************
-			MatchLobbyMessage change_color_reply(CHANGE_COLOR_REPLY, DIRECTION_TO_SERVER);
+			MatchLobbyMessage change_color_reply(CHANGE_COLOR_REPLY);
 			change_color_reply.m_changeAccepted = true;
-			if(  Message::WriteMessage(&change_color_reply, socketFD) == false)
+			if(MessageManager::Instance().WriteMessage(ticket, &change_color_reply) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
@@ -703,7 +699,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send Client Notifications
 			//*******************************
-			MatchLobbyMessage notification(COLOR_CHANGED_NOTIFICATION, DIRECTION_TO_CLIENT);
+			MatchLobbyMessage notification(COLOR_CHANGED_NOTIFICATION);
 			notification.m_newColor = match_lobby_message->m_newColor;
 			NotifyClients(playersMatch, &notification);
 
@@ -714,7 +710,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 		{
 			if( matchID == 0 )
 			{
-				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+				SendError(ticket, PROTOCOL_ERROR);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -722,7 +718,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
-				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
+				SendError(ticket, MATCH_DOESNT_EXIST);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -730,7 +726,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, not allowed
-				SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
+				SendError(ticket, NOT_ALLOWED_TO_CHANGE_THAT);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -740,9 +736,9 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send CHANGE MAP REPLY
 			//*******************************
-			MatchLobbyMessage change_map_reply(CHANGE_MAP_REPLY, DIRECTION_TO_SERVER);
+			MatchLobbyMessage change_map_reply(CHANGE_MAP_REPLY);
 			change_map_reply.m_changeAccepted = true;
-			if(  Message::WriteMessage(&change_map_reply, socketFD) == false)
+			if(MessageManager::Instance().WriteMessage(ticket, &change_map_reply) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
@@ -751,7 +747,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send Client Notifications
 			//*******************************
-			MatchLobbyMessage notification(MAP_CHANGED_NOTIFICATION, DIRECTION_TO_CLIENT);
+			MatchLobbyMessage notification(MAP_CHANGED_NOTIFICATION);
 			notification.m_mapDescription = match_lobby_message->m_mapDescription;
 			NotifyClients(playersMatch, &notification);
 
@@ -762,7 +758,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 		{
 			if( matchID == 0 )
 			{
-				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+				SendError(ticket, PROTOCOL_ERROR);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -770,7 +766,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
-				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
+				SendError(ticket, MATCH_DOESNT_EXIST);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -778,7 +774,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, not allowed
-				SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
+				SendError(ticket, NOT_ALLOWED_TO_CHANGE_THAT);
 				ret = IN_MATCH_LOBBY;
 				break;
 			}
@@ -788,9 +784,9 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*************************************
 			// Send Change Victory Condition Reply
 			//**************************************
-			MatchLobbyMessage change_victory_reply(CHANGE_VICTORY_COND_REPLY, DIRECTION_TO_SERVER);
+			MatchLobbyMessage change_victory_reply(CHANGE_VICTORY_COND_REPLY);
 			change_victory_reply.m_changeAccepted = true;
-			if( Message::WriteMessage(&change_victory_reply, socketFD) == false)
+			if( MessageManager::Instance().WriteMessage(ticket, &change_victory_reply) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
@@ -799,7 +795,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send Client Notifications
 			//*******************************
-			MatchLobbyMessage notification(VICTORY_COND_CHANGED_NOTIFICATION, DIRECTION_TO_CLIENT);
+			MatchLobbyMessage notification(VICTORY_COND_CHANGED_NOTIFICATION);
 			notification.m_newVictCond = match_lobby_message->m_newVictCond;
 			NotifyClients(playersMatch, &notification);
 
@@ -810,7 +806,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 		{
 			if( matchID == 0 )
 			{
-				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+				SendError(ticket, PROTOCOL_ERROR);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -818,7 +814,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
-				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
+				SendError(ticket, MATCH_DOESNT_EXIST);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -826,7 +822,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, not allowed
-				SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
+				SendError(ticket, NOT_ALLOWED_TO_CHANGE_THAT);
 				ret = IN_MATCH_LOBBY;
 				break;
 			}
@@ -836,9 +832,9 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send Change Game Speed Reply
 			//*******************************
-			MatchLobbyMessage change_speed_reply(CHANGE_GAME_SPEED_REPLY, DIRECTION_TO_SERVER);
+			MatchLobbyMessage change_speed_reply(CHANGE_GAME_SPEED_REPLY);
 			change_speed_reply.m_changeAccepted = true;
-			if(  Message::WriteMessage(&change_speed_reply, socketFD) == false)
+			if(MessageManager::Instance().WriteMessage(ticket, &change_speed_reply) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
@@ -847,7 +843,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send Client Notifications
 			//*******************************
-			MatchLobbyMessage notification(GAME_SPEED_CHANGED_NOTIFICATION, DIRECTION_TO_CLIENT);
+			MatchLobbyMessage notification(GAME_SPEED_CHANGED_NOTIFICATION);
 			notification.m_newSpeed = match_lobby_message->m_newSpeed;
 			NotifyClients(playersMatch, &notification);
 
@@ -858,7 +854,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 		{
 			if( matchID == 0 )
 			{
-				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+				SendError(ticket, PROTOCOL_ERROR);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -866,7 +862,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
-				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
+				SendError(ticket, MATCH_DOESNT_EXIST);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -881,9 +877,9 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send Change Leader Reply
 			//*******************************
-			MatchLobbyMessage change_leader_reply(CHANGE_LEADER_REPLY, DIRECTION_TO_SERVER);
+			MatchLobbyMessage change_leader_reply(CHANGE_LEADER_REPLY);
 			change_leader_reply.m_changeAccepted = changed;
-			if(  Message::WriteMessage(&change_leader_reply, socketFD) == false)
+			if(  MessageManager::Instance().WriteMessage(ticket, &change_leader_reply) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
@@ -894,7 +890,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				//*******************************
 				// Send Client Notifications
 				//*******************************
-				MatchLobbyMessage notification(CHANGE_LEADER_NOTIFICATION, DIRECTION_TO_CLIENT);
+				MatchLobbyMessage notification(CHANGE_LEADER_NOTIFICATION);
 				notification.m_playerID = match_lobby_message->m_playerID;
 				NotifyClients(playersMatch, &notification);
 			}
@@ -906,7 +902,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 		{
 			if( matchID == 0 )
 			{
-				SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+				SendError(ticket, PROTOCOL_ERROR);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -914,7 +910,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( playersMatch == NULL)
 			{
 				//Error, there is no such Match
-				SendError(socketFD, MATCH_DOESNT_EXIST, DIRECTION_TO_SERVER);
+				SendError(ticket, MATCH_DOESNT_EXIST);
 				ret = IN_MAIN_LOBBY;
 				break;
 			}
@@ -922,7 +918,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			if( playersMatch->GetLeaderID() != playerID)
 			{
 				//Error, not allowed
-				SendError(socketFD, NOT_ALLOWED_TO_CHANGE_THAT, DIRECTION_TO_SERVER);
+				SendError(ticket, NOT_ALLOWED_TO_CHANGE_THAT);
 				ret = IN_MATCH_LOBBY;
 				break;
 			}
@@ -932,9 +928,9 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 			//*******************************
 			// Send Kick Player Reply
 			//*******************************
-			MatchLobbyMessage kick_player_reply(KICK_PLAYER_REPLY, DIRECTION_TO_SERVER);
+			MatchLobbyMessage kick_player_reply(KICK_PLAYER_REPLY);
 			kick_player_reply.m_changeAccepted = removed;
-			if(  Message::WriteMessage(&kick_player_reply, socketFD) == false)
+			if(MessageManager::Instance().WriteMessage(ticket, &kick_player_reply) == false)
 			{
 				//Error in write, do something?
 				cerr << "ERROR: Message send returned failure.\n";
@@ -945,7 +941,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 				//*******************************
 				// Send Client Notifications
 				//*******************************
-				MatchLobbyMessage notification(PLAYER_LEFT_MATCH_NOTIFICATION, DIRECTION_TO_CLIENT);
+				MatchLobbyMessage notification(PLAYER_LEFT_MATCH_NOTIFICATION);
 				notification.m_playerID = match_lobby_message->m_playerID;
 				notification.m_newLeaderID = playersMatch->GetLeaderID();
 				NotifyClients(playersMatch, &notification);
@@ -956,7 +952,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 		}
 		default:
 		{
-			SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+			SendError(ticket, PROTOCOL_ERROR);
 			ret = IN_MATCH_LOBBY;
 			break;
 		}
@@ -969,7 +965,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(int socketFD, Player *player)
 //	Starts out by listening on the given socket for a GameMessage
 //	Executes the game protocol
 //	Returns a enum LobbyReturn to describe the end state
-enum LobbyReturn RTT::ProcessGameCommand(int socketFD, Player *player)
+enum LobbyReturn RTT::ProcessGameCommand(Ticket &ticket, Player *player)
 {
 	if(player == NULL)
 	{
@@ -987,17 +983,12 @@ enum LobbyReturn RTT::ProcessGameCommand(int socketFD, Player *player)
 	}
 	pthread_rwlock_unlock(&matchListLock);
 
-	if(!MessageManager::Instance().RegisterCallback(socketFD))
-	{
-		return EXITING_SERVER;
-	}
-
-	Message *message = Message::ReadMessage(socketFD, DIRECTION_TO_SERVER);
+	Message *message = MessageManager::Instance().ReadMessage(ticket);
 	if(message->m_messageType != MESSAGE_GAME)
 	{
 		//ERROR
 		cerr << "WARNING: Game message read failed\n";
-		SendError(socketFD, PROTOCOL_ERROR, DIRECTION_TO_SERVER);
+		SendError(ticket, PROTOCOL_ERROR);
 		return EXITING_SERVER;
 	}
 
@@ -1011,15 +1002,14 @@ enum LobbyReturn RTT::ProcessGameCommand(int socketFD, Player *player)
 			//TODO: Check to see if the move is legal
 			//TODO: Move the unit around in the gameboard
 
-			GameMessage move_reply(MOVE_UNIT_DIRECTION_REPLY, DIRECTION_TO_SERVER);
+			GameMessage move_reply(MOVE_UNIT_DIRECTION_REPLY);
 			move_reply.m_moveResult = MOVE_SUCCESS;
-			GameMessage::WriteMessage(&move_reply, socketFD);
+			MessageManager::Instance().WriteMessage(ticket, &move_reply);
 
-			GameMessage move_notice(UNIT_MOVED_DIRECTION_NOTICE, DIRECTION_TO_CLIENT);
+			GameMessage move_notice(UNIT_MOVED_DIRECTION_NOTICE);
 			move_notice.m_unitID = game_message->m_unitID;
 			move_notice.m_xOld = game_message->m_xOld;
 			move_notice.m_yOld = game_message->m_yOld;
-			move_notice.m_direction = game_message->m_direction;
 
 			NotifyClients(playersMatch, &move_notice);
 
@@ -1038,10 +1028,10 @@ enum LobbyReturn RTT::ProcessGameCommand(int socketFD, Player *player)
 
 //Send a message of type Error to the client
 //	NOTE: Does not synchronize. You must have the lock from UseSocket() before calling this
-void  RTT::SendError(int connectFD, enum ErrorType errorType, enum ProtocolDirection direction)
+void RTT::SendError(const Ticket &ticket, enum ErrorType errorType)
 {
-	ErrorMessage error_msg(errorType, direction);
-	if(  Message::WriteMessage(&error_msg, connectFD) == false)
+	ErrorMessage error_msg(errorType);
+	if(MessageManager::Instance().WriteMessage(ticket, &error_msg) == false)
 	{
 		cerr << "ERROR: Error message send returned failure.\n";
 	}
@@ -1063,13 +1053,13 @@ bool RTT::NotifyClients(Match *match, Message *message)
 			int recvSocket = (*it)->GetSocket();
 			if( recvSocket >= 0 )
 			{
-				Lock lock = MessageManager::Instance().UseSocket(recvSocket);
+				Ticket ticket = MessageManager::Instance().StartConversation(recvSocket);
 
-				if( Message::WriteMessage(message, recvSocket) == false )
+				if(MessageManager::Instance().WriteMessage(ticket, message) == false)
 				{
 					cerr << "ERROR: Message send returned failure.\n";
 				}
-				Message *message_ack = Message::ReadMessage(recvSocket, DIRECTION_TO_CLIENT);
+				Message *message_ack = MessageManager::Instance().ReadMessage(ticket);
 				//TODO: Not strictly correct. We only want to allow ACKs
 				if( message_ack->m_messageType != MESSAGE_MATCH_LOBBY)
 				{

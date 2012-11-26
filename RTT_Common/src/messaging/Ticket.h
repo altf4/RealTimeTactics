@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : MessageQueue.h
+// Name        : Ticket.h
 // Copyright   : DataSoft Corporation 2011-2012
 //	Nova is free software: you can redistribute it and/or modify
 //   it under the terms of the GNU General Public License as published by
@@ -13,58 +13,40 @@
 //
 //   You should have received a copy of the GNU General Public License
 //   along with Nova.  If not, see <http://www.gnu.org/licenses/>.
-// Description : An item in the MessageManager's table. Contains a pair of queues
-//	of received messages on a particular socket
+// Description : Manages unique IDs for a user of the MessageManager. Represents
+//		a "ticket" as one might receive from the DMV. It holds your spot in line
+//		and lets the system let you know when a new message has been received for you.
 //============================================================================
 
-#ifndef MESSAGEQUEUE_H_
-#define MESSAGEQUEUE_H_
-
-#include "messages/Message.h"
+#ifndef TICKET_H_
+#define TICKET_H_
 
 #include "pthread.h"
-#include <queue>
 
 namespace RTT
 {
 
-class MessageQueue
+class Ticket
 {
 
 public:
 
-	MessageQueue(uint32_t ourSerial);
-	~MessageQueue();
+	Ticket();
 
-	//Functions for pushing and popping messages off the Message queue
-	Message *PopMessage(int timeout);
-	bool PushMessage(Message *message);
+	Ticket(uint32_t, uint32_t, bool, bool, int, pthread_rwlock_t *);
 
-	uint32_t GetTheirSerialNum();
-	uint32_t GetOurSerialNum();
-
-	//Shuts down MessageQueue, also wakes up any reading threads
-	void Shutdown();
-
-private:
-
-	void SetTheirSerialNum(uint32_t serial);
-
-	std::queue<Message*> m_queue;
-	pthread_mutex_t m_queueMutex;
-
-	pthread_cond_t m_popWakeupCondition;
-
-	uint32_t m_theirSerialNum;
-	pthread_mutex_t m_theirSerialNumMutex;
+	~Ticket();
 
 	uint32_t m_ourSerialNum;
-	pthread_mutex_t m_ourSerialNumMutex;
-
-	bool isShutdown;
+	uint32_t m_theirSerialNum;
+	bool m_isCallback;
+	bool m_hasInit;
+	int m_socketFD;
+	pthread_rwlock_t *m_endpointLock;
 
 };
 
 }
 
-#endif /* MESSAGEQUEUE_H_ */
+
+#endif /* TICKET_H_ */

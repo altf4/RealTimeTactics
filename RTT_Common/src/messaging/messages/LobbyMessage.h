@@ -72,7 +72,7 @@ public:
 
 	enum LobbyType m_lobbyType;
 
-	LobbyMessage(enum LobbyType type, enum ProtocolDirection direction);
+	LobbyMessage(enum LobbyType type);
 	~LobbyMessage();
 	LobbyMessage(char *buffer, uint length);
 	char *Serialize(uint *length);

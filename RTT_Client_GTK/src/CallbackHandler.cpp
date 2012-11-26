@@ -89,7 +89,7 @@ void CallbackHandler::CallbackThread()
 		{
 			m_sig_callback_closed();
 			delete change;
-			continue;
+			return;
 		}
 		if(change->m_type == CALLBACK_ERROR)
 		{

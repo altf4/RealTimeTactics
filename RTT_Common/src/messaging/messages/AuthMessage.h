@@ -58,7 +58,7 @@ public:
 
 	enum AuthType m_authType;
 
-	AuthMessage(enum AuthType type, enum ProtocolDirection direction);
+	AuthMessage(enum AuthType type);
 	AuthMessage(char *buffer, uint length);
 	char *Serialize(uint *length);
 

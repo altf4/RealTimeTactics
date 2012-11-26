@@ -1,15 +1,29 @@
 //============================================================================
 // Name        : Message.cpp
-// Author      : AltF4
-// Copyright   : 2011, GNU GPLv3
-// Description : Message class which is passed to/from client/server
+// Copyright   : DataSoft Corporation 2011-2012
+//	Nova is free software: you can redistribute it and/or modify
+//   it under the terms of the GNU General Public License as published by
+//   the Free Software Foundation, either version 3 of the License, or
+//   (at your option) any later version.
+//
+//   Nova is distributed in the hope that it will be useful,
+//   but WITHOUT ANY WARRANTY; without even the implied warranty of
+//   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//   GNU General Public License for more details.
+//
+//   You should have received a copy of the GNU General Public License
+//   along with Nova.  If not, see <http://www.gnu.org/licenses/>.
+// Description : Parent message class for all message subtypes. Suitable for any
+//		communications over a stream socket
 //============================================================================
 
-#include "Message.h"
-#include "string.h"
-#include "iostream"
+#include <string>
+#include <vector>
+#include <errno.h>
 #include <sys/socket.h>
+#include <unistd.h>
 
+#include "Message.h"
 #include "AuthMessage.h"
 #include "LobbyMessage.h"
 #include "ErrorMessage.h"
@@ -21,6 +35,16 @@ using namespace std;
 using namespace RTT;
 
 Message::Message()
+{
+
+}
+
+Message::~Message()
+{
+
+}
+
+void Message::DeleteContents()
 {
 
 }
@@ -45,11 +69,11 @@ char *Message::Serialize(uint *length)
 	}
 }
 
-Message *Message::Deserialize(char *buffer, uint length, enum ProtocolDirection direction )
+Message *Message::Deserialize(char *buffer, uint length)
 {
-	if(length < MSG_HEADER_SIZE)
+	if(length < MESSAGE_MIN_SIZE)
 	{
-		return new ErrorMessage(ERROR_MALFORMED_MESSAGE, direction);
+		return new ErrorMessage(ERROR_MALFORMED_MESSAGE);
 	}
 
 	enum MessageType thisType;
@@ -85,79 +109,16 @@ Message *Message::Deserialize(char *buffer, uint length, enum ProtocolDirection 
 		}
 		default:
 		{
-			return new ErrorMessage(ERROR_UNKNOWN_MESSAGE_TYPE, direction);
+			return new ErrorMessage(ERROR_UNKNOWN_MESSAGE_TYPE);
 		}
 	}
 
 	if(message->m_serializeError)
 	{
 		delete message;
-		return new ErrorMessage(ERROR_MALFORMED_MESSAGE, direction);
+		return new ErrorMessage(ERROR_MALFORMED_MESSAGE);
 	}
 	return message;
-}
-
-
-Message *Message::ReadMessage(int connectFD, enum ProtocolDirection direction, int timeout)
-{
-	return MessageManager::Instance().PopMessage(connectFD, direction, timeout);
-
-}
-
-bool Message::WriteMessage(Message *message, int connectFD)
-{
-	if (connectFD == -1)
-		{
-			return false;
-		}
-
-		message->m_serialNumber = MessageManager::Instance().GetSerialNumber(
-				connectFD, message->m_direction);
-
-		uint32_t length;
-		char *buffer = message->Serialize(&length);
-
-		// Total bytes of a write() call that need to be sent
-		uint32_t bytesSoFar;
-
-		// Return value of the write() call, actual bytes sent
-		uint32_t bytesWritten;
-
-		// Send the message length
-		bytesSoFar = 0;
-	    while (bytesSoFar < sizeof(length))
-		{
-			bytesWritten = write(connectFD, &length, sizeof(length) - bytesSoFar);
-			if (bytesWritten < 0)
-			{
-				free(buffer);
-				return false;
-			}
-			else
-			{
-				bytesSoFar += bytesWritten;
-			}
-		}
-
-
-		// Send the message
-		bytesSoFar = 0;
-		while (bytesSoFar < length)
-		{
-			bytesWritten = write(connectFD, buffer, length - bytesSoFar);
-			if (bytesWritten < 0)
-			{
-				free(buffer);
-				return false;
-			}
-			else
-			{
-				bytesSoFar += bytesWritten;
-			}
-		}
-
-		free(buffer);
-		return true;
 }
 
 bool Message::DeserializeHeader(char **buffer)
@@ -174,28 +135,27 @@ bool Message::DeserializeHeader(char **buffer)
 	memcpy(&m_messageType, *buffer, sizeof(m_messageType));
 	*buffer += sizeof(m_messageType);
 
-	memcpy(&m_direction, *buffer, sizeof(m_direction));
-	*buffer += sizeof(m_direction);
+	memcpy(&m_theirSerialNumber, *buffer, sizeof(m_theirSerialNumber));
+	*buffer += sizeof(m_theirSerialNumber);
 
-	memcpy(&m_serialNumber, *buffer, sizeof(m_serialNumber));
-	*buffer += sizeof(m_serialNumber);
-
-	if((m_direction != DIRECTION_TO_CLIENT) && (m_direction != DIRECTION_TO_SERVER))
-	{
-		return false;
-	}
+	memcpy(&m_ourSerialNumber, *buffer, sizeof(m_ourSerialNumber));
+	*buffer += sizeof(m_ourSerialNumber);
 
 	return true;
 }
 
-void Message::SerializeHeader(char **buffer)
+void Message::SerializeHeader(char **buffer, uint32_t messageSize)
 {
+	// Put the size of the message first so we know how much to read when reading
+	memcpy(*buffer, &messageSize, sizeof(messageSize));
+	*buffer += sizeof(messageSize);
+
 	memcpy(*buffer, &m_messageType, sizeof(m_messageType));
 	*buffer += sizeof(m_messageType);
 
-	memcpy(*buffer, &m_direction, sizeof(m_direction));
-	*buffer += sizeof(m_direction);
+	memcpy(*buffer, &m_theirSerialNumber, sizeof(m_theirSerialNumber));
+	*buffer += sizeof(m_theirSerialNumber);
 
-	memcpy(*buffer, &m_serialNumber, sizeof(m_serialNumber));
-	*buffer += sizeof(m_serialNumber);
+	memcpy(*buffer, &m_ourSerialNumber, sizeof(m_ourSerialNumber));
+	*buffer += sizeof(m_ourSerialNumber);
 }

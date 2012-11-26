@@ -11,16 +11,23 @@
 using namespace std;
 using namespace RTT;
 
-ErrorMessage::ErrorMessage(enum ErrorType type, enum ProtocolDirection direction)
+ErrorMessage::ErrorMessage(enum ErrorType type)
 {
 	m_messageType = MESSAGE_ERROR;
 	m_errorType = type;
-	m_direction = direction;
 }
+
+ErrorMessage::ErrorMessage(enum ErrorType errorType, uint32_t ourSerial)
+{
+	m_messageType = MESSAGE_ERROR;
+	m_errorType = errorType;
+	m_ourSerialNumber = ourSerial;
+}
+
 
 ErrorMessage::ErrorMessage(char *buffer, uint32_t length)
 {
-	uint32_t expectedSize = MSG_HEADER_SIZE + sizeof(m_errorType);
+	uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_errorType);
 	if( length != expectedSize )
 	{
 		m_serializeError = true;
@@ -46,11 +53,11 @@ char *ErrorMessage::Serialize(uint32_t *length)
 	char *buffer, *originalBuffer;
 	uint32_t messageSize;
 
-	messageSize = MSG_HEADER_SIZE + sizeof(m_errorType);
+	messageSize = MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_errorType);
 	buffer = (char*)malloc(messageSize);
 	originalBuffer = buffer;
 
-	SerializeHeader(&buffer);
+	SerializeHeader(&buffer, messageSize);
 
 	//Error type
 	memcpy(buffer, &m_errorType, sizeof(m_errorType));

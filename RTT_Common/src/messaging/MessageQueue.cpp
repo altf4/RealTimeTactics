@@ -17,418 +17,162 @@
 //	of received messages on a particular socket
 //============================================================================
 
-#include "MessageQueue.h"
-#include "MessageManager.h"
 #include "../Lock.h"
+#include "MessageQueue.h"
 #include "messages/ErrorMessage.h"
 
-#include <sys/socket.h>
-#include "unistd.h"
-#include "string.h"
-#include "stdio.h"
 #include <sys/time.h>
+#include <pthread.h>
 #include "errno.h"
 
 namespace RTT
 {
 
-MessageQueue::MessageQueue(int socketFD, enum ProtocolDirection forwardDirection)
+MessageQueue::MessageQueue(uint32_t ourSerial)
 {
-	pthread_mutex_init(&m_forwardQueueMutex, NULL);
-	pthread_mutex_init(&m_callbackRegisterMutex, NULL);
-	pthread_mutex_init(&m_callbackCondMutex, NULL);
-	pthread_mutex_init(&m_callbackQueueMutex, NULL);
-	pthread_mutex_init(&m_isShutdownMutex, NULL);
-	pthread_cond_init(&m_readWakeupCondition, NULL);
-	pthread_cond_init(&m_callbackWakeupCondition, NULL);
+	pthread_mutex_init(&m_queueMutex, NULL);
+	pthread_mutex_init(&m_theirSerialNumMutex, NULL);
+	pthread_mutex_init(&m_ourSerialNumMutex, NULL);
+	pthread_cond_init(&m_popWakeupCondition, NULL);
 
-	m_expectedcallbackSerial = 0;
-	m_forwardSerialNumber = 0;
-
-	m_consecutiveTimeouts = 0;
-
-	m_isShutDown = false;
-	m_forwardDirection = forwardDirection;
-	m_socketFD = socketFD;
-
-	//We will later do a pthread_join, so don't detach here
-	pthread_create(&m_producerThread, NULL, StaticThreadHelper, this);
+	m_theirSerialNum = 0;
+	m_ourSerialNum = ourSerial;
+	isShutdown = false;
 }
 
-//Destructor should only be called by the callback thread, and also only while
-//	the protocol lock in MessageManager is held. This is done to avoid
-//	race conditions in deleting the object.
 MessageQueue::~MessageQueue()
 {
-	//Wait for the producer thread to finish,
-	// We can't have his object destroyed out from underneath him
-	pthread_join(m_producerThread, NULL);
-
-	//Delete any straggling messages in the queues
-	while(!m_forwardQueue.empty())
 	{
-		delete m_forwardQueue.front();
-		m_forwardQueue.pop();
-	}
-	while(!m_callbackQueue.empty())
-	{
-		delete m_callbackQueue.front();
-		m_callbackQueue.pop();
-	}
-
-	pthread_mutex_destroy(&m_forwardQueueMutex);
-	pthread_mutex_destroy(&m_callbackRegisterMutex);
-	pthread_mutex_destroy(&m_callbackCondMutex);
-	pthread_mutex_destroy(&m_callbackQueueMutex);
-	pthread_mutex_destroy(&m_isShutdownMutex);
-	pthread_cond_destroy(&m_readWakeupCondition);
-	pthread_cond_destroy(&m_callbackWakeupCondition);
-}
-
-//blocking call
-Message *MessageQueue::PopMessage(enum ProtocolDirection direction, int timeout)
-{
-	{
-		Lock lock(&m_isShutdownMutex);
-		if(m_isShutDown)
+		Lock lock(&m_queueMutex);
+		//When deleted, be sure to clear out any straggling messages which might have gotten left over
+		while(!m_queue.empty())
 		{
-			return new ErrorMessage(ERROR_SOCKET_CLOSED, DIRECTION_TO_CLIENT);
+			m_queue.front()->DeleteContents();
+			delete m_queue.front();
+			m_queue.pop();
 		}
 	}
+	pthread_mutex_destroy(&m_queueMutex);
+	pthread_mutex_destroy(&m_theirSerialNumMutex);
+	pthread_mutex_destroy(&m_ourSerialNumMutex);
+	pthread_cond_destroy(&m_popWakeupCondition);
+}
 
-	Message* retMessage;
+Message *MessageQueue::PopMessage(int timeout)
+{
+	Message *retMessage;
 
 	//If indefinite read:
 	if(timeout == 0)
 	{
-		if(direction == m_forwardDirection)
+		//Protection for the queue structure
+		Lock lock(&m_queueMutex);
+
+		//While loop to protect against spurious wakeups
+		while(m_queue.empty() && !isShutdown)
 		{
-			//Protection for the queue structure
-			Lock lockQueue(&m_forwardQueueMutex);
-
-			bool gotCorrectSerial = false;
-			while(!gotCorrectSerial)
-			{
-				//While loop to protect against spurious wakeups
-				while(m_forwardQueue.empty())
-				{
-					pthread_cond_wait(&m_readWakeupCondition, &m_forwardQueueMutex);
-				}
-
-				retMessage = m_forwardQueue.front();
-				m_forwardQueue.pop();
-				if(retMessage->m_serialNumber == m_forwardSerialNumber)
-				{
-					gotCorrectSerial = true;
-				}
-				else
-				{
-					//Discard this message and get a new one
-					//TODO: Must clear this message's internals or it will leak!
-					delete retMessage;
-				}
-			}
+			pthread_cond_wait(&m_popWakeupCondition, &m_queueMutex);
 		}
-		else
+		if(isShutdown)
 		{
-			//Protection for the queue structure
-			Lock lockQueue(&m_callbackQueueMutex);
-
-			bool gotCorrectSerial = false;
-			while(!gotCorrectSerial)
-			{
-				//While loop to protect against spurious wakeups
-				while(m_callbackQueue.empty())
-				{
-					pthread_cond_wait(&m_readWakeupCondition, &m_callbackQueueMutex);
-				}
-
-				retMessage = m_callbackQueue.front();
-				m_callbackQueue.pop();
-				if(retMessage->m_serialNumber == m_expectedcallbackSerial)
-				{
-					gotCorrectSerial = true;
-				}
-				else
-				{
-					//Discard this message and get a new one
-					//TODO: Must clear this message's internals or it will leak!
-					delete retMessage;
-				}
-			}
-
+			return new ErrorMessage(ERROR_SOCKET_CLOSED);
 		}
+
+		retMessage = m_queue.front();
+		m_queue.pop();
 	}
 	//Read with timeout
 	else
 	{
 		struct timespec timespec;
 		struct timeval timeval;
-		gettimeofday(&timeval, NULL);		//TODO: Check this for error return code
-	    timespec.tv_sec  = timeval.tv_sec;
-	    timespec.tv_nsec = timeval.tv_usec * 1000;
-	    timespec.tv_sec += timeout;
+		gettimeofday(&timeval, NULL);
+		timespec.tv_sec  = timeval.tv_sec;
+		timespec.tv_nsec = timeval.tv_usec*1000;
+		timespec.tv_sec += timeout;
 
-		if(direction == m_forwardDirection)
+		//Protection for the queue structure
+		Lock lock(&m_queueMutex);
+
+		//While loop to protect against spurious wakeups
+		while(m_queue.empty() && !isShutdown)
 		{
-			//Protection for the queue structure
-			Lock lockQueue(&m_forwardQueueMutex);
-
-			bool gotCorrectSerial = false;
-			while(!gotCorrectSerial)
+			if(pthread_cond_timedwait(&m_popWakeupCondition, &m_queueMutex, &timespec) == ETIMEDOUT)
 			{
-				//While loop to protect against spurious wakeups
-				while(m_forwardQueue.empty())
-				{
-					{
-						Lock lock(&m_isShutdownMutex);
-						if(m_isShutDown)
-						{
-							return new ErrorMessage(ERROR_SOCKET_CLOSED, DIRECTION_TO_CLIENT);
-						}
-					}
-					int errCondition = 	pthread_cond_timedwait(&m_readWakeupCondition, &m_forwardQueueMutex, &timespec);
-					if (errCondition == ETIMEDOUT)
-					{
-						if(++m_consecutiveTimeouts >= MAX_CONSECUTIVE_MSG_TIMEOUTS)
-						{
-							MessageManager::Instance().CloseSocket(m_socketFD);
-						}
-						return new ErrorMessage(ERROR_TIMEOUT, m_forwardDirection);
-					}
-				}
-
-				retMessage = m_forwardQueue.front();
-				m_forwardQueue.pop();
-				if(retMessage->m_serialNumber == m_forwardSerialNumber)
-				{
-					gotCorrectSerial = true;
-				}
-				else
-				{
-					//Discard this message and get a new one
-					//TODO: Must clear this message's internals or it will leak!
-					delete retMessage;
-				}
+				return new ErrorMessage(ERROR_TIMEOUT);
 			}
 		}
-		else
+		if(isShutdown)
 		{
-			//Protection for the queue structure
-			Lock lockQueue(&m_callbackQueueMutex);
-
-			bool gotCorrectSerial = false;
-			while(!gotCorrectSerial)
-			{
-				//While loop to protect against spurious wakeups
-				while(m_callbackQueue.empty())
-				{
-					{
-						Lock lock(&m_isShutdownMutex);
-						if(m_isShutDown)
-						{
-							return new ErrorMessage(ERROR_SOCKET_CLOSED, DIRECTION_TO_CLIENT);
-						}
-					}
-					int errCondition = 	pthread_cond_timedwait(&m_readWakeupCondition, &m_callbackQueueMutex, &timespec);
-					if (errCondition == ETIMEDOUT)
-					{
-						//If we have had too many timeouts in a row, then close down the socket
-						if(++m_consecutiveTimeouts >= MAX_CONSECUTIVE_MSG_TIMEOUTS)
-						{
-							MessageManager::Instance().CloseSocket(m_socketFD);
-						}
-						return new ErrorMessage(ERROR_TIMEOUT, m_forwardDirection);
-					}
-				}
-
-				retMessage = m_callbackQueue.front();
-				m_callbackQueue.pop();
-				if(retMessage->m_serialNumber == m_expectedcallbackSerial)
-				{
-					gotCorrectSerial = true;
-				}
-				else
-				{
-					//Discard this message and get a new one
-					//TODO: Must clear this message's internals or it will leak!
-					delete retMessage;
-				}
-			}
+			return new ErrorMessage(ERROR_SOCKET_CLOSED);
 		}
+
+		retMessage = m_queue.front();
+		m_queue.pop();
 	}
 
-	m_consecutiveTimeouts = 0;
 	return retMessage;
 }
 
-void *MessageQueue::StaticThreadHelper(void *ptr)
+bool MessageQueue::PushMessage(Message *message)
 {
-	return reinterpret_cast<MessageQueue*>(ptr)->ProducerThread();
-}
-
-void MessageQueue::PushMessage(Message *message)
-{
-	//If this is a callback message (not the forward direction)
-	if(message->m_direction != m_forwardDirection)
+	if(message == NULL)
 	{
-		{
-			//Protection for the queue structure
-			Lock lock(&m_callbackQueueMutex);
-			m_callbackQueue.push(message);
-		}
-
-		//Protection for the m_callbackDoWakeup bool
-		//Wake up anyone sleeping for a callback message!
-		Lock condLock(&m_callbackCondMutex);
-		pthread_cond_signal(&m_callbackWakeupCondition);
-		pthread_cond_signal(&m_readWakeupCondition);
+		return false;
 	}
+
+	uint32_t theirSerial = GetTheirSerialNum();
+
+	//If we're expecting a new serial number...
+	if(theirSerial == 0)
+	{
+		SetTheirSerialNum(message->m_ourSerialNumber);
+	}
+	//Else, we should expect to see the same serial number here as before
 	else
 	{
+		//Throw away the message if the serial number doesn't match up
+		if(theirSerial != message->m_ourSerialNumber)
 		{
-			//Protection for the queue structure
-			Lock lock(&m_forwardQueueMutex);
-			m_forwardQueue.push(message);
+			message->DeleteContents();
+			delete message;
+			return false;
 		}
-
-		//If there are no sleeping threads, this simply does nothing
-		pthread_cond_signal(&m_readWakeupCondition);
 	}
+
+	//Push the message
+	{
+		Lock lock(&m_queueMutex);
+		m_queue.push(message);
+	}
+
+	//Wake up anyone sleeping for a message
+	pthread_cond_signal(&m_popWakeupCondition);
+	return true;
 }
 
-bool MessageQueue::RegisterCallback()
+uint32_t MessageQueue::GetTheirSerialNum()
 {
-	//Only one thread in this function at a time
-	Lock lock(&m_callbackRegisterMutex);
-
-	{
-		//Protection for the m_callbackDoWakeup bool
-		Lock condLock(&m_callbackQueueMutex);
-		while(m_callbackQueue.empty())
-		{
-			pthread_cond_wait(&m_callbackWakeupCondition, &m_callbackQueueMutex);
-		}
-
-		//This is the first message of the protocol. This message contains the serial number we will be expecting later
-		Message *nextMessage = m_callbackQueue.front();
-		m_expectedcallbackSerial = nextMessage->m_serialNumber;
-	}
-
-	Lock shutdownLock(&m_isShutdownMutex);
-	return !m_isShutDown;
+	Lock lock(&m_theirSerialNumMutex);
+	return m_theirSerialNum;
 }
 
-void MessageQueue::NextConversation()
+uint32_t MessageQueue::GetOurSerialNum()
 {
-	m_forwardSerialNumber++;
+	Lock lock(&m_ourSerialNumMutex);
+	return m_ourSerialNum;
 }
 
-uint32_t MessageQueue::GetSerialNumber(enum ProtocolDirection direction)
+void MessageQueue::SetTheirSerialNum(uint32_t serial)
 {
-	if(direction == m_forwardDirection)
-	{
-		return m_forwardSerialNumber;
-	}
-	else
-	{
-		return m_expectedcallbackSerial;
-	}
-
+	Lock lock(&m_theirSerialNumMutex);
+	m_theirSerialNum = serial;
 }
 
-void *MessageQueue::ProducerThread()
+void MessageQueue::Shutdown()
 {
-	while(true)
-	{
-		uint32_t length = 0;
-		char buff[sizeof(length)];
-		uint totalBytesRead = 0;
-		int bytesRead = 0;
-
-		// Read in the message length
-		while( totalBytesRead < sizeof(length))
-		{
-			bytesRead = read(m_socketFD, buff + totalBytesRead, sizeof(length) - totalBytesRead);
-			if(bytesRead <= 0)
-			{
-				//The socket died on us!
-				{
-					Lock shutdownLock(&m_isShutdownMutex);
-					//Mark the queue as closed, put an error message on the queue, and quit reading
-					m_isShutDown = true;
-				}
-				//Push an ERROR_SOCKET_CLOSED message into both queues. So that everyone knows we're closed
-				PushMessage(new ErrorMessage(ERROR_SOCKET_CLOSED, DIRECTION_TO_CLIENT));
-				PushMessage(new ErrorMessage(ERROR_SOCKET_CLOSED, DIRECTION_TO_SERVER));
-				return NULL;
-			}
-			else
-			{
-				totalBytesRead += bytesRead;
-			}
-		}
-
-		// Make sure the length appears valid
-		// TODO: Assign some arbitrary max message size to avoid filling up memory by accident
-		memcpy(&length, buff, sizeof(length));
-		if (length == 0)
-		{
-			PushMessage(new ErrorMessage(ERROR_MALFORMED_MESSAGE, m_forwardDirection));
-			continue;
-		}
-
-		char *buffer = (char*)malloc(length);
-
-		if (buffer == NULL)
-		{
-			// This should never happen. If it does, probably because length is an absurd value (or we're out of memory)
-			PushMessage(new ErrorMessage(ERROR_MALFORMED_MESSAGE, m_forwardDirection));
-			free(buffer);
-			continue;
-		}
-
-		// Read in the actual message
-		totalBytesRead = 0;
-		bytesRead = 0;
-		while(totalBytesRead < length)
-		{
-			bytesRead = read(m_socketFD, buffer + totalBytesRead, length - totalBytesRead);
-
-			if(bytesRead <= 0)
-			{
-				//The socket died on us!
-				{
-					Lock shutdownLock(&m_isShutdownMutex);
-					//Mark the queue as closed, put an error message on the queue, and quit reading
-					m_isShutDown = true;
-				}
-				//Push an ERROR_SOCKET_CLOSED message into both queues. So that everyone knows we're closed
-				PushMessage(new ErrorMessage(ERROR_SOCKET_CLOSED, DIRECTION_TO_CLIENT));
-				PushMessage(new ErrorMessage(ERROR_SOCKET_CLOSED, DIRECTION_TO_SERVER));
-				free(buffer);
-				return NULL;
-			}
-			else
-			{
-				totalBytesRead += bytesRead;
-			}
-		}
-
-
-		if(length < MSG_HEADER_SIZE)
-		{
-			PushMessage(new ErrorMessage(ERROR_MALFORMED_MESSAGE, m_forwardDirection));
-			free(buffer);
-			continue;
-		}
-
-		PushMessage(Message::Deserialize(buffer, length, m_forwardDirection));
-		free(buffer);
-		continue;
-	}
-
-	return NULL;
+	isShutdown = true;
+	pthread_cond_signal(&m_popWakeupCondition);
 }
 
 }

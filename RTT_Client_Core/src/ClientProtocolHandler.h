@@ -21,6 +21,7 @@
 #include "Map.h"
 #include "messaging/messages/LobbyMessage.h"
 #include "messaging/messages/ErrorMessage.h"
+#include "messaging/Ticket.h"
 #include "callback/CallbackChange.h"
 
 namespace RTT
@@ -138,11 +139,13 @@ CallbackChange *ProcessCallbackCommand();
 //********************************************
 
 //Send a message of type Error to the client
-void SendError(int socket, enum ErrorType errorType, enum ProtocolDirection direction);
+void SendError(Ticket &ticket, enum ErrorType errorType);
 
 //********************************************
 //			Connection Commands
 //********************************************
+
+void Disconnect();
 
 }
 

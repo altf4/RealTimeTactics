@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lpthread -lRTT_Common
+LIBS := -lRTT_Common -levent -levent_pthreads -lpthread
 

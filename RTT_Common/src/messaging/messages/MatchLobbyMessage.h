@@ -99,7 +99,7 @@ public:
 
 	enum MatchLobbyType m_matchLobbyType;
 
-	MatchLobbyMessage(enum MatchLobbyType type, enum ProtocolDirection direction);
+	MatchLobbyMessage(enum MatchLobbyType type);
 	~MatchLobbyMessage();
 	MatchLobbyMessage(char *buffer, uint length);
 	char *Serialize(uint *length);

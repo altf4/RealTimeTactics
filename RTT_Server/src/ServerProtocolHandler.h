@@ -13,6 +13,7 @@
 #include "messaging/messages/ErrorMessage.h"
 #include "messaging/messages/MatchLobbyMessage.h"
 #include "messaging/messages/GameMessage.h"
+#include "messaging/Ticket.h"
 
 #define CALLBACK_WAIT_TIME 10
 
@@ -31,7 +32,7 @@ enum LobbyReturn
 
 //Negotiates the hello messages and authentication to a new client
 //	Returns a new Player object, NULL on error
-Player *GetNewClient(int connectFD);
+Player *GetNewClient(Ticket &ticket);
 
 //Authenticates the given username/password with the server
 //Checks that:
@@ -44,25 +45,25 @@ enum AuthResult AuthenticateClient(char *username, unsigned char *hashedPassword
 //	Starts out by listening on the given socket for a LobbyMessage
 //	Executes the Lobby protocol
 //	Returns a enum LobbyReturn to describe the end state
-enum LobbyReturn ProcessLobbyCommand(int connectFD, Player *player);
+enum LobbyReturn ProcessLobbyCommand(Ticket &ticket, Player *player);
 
 //Processes one MatchLobby command
 //	Starts out by listening on the given socket for a MatchLobbyMessage
 //	Executes the MatchLobby protocol
 //	Returns a enum LobbyReturn to describe the end state
-enum LobbyReturn ProcessMatchLobbyCommand(int connectFD, Player *player);
+enum LobbyReturn ProcessMatchLobbyCommand(Ticket &ticket, Player *player);
 
 //Processes one game command
 //	Starts out by listening on the given socket for a GameMessage
 //	Executes the game protocol
 //	Returns a enum LobbyReturn to describe the end state
-enum LobbyReturn ProcessGameCommand(int connectFD, Player *player);
+enum LobbyReturn ProcessGameCommand(Ticket &ticket, Player *player);
 
 //Establishes the player's receive socket
 //	Sets the player's receiveSocket
 //	connectFD: The old socket, used to tell the client we're ready
 //	returns the created socket
-int MatchLobbyConnectBack(int connectFD, uint portNum, Player *player);
+int MatchLobbyConnectBack(Ticket &ticket, uint portNum, Player *player);
 
 //Sends out the given Message to all clients in the given match
 //	NOTE: Does not synchronize. You must have the lock from UseSocket() before calling this
@@ -70,7 +71,7 @@ bool NotifyClients(Match *match, Message *message);
 
 //Send a message of type Error to the client
 //	NOTE: Does not synchronize. You must have the lock from UseSocket() before calling this
-void SendError(int connectFD, enum ErrorType errorType, enum ProtocolDirection direction);
+void SendError(const Ticket &ticket, enum ErrorType errorType);
 
 }
 #endif /* PROTOCOLHANDLER_H_ */

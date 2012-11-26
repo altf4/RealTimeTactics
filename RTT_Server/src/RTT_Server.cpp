@@ -10,7 +10,9 @@
 #include "RTT_Server.h"
 #include "messaging/MessageManager.h"
 #include "ServerProtocolHandler.h"
+#include "ServerProtocolHandler.h"
 #include "Player.h"
+#include "RTTServerCallback.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,11 +23,8 @@
 #include <netinet/in.h>
 #include <algorithm>
 #include <pthread.h>
-#include "ServerProtocolHandler.h"
 #include <iterator>
 #include <signal.h>
-
-#include "Player.h"
 
 using namespace std;
 using namespace RTT;
@@ -55,8 +54,6 @@ int main(int argc, char **argv)
 	pthread_rwlock_init(&matchListLock, NULL);
 	pthread_rwlock_init(&matchIDLock, NULL);
 	pthread_rwlock_init(&playerIDLock, NULL);
-
-	MessageManager::Initialize(DIRECTION_TO_CLIENT);
 
 	// We expect write failures to occur but we want to handle them where
 	// the error occurs rather than in a SIGPIPE handler.
@@ -99,144 +96,11 @@ int main(int argc, char **argv)
 		serverPortNumber = DEFAULT_SERVER_PORT;
 	}
 
-	//Set up the TCP sockets
-	struct sockaddr_in stSockAddr;
-	int mainSocket = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
+	//Go into the main accept() loop
+	RTTServerCallback callback;
+	MessageManager::Instance().StartServer(&callback, serverPortNumber);
 
-	if(-1 == mainSocket)
-	{
-		perror("can not create socket");
-		exit(EXIT_FAILURE);
-	}
-	int optval = 1;
-	setsockopt(mainSocket, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof optval);
-
-	memset(&stSockAddr, 0, sizeof(stSockAddr));
-	stSockAddr.sin_family = AF_INET;
-	stSockAddr.sin_port = htons(serverPortNumber);
-	stSockAddr.sin_addr.s_addr = INADDR_ANY;
-
-	if(-1 == ::bind(mainSocket,(struct sockaddr *)&stSockAddr, sizeof(stSockAddr)))
-	{
-		perror("error bind failed");
-		close(mainSocket);
-		exit(EXIT_FAILURE);
-	}
-
-	if(-1 == listen(mainSocket, 10))
-	{
-		perror("error listen failed");
-		close(mainSocket);
-		exit(EXIT_FAILURE);
-	}
-
-	pthread_t mainThreadID;
-
-	//Guaranteed to be the right size for your system, for converting void* and int
-	intptr_t sizedInteger = mainSocket;
-	//Send the new connection off to another thread for handling
-	pthread_create(&mainThreadID, NULL, MainListen, (void *) sizedInteger );
-	pthread_join(mainThreadID, NULL);
-
-	return 0;
-}
-
-void *RTT::MainListen(void * param)
-{
-	intptr_t mainSocket = (intptr_t)param;
-	//Main loop, just listens for new TCP connections and sends them off to MainClientThread
-	for(;;)
-	{
-		intptr_t ConnectFD = accept(mainSocket, NULL, NULL);
-
-		if(0 > ConnectFD)
-		{
-			perror("error accept failed");
-			close(mainSocket);
-			exit(EXIT_FAILURE);
-		}
-		pthread_t threadID;
-		//Send the new connection off to another thread for handling
-		pthread_create(&threadID, NULL, MainClientThread, (void *) ConnectFD );
-		pthread_detach(threadID);
-	}
-
-	return 0;
-}
-
-void *RTT::MainClientThread(void *parm)
-{
-	intptr_t socketFD = (intptr_t)parm;
-
-	MessageManager::Instance().DeleteQueue(socketFD);
-	MessageManager::Instance().StartSocket(socketFD);
-
-	//First, authenticate the client
-	Player *player = GetNewClient(socketFD);
-	if( player == NULL )
-	{
-		cout << "ERROR: Authentication Failure\n";
-		MessageManager::Instance().CloseSocket(socketFD);
-		return NULL;
-	}
-
-	cout << "Client: " << player->GetName() << " Authenticated!\n";
-	player->SetSocket(socketFD);
-
-	//*************************************
-	// In the main lobby
-	// Main Server Loop
-	//*************************************
-	while(true)
-	{
-		enum LobbyReturn lobbyReturn;
-		lobbyReturn = ProcessLobbyCommand(socketFD, player);
-
-		switch(lobbyReturn)
-		{
-			case IN_MATCH_LOBBY:
-			{
-				while( lobbyReturn == IN_MATCH_LOBBY)
-				{
-					lobbyReturn = ProcessMatchLobbyCommand(socketFD, player);
-					if(lobbyReturn == EXITING_SERVER)
-					{
-						cout << "Player: " << player->GetName() << " has left.\n";
-						QuitServer(player);
-						return NULL;
-					}
-				}
-				break;
-			}
-			case IN_GAME:
-			{
-				while( lobbyReturn == IN_GAME)
-				{
-					lobbyReturn = ProcessGameCommand(socketFD, player);
-				}
-				if(lobbyReturn == EXITING_SERVER)
-				{
-					cout << "Player: " << player->GetName() << " has left.\n";
-					QuitServer(player);
-					return NULL;
-				}
-				break;
-			}
-			case EXITING_SERVER:
-			{
-				cout << "Player: " << player->GetName() << " has left.\n";
-				QuitServer(player);
-				return NULL;
-			}
-			case IN_MAIN_LOBBY:
-			{
-				//Just loop back and get another LobbyMessage
-				break;
-			}
-		}
-	}
-
-	return NULL;
+	return EXIT_FAILURE;
 }
 
 //Processes one round of combat. (Can consist of many actions triggered)
@@ -432,6 +296,17 @@ enum LobbyResult RTT::JoinMatch(Player *player, uint matchID)
 	return LOBBY_SUCCESS;
 }
 
+//Prints usage tips
+string RTT::Usage()
+{
+	string out;
+
+	out += "Line of Fire Server Usage:\n";
+	out += "\t RTT_Server [-p PORT]\n\n";
+	out += "\t -p PORT == TCP Port number to listen for connections on.\n";
+	return out;
+}
+
 //Make player leave specified match
 //	Sets the variables within player and match properly
 //	If no players remain in the match afterward, then the match is deleted
@@ -474,45 +349,10 @@ bool RTT::LeaveMatch(Player *player)
 	//*******************************
 	// Send Client Notifications
 	//*******************************
-	MatchLobbyMessage notification(PLAYER_LEFT_MATCH_NOTIFICATION, DIRECTION_TO_CLIENT);
+	MatchLobbyMessage notification(PLAYER_LEFT_MATCH_NOTIFICATION);
 	notification.m_playerID = player->GetID();
 	notification.m_newLeaderID = foundMatch->GetLeaderID();
 	NotifyClients(foundMatch, &notification);
 	return true;
-}
-
-//Player has quit the server, clean up any references to it
-//	Deletes the player object
-void RTT::QuitServer(Player *player)
-{
-	if( player == NULL )
-	{
-		return;
-	}
-	if( player->GetCurrentMatchID() != 0)
-	{
-		//Leave any matches currently in
-		LeaveMatch(player);
-	}
-
-	int ID = player->GetID();
-	//Remove from the list of current players
-	pthread_rwlock_wrlock(&playerListLock);
-	playerList[ID] = NULL;
-	playerList.erase(ID);
-	pthread_rwlock_unlock(&playerListLock);
-
-	delete player;
-}
-
-//Prints usage tips
-string RTT::Usage()
-{
-	string out;
-
-	out += "Line of Fire Server Usage:\n";
-	out += "\t RTT_Server [-p PORT]\n\n";
-	out += "\t -p PORT == TCP Port number to listen for connections on.\n";
-	return out;
 }
 

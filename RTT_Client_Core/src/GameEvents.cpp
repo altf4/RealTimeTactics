@@ -30,12 +30,13 @@ GameEvents::~GameEvents()
 //		a return of false indicates that the game is over, and we should enter the MainLobby
 bool GameEvents::ProcessGameEvent()
 {
-	if(!MessageManager::Instance().RegisterCallback(socketFD))
+	Ticket ticket;
+	if(!MessageManager::Instance().RegisterCallback(socketFD, ticket))
 	{
 		return false;
 	}
 
-	Message *event_message = Message::ReadMessage(socketFD, DIRECTION_TO_CLIENT);
+	Message *event_message = MessageManager::Instance().ReadMessage(ticket);
 	if(event_message->m_messageType != MESSAGE_GAME)
 	{
 		cerr << "ERROR: Message read from server failed. Did it die?\n";
@@ -59,8 +60,8 @@ bool GameEvents::ProcessGameEvent()
 					source,	game_message->m_unitDirection, game_message->m_unitDirection);
 
 			//Send back an acknowledgment of the move
-			GameMessage unit_moved_reply(UNIT_MOVED_DIRECTION_ACK, DIRECTION_TO_CLIENT);
-			Message::WriteMessage(&unit_moved_reply, socketFD);
+			GameMessage unit_moved_reply(UNIT_MOVED_DIRECTION_ACK);
+			MessageManager::Instance().WriteMessage(ticket, &unit_moved_reply);
 			break;
 		}
 		default:
