@@ -1,5 +1,5 @@
-//============================================================================
-// Name        : RTT_Server.cpp
+ //============================================================================
+// Name        : Match.h
 // Author      : AltF4
 // Copyright   : 2011, GNU GPLv3
 // Description : A single match (or game) that is being played.
@@ -15,52 +15,16 @@
 #include "Player.h"
 #include "Map.h"
 #include "Enums.h"
-#include <sys/time.h>
 
-#define MAX_MATCHNAME_LEN 20
-#define MATCH_DESCR_SIZE sizeof(enum Status) + (sizeof(uint32_t)*4) + \
-		MAX_MATCHNAME_LEN + sizeof(int64_t)
-#define MATCH_OPTIONS_SIZE sizeof(uint32_t) + MAX_MATCHNAME_LEN
+#include <sys/time.h>
 
 namespace RTT
 {
-//Forward declaration to avoid self-reference
-class Team;
-class Player;
-
-enum Status: uint32_t
-{
-	WAITING_FOR_PLAYERS,
-	IN_PROGRESS,
-};
-
-//A fixed size description of the match
-//	Suitable for sending to others to give match info
-struct MatchDescription
-{
-	enum Status m_status;
-	uint32_t m_ID;
-	uint32_t m_maxPlayers;
-	uint32_t m_currentPlayerCount;
-	char m_name[MAX_MATCHNAME_LEN];
-	int64_t m_timeCreated;
-	uint32_t m_leaderID;
-};
-
-//A fixed size collection of options for match creation
-//	List of options necessary upon creation of the Match
-struct MatchOptions
-{
-	uint32_t m_maxPlayers;
-	char m_name[MAX_MATCHNAME_LEN];
-};
 
 class Match
 {
 
 public:
-	//The gameboard for this match
-	Gameboard *m_gameboard;
 
 	//Teams involved
 	Team* m_teams[MAX_TEAMS];
@@ -72,8 +36,12 @@ public:
 	Match(Player *player);
 	~Match();
 
+
+	//*******************************
+	//	Public Getters and Setters
+	//*******************************
 	void SetID(uint newID);
-	void SetStatus(enum Status newStatus);
+	void SetStatus(enum MatchStatus newStatus);
 	void SetMaxPlayers(uint maxPlayers);
 	void SetName(std::string newName);
 	void SetLeaderID(uint nextLeader);
@@ -83,7 +51,7 @@ public:
 	//Returns false if the given ID is not in this match
 	bool SetLeader(uint newID);
 
-	enum Status GetStatus();
+	enum MatchStatus GetStatus();
 	uint GetID();
 	uint GetMaxPlayers();
 	uint GetCurrentPlayerCount();
@@ -99,7 +67,23 @@ public:
 	bool RemovePlayer( uint playerID );
 	Player *GetPlayer( uint playerID );
 	bool ChangeTeam(Player *player, enum TeamNumber newTeam);
-	bool StartMatch();
+
+
+	//*****************************
+	// Match Progress Actions
+	//*****************************
+
+	//Starts the match (in a new thread)
+	// returns - true
+	bool Start();
+
+	//Stops the match.
+	//	returns - The winning team. In the case of a draw or no contest (game ended before a team won), then SPECTATOR is returned
+	enum TeamNumber Stop();
+	bool Pause();
+	bool Unpause();
+
+	bool Surrender(uint32_t losingPlayerID);
 
 	//Register that the given player is ready to start the match
 	//	returns - true if the player is the last one in
@@ -112,12 +96,21 @@ public:
 	static uint GameSpeedTouSeconds(enum GameSpeed speed);
 	static std::string VictoryConditionToString(enum VictoryCondition victory);
 
+	void *MatchLoop();
+
 private:
+
+	uint GetFirstPlayerID();
+
+	void TimerTick();
+
+	bool IsVictoryCondSatisfied();
+
 	//Lock for this match
 	pthread_rwlock_t m_lock;
 
 	//The current status of the match
-	enum Status m_status;
+	enum MatchStatus m_status;
 	//Globally unique identifier for the match on this server
 	uint32_t m_ID;
 	//Maximum number of players allowed for this match
@@ -137,7 +130,9 @@ private:
 	enum VictoryCondition m_victoryCondition;
 	enum GameSpeed m_gameSpeed;
 
-	uint GetFirstPlayerID();
+	pthread_t m_thread;
+
+	Gameboard *m_gameboard;
 
 };
 

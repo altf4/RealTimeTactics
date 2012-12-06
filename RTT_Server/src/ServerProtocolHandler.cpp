@@ -6,7 +6,7 @@
 //============================================================================
 
 #include "RTT_Server.h"
-#include "MatchLoop.h"
+#include "Match.h"
 #include "ServerProtocolHandler.h"
 #include "messaging/MessageManager.h"
 #include "Lock.h"
@@ -609,7 +609,7 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(Ticket &ticket, Player *player)
 				break;
 			}
 
-			bool started = playersMatch->StartMatch();
+			bool started = playersMatch->Start();
 
 			//*******************************
 			// Send START MATCH REPLY
@@ -627,11 +627,9 @@ enum LobbyReturn RTT::ProcessMatchLobbyCommand(Ticket &ticket, Player *player)
 				//*******************************
 				// Send Client Notifications
 				//*******************************
-				//TODO: Make sure each client is ready. IE: Listed for replies
+				//TODO: Make sure each client is ready. IE: Listen for replies
 				MatchLobbyMessage notification(MATCH_START_NOTIFICATION);
 				NotifyClients(playersMatch, &notification);
-
-				MatchLoop(playersMatch);
 			}
 			else
 			{
@@ -976,6 +974,7 @@ enum LobbyReturn RTT::ProcessGameCommand(Ticket &ticket, Player *player)
 
 	uint matchID = player->GetCurrentMatchID();
 
+	//TODO: Don't look up the player's match every message. It won't be changing often
 	Match *playersMatch = NULL;
 	{
 		Lock lock(&matchListLock, READ_LOCK);
@@ -994,7 +993,7 @@ enum LobbyReturn RTT::ProcessGameCommand(Ticket &ticket, Player *player)
 		return EXITING_SERVER;
 	}
 
-	enum LobbyReturn ret = IN_MATCH_LOBBY;
+	enum LobbyReturn ret = IN_GAME;
 
 	GameMessage *game_message = (GameMessage*)message;
 	switch(game_message->m_gameMessageType)
@@ -1008,6 +1007,7 @@ enum LobbyReturn RTT::ProcessGameCommand(Ticket &ticket, Player *player)
 			move_reply.m_moveResult = MOVE_SUCCESS;
 			MessageManager::Instance().WriteMessage(ticket, &move_reply);
 
+			//TODO: This is wrong. Incorrect coordinates
 			GameMessage move_notice(UNIT_MOVED_DIRECTION_NOTICE);
 			move_notice.m_unitID = game_message->m_unitID;
 			move_notice.m_xOld = game_message->m_xOld;
@@ -1016,6 +1016,39 @@ enum LobbyReturn RTT::ProcessGameCommand(Ticket &ticket, Player *player)
 			NotifyClients(playersMatch, &move_notice);
 
 			ret = IN_GAME;
+			break;
+		}
+		case MOVE_UNIT_DISTANT_REQUEST:
+		{
+			GameMessage move_reply(MOVE_UNIT_DISTANT_REPLY);
+			move_reply.m_moveResult = MOVE_SUCCESS;
+			move_reply.m_yNew = game_message->m_yNew;
+			move_reply.m_xNew = game_message->m_xNew;
+
+			MessageManager::Instance().WriteMessage(ticket, &move_reply);
+
+			GameMessage move_notice(UNIT_MOVED_DISTANT_NOTICE);
+			move_notice.m_unitID = game_message->m_unitID;
+			move_notice.m_xOld = game_message->m_xOld;
+			move_notice.m_yOld = game_message->m_yOld;
+			move_notice.m_xNew = game_message->m_xNew;
+			move_notice.m_yNew = game_message->m_yNew;
+
+			NotifyClients(playersMatch, &move_notice);
+			ret = IN_GAME;
+			break;
+		}
+		case SURRENDER_NOTICE:
+		{
+			if(playersMatch != NULL)
+			{
+				delete playersMatch;
+				{
+					Lock lock(&matchListLock, WRITE_LOCK);
+					matchList.erase(matchID);
+				}
+			}
+			ret = IN_MAIN_LOBBY;
 			break;
 		}
 		default:

@@ -17,12 +17,17 @@
 //TODO: Read this from config file
 #define MAX_PLAYERS_IN_MATCH 8
 
-#include "Match.h"
+#include "MatchTypes.h"
 #include "Map.h"
+#include "Enums.h"
 #include "messaging/messages/LobbyMessage.h"
 #include "messaging/messages/ErrorMessage.h"
 #include "messaging/Ticket.h"
-#include "callback/CallbackChange.h"
+#include "GameEvents.h"
+#include "MatchLobbyEvents.h"
+
+#include <string>
+#include <vector>
 
 namespace RTT
 {
@@ -125,27 +130,35 @@ bool StartMatch();
 
 
 //********************************************
-//			MatchLobby Callback
-//********************************************
-
-//Process a Callback command from the server
-//	These are notifications sent by the server that an event has occurred
-//	We listen for these messages on a different socket than
-CallbackChange *ProcessCallbackCommand();
-
-
-//********************************************
 //			Send Error Message
 //********************************************
 
 //Send a message of type Error to the client
 void SendError(Ticket &ticket, enum ErrorType errorType);
 
+
 //********************************************
 //			Connection Commands
 //********************************************
 
 void Disconnect();
+
+
+//********************************************
+//			Callback Processing
+//********************************************
+
+//Processes and executes a single Main Lobby Event from the server
+//	returns - The new state of the client as it leaves the function
+enum LobbyReturn ProcessMainLobbyEvent(Ticket &ticket);
+
+//Processes and executes a single Match Lobby Event from the server
+//	returns - The new state of the client as it leaves the function
+enum LobbyReturn ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *gameContext);
+
+//Processes and executes a single Game Event from the server
+//	returns - The new state of the client as it leaves the function
+enum LobbyReturn ProcessGameEvent(Ticket &ticket, GameEvents *gameContext);
 
 }
 

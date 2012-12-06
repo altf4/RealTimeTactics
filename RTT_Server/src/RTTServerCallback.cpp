@@ -11,6 +11,7 @@
 #include "RTTServerCallback.h"
 #include "ServerProtocolHandler.h"
 #include "RTT_Server.h"
+#include "Enums.h"
 
 #include "iostream"
 
@@ -78,11 +79,13 @@ void RTTServerCallback::CallbackThread(int socketFD)
 		{
 			case IN_MATCH_LOBBY:
 			{
+				cout << "xxxDEBUGxxx processing match lobby command " << endl;
 				lobbyReturn = ProcessMatchLobbyCommand(ticket, player);
 				break;
 			}
 			case IN_GAME:
 			{
+				cout << "xxxDEBUGxxx processing game command " << endl;
 				lobbyReturn = ProcessGameCommand(ticket, player);
 				break;
 			}
@@ -94,6 +97,7 @@ void RTTServerCallback::CallbackThread(int socketFD)
 			}
 			case IN_MAIN_LOBBY:
 			{
+				cout << "xxxDEBUGxxx processing main lobby command " << endl;
 				lobbyReturn = ProcessLobbyCommand(ticket, player);
 				break;
 			}

@@ -6,10 +6,12 @@
 //============================================================================
 
 #include "ClientProtocolHandler.h"
+#include "ClientGameState.h"
 #include "messaging/messages/AuthMessage.h"
 #include "messaging/messages/MatchLobbyMessage.h"
+#include "messaging/messages/GameMessage.h"
 #include "messaging/MessageManager.h"
-#include "callback/MainLobbyCallbackChange.h"
+#include "Tile.h"
 
 #include <unistd.h>
 #include <stdio.h>
@@ -877,39 +879,50 @@ bool RTT::StartMatch()
 	return false;
 }
 
-
 //********************************************
-//			MatchLobby Callback
+//			Send Error Message
 //********************************************
 
-//Process a Callback command from the server
-//	These are notifications sent by the server that an event has occurred
-//	We listen for these messages on a different socket than
-CallbackChange *RTT::ProcessCallbackCommand()
+//Send a message of type Error to the client
+void  RTT::SendError(Ticket &ticket, enum ErrorType errorType)
 {
-	Ticket ticket;
-	if(!MessageManager::Instance().RegisterCallback(socketFD, ticket))
+	ErrorMessage error_msg(errorType);
+	if( MessageManager::Instance().WriteMessage(ticket, &error_msg) == false)
 	{
-		return new CallbackChange(CALLBACK_CLOSED);
+		cerr << "ERROR: Error message send returned failure.\n";
+	}
+}
+
+//********************************************
+//			Connection Commands
+//********************************************
+
+
+
+//********************************************
+//			Callback Processing
+//********************************************
+
+//Processes and executes a single Match Lobby Event from the server
+//	returns - The new state of the client as it leaves the function
+enum LobbyReturn RTT::ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *gameContext)
+{
+	Message *event_message = MessageManager::Instance().ReadMessage(ticket);
+	if(event_message->m_messageType != MESSAGE_MATCH_LOBBY)
+	{
+		cerr << "ERROR: Message read from server failed. Did it die?\n";
+		delete event_message;
+		return IN_MATCH_LOBBY;
 	}
 
-	Message *message = MessageManager::Instance().ReadMessage(ticket);
-	//TODO: Accept more than just MatchLobby callbacks!!!
-	if( message->m_messageType != MESSAGE_MATCH_LOBBY)
-	{
-		delete message;
-		return new CallbackChange(CALLBACK_ERROR);
-	}
-	MatchLobbyMessage *match_message = (MatchLobbyMessage*)message;
+	enum LobbyReturn ret = IN_MATCH_LOBBY;
 
+	MatchLobbyMessage *match_message = (MatchLobbyMessage*)event_message;
 	switch(match_message->m_matchLobbyType)
 	{
 		case TEAM_CHANGED_NOTIFICATION:
 		{
-			//Get what we need from the message
-			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(TEAM_CHANGE);
-			change->m_playerID = match_message->m_playerID;
-			change->m_team = match_message->m_newTeam;
+			gameContext->UI_TeamChangedSignal(match_message->m_playerID, match_message->m_newTeam);
 
 			//***********************************
 			// Send Team Changed Ack
@@ -918,12 +931,11 @@ CallbackChange *RTT::ProcessCallbackCommand()
 			if( MessageManager::Instance().WriteMessage(ticket, &team_change_ack) == false)
 			{
 				//Error in write
-				delete match_message;
-				delete change;
-				return new CallbackChange(CALLBACK_ERROR);
+				ret = IN_MATCH_LOBBY;
 			}
 			delete match_message;
-			return change;
+			ret = IN_MATCH_LOBBY;
+			break;
 		}
 		case KICKED_FROM_MATCH_NOTIFICATION:
 		{
@@ -1117,24 +1129,65 @@ CallbackChange *RTT::ProcessCallbackCommand()
 		}
 	}
 	delete match_message;
-	return new CallbackChange(CALLBACK_ERROR);
+	return ret;
 }
 
-
-//********************************************
-//			Send Error Message
-//********************************************
-
-//Send a message of type Error to the client
-void  RTT::SendError(Ticket &ticket, enum ErrorType errorType)
+//Processes and executes a single Game Event from the server
+//	returns - The new state of the client as it leaves the function
+enum LobbyReturn RTT::ProcessGameEvent(Ticket &ticket, GameEvents *gameContext)
 {
-	ErrorMessage error_msg(errorType);
-	if( MessageManager::Instance().WriteMessage(ticket, &error_msg) == false)
+	Message *event_message = MessageManager::Instance().ReadMessage(ticket);
+	if(event_message->m_messageType != MESSAGE_GAME)
 	{
-		cerr << "ERROR: Error message send returned failure.\n";
+		cerr << "ERROR: Message read from server failed. Did it die?\n";
+		delete event_message;
+		return IN_GAME;
 	}
-}
 
-//********************************************
-//			Connection Commands
-//********************************************
+	enum LobbyReturn ret = IN_GAME;
+
+	GameMessage *game_message = (GameMessage*)event_message;
+	switch(game_message->m_gameMessageType)
+	{
+		case UNIT_MOVED_DIRECTION_NOTICE:
+		{
+			//TODO: Specify a separate direction to face
+			struct Coordinate source = {game_message->m_xOld, game_message->m_yOld};
+
+			ClientGameState::Instance().MoveUnitDirection(game_message->m_unitID,
+					source,	game_message->m_unitDirection, game_message->m_unitDirection);
+
+			//Call the UI's movement code (IE: Move the unit on the screen)
+			gameContext->UI_UnitMovedDirectionSignal(game_message->m_unitID,
+					source,	game_message->m_unitDirection, game_message->m_unitDirection);
+
+			//Send back an acknowledgment of the move
+			GameMessage unit_moved_reply(UNIT_MOVED_DIRECTION_ACK);
+			MessageManager::Instance().WriteMessage(ticket, &unit_moved_reply);
+			ret = IN_GAME;
+			break;
+		}
+		case UNIT_MOVED_DISTANT_NOTICE:
+		{
+			struct Coordinate source = {game_message->m_xOld, game_message->m_yOld};
+			struct Coordinate dest = {game_message->m_xNew, game_message->m_yNew};
+
+			ClientGameState::Instance().MoveUnitDistant(game_message->m_unitID, source,	dest);
+
+			//Call the UI's movement code (IE: Move the unit on the screen)
+			gameContext->UI_UnitMovedDistantSignal(game_message->m_unitID, source, dest);
+
+			GameMessage unit_moved_reply(UNIT_MOVED_DISTANT_ACK);
+			MessageManager::Instance().WriteMessage(ticket, &unit_moved_reply);
+			ret = IN_GAME;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+	delete game_message;
+	return ret;
+}

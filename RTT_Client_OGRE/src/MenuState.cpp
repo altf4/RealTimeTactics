@@ -614,7 +614,7 @@ void MenuState::ListPlayers()
 		mainWnd = CEGUI::WindowManager::getSingleton().getWindow("RTT_MatchLobby");
 		scrollpane = (CEGUI::ScrollablePane*)mainWnd->getChild("PlayersPane");
 	}
-	catch(CEGUI::UnknownObjectException ex)
+	catch(CEGUI::UnknownObjectException &ex)
 	{
 		OgreFramework::getSingletonPtr()->m_log->logMessage(
 				"Couldn't find required GUI element to ListPlayers()");

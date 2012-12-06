@@ -7,6 +7,7 @@
 
 #include "WelcomeWindow.h"
 #include "Team.h"
+#include "MatchTypes.h"
 #include "ClientProtocolHandler.h"
 
 using namespace RTT;

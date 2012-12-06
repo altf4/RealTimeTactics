@@ -29,9 +29,12 @@ Gameboard::Gameboard(uint x_arg, uint y_arg)
 	//Create the gameboard tiles
 	for(uint i = 0; i < m_xMax; i++)
 	{
+		vector<Tile*> column;
+		m_tiles.push_back(column);
+
 		for(uint j = 0; j < m_yMax; j++)
 		{
-			m_tiles[i][j] = new Tile(i,j);
+			m_tiles[i].push_back(new Tile(i,j));
 			m_tiles[i][j]->m_ID = (j*m_xMax) + i;
 		}
 	}

@@ -43,14 +43,6 @@ public:
 	//	which need cleaning when the GameEvents object is destroyed
 	virtual ~GameEvents();
 
-	//Parent function of all Game Events
-	//	This function listens on the callback socket for Game Events
-	//	When an event is read, it is processed by calling the sub-functions below
-	//	returns - true if the game is still running: IE: We should call this function again
-	//		a return of false indicates that the game is over, and we should enter the MainLobby
-	bool ProcessGameEvent();
-
-
 	//********************************************
 	//				Movement Events
 	//********************************************
@@ -58,6 +50,8 @@ public:
 	//Virtual function defined by the caller as a way to hook into this event
 	virtual void UI_UnitMovedDirectionSignal(uint32_t unitID, struct Coordinate source,
 			enum Direction direction, enum Direction facing) = 0;
+
+	virtual void UI_UnitMovedDistantSignal(uint32_t unitID, struct Coordinate source, struct Coordinate dest) = 0;
 
 	//A Unit has changed the direction it is facing
 	//	unitID - The ID of the unit moved

@@ -8,7 +8,7 @@
 
 #include "AppStateManager.h"
 
-#include <OgreWindowEventUtilities.h>
+#include <OGRE/OgreWindowEventUtilities.h>
 
 using namespace RTT;
 

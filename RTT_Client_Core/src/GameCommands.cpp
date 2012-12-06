@@ -31,7 +31,7 @@ extern int socketFD;
 //	direction - The direction to move the unit
 //		NOTE: The unit will also by default made to face the direction moved
 //	returns - A MovementResult struct describing the success or error of the move
-struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, enum Direction direction)
+struct MovementResult RTT::MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, enum Direction direction)
 {
 	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
@@ -82,15 +82,43 @@ struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, en
 
 //Move a Unit to a distant tile
 //	unitID - The ID of the unit to move.
-//	destination - The Coordinate of the tile being moved to
 //		NOTE: The unit will also by default made to face the direction of the last hop
 //	returns - A MovementResult struct describing the success or error of the move
-struct MovementResult RTT::MoveUnit(uint32_t unitID, struct Coordinate destination)
+struct MovementResult RTT::MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, uint32_t xNew, uint32_t yNew)
 {
-	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
-
 	struct MovementResult result;
 	result.m_result = MOVE_NO_SUCH_UNIT;
+
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
+
+	GameMessage move_request(MOVE_UNIT_DISTANT_REQUEST);
+	move_request.m_unitID = unitID;
+	move_request.m_xNew = xNew;
+	move_request.m_yNew = yNew;
+	move_request.m_xOld = xOld;
+	move_request.m_yOld = yOld;
+
+	MessageManager::Instance().WriteMessage(ticket, &move_request);
+
+	Message *move_reply = MessageManager::Instance().ReadMessage(ticket);
+	if(move_reply->m_messageType != MESSAGE_GAME)
+	{
+		return result;
+	}
+	GameMessage *gameMessage = (GameMessage*)move_reply;
+	if(gameMessage->m_gameMessageType != MOVE_UNIT_DISTANT_REPLY)
+	{
+		return result;
+	}
+	if((gameMessage->m_yNew == yNew) && (gameMessage->m_xNew == xNew))
+	{
+		result.m_result = gameMessage->m_moveResult;
+
+	}
+	else
+	{
+		//TODO: return where the unit SHOULD be
+	}
 
 	return result;
 }
@@ -104,4 +132,30 @@ bool RTT::ChangeUnitFacing(uint32_t unitID, enum Direction direction)
 	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
 
 	return false;
+}
+
+bool RTT::SurrenderMatch()
+{
+	Ticket ticket = MessageManager::Instance().StartConversation(socketFD);
+
+	GameMessage surrender_notice(SURRENDER_NOTICE);
+	if(!MessageManager::Instance().WriteMessage(ticket, &surrender_notice))
+	{
+		return false;
+	}
+
+	Message *message = MessageManager::Instance().ReadMessage(ticket);
+	if(message->m_messageType != MESSAGE_GAME)
+	{
+		return false;
+	}
+	GameMessage *ack = (GameMessage*)message;
+	if(ack->m_gameMessageType == SURRENDER_ACK)
+	{
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }

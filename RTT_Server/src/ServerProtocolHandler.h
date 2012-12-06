@@ -9,11 +9,13 @@
 #define PROTOCOLHANDLER_H_
 
 #include <vector>
+
 #include "messaging/messages/AuthMessage.h"
 #include "messaging/messages/ErrorMessage.h"
 #include "messaging/messages/MatchLobbyMessage.h"
 #include "messaging/messages/GameMessage.h"
 #include "messaging/Ticket.h"
+#include "Enums.h"
 
 #define CALLBACK_WAIT_TIME 10
 
@@ -21,14 +23,6 @@ using namespace std;
 
 namespace RTT
 {
-
-enum LobbyReturn
-{
-	IN_MATCH_LOBBY,
-	IN_MAIN_LOBBY,
-	EXITING_SERVER,
-	IN_GAME,
-};
 
 //Negotiates the hello messages and authentication to a new client
 //	Returns a new Player object, NULL on error

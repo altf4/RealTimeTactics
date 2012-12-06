@@ -7,6 +7,8 @@
 
 #include "Player.h"
 
+#include "string.h"
+
 using namespace RTT;
 using namespace std;
 

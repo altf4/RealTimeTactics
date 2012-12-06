@@ -14,7 +14,7 @@
 
 #include <vector>
 #include "Unit.h"
-#include "Match.h"
+#include "MatchTypes.h"
 #include <string>
 #include "Enums.h"
 #include <stdint.h>

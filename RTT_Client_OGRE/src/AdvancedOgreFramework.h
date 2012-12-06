@@ -9,24 +9,24 @@
 #ifndef OGRE_FRAMEWORK_HPP
 #define OGRE_FRAMEWORK_HPP
 
-#include <OgreCamera.h>
-#include <OgreEntity.h>
-#include <OgreLogManager.h>
-#include <OgreOverlay.h>
-#include <OgreOverlayElement.h>
-#include <OgreOverlayManager.h>
-#include <OgreRoot.h>
-#include <OgreViewport.h>
-#include <OgreSceneManager.h>
-#include <OgreRenderWindow.h>
-#include <OgreConfigFile.h>
+#include <OGRE/OgreCamera.h>
+#include <OGRE/OgreEntity.h>
+#include <OGRE/OgreLogManager.h>
+#include <OGRE/OgreOverlay.h>
+#include <OGRE/OgreOverlayElement.h>
+#include <OGRE/OgreOverlayManager.h>
+#include <OGRE/OgreRoot.h>
+#include <OGRE/OgreViewport.h>
+#include <OGRE/OgreSceneManager.h>
+#include <OGRE/OgreRenderWindow.h>
+#include <OGRE/OgreConfigFile.h>
 
-#include <OISEvents.h>
-#include <OISInputManager.h>
-#include <OISKeyboard.h>
-#include <OISMouse.h>
+#include <OIS/OISEvents.h>
+#include <OIS/OISInputManager.h>
+#include <OIS/OISKeyboard.h>
+#include <OIS/OISMouse.h>
 
-#include <CEGUI.h>
+#include <CEGUI/CEGUI.h>
 #include <CEGUI/RendererModules/Ogre/CEGUIOgreRenderer.h>
 
 #include "messaging/MessageManager.h"

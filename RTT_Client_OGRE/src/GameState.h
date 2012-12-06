@@ -18,8 +18,8 @@
 
 //#include "DotSceneLoader.hpp"
 
-#include <OgreSubEntity.h>
-#include <OgreMaterialManager.h>
+#include <OGRE/OgreSubEntity.h>
+#include <OGRE/OgreMaterialManager.h>
 
 enum QueryFlags
 {
@@ -60,7 +60,7 @@ public:
 
 	void Update(double timeSinceLastFrame);
 
-	void MoveUnit(RTT::RTT_Ogre_Unit &arg);
+	void MoveUnitOnScreen(RTT::RTT_Ogre_Unit &arg);
 	void MoveCursor(const RTT::Direction &arg);
 	void ShowRange(RTT::RTT_Ogre_Unit &arg, bool &arg2);
 	void MakeMove(RTT::RTT_Ogre_Unit &arg);

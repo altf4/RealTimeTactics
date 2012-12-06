@@ -27,6 +27,8 @@ public:
 	void UI_UnitMovedDirectionSignal(uint32_t unitID, struct Coordinate source,
 			enum Direction direction, enum Direction facing);
 
+	void UI_UnitMovedDistantSignal(uint32_t unitID, struct Coordinate source, struct Coordinate dest) = 0;
+
 	//A Unit has changed the direction it is facing
 	//	unitID - The ID of the unit moved
 	//	direction - The new direction to move the unit to face

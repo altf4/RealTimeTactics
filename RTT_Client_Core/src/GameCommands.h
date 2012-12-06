@@ -70,12 +70,12 @@ struct MovementResult
 //	returns - A MovementResult struct describing the success or error of the move
 struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, enum Direction direction);
 
+//TODO: We might also have to specify a path. Or else every move is a teleport
 //Move a Unit to a distant tile
 //	unitID - The ID of the unit to move.
-//	destination - The Coordinate of the tile being moved to
 //		NOTE: The unit will also by default made to face the direction of the last hop
 //	returns - A MovementResult struct describing the success or error of the move
-struct MovementResult MoveUnit(uint32_t unitID, struct Coordinate destination);
+struct MovementResult MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOld, uint32_t xNew, uint32_t yNew);
 
 //Make a unit change the direction it is facing
 //	unitID - The ID of the unit to move
@@ -99,6 +99,7 @@ bool PauseMatch();
 bool UnPauseMatch();
 
 //Give up and leave to the MainLobby
+//	returns = True if the server gives us a successful acknowledgment of the surrender
 bool SurrenderMatch();
 
 }

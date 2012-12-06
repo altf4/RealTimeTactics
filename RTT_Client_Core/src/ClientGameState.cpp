@@ -86,10 +86,8 @@ bool ClientGameState::HasUnit(uint32_t ID)
 //	unitID - The ID of the unit moved
 //	source - The Coordinate of the tile being moved from
 //	destination - The Coordinate of the tile being moved to
-//		NOTE: The unit by default should be facing the direction of the last hop moved
 //	returns - True on successfully moving unit, false on error
-enum MoveResult ClientGameState::MoveUnit(uint32_t unitID, struct Coordinate source,
-		struct Coordinate destination, enum Direction facing)
+enum MoveResult ClientGameState::MoveUnitDistant(uint32_t unitID, struct Coordinate source, struct Coordinate destination)
 {
 	Unit *movingUnit = GetUnit(unitID);
 	if(movingUnit == NULL)
@@ -108,7 +106,6 @@ enum MoveResult ClientGameState::MoveUnit(uint32_t unitID, struct Coordinate sou
 
 	movingUnit->m_x = destination.m_x;
 	movingUnit->m_y = destination.m_y;
-	movingUnit->m_directionFacing = facing;
 
 	return MOVE_SUCCESS;
 }

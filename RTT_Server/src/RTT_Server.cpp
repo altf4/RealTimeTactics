@@ -236,7 +236,7 @@ uint RTT::RegisterNewMatch(Player *player, struct MatchOptions options)
 	}
 	Match *match = new Match(player);
 	match->SetID(matchID);
-	match->SetStatus(WAITING_FOR_PLAYERS);
+	match->SetStatus(MATCH_WAITING_TO_START);
 	match->SetMaxPlayers(options.m_maxPlayers);
 	match->SetName(options.m_name);
 

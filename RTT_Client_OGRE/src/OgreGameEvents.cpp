@@ -8,6 +8,8 @@
 
 #include "OgreGameEvents.h"
 
+#include <iostream>
+
 using namespace std;
 using namespace RTT;
 
@@ -16,6 +18,11 @@ void OgreGameEvents::UI_UnitMovedDirectionSignal(uint32_t unitID, struct Coordin
 		enum Direction direction, enum Direction facing)
 {
 
+}
+
+void OgreGameEvents::UI_UnitMovedDistantSignal(uint32_t unitID, struct Coordinate source, struct Coordinate dest)
+{
+	cout << "freakin' woot" << endl;
 }
 
 //A Unit has changed the direction it is facing

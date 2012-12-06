@@ -43,6 +43,7 @@
 								</option>
 								<option id="gnu.cpp.link.option.libs.1383190881" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="RTT_Common"/>
+									<listOptionValue builtIn="false" value="crypto"/>
 									<listOptionValue builtIn="false" value="event"/>
 									<listOptionValue builtIn="false" value="event_pthreads"/>
 									<listOptionValue builtIn="false" value="pthread"/>
@@ -102,6 +103,7 @@
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.release.1745065304" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.release">
 								<option id="gnu.cpp.link.option.libs.1492613990" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="RTT_Common"/>
+									<listOptionValue builtIn="false" value="crypto"/>
 									<listOptionValue builtIn="false" value="event"/>
 									<listOptionValue builtIn="false" value="event_pthreads"/>
 									<listOptionValue builtIn="false" value="pthread"/>

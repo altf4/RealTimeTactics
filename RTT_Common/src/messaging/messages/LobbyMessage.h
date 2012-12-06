@@ -8,7 +8,7 @@
 #define SERVER_STATS_SIZE sizeof(uint32_t) + sizeof(uint32_t)
 
 #include "Message.h"
-#include "../../Match.h"
+#include "../../MatchTypes.h"
 
 namespace RTT
 {

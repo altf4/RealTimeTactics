@@ -6,6 +6,8 @@
 //============================================================================
 
 #include "LobbyMessage.h"
+#include "../../Player.h"
+
 #include "string.h"
 
 using namespace std;
@@ -91,8 +93,8 @@ LobbyMessage::LobbyMessage(char *buffer, uint32_t length)
 			//Copy over the memory for the match descriptions
 			for(uint32_t i = 0; i < m_returnedMatchesCount; i++)
 			{
-				memcpy(&m_matchDescriptions[i].m_status, buffer, sizeof(enum Status));
-				buffer += sizeof(enum Status);
+				memcpy(&m_matchDescriptions[i].m_status, buffer, sizeof(enum MatchStatus));
+				buffer += sizeof(enum MatchStatus);
 				memcpy(&m_matchDescriptions[i].m_ID, buffer, sizeof(uint32_t));
 				buffer += sizeof(uint32_t);
 				memcpy(&m_matchDescriptions[i].m_currentPlayerCount, buffer, sizeof(uint32_t));
@@ -174,8 +176,8 @@ LobbyMessage::LobbyMessage(char *buffer, uint32_t length)
 			}
 
 			//Match description
-			memcpy(&m_matchDescription.m_status, buffer, sizeof(enum Status));
-			buffer += sizeof(enum Status);
+			memcpy(&m_matchDescription.m_status, buffer, sizeof(enum MatchStatus));
+			buffer += sizeof(enum MatchStatus);
 			memcpy(&m_matchDescription.m_ID, buffer, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
 			memcpy(&m_matchDescription.m_currentPlayerCount, buffer, sizeof(uint32_t));
@@ -246,8 +248,8 @@ LobbyMessage::LobbyMessage(char *buffer, uint32_t length)
 			}
 
 			//Match description
-			memcpy(&m_matchDescription.m_status, buffer, sizeof(enum Status));
-			buffer += sizeof(enum Status);
+			memcpy(&m_matchDescription.m_status, buffer, sizeof(enum MatchStatus));
+			buffer += sizeof(enum MatchStatus);
 			memcpy(&m_matchDescription.m_ID, buffer, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
 			memcpy(&m_matchDescription.m_currentPlayerCount, buffer, sizeof(uint32_t));
@@ -376,8 +378,8 @@ char *LobbyMessage::Serialize(uint32_t *length)
 			for(uint32_t i = 0; i < m_returnedMatchesCount; i++)
 			{
 				//New match description
-				memcpy(buffer, &m_matchDescriptions[i].m_status, sizeof(enum Status));
-				buffer += sizeof(enum Status);
+				memcpy(buffer, &m_matchDescriptions[i].m_status, sizeof(enum MatchStatus));
+				buffer += sizeof(enum MatchStatus);
 				memcpy(buffer, &m_matchDescriptions[i].m_ID, sizeof(uint32_t));
 				buffer += sizeof(uint32_t);
 				memcpy(buffer, &m_matchDescriptions[i].m_currentPlayerCount, sizeof(uint32_t));
@@ -468,8 +470,8 @@ char *LobbyMessage::Serialize(uint32_t *length)
 			buffer += sizeof(m_lobbyType);
 
 			//New match description
-			memcpy(buffer, &m_matchDescription.m_status, sizeof(enum Status));
-			buffer += sizeof(enum Status);
+			memcpy(buffer, &m_matchDescription.m_status, sizeof(enum MatchStatus));
+			buffer += sizeof(enum MatchStatus);
 			memcpy(buffer, &m_matchDescription.m_ID, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
 			memcpy(buffer, &m_matchDescription.m_currentPlayerCount, sizeof(uint32_t));
@@ -540,8 +542,8 @@ char *LobbyMessage::Serialize(uint32_t *length)
 			}
 
 			//Match Description
-			memcpy(buffer, &m_matchDescription.m_status, sizeof(enum Status));
-			buffer += sizeof(enum Status);
+			memcpy(buffer, &m_matchDescription.m_status, sizeof(enum MatchStatus));
+			buffer += sizeof(enum MatchStatus);
 			memcpy(buffer, &m_matchDescription.m_ID, sizeof(uint32_t));
 			buffer += sizeof(uint32_t);
 			memcpy(buffer, &m_matchDescription.m_currentPlayerCount, sizeof(uint32_t));

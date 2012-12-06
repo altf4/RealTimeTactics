@@ -54,6 +54,14 @@ enum GameSpeed: char
 	SPEED_FASTEST,
 };
 
+enum LobbyReturn
+{
+	IN_MATCH_LOBBY,
+	IN_MAIN_LOBBY,
+	EXITING_SERVER,
+	IN_GAME,
+};
+
 }
 
 

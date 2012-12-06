@@ -11,9 +11,10 @@
 #include <queue>
 #include "pthread.h"
 
-#include "../ClientProtocolHandler.h"
-#include "CallbackChange.h"
-
+#include "Enums.h"
+#include "ClientProtocolHandler.h"
+#include "GameEvents.h"
+#include "MatchLobbyEvents.h"
 
 namespace RTT
 {
@@ -22,25 +23,22 @@ class CallbackHandler
 {
 public:
 
-	CallbackHandler();
+	CallbackHandler(int socketFD, GameEvents *gameContext, MatchLobbyEvents *matchLobbyContext);
 	~CallbackHandler();
 
-	bool Start();
 	void Stop();
-
-	CallbackChange *PopCallbackChange();
 
 private:
 
 	void *CallbackThread();
-	void PushCallbackChange(CallbackChange *change);
 
 	static void *StartThreadHelper(void *ptr);
 
 	pthread_t m_thread;
+	int m_socketFD;
 
-	pthread_mutex_t m_queueMutex;
-	std::queue<CallbackChange*> m_changeQueue;
+	GameEvents *m_gameContext;
+	MatchLobbyEvents *m_matchLobbyContext;
 };
 
 }

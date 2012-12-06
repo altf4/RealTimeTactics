@@ -50,10 +50,8 @@ public:
 	//	unitID - The ID of the unit moved
 	//	source - The Coordinate of the tile being moved from
 	//	destination - The Coordinate of the tile being moved to
-	//	facing - The direction to have the Unit face at the end of the move
-	enum MoveResult MoveUnit(uint32_t unitID, struct Coordinate source,
-			struct Coordinate destination, enum Direction facing);
-
+	enum MoveResult MoveUnitDistant(uint32_t unitID, struct Coordinate source,
+			struct Coordinate destination);
 
 	//Move a Unit to a new adjacent tile
 	//	unitID - The ID of the unit moved

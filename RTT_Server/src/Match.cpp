@@ -7,6 +7,9 @@
 //============================================================================s
 
 #include "Match.h"
+#include "Enums.h"
+
+#include "iostream"
 
 using namespace std;
 using namespace RTT;
@@ -26,6 +29,7 @@ Match::Match(Player *player)
 	m_description.m_leaderID = m_leaderID;
 	m_currentPlayerCount = 0;
 	pthread_rwlock_init(&m_lock, NULL);
+	m_gameboard = NULL;
 }
 
 Match::~Match()
@@ -48,7 +52,7 @@ void Match::SetID(uint newID)
 	m_description.m_ID = newID;
 }
 
-void Match::SetStatus(enum Status newStatus)
+void Match::SetStatus(enum MatchStatus newStatus)
 {
 	Lock lock(&m_lock, WRITE_LOCK);
 	m_status = newStatus;
@@ -105,7 +109,7 @@ bool Match::SetLeader(uint newID)
 }
 
 //GET methods
-enum Status Match::GetStatus()
+enum MatchStatus Match::GetStatus()
 {
 	Lock lock(&m_lock, READ_LOCK);
 	return m_status;
@@ -259,7 +263,84 @@ bool Match::ChangeTeam(Player *player, enum TeamNumber newTeam)
 	return false;
 }
 
-bool Match::StartMatch()
+static void *StaticStartHelper(void *arg)
+{
+	return reinterpret_cast<Match*>(arg)->MatchLoop();
+}
+
+bool Match::Start()
+{
+	if(m_status == MATCH_WAITING_TO_START)
+	{
+		m_gameboard = new Gameboard(10, 10);
+
+		pthread_create(&m_thread, NULL, StaticStartHelper, this);
+		pthread_detach(m_thread);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+void *Match::MatchLoop()
+{
+	GameSpeed speed = GetGamespeed();
+	uint tickDelta = Match::GameSpeedTouSeconds(speed);
+
+	//Lock to ensure that only one timer tick thread can happen at once
+	pthread_mutex_t *tickLock = new pthread_mutex_t;
+	pthread_mutex_init(tickLock, NULL);
+
+	struct timespec wakeUpTime, startTime;
+
+	bool keepLooping  = true;
+	while(keepLooping)
+	{
+
+//		if(clock_gettime(CLOCK_MONOTONIC, &startTime) == -1)
+//		{
+//			//TODO: Couldn't get system time. Probably quit here
+//		}
+
+		//currentTime.tv_nsec
+		//Thread that gets called when the timer tick hits
+		TimerTick();
+
+
+		//If we've hit our victory condition, then end the match
+		keepLooping = !IsVictoryCondSatisfied();
+
+
+		//Figure out how long we need to sleep
+		//tickDelta -
+
+		//TODO: Calculate this sleep value properly
+		usleep(tickDelta);
+	}
+
+	//TODO: Properly cleanup this mutex. Not a trivial thing.
+	//	There's N theads all potentially trying to use it right now. Have to wait for them
+	//	with pthread_join
+	//pthread_mutex_destroy(&tickLock);
+	//delete tickLock;
+	return NULL;
+}
+
+void Match::TimerTick()
+{
+	//TODO: Important game stuff goes here!
+	cout << "Tick!\n";
+}
+
+bool Match::IsVictoryCondSatisfied()
+{
+	//TODO
+	return false;
+}
+
+bool Match::Surrender(uint32_t losingPlayerID)
 {
 	return true;
 }

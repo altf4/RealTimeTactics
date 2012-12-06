@@ -7,6 +7,7 @@
 //============================================================================
 
 #include "GameState.h"
+#include "GameCommands.h"
 
 using namespace Ogre;
 using namespace RTT;
@@ -15,14 +16,14 @@ GameState::GameState(void):
 		m_mainPlayer(),
 		m_playerCursor()
 {
-	m_moveSpeed		= 0.1f;
-	m_rotateSpeed	= 0.3f;
+	m_moveSpeed = 0.1f;
+	m_rotateSpeed = 0.3f;
 
-	m_isLMouseDown       = false;
-	m_isRMouseDown       = false;
-	m_quit             = false;
-	m_isSettingsMode     = false;
-	m_isMoving 			= false;
+	m_isLMouseDown = false;
+	m_isRMouseDown = false;
+	m_quit = false;
+	m_isSettingsMode = false;
+	m_isMoving = false;
 
 	//m_pDetailsPanel	= NULL;
 }
@@ -288,11 +289,12 @@ bool GameState::keyPressed(const OIS::KeyEvent& keyEventRef)
 		{
 			if(!m_isMoving)
 			{
-				MoveUnit(m_mainPlayer.ogreUnits);
-				break;
+				MoveUnitOnScreen(m_mainPlayer.ogreUnits);
 			}
 			else
+			{
 				MakeMove(m_mainPlayer.ogreUnits);
+			}
 			break;
 		}
 		case OIS::KC_F: //Facing 'dialog'
@@ -309,7 +311,7 @@ bool GameState::keyPressed(const OIS::KeyEvent& keyEventRef)
 	return true;
 }
 
-void GameState::MoveUnit(RTT::RTT_Ogre_Unit& toMove)
+void GameState::MoveUnitOnScreen(RTT::RTT_Ogre_Unit& toMove)
 {
 	if(!m_isMoving)
 	{
@@ -326,6 +328,8 @@ void GameState::MakeMove(RTT::RTT_Ogre_Unit& toMove)
 {
 	if(m_isMoving)
 	{
+		MoveUnit(toMove.m_ID, toMove.m_locationX, toMove.m_locationY, m_playerCursor.m_locationX, m_playerCursor.m_locationY);
+
 		m_isMoving = false;
 		ShowRange(toMove, m_isMoving);
 		m_playerCursor.m_unitNode->setVisible(m_isMoving);
@@ -470,7 +474,6 @@ void GameState::MoveCursor(const RTT::Direction& moveDirection)
 		}
 		else
 		{
-			//LogManager::getSingletonPtr()->logMessage("Real Location: " + Ogre::StringConverter::toString(unitX*1.732) +"," + Ogre::StringConverter::toString(-unitY*1.5));
 			m_playerCursor.m_unitNode->setPosition(Ogre::Vector3(
 					m_playerCursor.m_locationX*1.732,0,-m_playerCursor.m_locationY*1.5));
 		}

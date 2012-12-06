@@ -4,14 +4,14 @@ debug:
 	cd RTT_Common/Debug; $(MAKE)
 	cd RTT_Server/Debug; $(MAKE)
 	cd RTT_Client_Core/Debug; $(MAKE)
-	cd RTT_Client_GTK/Debug; $(MAKE)
+#	cd RTT_Client_GTK/Debug; $(MAKE)
 	cd RTT_Client_OGRE/Debug; $(MAKE)
 	cp RTT_Client_OGRE/Debug/plugins.cfg RTT_Client_OGRE/plugins.cfg
 	cp RTT_Client_OGRE/Debug/resources.cfg RTT_Client_OGRE/resources.cfg
 	cp RTT_Client_OGRE/Debug/ogre.cfg RTT_Client_OGRE/ogre.cfg
 	#copy binaries to neutral location
 	cp RTT_Client_Core/Debug/libRTT_Client_Core.so RTT_Client_Core/
-	cp RTT_Client_GTK/Debug/RTT_Client_GTK RTT_Client_GTK/
+#	cp RTT_Client_GTK/Debug/RTT_Client_GTK RTT_Client_GTK/
 	cp RTT_Client_OGRE/Debug/RTT_Client_OGRE RTT_Client_OGRE/
 	cp RTT_Server/Debug/RTT_Server RTT_Server/
 
