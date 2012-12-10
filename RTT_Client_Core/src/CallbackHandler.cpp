@@ -13,22 +13,34 @@
 using namespace std;
 using namespace RTT;
 
-CallbackHandler::CallbackHandler(int socketFD, GameEvents *gameContext, MatchLobbyEvents *matchLobbyContext)
+CallbackHandler::CallbackHandler(GameEvents *gameContext, MatchLobbyEvents *matchLobbyContext, MainLobbyEvents *mainLobbyContext)
 {
-	m_socketFD = socketFD;
+	m_socketFD = -1;
 	m_gameContext = gameContext;
 	m_matchLobbyContext = matchLobbyContext;
-	pthread_create(&m_thread, NULL, &CallbackHandler::StartThreadHelper, this);
+	m_mainLobbyEvents = mainLobbyContext;
 }
 
 CallbackHandler::~CallbackHandler()
 {
 	pthread_join(m_thread, NULL);
+	delete m_gameContext;
+	delete m_matchLobbyContext;
+	delete m_mainLobbyEvents;
 }
 
 void *CallbackHandler::StartThreadHelper(void *ptr)
 {
 	return reinterpret_cast<CallbackHandler*>(ptr)->CallbackThread();
+}
+
+void CallbackHandler::Start(int socketFD)
+{
+	if(!isRunning)
+	{
+		m_socketFD = socketFD;
+		pthread_create(&m_thread, NULL, &CallbackHandler::StartThreadHelper, this);
+	}
 }
 
 void CallbackHandler::Stop()
@@ -48,6 +60,7 @@ void *CallbackHandler::CallbackThread()
 			return NULL;
 		}
 
+		cout << "xxxDEBUGxxx Processing Match Lobby Event..." << endl;
 		lobbyReturn = ProcessMatchLobbyEvent(ticket, m_matchLobbyContext);
 	}
 
@@ -64,24 +77,25 @@ void *CallbackHandler::CallbackThread()
 		{
 			case IN_MATCH_LOBBY:
 			{
-				cout << "xxxDEBUGxxx processing match lobby command " << endl;
+				cout << "xxxDEBUGxxx Processing Match Lobby Event..." << endl;
 				lobbyReturn = ProcessMatchLobbyEvent(ticket, m_matchLobbyContext);
 				break;
 			}
 			case IN_GAME:
 			{
-				cout << "xxxDEBUGxxx processing game command " << endl;
+				cout << "xxxDEBUGxxx Processing Game Event..." << endl;
 				lobbyReturn = ProcessGameEvent(ticket, m_gameContext);
 				break;
 			}
 			case EXITING_SERVER:
 			{
+				isRunning = false;
 				return NULL;
 			}
 			case IN_MAIN_LOBBY:
 			{
-				cout << "xxxDEBUGxxx processing main lobby command " << endl;
-				lobbyReturn = ProcessMainLobbyEvent(ticket);
+				cout << "xxxDEBUGxxx Processing Main Lobby Event..." << endl;
+				lobbyReturn = ProcessMainLobbyEvent(ticket, m_mainLobbyEvents);
 				break;
 			}
 		}

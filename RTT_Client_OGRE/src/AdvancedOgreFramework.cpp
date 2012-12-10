@@ -7,9 +7,14 @@
 //============================================================================
 
 #include "AdvancedOgreFramework.h"
+#include "OgreGameEvents.h"
+#include "OgreMainLobbyEvents.h"
+#include "OgreMatchLobbyEvents.h"
+
 #include <fstream>
 
 using namespace Ogre;
+using namespace RTT;
 
 template<> OgreFramework *Ogre::Singleton<OgreFramework>::msSingleton = NULL;
 
@@ -28,7 +33,7 @@ OgreFramework::OgreFramework()
 	m_debugOverlay = NULL;
 	m_infoOverlay = NULL;
 	m_numScreenShots = 0;
-	m_callbackHandler = NULL;
+	m_callbackHandler = new CallbackHandler(new OgreGameEvents(), new OgreMatchLobbyEvents(), new OgreMainLobbyEvents());
 }
 
 OgreFramework::~OgreFramework()
@@ -237,9 +242,6 @@ bool OgreFramework::InitOgre(Ogre::String wndTitle, OIS::KeyListener *pKeyListen
 	const OIS::MouseState state = m_mouse->getMouseState();
 	CEGUI::Point mousePos = CEGUI::MouseCursor::getSingleton().getPosition();
 	CEGUI::System::getSingleton().injectMouseMove(state.X.abs-mousePos.d_x,state.Y.abs-mousePos.d_y);
-
-    //Create callback thread
-    m_callbackHandler = new RTT::CallbackHandler();
 
 	return true;
 }

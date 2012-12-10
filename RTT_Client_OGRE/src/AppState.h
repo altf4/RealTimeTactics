@@ -10,6 +10,7 @@
 #define APP_STATE_H
 
 #include "AdvancedOgreFramework.h"
+#include "EventQueue.h"
 
 class AppState;
 
@@ -42,7 +43,7 @@ public:
 	virtual bool Pause(){return true;}
 	virtual void Resume(){};
 	virtual void Update(double timeSinceLastFrame) = 0;
-	virtual void ProcessCallback(RTT::CallbackChange *) = 0;
+	virtual void ProcessCallback(struct RTT::ServerEvent event) = 0;
 
 protected:
 	AppState(){};

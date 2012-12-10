@@ -7,8 +7,8 @@
 //============================================================================
 
 #include "AppStateManager.h"
-
 #include <OGRE/OgreWindowEventUtilities.h>
+#include "EventQueue.h"
 
 using namespace RTT;
 
@@ -94,17 +94,11 @@ void AppStateManager::Start(AppState *state)
 			timeSinceLastFrame = OgreFramework::getSingletonPtr()->
 					m_timer->getMillisecondsCPU() - startTime;
 
-			//Not an infinite loop. Breaks inside when NO_CALLBACK is found
-			while(true)
+			//Process all events we've seen this frame
+			while(!EventQueue::Instance().Empty())
 			{
-				CallbackChange *change = OgreFramework::getSingletonPtr()->m_callbackHandler->PopCallbackChange();
-				if(change->m_type == NO_CALLBACK)
-				{
-					delete change;
-					break;
-				}
-				m_activeStateStack.back()->ProcessCallback(change);
-				delete change;
+				struct ServerEvent event = EventQueue::Instance().Dequeue();
+				m_activeStateStack.back()->ProcessCallback(event);
 			}
 		}
 		else

@@ -10,7 +10,7 @@
 #define MENU_STATE_H
 
 #include "AppState.h"
-#include "callback/MainLobbyCallbackChange.h"
+#include "EventQueue.h"
 
 enum GUIState
 {
@@ -96,7 +96,7 @@ public:
 
 	void Update(double timeSinceLastFrame);
 
-	void ProcessCallback(RTT::CallbackChange *);
+	void ProcessCallback(struct RTT::ServerEvent event);
 
 private:
 	bool m_quit;
@@ -105,18 +105,18 @@ private:
 	GUIState m_location;
 
 protected:
-	void TeamChangedEvent(RTT::MainLobbyCallbackChange *change);
-	void TeamColorChangedEvent(RTT::MainLobbyCallbackChange *change);
-	void MapChangedEvent(RTT::MainLobbyCallbackChange *change);
-	void GamespeedChangedEvent(RTT::MainLobbyCallbackChange *change);
-	void VictoryConditionChangedEvent(RTT::MainLobbyCallbackChange *change);
-	void PlayerLeftEvent(RTT::MainLobbyCallbackChange *change);
-	void KickedFromMatchEvent(RTT::MainLobbyCallbackChange *change);
-	void PlayerJoinedEvent(RTT::MainLobbyCallbackChange *change);
-	void MatchStartedEvent(RTT::MainLobbyCallbackChange *change);
-	void CallbackClosedEvent(RTT::MainLobbyCallbackChange *change);
-	void CallbackErrorEvent(RTT::MainLobbyCallbackChange *change);
-	void LeaderChangedEvent(RTT::MainLobbyCallbackChange *change);
+	void TeamChangedEvent(uint32_t playerID, enum RTT::TeamNumber newTeam);
+	void TeamColorChangedEvent(struct RTT::ServerEvent event);
+	void MapChangedEvent(struct RTT::ServerEvent event);
+	void GamespeedChangedEvent(struct RTT::ServerEvent event);
+	void VictoryConditionChangedEvent(struct RTT::ServerEvent event);
+	void PlayerLeftEvent(uint32_t playerID, uint32_t leaderID);
+	void KickedFromMatchEvent(struct RTT::ServerEvent event);
+	void PlayerJoinedEvent(struct RTT::PlayerDescription player);
+	void MatchStartedEvent();
+	void CallbackClosedEvent(struct RTT::ServerEvent event);
+	void CallbackErrorEvent(struct RTT::ServerEvent event);
+	void LeaderChangedEvent(uint32_t newLeaderID);
 
 	void EnableLeader(bool value);
 

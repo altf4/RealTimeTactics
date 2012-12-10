@@ -25,6 +25,7 @@
 #include "messaging/Ticket.h"
 #include "GameEvents.h"
 #include "MatchLobbyEvents.h"
+#include "MainLobbyEvents.h"
 
 #include <string>
 #include <vector>
@@ -150,11 +151,11 @@ void Disconnect();
 
 //Processes and executes a single Main Lobby Event from the server
 //	returns - The new state of the client as it leaves the function
-enum LobbyReturn ProcessMainLobbyEvent(Ticket &ticket);
+enum LobbyReturn ProcessMainLobbyEvent(Ticket &ticket, MainLobbyEvents *lobbyContext);
 
 //Processes and executes a single Match Lobby Event from the server
 //	returns - The new state of the client as it leaves the function
-enum LobbyReturn ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *gameContext);
+enum LobbyReturn ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *lobbyContext);
 
 //Processes and executes a single Game Event from the server
 //	returns - The new state of the client as it leaves the function

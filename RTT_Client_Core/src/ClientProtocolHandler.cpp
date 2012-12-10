@@ -903,6 +903,11 @@ void  RTT::SendError(Ticket &ticket, enum ErrorType errorType)
 //			Callback Processing
 //********************************************
 
+enum LobbyReturn RTT::ProcessMainLobbyEvent(Ticket &ticket, MainLobbyEvents *lobbyContext)
+{
+	return IN_MAIN_LOBBY;
+}
+
 //Processes and executes a single Match Lobby Event from the server
 //	returns - The new state of the client as it leaves the function
 enum LobbyReturn RTT::ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *gameContext)
@@ -933,14 +938,13 @@ enum LobbyReturn RTT::ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *g
 				//Error in write
 				ret = IN_MATCH_LOBBY;
 			}
-			delete match_message;
 			ret = IN_MATCH_LOBBY;
 			break;
 		}
 		case KICKED_FROM_MATCH_NOTIFICATION:
 		{
-			//Get what we need from the message
-			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(KICKED);
+
+			gameContext->UI_KickFromMatchSignal();
 
 			//***********************************
 			// Send Kicked From Match Ack
@@ -949,20 +953,14 @@ enum LobbyReturn RTT::ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *g
 			if( MessageManager::Instance().WriteMessage(ticket, &kicked_ack) == false)
 			{
 				//Error in write
-				delete match_message;
-				delete change;
-				return new CallbackChange(CALLBACK_ERROR);
 			}
 
-			delete match_message;
-			return change;
+			ret = IN_MAIN_LOBBY;
+			break;
 		}
 		case PLAYER_LEFT_MATCH_NOTIFICATION:
 		{
-			//Get what we need from the message
-			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(PLAYER_LEFT);
-			change->m_playerID = match_message->m_playerID;
-			change->m_newLeaderID = match_message->m_newLeaderID;
+			gameContext->UI_PlayerLeftSignal(match_message->m_playerID, match_message->m_newLeaderID);
 
 			//***********************************
 			// Send Player Left Ack
@@ -971,18 +969,13 @@ enum LobbyReturn RTT::ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *g
 			if( MessageManager::Instance().WriteMessage(ticket, &player_left_ack) == false)
 			{
 				//Error in write
-				delete match_message;
-				delete change;
-				return new CallbackChange(CALLBACK_ERROR);
 			}
-			delete match_message;
-			return change;
+			ret = IN_MATCH_LOBBY;
+			break;
 		}
 		case PLAYER_JOINED_MATCH_NOTIFICATION:
 		{
-			//Get what we need from the message
-			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(PLAYER_JOINED);
-			change->m_playerDescription = match_message->m_playerDescription;
+			gameContext->UI_PlayerJoinedSignal(match_message->m_playerDescription);
 
 			//***********************************
 			// Send Player Joined Ack
@@ -991,19 +984,13 @@ enum LobbyReturn RTT::ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *g
 			if( MessageManager::Instance().WriteMessage(ticket, &player_joined_ack) == false)
 			{
 				//Error in write
-				delete match_message;
-				delete change;
-				return new CallbackChange(CALLBACK_ERROR);
 			}
-			delete match_message;
-			return change;
+			ret = IN_MATCH_LOBBY;
+			break;
 		}
 		case COLOR_CHANGED_NOTIFICATION:
 		{
-			//Get what we need from the message
-			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(COLOR_CHANGE);
-			change->m_playerID = match_message->m_playerID;
-			change->m_color = match_message->m_newColor;
+			gameContext->UI_ColorChangedSignal( match_message->m_playerID, match_message->m_newColor);
 
 			//***********************************
 			// Send Color Changed Ack
@@ -1012,18 +999,13 @@ enum LobbyReturn RTT::ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *g
 			if( MessageManager::Instance().WriteMessage(ticket, &color_change_ack) == false)
 			{
 				//Error in write
-				delete match_message;
-				delete change;
-				return new CallbackChange(CALLBACK_ERROR);
 			}
-			delete match_message;
-			return change;
+			ret = IN_MATCH_LOBBY;
+			break;
 		}
 		case MAP_CHANGED_NOTIFICATION:
 		{
-			//Get what we need from the message
-			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(MAP_CHANGE);
-			change->m_mapDescription = match_message->m_mapDescription;
+			gameContext->UI_MapChangedSignal(match_message->m_mapDescription);
 
 			//***********************************
 			// Send Map Changed Ack
@@ -1032,18 +1014,13 @@ enum LobbyReturn RTT::ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *g
 			if( MessageManager::Instance().WriteMessage(ticket, &map_changed_ack) == false)
 			{
 				//Error in write
-				delete match_message;
-				delete change;
-				return new CallbackChange(CALLBACK_ERROR);
 			}
-			delete match_message;
-			return change;
+			ret = IN_MATCH_LOBBY;
+			break;
 		}
 		case GAME_SPEED_CHANGED_NOTIFICATION:
 		{
-			//Get what we need from the message
-			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(SPEED_CHANGE);
-			change->m_speed = match_message->m_newSpeed;
+			gameContext->UI_GamespeedChangedSignal(match_message->m_newSpeed);
 
 			//***********************************
 			// Send Game Speed Changed Ack
@@ -1052,18 +1029,13 @@ enum LobbyReturn RTT::ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *g
 			if( MessageManager::Instance().WriteMessage(ticket, &speed_changed_ack) == false)
 			{
 				//Error in write
-				delete match_message;
-				delete change;
-				return new CallbackChange(CALLBACK_ERROR);
 			}
-			delete match_message;
-			return change;
+			ret = IN_MATCH_LOBBY;
+			break;
 		}
 		case VICTORY_COND_CHANGED_NOTIFICATION:
 		{
-			//Get what we need from the message
-			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(VICTORY_CHANGE);
-			change->m_victory = match_message->m_newVictCond;
+			gameContext->UI_VictoryCondChangedSignal(match_message->m_newVictCond);
 
 			//***********************************
 			// Send Victory Condition Changed Ack
@@ -1072,39 +1044,29 @@ enum LobbyReturn RTT::ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *g
 			if( MessageManager::Instance().WriteMessage(ticket, &victory_changed_ack) == false)
 			{
 				//Error in write
-				delete match_message;
-				delete change;
-				return new CallbackChange(CALLBACK_ERROR);
 			}
-			delete match_message;
-			return change;
+			ret = IN_MATCH_LOBBY;
+			break;
 		}
 		case CHANGE_LEADER_NOTIFICATION:
 		{
-			//Get what we need from the message
-			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(LEADER_CHANGE);
-			change->m_playerID = match_message->m_playerID;
+			gameContext->UI_ChangeLeaderSignal(match_message->m_playerID);
 
 			//***********************************
-			// Send Victory Condition Changed Ack
+			// Send Change Leader Ack
 			//***********************************
 			MatchLobbyMessage leader_changed_ack(CHANGE_LEADER_ACK);
 			if( MessageManager::Instance().WriteMessage(ticket, &leader_changed_ack) == false)
 			{
 				//Error in write
-				delete match_message;
-				delete change;
-				return new CallbackChange(CALLBACK_ERROR);
 			}
-			delete match_message;
-			return change;
+			ret = IN_MATCH_LOBBY;
+			break;
 		}
 		case MATCH_START_NOTIFICATION:
 		{
 			//TODO: Must accept first
-
-			//Get what we need from the message
-			MainLobbyCallbackChange *change = new MainLobbyCallbackChange(MATCH_STARTED);
+			gameContext->UI_MatchStartedSignal();
 
 			//***********************************
 			// Send Match Started Ack
@@ -1114,18 +1076,16 @@ enum LobbyReturn RTT::ProcessMatchLobbyEvent(Ticket &ticket, MatchLobbyEvents *g
 			if(MessageManager::Instance().WriteMessage(ticket, &match_started_ack) == false)
 			{
 				//Error in write
-				delete match_message;
-				delete change;
-				return new CallbackChange(CALLBACK_ERROR);
 			}
-			delete match_message;
-			return change;
+			ret = IN_GAME;
+			break;
 		}
 		default:
 		{
 			cerr << "ERROR: Received a bad message on the callback socket\n";
 			SendError(ticket, AUTHENTICATION_ERROR);
-			return new CallbackChange(CALLBACK_ERROR);
+			ret = IN_MATCH_LOBBY;
+			break;
 		}
 	}
 	delete match_message;
@@ -1140,6 +1100,7 @@ enum LobbyReturn RTT::ProcessGameEvent(Ticket &ticket, GameEvents *gameContext)
 	if(event_message->m_messageType != MESSAGE_GAME)
 	{
 		cerr << "ERROR: Message read from server failed. Did it die?\n";
+		cout << "xxxDEBUGxxx Message Type: " << event_message->m_messageType << " Subtype: "<< ((ErrorMessage*)event_message)->m_errorType << endl;
 		delete event_message;
 		return IN_GAME;
 	}

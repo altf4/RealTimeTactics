@@ -1,15 +1,13 @@
 //============================================================================
-// Name        : MatchLobbyEvents.h
+// Name        : MainLobbyEvents.h
 // Author      : AltF4
-// Copyright   : 2011, GNU GPLv3
-// Description : Match Lobby events which have happened on the server, and the
+// Copyright   : 2012, GNU GPLv3
+// Description : Main Lobby events which have happened on the server, and the
 //					client is being notified about.
 //============================================================================
-#ifndef MATCHLOBBYEVENTS_H_
-#define MATCHLOBBYEVENTS_H_
 
-#include <stdint.h>
-#include "Enums.h"
+#ifndef MAINLOBBYEVENTS_H_
+#define MAINLOBBYEVENTS_H_
 
 namespace RTT
 {
@@ -32,37 +30,15 @@ namespace RTT
 
 //		Each of the virtual functions begin with "UI_" to help you find them
 
-class MatchLobbyEvents
+class MainLobbyEvents
 {
 
 public:
-	//You probably don't need to manually override this
-	//	Destructors are implicitly defined. Unless you create some objects in your sub class
-	//	which need cleaning when the GameEvents object is destroyed
-	virtual ~MatchLobbyEvents();
 
-	virtual void UI_TeamChangedSignal(uint32_t playerID, enum TeamNumber newTeam) = 0;
-
-	virtual void UI_KickFromMatchSignal() = 0;
-
-	virtual void UI_PlayerLeftSignal(uint32_t playerID, uint32_t leaderID) = 0;
-
-	virtual void UI_PlayerJoinedSignal(struct PlayerDescription player) = 0;
-
-	virtual void UI_ColorChangedSignal(uint32_t playerID, enum TeamColor color) = 0;
-
-	virtual void UI_MapChangedSignal(struct MapDescription mapDesc) = 0;
-
-	virtual void UI_GamespeedChangedSignal(enum GameSpeed speed) = 0;
-
-	virtual void UI_VictoryCondChangedSignal(enum VictoryCondition victory) = 0;
-
-	virtual void UI_ChangeLeaderSignal(uint32_t playerID) = 0;
-
-	virtual void UI_MatchStartedSignal() = 0;
+	virtual ~MainLobbyEvents();
 
 };
 
 }
 
-#endif /* MATCHLOBBYEVENTS_H_ */
+#endif /* MAINLOBBYEVENTS_H_ */

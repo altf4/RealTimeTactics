@@ -1,5 +1,5 @@
 //============================================================================
-// Name        : RTT_Server.cpp
+// Name        : Player.h
 // Author      : AltF4
 // Copyright   : 2011, GNU GPLv3
 // Description : Collects all information specific to one player

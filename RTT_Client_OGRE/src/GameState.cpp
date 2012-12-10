@@ -772,10 +772,20 @@ void GameState::SetUnbufferedMode()
 	pControlsPanel->setText("[Tab] - To switch between input modes\n\n[W] - Forward\n[S] - Backwards\n[A] - Left\n[D] - Right\n\nPress [Shift] to move faster\n\n[O] - Toggle Overlays\n[Print] - Take screenshot\n\n[Esc] - Quit to main menu");
 }
 
-void GameState::ProcessCallback(CallbackChange *change)
+void GameState::ProcessCallback(struct RTT::ServerEvent event)
 {
-	switch(change->m_type)
+	if(event.m_appState != IN_GAME)
 	{
+		return;
+	}
+
+	switch(event.m_type)
+	{
+		case EVENT_UNIT_MOVED_DISTANT:
+		{
+			cout << "xxxDEBUGxxx ENEMY UNIT:" << event.m_unitID << " moved to " << event.m_dest.m_x << ", " << event.m_dest.m_y << endl;
+			break;
+		}
 		default:
 		{
 			break;

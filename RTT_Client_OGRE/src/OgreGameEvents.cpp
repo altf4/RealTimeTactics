@@ -7,6 +7,8 @@
 //============================================================================
 
 #include "OgreGameEvents.h"
+#include "EventQueue.h"
+#include "Enums.h"
 
 #include <iostream>
 
@@ -22,7 +24,13 @@ void OgreGameEvents::UI_UnitMovedDirectionSignal(uint32_t unitID, struct Coordin
 
 void OgreGameEvents::UI_UnitMovedDistantSignal(uint32_t unitID, struct Coordinate source, struct Coordinate dest)
 {
-	cout << "freakin' woot" << endl;
+	struct ServerEvent event;
+	event.m_appState = IN_GAME;
+	event.m_type = EVENT_UNIT_MOVED_DISTANT;
+	event.m_unitID = unitID;
+	event.m_source = source;
+	event.m_dest = dest;
+	EventQueue::Instance().Enqueue(event);
 }
 
 //A Unit has changed the direction it is facing

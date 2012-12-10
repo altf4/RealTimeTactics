@@ -16,25 +16,13 @@ MenuState::MenuState()
 {
     m_quit = false;
     m_frameEvent = Ogre::FrameEvent();
-    OgreFramework::getSingletonPtr()->m_log->logMessage("Is there a callback thread?");
-
-    if(OgreFramework::getSingletonPtr()->m_callbackHandler == NULL)
-    {
-    	OgreFramework::getSingletonPtr()->m_log->logMessage("No, make one");
-    	OgreFramework::getSingletonPtr()->m_callbackHandler = new RTT::CallbackHandler();
-    }
-    else
-    {
-    	OgreFramework::getSingletonPtr()->m_log->logMessage("Yes, use it");
-    }
 }
 
 void MenuState::Enter()
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Entering MenuState...");
 
-	m_sceneMgr = OgreFramework::getSingletonPtr()->m_root->createSceneManager(
-			ST_GENERIC, "MenuSceneMgr");
+	m_sceneMgr = OgreFramework::getSingletonPtr()->m_root->createSceneManager(ST_GENERIC, "MenuSceneMgr");
 	m_sceneMgr->setAmbientLight(Ogre::ColourValue(0.7f, 0.7f, 0.7f));
 
 	m_camera = m_sceneMgr->createCamera("MenuCam");
@@ -405,22 +393,16 @@ bool MenuState::OnJoinServerButton(const CEGUI::EventArgs &args)
 
 	std::string hashedPassword = PasswordBox->getText().c_str();
 
-	int SocketFD = AuthToServer(serverIP, serverPort,
+	int socketFD = AuthToServer(serverIP, serverPort,
 			givenName, (unsigned char*)hashedPassword.c_str(), &m_playerDescription);
 
-	if( SocketFD > 0 )
+	if(socketFD > 0)
 	{
 		pCustomServerWnd->setText("Connection Successful!");
 		OgreFramework::getSingletonPtr()->m_log->logMessage("Connection Successful!");
 
 		//Launch the Callback Thread
-		if(OgreFramework::getSingletonPtr()->m_callbackHandler != NULL)
-		{
-			OgreFramework::getSingletonPtr()->m_log->logMessage(
-					"Starting Callback Thread");
-			OgreFramework::getSingletonPtr()->m_callbackHandler->Start();
-
-		}
+		OgreFramework::getSingletonPtr()->m_callbackHandler->Start(socketFD);
 		ServerLobby();
 	}
 	else
@@ -1116,7 +1098,7 @@ bool MenuState::OnMatchNameDeactivate(const CEGUI::EventArgs &args)
 }
 
 //Callback Events
-void MenuState::LeaderChangedEvent(MainLobbyCallbackChange *change)
+void MenuState::LeaderChangedEvent(uint32_t newLeaderID)
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Leader Change Event");
 
@@ -1124,15 +1106,15 @@ void MenuState::LeaderChangedEvent(MainLobbyCallbackChange *change)
 
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Unselected old leader");
 	if(CEGUI::WindowManager::getSingleton().isWindowPresent("IsLeader" +
-					CEGUI::PropertyHelper::intToString((int)change->m_playerID)))
+					CEGUI::PropertyHelper::intToString(newLeaderID)))
 	{
 		OgreFramework::getSingletonPtr()->m_log->logMessage("Found IsLeader" +
-				Ogre::StringConverter::toString((int)change->m_playerID));
+				Ogre::StringConverter::toString(newLeaderID));
 
 		newLeader = (CEGUI::RadioButton*)CEGUI::WindowManager::getSingleton().getWindow("IsLeader" +
-				CEGUI::PropertyHelper::intToString((int)change->m_playerID));
+				CEGUI::PropertyHelper::intToString(newLeaderID));
 		newLeader->setSelected(true);
-		m_currentMatch.m_leaderID = change->m_playerID;
+		m_currentMatch.m_leaderID = newLeaderID;
 
 		if(m_playerDescription.m_ID == m_currentMatch.m_leaderID)
 		{
@@ -1146,7 +1128,7 @@ void MenuState::LeaderChangedEvent(MainLobbyCallbackChange *change)
 	else
 	{
 		OgreFramework::getSingletonPtr()->m_log->logMessage("Found IsLeader" +
-						Ogre::StringConverter::toString((int)change->m_playerID));
+						Ogre::StringConverter::toString(newLeaderID));
 		return;
 	}
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Selected new leader");
@@ -1169,70 +1151,92 @@ void MenuState::EnableLeader(bool value)
 	}
 }
 
-void MenuState::TeamChangedEvent(MainLobbyCallbackChange *change)
+void MenuState::TeamChangedEvent(uint32_t playerID, enum TeamNumber newTeam)
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Team Change Event");
 
-	if(CEGUI::WindowManager::getSingleton().isWindowPresent("Team" + CEGUI::PropertyHelper::intToString((int)change->m_playerID)))
+	if(CEGUI::WindowManager::getSingleton().isWindowPresent("Team" + CEGUI::PropertyHelper::intToString(playerID)))
 	{
-		CEGUI::Combobox *playerTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().getWindow("Team" + CEGUI::PropertyHelper::intToString((int)change->m_playerID));
+		CEGUI::Combobox *playerTeam = (CEGUI::Combobox*)CEGUI::WindowManager::getSingleton().getWindow("Team" + CEGUI::PropertyHelper::intToString(playerID));
 
 		CEGUI::ListboxTextItem *teamItem;
 
-		switch(change->m_team)
+		switch(newTeam)
 		{
 			case SPECTATOR:
+			{
 				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(0);
 				teamItem->setSelected(true);
 				playerTeam->setText(teamItem->getText());
 				break;
+			}
 			case TEAM_1:
+			{
 				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(1);
 				teamItem->setSelected(true);
 				playerTeam->setText(teamItem->getText());
 				break;
+			}
 			case TEAM_2:
+			{
 				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(2);
 				teamItem->setSelected(true);
 				playerTeam->setText(teamItem->getText());
 				break;
+			}
 			case TEAM_3:
+			{
 				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(3);
 				teamItem->setSelected(true);
 				playerTeam->setText(teamItem->getText());
 				break;
+			}
 			case TEAM_4:
+			{
 				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(4);
 				teamItem->setSelected(true);
 				playerTeam->setText(teamItem->getText());
 				break;
+			}
 			case TEAM_5:
+			{
 				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(5);
 				teamItem->setSelected(true);
 				playerTeam->setText(teamItem->getText());
 				break;
+			}
 			case TEAM_6:
+			{
 				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(6);
 				teamItem->setSelected(true);
 				playerTeam->setText(teamItem->getText());
 				break;
+			}
 			case TEAM_7:
+			{
 				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(7);
 				teamItem->setSelected(true);
 				playerTeam->setText(teamItem->getText());
 				break;
+			}
 			case TEAM_8:
+			{
 				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(8);
 				teamItem->setSelected(true);
 				playerTeam->setText(teamItem->getText());
 				break;
+			}
 			case REFEREE:
+			{
 				teamItem = (CEGUI::ListboxTextItem*)playerTeam->getListboxItemFromIndex(9);
 				teamItem->setSelected(true);
 				playerTeam->setText(teamItem->getText());
 				break;
+			}
 			default:
+			{
 				break;
+			}
 		}
 	}
 	else
@@ -1240,101 +1244,100 @@ void MenuState::TeamChangedEvent(MainLobbyCallbackChange *change)
 		OgreFramework::getSingletonPtr()->m_log->logMessage("ERROR!! Player's team box not found!");
 	}
 }
-void MenuState::TeamColorChangedEvent(MainLobbyCallbackChange *change)
+void MenuState::TeamColorChangedEvent(struct ServerEvent event)
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Team Color Change Event");
 }
-void MenuState::MapChangedEvent(MainLobbyCallbackChange *change)
+void MenuState::MapChangedEvent(struct ServerEvent event)
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Map Change Event");
 }
-void MenuState::GamespeedChangedEvent(MainLobbyCallbackChange *change)
+void MenuState::GamespeedChangedEvent(struct ServerEvent event)
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("GameSpeed Change Event");
 }
-void MenuState::VictoryConditionChangedEvent(MainLobbyCallbackChange *change)
+void MenuState::VictoryConditionChangedEvent(struct ServerEvent event)
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Game Mode Change Event");
 }
-void MenuState::PlayerLeftEvent(MainLobbyCallbackChange *change)
+//TODO: change the leader, here
+void MenuState::PlayerLeftEvent(uint32_t playerID, uint32_t leaderID)
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Player Left Event");
 	m_currentMatch.m_currentPlayerCount--;
 
 	for(uint i = 0; i < m_currentPlayers.size(); i++)
 	{
-		if(m_currentPlayers[i].m_ID == change->m_playerID)
+		if(m_currentPlayers[i].m_ID == playerID)
 		{
 			m_currentPlayers.erase(m_currentPlayers.begin()+i);
 		}
 	}
 	ListPlayers();
 }
-void MenuState::KickedFromMatchEvent(MainLobbyCallbackChange *change)
+void MenuState::KickedFromMatchEvent(struct ServerEvent event)
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Kicked From Match Event");
 }
-void MenuState::PlayerJoinedEvent(MainLobbyCallbackChange *change)
+void MenuState::PlayerJoinedEvent(struct PlayerDescription player)
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Player Joined Event");
 	m_currentMatch.m_currentPlayerCount++;
-	m_currentPlayers.push_back(change->m_playerDescription);
+	m_currentPlayers.push_back(player);
 	ListPlayers();
 }
-void MenuState::MatchStartedEvent(MainLobbyCallbackChange *change)
+void MenuState::MatchStartedEvent()
 {
 		OgreFramework::getSingletonPtr()->m_log->logMessage("Match Start Event");
 		ChangeAppState(FindByName("GameState"));
 }
-void MenuState::CallbackClosedEvent(MainLobbyCallbackChange *change)
+void MenuState::CallbackClosedEvent(struct ServerEvent event)
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("WARNING!!  Callback CLOSED event");
 }
-void MenuState::CallbackErrorEvent(MainLobbyCallbackChange *change)
+void MenuState::CallbackErrorEvent(struct ServerEvent event)
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("ERROR!!  Callback ERROR Event");
 }
-void MenuState::ProcessCallback(CallbackChange *change)
+void MenuState::ProcessCallback(struct ServerEvent event)
 {
-	if(change == NULL)
+	if((event.m_appState != IN_MAIN_LOBBY) || (event.m_appState != IN_MATCH_LOBBY))
 	{
-		cerr << "ERROR: Callback was NULL. Should not happen!" << endl;
 		return;
 	}
 
-	if(change->m_type != CHANGE_MAIN_LOBBY)
-	{
-		cerr << "ERROR: Expected callback type CHANGE_MAIN_LOBBY, but got: " << change->m_type << endl;
-		return;
-	}
+	//TODO: Handlers for the following events:
+//	EVENT_TEAM_COLOR_CHANGED,
+//	EVENT_MAP_CHANGED,
+//	EVENT_GAMESPEED_CHANGED,
+//	EVENT_VICTORY_CONDITION_CHANGED,
+//	EVENT_KICKED,
 
-	MainLobbyCallbackChange *lobbyChange = (MainLobbyCallbackChange*)change;
-
-	switch(lobbyChange->m_mainLobbyType)
+	switch(event.m_type)
 	{
-		case LEADER_CHANGE:
+		case EVENT_LEADER_CHANGED:
 		{
-			LeaderChangedEvent(lobbyChange);
+			LeaderChangedEvent(event.m_leaderID);
 			break;
 		}
-		case PLAYER_JOINED:
+		case EVENT_PLAYER_JOINED:
 		{
-			PlayerJoinedEvent(lobbyChange);
+			PlayerJoinedEvent(event.m_newPlayer);
 			break;
 		}
-		case PLAYER_LEFT:
+		case EVENT_PLAYER_LEFT:
 		{
-			PlayerLeftEvent(lobbyChange);
+			PlayerLeftEvent(event.m_playerID, event.m_leaderID);
 			break;
 		}
-		case TEAM_CHANGE:
+		case EVENT_TEAM_CHANGED:
 		{
-			TeamChangedEvent(lobbyChange);
+			TeamChangedEvent(event.m_playerID, event.m_newTeam);
 			break;
 		}
-		case MATCH_STARTED:
+		case EVENT_MATCH_STARTED:
 		{
-			MatchStartedEvent(lobbyChange);
+			MatchStartedEvent();
 			break;
 		}
 		default:

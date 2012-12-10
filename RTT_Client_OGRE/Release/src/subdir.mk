@@ -7,9 +7,11 @@ CPP_SRCS += \
 ../src/AdvancedOgreFramework.cpp \
 ../src/AppStateManager.cpp \
 ../src/DemoApp.cpp \
+../src/EventQueue.cpp \
 ../src/GameState.cpp \
 ../src/MenuState.cpp \
 ../src/OgreGameEvents.cpp \
+../src/OgreMatchLobbyEvents.cpp \
 ../src/RTT_Ogre_Map.cpp \
 ../src/RTT_Ogre_Player.cpp \
 ../src/RTT_Ogre_Unit.cpp \
@@ -19,9 +21,11 @@ OBJS += \
 ./src/AdvancedOgreFramework.o \
 ./src/AppStateManager.o \
 ./src/DemoApp.o \
+./src/EventQueue.o \
 ./src/GameState.o \
 ./src/MenuState.o \
 ./src/OgreGameEvents.o \
+./src/OgreMatchLobbyEvents.o \
 ./src/RTT_Ogre_Map.o \
 ./src/RTT_Ogre_Player.o \
 ./src/RTT_Ogre_Unit.o \
@@ -31,9 +35,11 @@ CPP_DEPS += \
 ./src/AdvancedOgreFramework.d \
 ./src/AppStateManager.d \
 ./src/DemoApp.d \
+./src/EventQueue.d \
 ./src/GameState.d \
 ./src/MenuState.d \
 ./src/OgreGameEvents.d \
+./src/OgreMatchLobbyEvents.d \
 ./src/RTT_Ogre_Map.d \
 ./src/RTT_Ogre_Player.d \
 ./src/RTT_Ogre_Unit.d \

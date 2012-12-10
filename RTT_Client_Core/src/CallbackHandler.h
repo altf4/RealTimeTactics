@@ -15,6 +15,7 @@
 #include "ClientProtocolHandler.h"
 #include "GameEvents.h"
 #include "MatchLobbyEvents.h"
+#include "MainLobbyEvents.h"
 
 namespace RTT
 {
@@ -23,9 +24,10 @@ class CallbackHandler
 {
 public:
 
-	CallbackHandler(int socketFD, GameEvents *gameContext, MatchLobbyEvents *matchLobbyContext);
+	CallbackHandler(GameEvents *gameContext, MatchLobbyEvents *matchLobbyContext, MainLobbyEvents *mainLobbycontext);
 	~CallbackHandler();
 
+	void Start(int socketFD);
 	void Stop();
 
 private:
@@ -36,9 +38,11 @@ private:
 
 	pthread_t m_thread;
 	int m_socketFD;
+	bool isRunning;
 
 	GameEvents *m_gameContext;
 	MatchLobbyEvents *m_matchLobbyContext;
+	MainLobbyEvents *m_mainLobbyEvents;
 };
 
 }
