@@ -1301,7 +1301,7 @@ void MenuState::CallbackErrorEvent(struct ServerEvent event)
 }
 void MenuState::ProcessCallback(struct ServerEvent event)
 {
-	if((event.m_appState != IN_MAIN_LOBBY) || (event.m_appState != IN_MATCH_LOBBY))
+	if(event.m_appState == IN_GAME)
 	{
 		return;
 	}
