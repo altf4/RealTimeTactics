@@ -12,6 +12,7 @@ using namespace RTT;
 RTT_Ogre_Player::RTT_Ogre_Player()
 {
 }
+
 RTT_Ogre_Player::~RTT_Ogre_Player()
 {
 }

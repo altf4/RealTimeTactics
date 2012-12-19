@@ -38,7 +38,7 @@ private:
 
 	pthread_t m_thread;
 	int m_socketFD;
-	bool isRunning;
+	bool m_isRunning;
 
 	GameEvents *m_gameContext;
 	MatchLobbyEvents *m_matchLobbyContext;

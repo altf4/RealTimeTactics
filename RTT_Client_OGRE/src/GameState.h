@@ -10,7 +10,7 @@
 #define GAME_STATE_HPP
 
 #include "AppState.h"
-#include "RTT_Ogre_Unit.h"
+#include "OgreUnit.h"
 #include "RTT_Ogre_Player.h"
 
 #include "GameCommands.h"
@@ -60,16 +60,16 @@ public:
 
 	void Update(double timeSinceLastFrame);
 
-	void MoveUnitOnScreen(RTT::RTT_Ogre_Unit &arg);
+	void MoveUnitOnScreen(uint32_t unitID);
 	void MoveCursor(const RTT::Direction &arg);
-	void ShowRange(RTT::RTT_Ogre_Unit &arg, bool &arg2);
-	void MakeMove(RTT::RTT_Ogre_Unit &arg);
+	void ShowRange(uint32_t unitID, bool &arg2);
+	void MakeMove(uint32_t unitID);
 
 	void BuildUnits();
 
 	void ProcessCallback(struct RTT::ServerEvent event);
 
-	private:
+private:
 	Ogre::SceneNode *m_ogreHeadNode;
 	Ogre::Entity *m_ogreHeadEntity;
 	Ogre::MaterialPtr m_ogreHeadMat;
@@ -95,9 +95,16 @@ public:
 
 	bool m_isMoving;
 	RTT::RTT_Ogre_Player m_mainPlayer;
-	RTT::RTT_Ogre_Unit m_playerCursor;
+	RTT::OgreUnit m_playerCursor;
+	uint32_t m_selectedUnit;
+
 	CEGUI::Window *m_mainWnd;
 	CEGUI::Window *m_chatWnd;
+
+	//To show ranges, there are a set of highlighted tiles that can be overlayed on every
+	//	gameboard tile. After they are initialized, just set their visibility on/off to
+	//	display ranges
+	Ogre::SceneNode *m_rangeNode[8][8];
 };
 
 #endif

@@ -9,24 +9,26 @@
 #define RTT_OGRE_PLAYER_H_
 
 
-#include "RTT_Ogre_Unit.h"
+#include "OgreUnit.h"
 #include "AdvancedOgreFramework.h"
 #include "Enums.h"
+#include "Player.h"
 
 #include <vector>
 
 namespace RTT
 {
-	class RTT_Ogre_Player
-	{
-	public:
-		RTT_Ogre_Player();
-		virtual ~RTT_Ogre_Player();
-		RTT_Ogre_Unit ogreUnits;
-		uint currentUnit;
-		Ogre::SceneNode* rangeNode[8][8];
-		RTT::TeamNumber Team;
-	};
+
+class RTT_Ogre_Player : public Player
+{
+public:
+
+	RTT_Ogre_Player();
+	virtual ~RTT_Ogre_Player();
+
+	uint m_currentUnit;
+	RTT::TeamNumber m_team;
+};
 
 }
 

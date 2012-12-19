@@ -8,6 +8,7 @@
 //============================================================================
 
 #include "MenuState.h"
+#include "ClientGameState.h"
 
 using namespace Ogre;
 using namespace RTT;
@@ -391,8 +392,13 @@ bool MenuState::OnJoinServerButton(const CEGUI::EventArgs &args)
 		return true;
 	}
 
-	std::string hashedPassword = PasswordBox->getText().c_str();
-
+	std::string hashedPassword;
+	if(!PasswordBox->getText().empty())
+	{
+		hashedPassword = PasswordBox->getText().c_str();
+	}
+	//Ugly hack. We need the password to be 32 bytes long.
+	hashedPassword.resize(32);
 	int socketFD = AuthToServer(serverIP, serverPort,
 			givenName, (unsigned char*)hashedPassword.c_str(), &m_playerDescription);
 
@@ -574,6 +580,12 @@ void MenuState::MatchLobby()
 
 	m_currentPlayers.push_back(m_playerDescription);
 	ListPlayers();
+
+	//Add ourselves to the game state's player list
+	ClientGameState::Instance().AddPlayer(new Player(m_playerDescription));
+	ClientGameState::Instance().SetOurPlayerID(m_playerDescription.m_ID);
+	cout << "xxxDEBUGxxx Adding ourselves into the player pool: " << m_playerDescription.m_ID << endl;
+
 	return;
 }
 
@@ -1274,6 +1286,10 @@ void MenuState::PlayerLeftEvent(uint32_t playerID, uint32_t leaderID)
 		}
 	}
 	ListPlayers();
+
+	//Remove player from game state
+	ClientGameState::Instance().RemovePlayer(playerID);
+	//TODO: Delete this player. LEAK! But with locking? Concurrency is hard here.
 }
 void MenuState::KickedFromMatchEvent(struct ServerEvent event)
 {
@@ -1285,11 +1301,15 @@ void MenuState::PlayerJoinedEvent(struct PlayerDescription player)
 	m_currentMatch.m_currentPlayerCount++;
 	m_currentPlayers.push_back(player);
 	ListPlayers();
+
+	//Add the new player to the game state
+	Player *newPlayer = new Player(player);
+	ClientGameState::Instance().AddPlayer(newPlayer);
 }
 void MenuState::MatchStartedEvent()
 {
-		OgreFramework::getSingletonPtr()->m_log->logMessage("Match Start Event");
-		ChangeAppState(FindByName("GameState"));
+	OgreFramework::getSingletonPtr()->m_log->logMessage("Match Start Event");
+	ChangeAppState(FindByName("GameState"));
 }
 void MenuState::CallbackClosedEvent(struct ServerEvent event)
 {

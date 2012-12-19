@@ -29,6 +29,8 @@ ClientGameState::ClientGameState()
 	:m_gameboard(10, 10)				//TODO: Un-harcode the gameboard size!!!
 {
 	pthread_mutex_init(&m_unitsLock, NULL);
+	pthread_mutex_init(&m_playersLock, NULL);
+	m_ourPlayerID = 0;
 }
 
 //Adds a new unit to the game state
@@ -50,6 +52,48 @@ bool ClientGameState::AddUnit(Unit *newUnit)
 	Lock lock(&m_unitsLock);
 	m_units.push_back(newUnit);
 	return true;
+}
+
+void ClientGameState::RemoveUnit(uint32_t ID)
+{
+	Lock lock(&m_unitsLock);
+	for(uint i = 0; i < m_units.size(); i++)
+	{
+		if(m_units[i]->m_ID == ID)
+		{
+			m_units.erase(m_units.begin() + i);
+		}
+	}
+}
+
+bool ClientGameState::AddPlayer(Player *newPlayer)
+{
+	if(newPlayer == NULL)
+	{
+		return false;
+	}
+
+	if(HasPlayer(newPlayer->GetID()))
+	{
+		return false;
+	}
+
+	Lock lock(&m_playersLock);
+	m_players.push_back(newPlayer);
+	return true;
+}
+
+void ClientGameState::RemovePlayer(uint32_t ID)
+{
+	Lock lock(&m_playersLock);
+	for(uint i = 0; i < m_players.size(); i++)
+	{
+		if(m_players[i]->GetID() == ID)
+		{
+			m_players.erase(m_players.begin() + i);
+		}
+	}
+
 }
 
 Unit *ClientGameState::GetUnit(uint32_t ID)
@@ -80,6 +124,72 @@ bool ClientGameState::HasUnit(uint32_t ID)
 		}
 	}
 	return successResult;
+}
+
+vector<uint32_t> ClientGameState::GetUnits()
+{
+	vector<uint32_t> ret;
+	Lock lock(&m_unitsLock);
+	for(uint i = 0; i < m_units.size(); i++)
+	{
+		ret.push_back(m_units[i]->m_ID);
+	}
+	return ret;
+}
+
+bool ClientGameState::HasPlayer(uint32_t ID)
+{
+	bool successResult = false;
+	Lock lock(&m_playersLock);
+
+	for(uint i = 0; i < m_players.size(); i++)
+	{
+		if(m_players[i]->GetID() == ID)
+		{
+			successResult = true;
+			break;
+		}
+	}
+	return successResult;
+}
+
+Player *ClientGameState::GetPlayer(uint32_t ID)
+{
+	Lock lock(&m_playersLock);
+	for(uint i = 0; i < m_units.size(); i++)
+	{
+		if(m_players[i]->GetID() == ID)
+		{
+			return m_players[i];
+		}
+	}
+
+	return NULL;
+}
+
+vector<uint32_t> ClientGameState::GetPlayers()
+{
+	vector<uint32_t> ret;
+	Lock lock(&m_playersLock);
+	for(uint i = 0; i < m_players.size(); i++)
+	{
+		ret.push_back(m_players[i]->GetID());
+	}
+	return ret;
+}
+
+uint32_t ClientGameState::GetOurPlayerID()
+{
+	//TODO: We don't need to use this lock, here. Make a new one for the ourPlayerID
+	Lock lock(&m_playersLock);
+	return m_ourPlayerID;
+}
+
+void ClientGameState::SetOurPlayerID(uint32_t ID)
+{
+	//TODO: We don't need to use this lock, here. Make a new one for the ourPlayerID
+	Lock lock(&m_playersLock);
+	m_ourPlayerID = ID;
 }
 
 //A Unit has moved

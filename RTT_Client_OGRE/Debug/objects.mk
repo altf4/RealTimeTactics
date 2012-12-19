@@ -4,5 +4,5 @@
 
 USER_OBJS :=
 
-LIBS := -lRTT_Client_Core -lCEGUIOgreRenderer -lOgreMain -lpthread -lCEGUIBase -lOIS -lboost_date_time -lcrypto
+LIBS := -lRTT_Client_Core -lRTT_Common -lCEGUIOgreRenderer -lOgreMain -lpthread -lCEGUIBase -lOIS -lboost_date_time -lcrypto
 

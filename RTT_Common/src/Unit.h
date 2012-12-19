@@ -54,6 +54,7 @@ public:
 	//How many movement points the unit has
 	//	Each tile takes up a certain number of movement points
 	double m_currentMovement;
+	double m_maxMovement;
 
 	//Position on the gameboard
 	uint m_x, m_y;

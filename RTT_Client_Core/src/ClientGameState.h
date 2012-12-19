@@ -12,6 +12,7 @@
 
 #include "Gameboard.h"
 #include "messaging/messages/GameMessage.h"
+#include "Player.h"
 
 #include "pthread.h"
 
@@ -36,15 +37,41 @@ public:
 	Unit *GetUnit(uint32_t ID);
 	bool HasUnit(uint32_t ID);
 
+	//Returns a list of Unit ID's that are currently used in the game
+	//	NOTE: It is entirely possible that a new unit is added by another
+	//	thread immediately after calling this function. So the list may
+	//	always be out of date by the time you get it. Deal with it.
+	vector<uint32_t> GetUnits();
+
+	//NOTE: If the player doesn't exist, returns NULL
+	Player *GetPlayer(uint32_t ID);
+	bool HasPlayer(uint32_t ID);
+
+	//Returns a list of Player ID's that are currently in the game
+	//	NOTE: It is entirely possible that a new Player is added by another
+	//	thread immediately after calling this function. So the list may
+	//	always be out of date by the time you get it. Deal with it.
+	vector<uint32_t> GetPlayers();
+
+	uint32_t GetOurPlayerID();
+	void SetOurPlayerID(uint32_t ID);
 
 	//********************************************
-	//				Set Functions
+	//				Modify Functions
 	//********************************************
 
 	//Adds a new unit to the game state
 	//	newUnit - A copy of the Unit to add
 	//	returns - True if the Unit was added successfully, false on error
 	bool AddUnit(Unit *newUnit);
+
+	//Add a new Player to the game state
+	//	returns - True on success, false if player already exists
+	bool AddPlayer(Player *newPlayer);
+
+	//Removes Player with the given ID
+	//	NOTE: Safely does nothing if player doesn't exist
+	void RemovePlayer(uint32_t ID);
 
 	//Move a Unit to a new specified (possibly distant) tile
 	//	unitID - The ID of the unit moved
@@ -69,12 +96,21 @@ public:
 
 private:
 
+	//Removes unit with the given ID
+	//	NOTE: Safely does nothing if unit doesn't exist
+	void RemoveUnit(uint32_t ID);
+
 	static ClientGameState *m_instance;
 
 	Gameboard m_gameboard;
 
 	vector <Unit*> m_units;			//TODO: Maybe use a hash map?
 	pthread_mutex_t m_unitsLock;	//Lock on reading/writing from the units list
+
+	vector <Player*> m_players;		//TODO: Maybe use a hash map?
+	pthread_mutex_t m_playersLock;	//Lock on reading/writing from the players list
+
+	uint32_t m_ourPlayerID;
 
 	//Private constructor, since you should just use Instance()
 	ClientGameState();

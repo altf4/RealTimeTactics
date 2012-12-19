@@ -47,6 +47,7 @@ public:
 	//For when c strings are easier, or std::strings are
 	Player(char *username, uint newID);
 	Player(std::string username, uint newID);
+	Player(struct PlayerDescription descr);
 
 	std::string GetName();
 	uint GetID();
@@ -63,7 +64,7 @@ public:
 	void SetSocket(int socket);
 	void SetCurrentMatchID(int matchID);
 
-private:
+protected:
 	pthread_rwlock_t m_lock;
 	std::string m_name;
 	uint m_ID;

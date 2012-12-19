@@ -110,7 +110,7 @@ struct MovementResult RTT::MoveUnit(uint32_t unitID, uint32_t xOld, uint32_t yOl
 	{
 		return result;
 	}
-	if((gameMessage->m_yNew == yNew) && (gameMessage->m_xNew == xNew))
+	if((gameMessage->m_unitID == unitID) && (gameMessage->m_yNew == yNew) && (gameMessage->m_xNew == xNew))
 	{
 		result.m_result = gameMessage->m_moveResult;
 

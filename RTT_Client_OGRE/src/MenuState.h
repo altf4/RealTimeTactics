@@ -84,9 +84,8 @@ public:
 	CEGUI::MultiColumnList *m_ultiColumnListMatch;
 	CEGUI::MultiColumnList *m_ultiColumnListPlayer;
 
-	RTT::PlayerDescription m_playerDescription;
-
 	std::vector <RTT::PlayerDescription> m_currentPlayers;
+	RTT::PlayerDescription m_playerDescription;
 
 	std::vector <CEGUI::DefaultWindow*> m_playerNameTextBoxes;
 	std::vector <CEGUI::RadioButton*> m_isLeaderCheckBoxes;

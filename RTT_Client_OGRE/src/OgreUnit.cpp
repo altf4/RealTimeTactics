@@ -6,13 +6,13 @@
 //============================================================================
 
 //#include "Unit.h"
-#include "RTT_Ogre_Unit.h"
+#include "OgreUnit.h"
 
 using namespace RTT;
 
-RTT_Ogre_Unit::RTT_Ogre_Unit()
+OgreUnit::OgreUnit()
 {
 }
-RTT_Ogre_Unit::~RTT_Ogre_Unit()
+OgreUnit::~OgreUnit()
 {
 }

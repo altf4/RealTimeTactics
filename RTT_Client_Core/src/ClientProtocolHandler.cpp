@@ -1099,8 +1099,11 @@ enum LobbyReturn RTT::ProcessGameEvent(Ticket &ticket, GameEvents *gameContext)
 	Message *event_message = MessageManager::Instance().ReadMessage(ticket);
 	if(event_message->m_messageType != MESSAGE_GAME)
 	{
-		cerr << "ERROR: Message read from server failed. Did it die?\n";
-		cout << "xxxDEBUGxxx Message Type: " << event_message->m_messageType << " Subtype: "<< ((ErrorMessage*)event_message)->m_errorType << endl;
+		if(event_message->m_messageType == MESSAGE_ERROR)
+		{
+			cerr << "ERROR: Message read from server failed. Did it die?\n";
+			cout << "xxxDEBUGxxx Message Type: " << event_message->m_messageType << " Subtype: "<< ((ErrorMessage*)event_message)->m_errorType << endl;
+		}
 		delete event_message;
 		return IN_GAME;
 	}

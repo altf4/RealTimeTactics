@@ -41,6 +41,17 @@ Player::Player(string username, uint newID)
 	pthread_rwlock_init(&m_lock, NULL);
 }
 
+Player::Player(struct PlayerDescription descr)
+{
+	m_name = string(descr.m_name);
+	strncpy(m_description.m_name, descr.m_name, sizeof(m_description.m_name));
+	m_currentMatchID = 0;
+	m_ID = descr.m_ID;
+	m_description.m_ID = descr.m_ID;
+	m_socketFD = -1;
+	pthread_rwlock_init(&m_lock, NULL);
+}
+
 string Player::GetName()
 {
 	Lock lock(&m_lock, READ_LOCK);

@@ -134,9 +134,10 @@ GameMessage::GameMessage(char *buffer, uint32_t length)
 		{
 			//Uses: 1) Message Type
 			//		2) MoveResult enum describing success or failure
-			//		3) X coordinate, ending location
-			//		4) Y coordinate, ending location
-			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_gameMessageType) + sizeof(m_moveResult)
+			//		3) Unit ID
+			//		4) X coordinate, ending location
+			//		5) Y coordinate, ending location
+			uint32_t expectedSize = MESSAGE_HDR_SIZE + sizeof(m_gameMessageType) + sizeof(m_unitID) + sizeof(m_moveResult)
 					+ sizeof(m_xNew) + sizeof(m_yNew);
 			if( length != expectedSize)
 			{
@@ -384,9 +385,10 @@ char *GameMessage::Serialize(uint32_t *length)
 		{
 			//Uses: 1) Message Type
 			//		2) MoveResult enum describing success or failure
-			//		3) X coordinate, ending location
-			//		4) Y coordinate, ending location
-			messageSize =  MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_gameMessageType) + sizeof(m_moveResult)
+			//		3) Unit ID
+			//		4) X coordinate, ending location
+			//		5) Y coordinate, ending location
+			messageSize =  MESSAGE_HDR_SIZE + sizeof(messageSize) + sizeof(m_gameMessageType) + sizeof(m_unitID) + sizeof(m_moveResult)
 					+ sizeof(m_xNew) + sizeof(m_yNew);
 			buffer = (char*)malloc(messageSize);
 			originalBuffer = buffer;
@@ -396,7 +398,12 @@ char *GameMessage::Serialize(uint32_t *length)
 			//GameMessage type
 			memcpy(buffer, &m_gameMessageType, sizeof(m_gameMessageType));
 			buffer += sizeof(m_gameMessageType);
+
 			//Unit ID
+			memcpy(buffer, &m_unitID, sizeof(m_unitID));
+			buffer += sizeof(m_unitID);
+
+			//Move result
 			memcpy(buffer, &m_moveResult, sizeof(m_moveResult));
 			buffer += sizeof(m_moveResult);
 			//X coord

@@ -12,9 +12,9 @@ CPP_SRCS += \
 ../src/MenuState.cpp \
 ../src/OgreGameEvents.cpp \
 ../src/OgreMatchLobbyEvents.cpp \
+../src/OgreUnit.cpp \
 ../src/RTT_Ogre_Map.cpp \
 ../src/RTT_Ogre_Player.cpp \
-../src/RTT_Ogre_Unit.cpp \
 ../src/main.cpp 
 
 OBJS += \
@@ -26,9 +26,9 @@ OBJS += \
 ./src/MenuState.o \
 ./src/OgreGameEvents.o \
 ./src/OgreMatchLobbyEvents.o \
+./src/OgreUnit.o \
 ./src/RTT_Ogre_Map.o \
 ./src/RTT_Ogre_Player.o \
-./src/RTT_Ogre_Unit.o \
 ./src/main.o 
 
 CPP_DEPS += \
@@ -40,9 +40,9 @@ CPP_DEPS += \
 ./src/MenuState.d \
 ./src/OgreGameEvents.d \
 ./src/OgreMatchLobbyEvents.d \
+./src/OgreUnit.d \
 ./src/RTT_Ogre_Map.d \
 ./src/RTT_Ogre_Player.d \
-./src/RTT_Ogre_Unit.d \
 ./src/main.d 
 
 

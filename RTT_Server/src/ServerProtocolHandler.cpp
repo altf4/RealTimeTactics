@@ -1024,6 +1024,7 @@ enum LobbyReturn RTT::ProcessGameCommand(Ticket &ticket, Player *player)
 			move_reply.m_moveResult = MOVE_SUCCESS;
 			move_reply.m_yNew = game_message->m_yNew;
 			move_reply.m_xNew = game_message->m_xNew;
+			move_reply.m_unitID = game_message->m_unitID;
 
 			MessageManager::Instance().WriteMessage(ticket, &move_reply);
 

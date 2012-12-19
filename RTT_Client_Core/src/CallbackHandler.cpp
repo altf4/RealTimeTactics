@@ -16,6 +16,7 @@ using namespace RTT;
 CallbackHandler::CallbackHandler(GameEvents *gameContext, MatchLobbyEvents *matchLobbyContext, MainLobbyEvents *mainLobbyContext)
 {
 	m_socketFD = -1;
+	m_isRunning = false;
 	m_gameContext = gameContext;
 	m_matchLobbyContext = matchLobbyContext;
 	m_mainLobbyEvents = mainLobbyContext;
@@ -36,8 +37,9 @@ void *CallbackHandler::StartThreadHelper(void *ptr)
 
 void CallbackHandler::Start(int socketFD)
 {
-	if(!isRunning)
+	if(!m_isRunning)
 	{
+		m_isRunning = true;
 		m_socketFD = socketFD;
 		pthread_create(&m_thread, NULL, &CallbackHandler::StartThreadHelper, this);
 	}
@@ -89,7 +91,7 @@ void *CallbackHandler::CallbackThread()
 			}
 			case EXITING_SERVER:
 			{
-				isRunning = false;
+				m_isRunning = false;
 				return NULL;
 			}
 			case IN_MAIN_LOBBY:
