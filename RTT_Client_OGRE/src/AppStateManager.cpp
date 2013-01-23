@@ -75,7 +75,10 @@ void AppStateManager::Start(AppState *state)
 
 	while(!m_isShutdown)
 	{
-		if(OgreFramework::getSingletonPtr()->m_renderWnd->isClosed())m_isShutdown = true;
+		if(OgreFramework::getSingletonPtr()->m_renderWnd->isClosed())
+		{
+			m_isShutdown = true;
+		}
 
 		Ogre::WindowEventUtilities::messagePump();
 

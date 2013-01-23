@@ -53,7 +53,7 @@ void GameState::BuildUnits(void)
 		cerr << "xxxDEBUGxxx: Added unit number: " << unit->m_ID << endl;
 	}
 
-	m_selectedUnit = ClientGameState::Instance().GetOurPlayerID();
+	m_selectedUnitID = ClientGameState::Instance().GetOurPlayerID();
 
 	m_playerCursor.m_unitEntity = m_sceneMgr->createEntity("Cursor", "Marker.mesh");
 	m_playerCursor.m_unitEntity->setMaterialName("Marker");
@@ -74,9 +74,7 @@ void GameState::Enter()
 	//Shadowmaps	EXPERIMENTAL
 	m_sceneMgr->setShadowTexturePixelFormat(Ogre::PF_FLOAT32_R);
 	m_sceneMgr->setShadowTextureSelfShadow(true);
-	//rttSceneManager->setShadowCasterRenderBackFaces(false);
 	m_sceneMgr->setShadowTextureCasterMaterial("Ogre/DepthShadowmap/Caster/Float");
-	//rttSceneManager->setShadowTextureReceiverMaterial("Ogre/DepthShadowmap/BasicTemplateMaterial");
 	m_sceneMgr->setShadowTextureSize(1024);
 	m_isMoving = false;
 
@@ -98,9 +96,7 @@ void GameState::Enter()
 	m_currentObject = NULL;
 
 	BuildGUI();
-
 	SetUnbufferedMode();
-
 	CreateScene();
 }
 
@@ -114,14 +110,7 @@ bool GameState::Pause()
 void GameState::Resume()
 {
 	OgreFramework::getSingletonPtr()->m_log->logMessage("Resuming GameState...");
-
-	//buildGUI();
-
-	//OgreFramework::getSingletonPtr()->m_pViewport->setCamera(m_pCamera);
-
 	OgreFramework::getSingletonPtr()->m_viewport->setCamera(m_camera);
-//	OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(m_pSceneMgr);
-
 	OgreFramework::getSingletonPtr()->m_GUISystem->setGUISheet(CEGUI::WindowManager::getSingleton().getWindow("RTT_Game"));
 
 	m_quit = false;
@@ -245,53 +234,52 @@ bool GameState::keyPressed(const OIS::KeyEvent& keyEventRef)
 
 	switch (keyEventRef.key)
 	{
-		case OIS::KC_NUMPAD7: //Move North West
+		case OIS::KC_NUMPAD7:
 		{
 			MoveCursor(RTT::NORTHWEST);
 			break;
 		}
-		case OIS::KC_NUMPAD4: //Move North EDIT::::::::WEST!
+		case OIS::KC_NUMPAD4:
 		{
 			MoveCursor(RTT::WEST);
 			break;
 		}
-		case OIS::KC_NUMPAD9: //Move North East
+		case OIS::KC_NUMPAD9:
 		{
 			MoveCursor(RTT::NORTHEAST);
 			break;
 		}
-		case OIS::KC_NUMPAD1://Move South West
+		case OIS::KC_NUMPAD1:
 		{
 			MoveCursor(RTT::SOUTHWEST);
 			break;
 		}
-		case OIS::KC_NUMPAD6: //Move South  EDIT:::::::::EAST!
+		case OIS::KC_NUMPAD6:
 		{
 			MoveCursor(RTT::EAST);
 			break;
 		}
-		case OIS::KC_NUMPAD3: //Move South East
+		case OIS::KC_NUMPAD3:
 		{
 			MoveCursor(RTT::SOUTHEAST);
 			break;
 		}
-		case OIS::KC_M: //Move 'dialog'
+		case OIS::KC_M:
 		{
-			cerr << "xxxDEBUGxxx: Trying to move unit: " << m_selectedUnit << endl;
 			if(!m_isMoving)
 			{
-				MoveUnitOnScreen(m_selectedUnit);
+				ShowMovementSelection(m_selectedUnitID);
 			}
 			else
 			{
-				MakeMove(m_selectedUnit);
+				MoveUnitToCursor(m_selectedUnitID);
 			}
 			break;
 		}
-		case OIS::KC_F: //Facing 'dialog'
+		case OIS::KC_F:
 		{
 			m_isMoving = false;
-			ShowRange(m_selectedUnit, m_isMoving);
+			ShowRange(m_selectedUnitID, false);
 			break;
 		}
 		default:
@@ -302,51 +290,55 @@ bool GameState::keyPressed(const OIS::KeyEvent& keyEventRef)
 	return true;
 }
 
-void GameState::MoveUnitOnScreen(uint32_t unitID)
-{
-	if(!m_isMoving)
-	{
-		Unit *unit = ClientGameState::Instance().GetUnit(unitID);
-		if(unit == NULL)
-		{
-			return;
-		}
-		m_isMoving = true;
-		m_playerCursor.m_unitNode->setPosition(((OgreUnit*)unit)->m_unitNode->getPosition());
-		m_playerCursor.m_x = unit->m_x;
-		m_playerCursor.m_y = unit->m_y;
-		ShowRange(unitID, m_isMoving);
-		m_playerCursor.m_unitNode->setVisible(m_isMoving);
-	}
-}
-
-void GameState::MakeMove(uint32_t unitID)
+void GameState::ShowMovementSelection(uint32_t unitID)
 {
 	if(m_isMoving)
 	{
-		Unit *unit = ClientGameState::Instance().GetUnit(unitID);
-		if(unit == NULL)
-		{
-			return;
-		}
-		struct MovementResult result = MoveUnit(unit->m_ID, unit->m_x, unit->m_y, m_playerCursor.m_x, m_playerCursor.m_y);
-		if(result.m_result == MOVE_SUCCESS)
-		{
-			m_isMoving = false;
-			ShowRange(unitID, m_isMoving);
-			m_playerCursor.m_unitNode->setVisible(m_isMoving);
-			((OgreUnit*)unit)->m_unitNode->setPosition(m_playerCursor.m_unitNode->getPosition());
-			unit->m_x = m_playerCursor.m_x;
-			unit->m_y = m_playerCursor.m_y;
-		}
-		else
-		{
-			LogManager::getSingletonPtr()->logMessage("Movement was rejected by the server");
-		}
+		return;
+	}
+
+	Unit *unit = ClientGameState::Instance().GetUnit(unitID);
+	if(unit == NULL)
+	{
+		return;
+	}
+	m_isMoving = true;
+	m_playerCursor.m_unitNode->setPosition(((OgreUnit*)unit)->m_unitNode->getPosition());
+	m_playerCursor.m_x = unit->m_x;
+	m_playerCursor.m_y = unit->m_y;
+	ShowRange(unitID, true);
+	m_playerCursor.m_unitNode->setVisible(true);
+}
+
+void GameState::MoveUnitToCursor(uint32_t unitID)
+{
+	if(!m_isMoving)
+	{
+		return;
+	}
+
+	Unit *unit = ClientGameState::Instance().GetUnit(unitID);
+	if(unit == NULL)
+	{
+		return;
+	}
+	struct MovementResult result = MoveUnit(unit->m_ID, unit->m_x, unit->m_y, m_playerCursor.m_x, m_playerCursor.m_y);
+	if(result.m_result == MOVE_SUCCESS)
+	{
+		m_isMoving = false;
+		ShowRange(unitID, false);
+		m_playerCursor.m_unitNode->setVisible(false);
+		((OgreUnit*)unit)->m_unitNode->setPosition(m_playerCursor.m_unitNode->getPosition());
+		unit->m_x = m_playerCursor.m_x;
+		unit->m_y = m_playerCursor.m_y;
+	}
+	else
+	{
+		LogManager::getSingletonPtr()->logMessage("Movement was rejected by the server");
 	}
 }
 
-void GameState::ShowRange(uint32_t unitID, bool& value)
+void GameState::ShowRange(uint32_t unitID, bool doShow)
 {
 	Unit *unit = ClientGameState::Instance().GetUnit(unitID);
 	if(unit == NULL)
@@ -354,21 +346,20 @@ void GameState::ShowRange(uint32_t unitID, bool& value)
 		return;
 	}
 	//TODO: This just truncates. Eventually we'll want to make movement more involved
-	int radius =unit->m_maxMovement;
+	int radius = unit->m_maxMovement;
 	cout << "Currently at: " << unit->m_x << ", " << unit->m_y << endl;
 	cout << "Radius: " << radius << endl;
 
 	int pivotX = unit->m_x - radius;
 	int pivotY = unit->m_y;
 
-	for(int i = 0; i <= radius; i++ )
+	for(int i = 0; i <= radius; i++)
 	{
 		for(int j = 0; j < (radius*2) +1 -i; j++)
 		{
-			//cout << "j = " << j << endl;
 			if((pivotX + j >= 0) && (pivotX + j <= 7) && (pivotY >= 0) && (pivotY <= 7))
 			{
-				m_rangeNode[pivotX + j][pivotY]->setVisible(value);
+				m_rangeNode[pivotX + j][pivotY]->setVisible(doShow);
 			}
 		}
 
@@ -391,7 +382,7 @@ void GameState::ShowRange(uint32_t unitID, bool& value)
 			if((pivotX + j >= 0) && (pivotX + j <= 7) &&
 					(pivotY >= 0) && (pivotY <= 7))
 			{
-				m_rangeNode[pivotX + j][pivotY]->setVisible(value);
+				m_rangeNode[pivotX + j][pivotY]->setVisible(doShow);
 			}
 		}
 
@@ -401,93 +392,93 @@ void GameState::ShowRange(uint32_t unitID, bool& value)
 		}
 		pivotY--;
 	}
-
 }
 
-void GameState::MoveCursor(const RTT::Direction& moveDirection)
+void GameState::MoveCursor(RTT::Direction moveDirection)
 {
-	if(m_isMoving)
+	if(!m_isMoving)
 	{
-		//Ogre::Vector3 playerDirChange = m_playerCursor.m_unitNode->getPosition();
-		int facingDirection = 0;
-		switch(moveDirection)
-		{
-			case RTT::EAST:
-			{
-				LogManager::getSingletonPtr()->logMessage("Moving: East");
-				m_playerCursor.m_x++;
-				facingDirection = 90;
-				break;
-			}
-			case RTT::NORTHWEST:
-			{
-				LogManager::getSingletonPtr()->logMessage("Moving: North West");
-				if(m_playerCursor.m_y%2 != 0)
-					m_playerCursor.m_x--;
-				m_playerCursor.m_y++;
-				facingDirection = -150;
-				break;
-			}
-			case RTT::NORTHEAST:
-			{
-				LogManager::getSingletonPtr()->logMessage("Moving: North East");
-				if(m_playerCursor.m_y%2 == 0)
-					m_playerCursor.m_x++;
-				m_playerCursor.m_y++;
-				facingDirection = 150;
-				break;
-			}
-			case RTT::WEST:
-			{
-				LogManager::getSingletonPtr()->logMessage("Moving: West");
-				m_playerCursor.m_x--;
-				facingDirection = -90;
-				break;
-			}
-			case RTT::SOUTHWEST:
-			{
-				LogManager::getSingletonPtr()->logMessage("Moving: South West");
-				if(m_playerCursor.m_y%2 != 0)
-					m_playerCursor.m_x--;
-				m_playerCursor.m_y--;
-				facingDirection = -30;
-				break;
-			}
-			case RTT::SOUTHEAST:
-			{
-				LogManager::getSingletonPtr()->logMessage("Moving: South East");
-				if(m_playerCursor.m_y%2 == 0)
-					m_playerCursor.m_x++;
-				m_playerCursor.m_y--;
-				facingDirection = 30;
-				break;
-			}
-			default:
-			{
-				break;
-			}
-		}
-
-		LogManager::getSingletonPtr()->logMessage("Location: " +
-				Ogre::StringConverter::toString(m_playerCursor.m_x) +"," +
-				Ogre::StringConverter::toString(m_playerCursor.m_y));
-		if(m_playerCursor.m_y%2 != 0)
-		{
-			//LogManager::getSingletonPtr()->logMessage("Real Location: "
-			//+ Ogre::StringConverter::toString(unitX*1.732-.866) +"," +
-			//Ogre::StringConverter::toString(-unitY*1.5));
-			m_playerCursor.m_unitNode->setPosition(Ogre::Vector3(
-					m_playerCursor.m_x*1.732-.866,0,-m_playerCursor.m_y*1.5));
-		}
-		else
-		{
-			m_playerCursor.m_unitNode->setPosition(Ogre::Vector3(
-					m_playerCursor.m_x*1.732,0,-m_playerCursor.m_y*1.5));
-		}
-		m_playerCursor.m_unitNode->resetOrientation();
-		//Make sure we are facing the right way
-		m_playerCursor.m_unitNode->yaw(Degree(facingDirection));
+		return;
 	}
+
+	int facingDirection = 0;
+	switch(moveDirection)
+	{
+		case RTT::EAST:
+		{
+			m_playerCursor.m_x++;
+			facingDirection = 90;
+			break;
+		}
+		case RTT::NORTHWEST:
+		{
+			if(m_playerCursor.m_y %2 != 0)
+			{
+				m_playerCursor.m_x--;
+			}
+			m_playerCursor.m_y++;
+			facingDirection = -150;
+			break;
+		}
+		case RTT::NORTHEAST:
+		{
+			if(m_playerCursor.m_y%2 == 0)
+			{
+				m_playerCursor.m_x++;
+			}
+			m_playerCursor.m_y++;
+			facingDirection = 150;
+			break;
+		}
+		case RTT::WEST:
+		{
+			m_playerCursor.m_x--;
+			facingDirection = -90;
+			break;
+		}
+		case RTT::SOUTHWEST:
+		{
+			if(m_playerCursor.m_y%2 != 0)
+			{
+				m_playerCursor.m_x--;
+			}
+			m_playerCursor.m_y--;
+			facingDirection = -30;
+			break;
+		}
+		case RTT::SOUTHEAST:
+		{
+			if(m_playerCursor.m_y%2 == 0)
+			{
+				m_playerCursor.m_x++;
+			}
+			m_playerCursor.m_y--;
+			facingDirection = 30;
+			break;
+		}
+		default:
+		{
+			break;
+		}
+	}
+
+
+	LogManager::getSingletonPtr()->logMessage("Location: " +
+			Ogre::StringConverter::toString(m_playerCursor.m_x) +"," +
+			Ogre::StringConverter::toString(m_playerCursor.m_y));
+	if(m_playerCursor.m_y%2 != 0)
+	{
+		m_playerCursor.m_unitNode->setPosition(Ogre::Vector3(
+				m_playerCursor.m_x*1.732-.866,0,-m_playerCursor.m_y*1.5));
+	}
+	else
+	{
+		m_playerCursor.m_unitNode->setPosition(Ogre::Vector3(
+				m_playerCursor.m_x*1.732,0,-m_playerCursor.m_y*1.5));
+	}
+	m_playerCursor.m_unitNode->resetOrientation();
+	//Make sure we are facing the right way
+	m_playerCursor.m_unitNode->yaw(Degree(facingDirection));
 }
 
 bool GameState::keyReleased(const OIS::KeyEvent &keyEventRef)
@@ -498,8 +489,6 @@ bool GameState::keyReleased(const OIS::KeyEvent &keyEventRef)
 
 bool GameState::mouseMoved(const OIS::MouseEvent &evt)
 {
-//	if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseMove(evt)) return true;
-
 	//Mouse scroll wheel zoom
 	static double scrollZoomTotal = 0;
 
@@ -535,8 +524,6 @@ bool GameState::mouseMoved(const OIS::MouseEvent &evt)
 
 bool GameState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
-	//if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseDown(evt, id)) return true;
-
 	if(id == OIS::MB_Left)
 	{
 		OnLeftPressed(evt);
@@ -554,8 +541,6 @@ bool GameState::mousePressed(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 
 bool GameState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 {
-	//if(OgreFramework::getSingletonPtr()->m_pTrayMgr->injectMouseUp(evt, id)) return true;
-
 	if(id == OIS::MB_Left)
 	{
 		m_isLMouseDown = false;
@@ -571,39 +556,6 @@ bool GameState::mouseReleased(const OIS::MouseEvent &evt, OIS::MouseButtonID id)
 
 void GameState::OnLeftPressed(const OIS::MouseEvent &evt)
 {
-	/*
-	if(m_pCurrentObject)
-	{
-		m_pCurrentObject->showBoundingBox(false);
-		m_pCurrentEntity->getSubEntity(1)->setMaterial(m_pOgreHeadMat);
-	}
-
-	Ogre::Ray mouseRay = m_pCamera->getCameraToViewportRay(
-		OgreFramework::getSingletonPtr()->m_pMouse->getMouseState().X.abs / float(evt.state.width),
-		OgreFramework::getSingletonPtr()->m_pMouse->getMouseState().Y.abs / float(evt.state.height));
-	m_pRSQ->setRay(mouseRay);
-	m_pRSQ->setSortByDistance(true);
-
-	Ogre::RaySceneQueryResult &result = m_pRSQ->execute();
-	Ogre::RaySceneQueryResult::iterator itr;
-
-	for(itr = result.begin(); itr != result.end(); itr++)
-	{
-		if(itr->movable)
-		{
-			OgreFramework::getSingletonPtr()->m_pLog->logMessage(
-					"MovableName: " + itr->movable->getName());
-			m_pCurrentObject = m_pSceneMgr->getEntity(
-					itr->movable->getName())->getParentSceneNode();
-			OgreFramework::getSingletonPtr()->m_pLog->logMessage(
-					"ObjName " + m_pCurrentObject->getName());
-			m_pCurrentObject->showBoundingBox(true);
-			m_pCurrentEntity = m_pSceneMgr->getEntity(itr->movable->getName());
-			m_pCurrentEntity->getSubEntity(1)->setMaterial(m_pOgreHeadMatHigh);
-			break;
-		}
-	}
-	*/
 }
 
 bool GameState::OnExitButtonGame(const CEGUI::EventArgs &args)
@@ -659,33 +611,12 @@ void GameState::GetInput()
 void GameState::Update(double timeSinceLastFrame)
 {
 	m_frameEvent.timeSinceLastFrame = timeSinceLastFrame;
-	//OgreFramework::getSingletonPtr()->m_pTrayMgr->frameRenderingQueued(m_FrameEvent);
 
 	if(m_quit == true)
 	{
 		PopAppState();
 		return;
 	}
-
-//	if(!OgreFramework::getSingletonPtr()->m_pTrayMgr->isDialogVisible())
-	//{
-		/*
-		if(m_pDetailsPanel->isVisible())
-		{
-			m_pDetailsPanel->setParamValue(0, Ogre::StringConverter::toString(m_pCamera->getDerivedPosition().x));
-			m_pDetailsPanel->setParamValue(1, Ogre::StringConverter::toString(m_pCamera->getDerivedPosition().y));
-			m_pDetailsPanel->setParamValue(2, Ogre::StringConverter::toString(m_pCamera->getDerivedPosition().z));
-			m_pDetailsPanel->setParamValue(3, Ogre::StringConverter::toString(m_pCamera->getDerivedOrientation().w));
-			m_pDetailsPanel->setParamValue(4, Ogre::StringConverter::toString(m_pCamera->getDerivedOrientation().x));
-			m_pDetailsPanel->setParamValue(5, Ogre::StringConverter::toString(m_pCamera->getDerivedOrientation().y));
-			m_pDetailsPanel->setParamValue(6, Ogre::StringConverter::toString(m_pCamera->getDerivedOrientation().z));
-			if(m_bSettingsMode)
-				m_pDetailsPanel->setParamValue(7, "Buffered Input");
-			else
-				m_pDetailsPanel->setParamValue(7, "Un-Buffered Input");
-		}
-		*/
-	//}
 
 	m_moveScale = m_moveSpeed   * timeSinceLastFrame;
 	m_rotScale  = m_rotateSpeed * timeSinceLastFrame;
@@ -698,9 +629,6 @@ void GameState::Update(double timeSinceLastFrame)
 
 void GameState::BuildGUI()
 {
-
-//	OgreFramework::getSingletonPtr()->m_pGUIRenderer->setTargetSceneManager(m_pSceneMgr);
-
 	OgreFramework::getSingletonPtr()->m_GUISystem->setDefaultMouseCursor((CEGUI::utf8*)"OgreTrayImages", (CEGUI::utf8*)"MouseArrow");
 	CEGUI::MouseCursor::getSingleton().setImage("OgreTrayImages", "MouseArrow");
 	const OIS::MouseState state = OgreFramework::getSingletonPtr()->m_mouse->getMouseState();
@@ -718,42 +646,6 @@ void GameState::BuildGUI()
 	m_isLMouseDown = m_isRMouseDown = false;
 	m_quit = false;
 	m_isChatMode = false;
-
-	/*
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->showFrameStats(OgreBites::TL_BOTTOMLEFT);
-	//OgreFramework::getSingletonPtr()->m_pTrayMgr->showLogo(OgreBites::TL_BOTTOMRIGHT);
-	//OgreFramework::getSingletonPtr()->m_pTrayMgr->createLabel(OgreBites::TL_TOP, "GameLbl",
-	//	"Game mode", 250);
-	OgreFramework::getSingletonPtr()->m_pTrayMgr->showCursor();
-
-	Ogre::StringVector items;
-	items.push_back("cam.pX");
-	items.push_back("cam.pY");
-	items.push_back("cam.pZ");
-	items.push_back("cam.oW");
-	items.push_back("cam.oX");
-	items.push_back("cam.oY");
-	items.push_back("cam.oZ");
-	items.push_back("Mode");
-
-	//m_pDetailsPanel = OgreFramework::getSingletonPtr()->m_pTrayMgr->createParamsPanel(
-	//	OgreBites::TL_TOPLEFT, "DetailsPanel", 200, items);
-	//m_pDetailsPanel->hide();
-
-	Ogre::String infoText = "[TAB] - Switch input mode\n\n[W] - Forward / Mode up\n[S] - "
-			"Backwards/ Mode down\n[A] - Left\n";
-	infoText.append("[D] - Right\n\nPress [SHIFT] to move faster\n\n[O] - Toggle FPS / logo\n");
-	infoText.append("[Print] - Take screenshot\n\n[ESC] - Exit");
-	//OgreFramework::getSingletonPtr()->m_pTrayMgr->createTextBox(
-	//	OgreBites::TL_RIGHT, "InfoPanel", infoText, 300, 220);
-
-	Ogre::StringVector chatModes;
-	chatModes.push_back("Solid mode");
-	chatModes.push_back("Wireframe mode");
-	chatModes.push_back("Point mode");
-	//OgreFramework::getSingletonPtr()->m_pTrayMgr->createLongSelectMenu(
-	//	OgreBites::TL_TOPRIGHT, "ChatModeSelMenu", "ChatMode", 200, 3, chatModes);
-	 */
 }
 
 void GameState::SetBufferedMode()
@@ -799,25 +691,3 @@ void GameState::ProcessCallback(struct RTT::ServerEvent event)
 		}
 	}
 }
-
-//void GameState::itemSelected(OgreBites::SelectMenu *menu)
-//{
-	//switch(menu->getSelectionIndex())
-	//{
-		//case 0:
-		//{
-		//	m_pCamera->setPolygonMode(Ogre::PM_SOLID);
-		//	break;
-		//}
-		//case 1:
-//		{
-//			m_pCamera->setPolygonMode(Ogre::PM_WIREFRAME);
-//			break;
-//		}
-//		case 2:
-//		{
-//			m_pCamera->setPolygonMode(Ogre::PM_POINTS);
-//			break;
-//		}
-//	}
-//}

@@ -60,10 +60,10 @@ public:
 
 	void Update(double timeSinceLastFrame);
 
-	void MoveUnitOnScreen(uint32_t unitID);
-	void MoveCursor(const RTT::Direction &arg);
-	void ShowRange(uint32_t unitID, bool &arg2);
-	void MakeMove(uint32_t unitID);
+	void ShowMovementSelection(uint32_t unitID);
+	void MoveCursor(RTT::Direction arg);
+	void ShowRange(uint32_t unitID, bool doShow);
+	void MoveUnitToCursor(uint32_t unitID);
 
 	void BuildUnits();
 
@@ -96,7 +96,7 @@ private:
 	bool m_isMoving;
 	RTT::RTT_Ogre_Player m_mainPlayer;
 	RTT::OgreUnit m_playerCursor;
-	uint32_t m_selectedUnit;
+	uint32_t m_selectedUnitID;
 
 	CEGUI::Window *m_mainWnd;
 	CEGUI::Window *m_chatWnd;
